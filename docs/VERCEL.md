@@ -63,6 +63,24 @@ Then open `/login` and use:
 curl https://YOUR_APP.vercel.app/api/setup
 ```
 
+## 403 FORBIDDEN after claiming a temporary URL
+
+Anonymous `*.tmp.now` deploys are public. **Claiming** them into your Vercel account often enables **Deployment Protection** (Vercel Authentication). Browsers then see:
+
+```text
+This request was blocked
+403 FORBIDDEN
+iad1::…
+```
+
+That is Vercel’s edge gate — not an app bug.
+
+**Fix (claimed project):** Vercel → Project → **Settings** → **Deployment Protection** → set to **Disabled** (or Standard Protection only for Preview), then hard-refresh.
+
+**Or skip claiming:** use the `*.tmp.now` link as-is (expires ~1 hour), or run locally on port `3847`.
+
+Do **not** claim a temp deploy if you only want a quick public demo URL.
+
 ## Limits on Vercel (intentional)
 
 - No long-running execution worker / Docker-in-Docker for candidate sandboxes.

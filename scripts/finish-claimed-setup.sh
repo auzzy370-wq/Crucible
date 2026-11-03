@@ -58,3 +58,7 @@ echo "  App:   ${PROD_URL:-check Vercel dashboard}"
 echo "  Login: admin@gauntlet.local / Gauntlet!Admin1"
 echo "  SETUP_SECRET saved for this shell: $SETUP_SECRET"
 echo "  If users missing: curl -X POST \"\$APP/api/setup\" -H 'content-type: application/json' -d '{\"secret\":\"$SETUP_SECRET\",\"seed\":true}'"
+echo
+echo "  If the browser shows 403 FORBIDDEN (iad1::…):"
+echo "    Vercel → Project → Settings → Deployment Protection → Disabled"
+echo "    Claiming a *.tmp.now URL turns protection on; that is not an app bug."
