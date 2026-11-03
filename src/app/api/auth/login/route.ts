@@ -17,7 +17,16 @@ export async function POST(req: Request) {
     const ip = req.headers.get("x-forwarded-for") ?? "local";
     await rateLimit(`login:${ip}`, 20);
     const body = schema.parse(await req.json());
-    const user = await prisma.user.findUnique({ where: { email: body.email.toLowerCase() } });
+    let user;
+    try {
+      user = await prisma.user.findUnique({ where: { email: body.email.toLowerCase() } });
+    } catch {
+      throw new AppError(
+        "Database is not connected. On Vercel, set DATABASE_URL (Neon), redeploy, then POST /api/setup to seed.",
+        503,
+        "DATABASE_UNAVAILABLE",
+      );
+    }
     if (!user || !(await verifyPassword(body.password, user.passwordHash))) {
       throw new AppError("Invalid credentials", 401, "INVALID_CREDENTIALS");
     }
