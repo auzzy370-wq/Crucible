@@ -52,8 +52,11 @@ export default async function DashboardPage() {
                     <span className="font-mono text-cyan-300">{formatScore(a.scoreReport.overall)}</span>
                   </div>
                 )}
-                <Link className="text-cyan-300 hover:underline" href={a.workspace ? `/workspace/${a.workspace.id}` : `/assessments/${a.id}`}>
-                  Open workspace →
+                <Link
+                  className="text-cyan-300 hover:underline"
+                  href={a.workspace ? `/workspace/${a.workspace.id}` : "/workspace"}
+                >
+                  {a.workspace ? "Open workspace →" : "View workspaces →"}
                 </Link>
               </CardContent>
             </Card>

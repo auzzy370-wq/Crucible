@@ -26,11 +26,16 @@ export default function LoginPage() {
   useEffect(() => {
     void (async () => {
       try {
-        const res = await fetch("/api/setup");
+        const res = await fetch("/api/setup", { cache: "no-store" });
+        if (!res.ok) {
+          setDbOk(null);
+          return;
+        }
         const json = await res.json();
         setDbOk(Boolean(json?.data?.databaseReachable));
       } catch {
-        setDbOk(false);
+        // Network blip / preview proxy — don't hard-disable login.
+        setDbOk(null);
       }
     })();
   }, []);
@@ -64,7 +69,10 @@ export default function LoginPage() {
       router.push("/dashboard");
       router.refresh();
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Login failed";
+      let message = err instanceof Error ? err.message : "Login failed";
+      if (/load failed|failed to fetch|networkerror/i.test(message)) {
+        message = "Could not reach the server. Refresh and try again.";
+      }
       setError(message);
       toast.error(message);
     } finally {
