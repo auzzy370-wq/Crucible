@@ -1,0 +1,83 @@
+import { cookies } from "next/headers";
+import { nanoid } from "nanoid";
+import { Role, User } from "@prisma/client";
+import { prisma } from "@/lib/db";
+import { AppError } from "@/lib/errors";
+
+const COOKIE = "gauntlet_session";
+const TTL_MS = 1000 * 60 * 60 * 24 * 14;
+
+export type AuthUser = Pick<User, "id" | "email" | "name" | "role" | "avatarUrl" | "githubLogin">;
+
+export async function createSession(userId: string, meta?: { ip?: string; userAgent?: string }) {
+  const token = nanoid(48);
+  const expiresAt = new Date(Date.now() + TTL_MS);
+  await prisma.session.create({
+    data: {
+      userId,
+      token,
+      expiresAt,
+      ip: meta?.ip,
+      userAgent: meta?.userAgent,
+    },
+  });
+  const jar = await cookies();
+  jar.set(COOKIE, token, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    expires: expiresAt,
+  });
+  return token;
+}
+
+export async function destroySession() {
+  const jar = await cookies();
+  const token = jar.get(COOKIE)?.value;
+  if (token) {
+    await prisma.session.deleteMany({ where: { token } });
+    jar.delete(COOKIE);
+  }
+}
+
+export async function getSessionUser(): Promise<AuthUser | null> {
+  const jar = await cookies();
+  const token = jar.get(COOKIE)?.value;
+  if (!token) return null;
+  const session = await prisma.session.findUnique({
+    where: { token },
+    include: { user: true },
+  });
+  if (!session || session.expiresAt < new Date()) {
+    if (session) await prisma.session.delete({ where: { id: session.id } });
+    return null;
+  }
+  const { id, email, name, role, avatarUrl, githubLogin } = session.user;
+  return { id, email, name, role, avatarUrl, githubLogin };
+}
+
+export async function requireUser(roles?: Role[]): Promise<AuthUser> {
+  const user = await getSessionUser();
+  if (!user) throw new AppError("Authentication required", 401, "UNAUTHORIZED");
+  if (roles && !roles.includes(user.role)) {
+    throw new AppError("Insufficient permissions", 403, "FORBIDDEN");
+  }
+  return user;
+}
+
+export function canManageCandidates(role: Role) {
+  return role === "SUPER_ADMIN" || role === "HIRING_MANAGER";
+}
+
+export function canReview(role: Role) {
+  return role === "SUPER_ADMIN" || role === "HIRING_MANAGER" || role === "TECHNICAL_REVIEWER";
+}
+
+export function canAdmin(role: Role) {
+  return role === "SUPER_ADMIN";
+}
+
+export function isStaff(role: Role) {
+  return canReview(role);
+}

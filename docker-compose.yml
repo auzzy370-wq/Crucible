@@ -1,0 +1,102 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: gauntlet
+      POSTGRES_PASSWORD: gauntlet
+      POSTGRES_DB: engineering_gauntlet
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gauntlet -d engineering_gauntlet"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: gauntlet
+      MINIO_ROOT_PASSWORD: gauntletsecret
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - miniodata:/data
+
+  minio-init:
+    image: minio/mc:latest
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      sleep 3;
+      mc alias set local http://minio:9000 gauntlet gauntletsecret;
+      mc mb -p local/gauntlet-artifacts || true;
+      exit 0;
+      "
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://gauntlet:gauntlet@postgres:5432/engineering_gauntlet?schema=public
+      REDIS_URL: redis://redis:6379
+      S3_ENDPOINT: http://minio:9000
+      EXECUTION_MODE: docker
+      APP_URL: http://localhost:3847
+      NEXT_PUBLIC_APP_URL: http://localhost:3847
+    ports:
+      - "3847:3847"
+    volumes:
+      - ./storage:/app/storage
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_started
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://gauntlet:gauntlet@postgres:5432/engineering_gauntlet?schema=public
+      REDIS_URL: redis://redis:6379
+      EXECUTION_MODE: docker
+      STORAGE_ROOT: /app/storage
+    volumes:
+      - ./storage:/app/storage
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      web:
+        condition: service_started
+    # SECURITY NOTE: mounting the Docker socket is for local orchestration only.
+    # Production must use a dedicated executor (e.g. Firecracker/gVisor) with no host socket access.
+
+volumes:
+  pgdata:
+  miniodata:

@@ -1,0 +1,654 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  SUPER_ADMIN
+  HIRING_MANAGER
+  TECHNICAL_REVIEWER
+  CANDIDATE
+  TEAM_MEMBER
+}
+
+enum SkillSource {
+  CLAIMED
+  PORTFOLIO
+  ASSESSMENT
+  HUMAN_REVIEW
+}
+
+enum ChallengeType {
+  FULL_STACK_SAAS
+  VIDEO_PLATFORM
+  REALTIME_COMMS
+  DISTRIBUTED_INFRA
+  ECOMMERCE
+  AI_SAAS
+  BACKEND
+  FRONTEND
+  INFRASTRUCTURE
+  DISTRIBUTED_SYSTEMS
+  SECURITY
+  DEBUGGING
+  PERFORMANCE
+  ARCHITECTURE
+  TEAM_PROJECT
+  PRODUCTION_INCIDENT
+  DATABASE
+  // Cybersecurity specialization track
+  APPSEC
+  CLOUD_SECURITY
+  THREAT_MODELING
+  SOC_IR
+  SECURE_CODE_REVIEW
+  CRYPTOGRAPHY
+  ZERO_TRUST
+  DETECTION_ENGINEERING
+  IDENTITY_ACCESS
+  VULN_TRIAGE
+}
+
+enum AssessmentTrack {
+  SOFTWARE_ENGINEERING
+  CYBERSECURITY
+  SECURE_FULL_STACK
+}
+
+enum AssessmentStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum AssignmentStatus {
+  ASSIGNED
+  IN_PROGRESS
+  SUBMITTED
+  GRADING
+  UNDER_REVIEW
+  COMPLETED
+  FAILED
+  EXPIRED
+}
+
+enum ExecutionStatus {
+  QUEUED
+  RUNNING
+  SUCCEEDED
+  FAILED
+  TIMEOUT
+  CANCELLED
+}
+
+enum EvidenceKind {
+  FACT
+  INFERENCE
+  UNKNOWN
+}
+
+enum QualificationTier {
+  NOT_QUALIFIED
+  ELITE
+  EXCEPTIONAL
+  DISTINGUISHED
+}
+
+enum ReviewDecisionType {
+  APPROVE
+  REJECT
+  REQUEST_FOLLOW_UP
+  OVERRIDE_AI
+}
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String
+  name         String
+  role         Role      @default(CANDIDATE)
+  avatarUrl    String?
+  githubLogin  String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  lastLoginAt  DateTime?
+
+  sessions            Session[]
+  candidateProfile    CandidateProfile?
+  createdAssessments  Assessment[]           @relation("AssessmentCreator")
+  assignments         AssessmentAssignment[] @relation("CandidateAssignments")
+  assignedBy          AssessmentAssignment[] @relation("AssignmentAssigner")
+  reviews             ReviewDecision[]
+  auditLogs           AuditLog[]
+  teamMemberships     TeamMember[]
+  reviewNotes         ReviewNote[]
+  followUpAnswers     FollowUpAnswer[]
+  managedTeams        EngineeringTeam[]      @relation("TeamManager")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  ip        String?
+  userAgent String?
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model CandidateProfile {
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  headline         String?
+  bio              String?
+  portfolioUrl     String?
+  githubUrl        String?
+  linkedInUrl      String?
+  yearsExperience  Int?
+  previousEmployers Json?
+  languages             String[] @default([])
+  frameworks            String[] @default([])
+  databases             String[] @default([])
+  cloud                 String[] @default([])
+  infrastructure        String[] @default([])
+  aiExperience          String[] @default([])
+  cybersecurity         String[] @default([])
+  securityClearanceNote String?
+  preferredTrack        AssessmentTrack @default(SOFTWARE_ENGINEERING)
+  projectHistory        Json?
+  accommodations        String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  resumes           Resume[]
+  skills            SkillRecord[]
+  projectEvidence   ProjectEvidence[]
+}
+
+model Resume {
+  id               String   @id @default(cuid())
+  profileId        String
+  filename         String
+  storagePath      String
+  mimeType         String
+  sizeBytes        Int
+  extractedText    String?
+  aiAnalysis       Json?
+  analyzedAt       DateTime?
+  uploadedAt       DateTime @default(now())
+  profile          CandidateProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+}
+
+model SkillRecord {
+  id          String      @id @default(cuid())
+  profileId   String
+  name        String
+  domain      String
+  source      SkillSource
+  confidence  Float       @default(0)
+  evidence    String?
+  verifiedBy  String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  profile     CandidateProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId, source])
+  @@unique([profileId, name, source])
+}
+
+model ProjectEvidence {
+  id          String   @id @default(cuid())
+  profileId   String
+  title       String
+  description String
+  url         String?
+  skills      String[]
+  attachedBy  String
+  createdAt   DateTime @default(now())
+  profile     CandidateProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+}
+
+model Challenge {
+  id                 String          @id @default(cuid())
+  slug               String          @unique
+  title              String
+  summary            String
+  description        String
+  type               ChallengeType
+  track              AssessmentTrack @default(SOFTWARE_ENGINEERING)
+  difficulty         Int             @default(1)
+  estimatedDays      Int             @default(3)
+  tags               String[]        @default([])
+  starterRepoPath    String?
+  referenceSolution  String?
+  hiddenRequirements Json?
+  publicRequirements Json?
+  gradingRubric      Json?
+  adaptiveTrack      Json?
+  // Controlled vuln labs only — never production secrets
+  controlledVulns    Json?
+  mitreMappings      String[]        @default([])
+  owaspMappings      String[]        @default([])
+  languages          String[]        @default(["typescript", "python", "go"])
+  isPublished        Boolean         @default(true)
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+
+  assessments Assessment[]
+  incidents   IncidentScenario[]
+}
+
+model Assessment {
+  id              String           @id @default(cuid())
+  title           String
+  description     String
+  challengeId     String
+  track           AssessmentTrack  @default(SOFTWARE_ENGINEERING)
+  status          AssessmentStatus @default(DRAFT)
+  timedMinutes    Int?
+  multiDay        Boolean          @default(true)
+  allowTeam       Boolean          @default(false)
+  teamSizeMin     Int?
+  teamSizeMax     Int?
+  progressiveDiff Boolean          @default(true)
+  createdById     String
+  scoringPolicyId String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  challenge     Challenge              @relation(fields: [challengeId], references: [id])
+  createdBy     User                   @relation("AssessmentCreator", fields: [createdById], references: [id])
+  scoringPolicy ScoringPolicy?         @relation(fields: [scoringPolicyId], references: [id])
+  assignments   AssessmentAssignment[]
+  teams         EngineeringTeam[]
+
+  @@index([status])
+  @@index([track])
+}
+
+model ScoringPolicy {
+  id                    String   @id @default(cuid())
+  name                  String
+  minOverall            Int      @default(90)
+  minCategoryPct        Int      @default(80)
+  requireDeployment     Boolean  @default(true)
+  requireHiddenTests    Boolean  @default(true)
+  requireIncident       Boolean  @default(true)
+  requireArchitecture   Boolean  @default(true)
+  requireTeam           Boolean  @default(true)
+  requireHumanApproval   Boolean  @default(true)
+  requireNoCriticalSec  Boolean  @default(true)
+  weights               Json
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  assessments           Assessment[]
+}
+
+model AssessmentAssignment {
+  id               String           @id @default(cuid())
+  assessmentId     String
+  candidateId      String
+  assignedById     String
+  status           AssignmentStatus @default(ASSIGNED)
+  dueAt            DateTime?
+  startedAt        DateTime?
+  submittedAt      DateTime?
+  currentLevel     Int              @default(1)
+  maxLevelReached  Int              @default(1)
+  accommodations   String?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  assessment   Assessment          @relation(fields: [assessmentId], references: [id])
+  candidate    User                @relation("CandidateAssignments", fields: [candidateId], references: [id])
+  assignedBy   User                @relation("AssignmentAssigner", fields: [assignedById], references: [id])
+  workspace    Workspace?
+  submissions  Submission[]
+  scoreReport  ScoreReport?
+  followUps    FollowUpQuestion[]
+  reviews      ReviewDecision[]
+  deployments  DeploymentResult[]
+  teamMemberId String?
+
+  @@unique([assessmentId, candidateId])
+  @@index([candidateId, status])
+}
+
+model Workspace {
+  id             String   @id @default(cuid())
+  assignmentId   String   @unique
+  language       String   @default("typescript")
+  imageTag       String   @default("gauntlet/node:20")
+  rootPath       String
+  gitRemoteUrl   String?
+  lastCommitSha  String?
+  previewUrl     String?
+  status         String   @default("ready")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  assignment AssessmentAssignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  files      WorkspaceFile[]
+  jobs       ExecutionJob[]
+  commits    GitCommit[]
+  pullReqs   PullRequest[]
+}
+
+model WorkspaceFile {
+  id          String   @id @default(cuid())
+  workspaceId String
+  path        String
+  content     String
+  language    String?
+  updatedAt   DateTime @updatedAt
+  createdAt   DateTime @default(now())
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, path])
+}
+
+model GitCommit {
+  id          String   @id @default(cuid())
+  workspaceId String
+  sha         String
+  message     String
+  authorEmail String
+  createdAt   DateTime @default(now())
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+}
+
+model PullRequest {
+  id          String   @id @default(cuid())
+  workspaceId String
+  number      Int
+  title       String
+  body        String?
+  status      String   @default("open")
+  reviews     Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+}
+
+model Submission {
+  id            String   @id @default(cuid())
+  assignmentId  String
+  commitSha     String?
+  notes         String?
+  artifactPath  String?
+  createdAt     DateTime @default(now())
+  assignment    AssessmentAssignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  testRuns      TestRun[]
+  aiEvaluations AiEvaluation[]
+
+  @@index([assignmentId])
+}
+
+model ExecutionJob {
+  id           String          @id @default(cuid())
+  workspaceId  String
+  type         String
+  status       ExecutionStatus @default(QUEUED)
+  imageTag     String
+  command      String
+  cpuLimit     String          @default("1")
+  memoryLimit  String          @default("512m")
+  timeoutSec   Int             @default(120)
+  networkMode  String          @default("none")
+  stdout       String?
+  stderr       String?
+  exitCode     Int?
+  startedAt    DateTime?
+  finishedAt   DateTime?
+  createdAt    DateTime        @default(now())
+  auditMeta    Json?
+  workspace    Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  testRun      TestRun?
+
+  @@index([status])
+}
+
+model TestRun {
+  id            String   @id @default(cuid())
+  submissionId  String?
+  jobId         String   @unique
+  suite         String
+  passed        Int      @default(0)
+  failed        Int      @default(0)
+  hiddenPassed  Int      @default(0)
+  hiddenFailed  Int      @default(0)
+  results       Json
+  createdAt     DateTime @default(now())
+  submission    Submission?   @relation(fields: [submissionId], references: [id])
+  job           ExecutionJob  @relation(fields: [jobId], references: [id], onDelete: Cascade)
+}
+
+model DeploymentResult {
+  id           String   @id @default(cuid())
+  assignmentId String
+  success      Boolean
+  url          String?
+  checks       Json
+  logs         String?
+  createdAt    DateTime @default(now())
+  assignment   AssessmentAssignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+}
+
+model ScoreReport {
+  id                 String             @id @default(cuid())
+  assignmentId       String             @unique
+  overall            Float
+  frontend           Float
+  backend            Float
+  database           Float
+  architecture       Float
+  infrastructure     Float
+  security           Float
+  testing            Float
+  problemSolving     Float
+  performance        Float
+  collaboration      Float
+  qualified          Boolean            @default(false)
+  tier               QualificationTier  @default(NOT_QUALIFIED)
+  mandatoryFailures  String[]           @default([])
+  calibrated         Boolean            @default(false)
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  assignment         AssessmentAssignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  categories         ScoreCategoryEvidence[]
+}
+
+model ScoreCategoryEvidence {
+  id            String       @id @default(cuid())
+  reportId      String
+  criterion     String
+  score         Float
+  maxScore      Float
+  evidenceKind  EvidenceKind
+  observed      String
+  automated     String?
+  strengths     String[]
+  weaknesses    String[]
+  explanation   String
+  followUps     String[]
+  report        ScoreReport  @relation(fields: [reportId], references: [id], onDelete: Cascade)
+}
+
+model AiProviderConfig {
+  id           String   @id @default(cuid())
+  name         String
+  baseUrl      String
+  model        String
+  apiKeyEnv    String
+  isDefault    Boolean  @default(false)
+  enabled      Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model AiEvaluation {
+  id            String   @id @default(cuid())
+  submissionId  String
+  provider      String
+  model         String
+  report        Json
+  rawResponse   String?
+  createdAt     DateTime @default(now())
+  submission    Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+}
+
+model FollowUpQuestion {
+  id           String   @id @default(cuid())
+  assignmentId String
+  prompt       String
+  basedOnPath  String?
+  difficulty   Int      @default(1)
+  createdAt    DateTime @default(now())
+  assignment   AssessmentAssignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  answers      FollowUpAnswer[]
+}
+
+model FollowUpAnswer {
+  id         String   @id @default(cuid())
+  questionId String
+  userId     String
+  answer     String
+  score      Float?
+  feedback   String?
+  createdAt  DateTime @default(now())
+  question   FollowUpQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  user       User             @relation(fields: [userId], references: [id])
+}
+
+model ReviewDecision {
+  id           String             @id @default(cuid())
+  assignmentId String
+  reviewerId   String
+  decision     ReviewDecisionType
+  reasoning    String
+  overridesAi  Boolean            @default(false)
+  createdAt    DateTime           @default(now())
+  assignment   AssessmentAssignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  reviewer     User                 @relation(fields: [reviewerId], references: [id])
+}
+
+model ReviewNote {
+  id           String   @id @default(cuid())
+  assignmentId String
+  authorId     String
+  body         String
+  path         String?
+  line         Int?
+  createdAt    DateTime @default(now())
+  author       User     @relation(fields: [authorId], references: [id])
+}
+
+model EngineeringTeam {
+  id           String   @id @default(cuid())
+  name         String
+  assessmentId String
+  managerId    String
+  createdAt    DateTime @default(now())
+  assessment   Assessment @relation(fields: [assessmentId], references: [id])
+  manager      User       @relation("TeamManager", fields: [managerId], references: [id])
+  members      TeamMember[]
+  discussions  TeamDiscussion[]
+}
+
+model TeamMember {
+  id        String   @id @default(cuid())
+  teamId    String
+  userId    String
+  roleLabel String
+  duties    String
+  joinedAt  DateTime @default(now())
+  team      EngineeringTeam @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user      User            @relation(fields: [userId], references: [id])
+
+  @@unique([teamId, userId])
+}
+
+model TeamDiscussion {
+  id        String   @id @default(cuid())
+  teamId    String
+  authorId  String
+  body      String
+  createdAt DateTime @default(now())
+  team      EngineeringTeam @relation(fields: [teamId], references: [id], onDelete: Cascade)
+}
+
+model IncidentScenario {
+  id          String   @id @default(cuid())
+  challengeId String?
+  slug        String   @unique
+  title       String
+  synopsis    String
+  symptoms    Json
+  rootCause   String
+  buggyFiles  Json
+  createdAt   DateTime @default(now())
+  challenge   Challenge? @relation(fields: [challengeId], references: [id])
+  runs        IncidentRun[]
+}
+
+model IncidentRun {
+  id              String   @id @default(cuid())
+  scenarioId      String
+  assignmentId    String?
+  candidateId     String
+  diagnosis       String?
+  rootCauseFound  Boolean  @default(false)
+  fixApplied      Boolean  @default(false)
+  regressionTests Boolean  @default(false)
+  recovered       Boolean  @default(false)
+  preventionDoc   String?
+  timeline        Json?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  scenario        IncidentScenario @relation(fields: [scenarioId], references: [id])
+}
+
+model ArchitectureSubmission {
+  id           String   @id @default(cuid())
+  assignmentId String
+  diagrams     Json
+  proposal     String
+  answers      Json
+  score        Float?
+  feedback     String?
+  createdAt    DateTime @default(now())
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  action     String
+  entityType String
+  entityId   String?
+  metadata   Json?
+  ip         String?
+  createdAt  DateTime @default(now())
+  actor      User?    @relation(fields: [actorId], references: [id])
+
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}
+
+model PlatformSetting {
+  id    String @id @default(cuid())
+  key   String @unique
+  value Json
+}
