@@ -61,7 +61,7 @@ export default function IncidentsPage() {
     <div className="animate-rise space-y-6">
       <header>
         <p className="font-mono text-xs tracking-[0.3em] text-rose-300">PRODUCTION / SOC SIMULATOR</p>
-        <h1 className="mt-2 text-3xl font-semibold">Incident response gauntlets</h1>
+        <h1 className="mt-2 text-2xl font-semibold sm:text-3xl">Incident response gauntlets</h1>
         <p className="mt-2 max-w-3xl text-slate-400">
           Software reliability incidents and cybersecurity SOC simulations. Investigate, contain, fix, regress, recover,
           document prevention.

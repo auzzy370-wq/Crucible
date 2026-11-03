@@ -21,7 +21,7 @@ export default async function ChallengesPage({
     <div className="animate-rise space-y-6">
       <header>
         <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">CHALLENGE LIBRARY</p>
-        <h1 className="mt-2 text-3xl font-semibold">Realistic project gauntlets</h1>
+        <h1 className="mt-2 text-2xl font-semibold sm:text-3xl">Realistic project gauntlets</h1>
         <p className="mt-2 max-w-3xl text-slate-400">
           Full-stack product builds, distributed systems, and a dedicated cybersecurity track covering AppSec, cloud
           hardening, threat modeling, SOC/IR, detection engineering, cryptography, and zero trust.

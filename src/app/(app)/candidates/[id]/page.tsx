@@ -30,7 +30,7 @@ export default async function CandidateDetailPage({ params }: { params: Promise<
     <div className="animate-rise space-y-6">
       <header>
         <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">CANDIDATE DOSSIER</p>
-        <h1 className="mt-2 text-3xl font-semibold">{candidate.name}</h1>
+        <h1 className="mt-2 text-2xl font-semibold sm:text-3xl">{candidate.name}</h1>
         <p className="text-slate-400">{candidate.email}</p>
       </header>
       <div className="grid gap-4 lg:grid-cols-2">

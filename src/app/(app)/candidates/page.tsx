@@ -15,7 +15,7 @@ export default async function CandidatesPage() {
       <div className="animate-rise space-y-6">
         <header>
           <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">CANDIDATE PROFILE</p>
-          <h1 className="mt-2 text-3xl font-semibold">Profile, résumé & skill evidence</h1>
+          <h1 className="mt-2 text-2xl font-semibold sm:text-3xl">Profile, résumé & skill evidence</h1>
           <p className="mt-2 max-w-3xl text-slate-400">
             Skills are separated into claimed, portfolio, assessment-verified, and human-reviewed. Résumé claims never
             equal competence.
@@ -43,7 +43,7 @@ export default async function CandidatesPage() {
     <div className="animate-rise space-y-6">
       <header>
         <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">CANDIDATES</p>
-        <h1 className="mt-2 text-3xl font-semibold">Profiles & evidence lanes</h1>
+        <h1 className="mt-2 text-2xl font-semibold sm:text-3xl">Profiles & evidence lanes</h1>
       </header>
       <div className="grid gap-4 lg:grid-cols-2">
         {candidates.map((c) => (

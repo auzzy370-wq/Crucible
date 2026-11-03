@@ -43,7 +43,7 @@ export default function AdminPage() {
     <div className="animate-rise space-y-6">
       <header>
         <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">SUPER ADMIN</p>
-        <h1 className="mt-2 text-3xl font-semibold">Platform security & AI configuration</h1>
+        <h1 className="mt-2 text-2xl font-semibold sm:text-3xl">Platform security & AI configuration</h1>
         <p className="mt-2 max-w-3xl text-slate-400">
           Configure LLM providers via environment variable names — never hardcoded keys. Manage scoring policies and
           execution isolation posture for both software engineering and cybersecurity labs.

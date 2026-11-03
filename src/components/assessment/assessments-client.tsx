@@ -77,7 +77,7 @@ export function AssessmentsClient(props: {
     <div className="animate-rise space-y-6">
       <header>
         <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">ASSESSMENT MANAGEMENT</p>
-        <h1 className="mt-2 text-3xl font-semibold">Assign real engineering work</h1>
+        <h1 className="mt-2 text-2xl font-semibold sm:text-3xl">Assign real engineering work</h1>
         <p className="mt-2 max-w-3xl text-slate-400">
           Create assessments from the challenge library — including cybersecurity labs — and assign candidates to
           isolated workspaces.
@@ -181,7 +181,31 @@ export function AssessmentsClient(props: {
 
       <section className="space-y-3">
         <h2 className="text-lg font-semibold">Assignments</h2>
-        <div className="overflow-x-auto rounded-xl border border-slate-800">
+        <div className="grid gap-3 md:hidden">
+          {props.assignments.map((a) => (
+            <Card key={a.id}>
+              <CardContent className="space-y-2 pt-4 text-sm">
+                <div className="font-medium text-slate-100">{a.candidate.name}</div>
+                <div className="text-slate-400">{a.assessment.title}</div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge variant={a.assessment.track === "CYBERSECURITY" ? "violet" : "cyan"}>
+                    {a.assessment.track}
+                  </Badge>
+                  <span className="font-mono text-xs text-slate-300">{a.status}</span>
+                  <span className="font-mono text-xs text-cyan-300">
+                    {a.scoreReport ? formatScore(a.scoreReport.overall) : "—"}
+                  </span>
+                </div>
+                {a.workspace ? (
+                  <Link className="inline-block text-cyan-300 hover:underline" href={`/workspace/${a.workspace.id}`}>
+                    Open workspace →
+                  </Link>
+                ) : null}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+        <div className="hidden overflow-x-auto rounded-xl border border-slate-800 md:block">
           <table className="min-w-full text-left text-sm">
             <thead className="bg-slate-950/80 text-slate-400">
               <tr>

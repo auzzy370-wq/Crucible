@@ -45,7 +45,7 @@ export default function ReviewsPage() {
     <div className="animate-rise space-y-6">
       <header>
         <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">HUMAN TECHNICAL REVIEW</p>
-        <h1 className="mt-2 text-3xl font-semibold">AI assists — humans decide</h1>
+        <h1 className="mt-2 text-2xl font-semibold sm:text-3xl">AI assists — humans decide</h1>
         <p className="mt-2 max-w-3xl text-slate-400">
           Inspect evidence-based AI reports, override with documented reasoning, and verify cybersecurity or
           engineering skills explicitly.

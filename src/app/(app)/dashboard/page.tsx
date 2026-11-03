@@ -20,7 +20,7 @@ export default async function DashboardPage() {
       <div className="animate-rise space-y-6">
         <header>
           <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">CANDIDATE PORTAL</p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight">Your gauntlet assignments</h1>
+          <h1 className="mt-2 text-2xl font-semibold sm:text-3xl tracking-tight">Your gauntlet assignments</h1>
           <p className="mt-2 max-w-2xl text-slate-400">
             Complete realistic engineering and cybersecurity projects. Résumé claims are never treated as proof.
           </p>
@@ -29,9 +29,12 @@ export default async function DashboardPage() {
           {assignments.map((a) => (
             <Card key={a.id}>
               <CardHeader>
-                <div className="flex items-center justify-between gap-2">
-                  <CardTitle className="text-base">{a.assessment.title}</CardTitle>
-                  <Badge variant={a.assessment.track === "CYBERSECURITY" ? "violet" : "cyan"}>
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                  <CardTitle className="text-base leading-snug">{a.assessment.title}</CardTitle>
+                  <Badge
+                    className="w-fit shrink-0"
+                    variant={a.assessment.track === "CYBERSECURITY" ? "violet" : "cyan"}
+                  >
                     {a.assessment.track.replaceAll("_", " ")}
                   </Badge>
                 </div>
@@ -91,7 +94,7 @@ export default async function DashboardPage() {
       <header className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">OPERATIONS DASHBOARD</p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight">Engineering & Cyber Qualification</h1>
+          <h1 className="mt-2 text-2xl font-semibold sm:text-3xl tracking-tight">Engineering & Cyber Qualification</h1>
           <p className="mt-2 max-w-3xl text-slate-400">
             Premium hiring operations for exceptional software engineers and cybersecurity practitioners.
             Scores are calibrated to challenge difficulty — not population percentiles.

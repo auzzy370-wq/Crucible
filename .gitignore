@@ -1,15 +1,19 @@
 
+artifacts/
+bin/
 /build
 /coverage
 # debug
 # dependencies
 .DS_Store
+dump.rdb
 .env
 !.env.example
 # env files (can opt-in for committing if needed)
 .env.*.local
 .env.local
 .env.neon.claimable
+.env.neon.claimed
 # local storage artifacts
 # misc
 .neon
@@ -44,5 +48,3 @@ yarn-error.log*
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
-.env.neon.claimed
-dump.rdb

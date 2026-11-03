@@ -84,12 +84,14 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center px-4">
+    <div className="relative flex min-h-screen items-center justify-center px-4 py-8 safe-top safe-bottom">
       <div className="pointer-events-none absolute inset-0 grid-overlay" />
       <Card className="animate-rise relative w-full max-w-md border-cyan-500/20">
         <CardHeader>
-          <div className="mb-2 font-mono text-xs tracking-[0.35em] text-cyan-300">ENGINEERING GAUNTLET</div>
-          <CardTitle className="text-2xl">Sign in to operations</CardTitle>
+          <div className="mb-2 font-mono text-[10px] tracking-[0.3em] text-cyan-300 sm:text-xs sm:tracking-[0.35em]">
+            ENGINEERING GAUNTLET
+          </div>
+          <CardTitle className="text-xl sm:text-2xl">Sign in to operations</CardTitle>
           <CardDescription>
             Elite software engineering and cybersecurity qualification platform. Demo data is preloaded: challenges,
             assessments, workspaces, and tests.
@@ -116,7 +118,7 @@ export default function LoginPage() {
                 </button>
               ))}
             </div>
-            <div className="mt-2 font-mono text-[11px] text-slate-400">
+            <div className="mt-2 break-all font-mono text-[11px] text-slate-400">
               {email} / {password}
             </div>
           </div>

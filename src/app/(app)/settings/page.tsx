@@ -5,7 +5,7 @@ export default function SettingsPage() {
     <div className="animate-rise space-y-6">
       <header>
         <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">SETTINGS</p>
-        <h1 className="mt-2 text-3xl font-semibold">Platform configuration</h1>
+        <h1 className="mt-2 text-2xl font-semibold sm:text-3xl">Platform configuration</h1>
       </header>
       <Card>
         <CardHeader>

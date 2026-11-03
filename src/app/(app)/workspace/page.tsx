@@ -25,7 +25,7 @@ export default async function WorkspaceIndexPage() {
     <div className="animate-rise space-y-6">
       <header>
         <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">BROWSER IDE</p>
-        <h1 className="mt-2 text-3xl font-semibold">Isolated engineering workspaces</h1>
+        <h1 className="mt-2 text-2xl font-semibold sm:text-3xl">Isolated engineering workspaces</h1>
         <p className="mt-2 text-slate-400">
           Monaco editor, file tree, commits, sandboxed test execution. Untrusted code never runs on the primary app
           process with platform privileges.

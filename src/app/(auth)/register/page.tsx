@@ -41,12 +41,14 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center px-4 py-10">
+    <div className="relative flex min-h-screen items-center justify-center px-4 py-8 safe-top safe-bottom">
       <div className="pointer-events-none absolute inset-0 grid-overlay" />
       <Card className="animate-rise relative w-full max-w-lg border-emerald-500/20">
         <CardHeader>
-          <div className="mb-2 font-mono text-xs tracking-[0.35em] text-emerald-300">CANDIDATE ONBOARDING</div>
-          <CardTitle className="text-2xl">Create candidate account</CardTitle>
+          <div className="mb-2 font-mono text-[10px] tracking-[0.3em] text-emerald-300 sm:text-xs sm:tracking-[0.35em]">
+            CANDIDATE ONBOARDING
+          </div>
+          <CardTitle className="text-xl sm:text-2xl">Create candidate account</CardTitle>
           <CardDescription>
             Choose a primary track. You can still be assigned assessments across software engineering and cybersecurity.
           </CardDescription>
