@@ -1,9 +1,8 @@
 import fs from "fs/promises";
 import path from "path";
 import { prisma } from "@/lib/db";
+import { getStorageRoot } from "@/lib/storage";
 import { starterFilesForChallenge } from "./starters";
-
-const STORAGE = process.env.STORAGE_ROOT ?? "./storage";
 
 export async function createWorkspaceForAssignment(params: {
   assignmentId: string;
@@ -11,7 +10,7 @@ export async function createWorkspaceForAssignment(params: {
   language: string;
   track: string;
 }) {
-  const rootPath = path.join(STORAGE, "workspaces", params.assignmentId);
+  const rootPath = path.join(getStorageRoot(), "workspaces", params.assignmentId);
   await fs.mkdir(rootPath, { recursive: true });
 
   const files = starterFilesForChallenge(params.challengeSlug, params.language, params.track);

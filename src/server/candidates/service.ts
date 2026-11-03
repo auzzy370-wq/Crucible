@@ -5,8 +5,7 @@ import { writeAudit } from "@/server/security/audit";
 import { analyzeResumeText } from "@/server/ai/resume";
 import fs from "fs/promises";
 import path from "path";
-
-const STORAGE = process.env.STORAGE_ROOT ?? "./storage";
+import { getStorageRoot } from "@/lib/storage";
 
 export async function ensureCandidateProfile(userId: string) {
   const existing = await prisma.candidateProfile.findUnique({ where: { userId } });
@@ -107,7 +106,7 @@ export async function uploadResume(params: {
   }
 
   const profile = await ensureCandidateProfile(params.userId);
-  const dir = path.join(STORAGE, "resumes", profile.id);
+  const dir = path.join(getStorageRoot(), "resumes", profile.id);
   await fs.mkdir(dir, { recursive: true });
   const safeName = params.filename.replace(/[^a-zA-Z0-9._-]/g, "_");
   const storagePath = path.join(dir, `${Date.now()}-${safeName}`);

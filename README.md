@@ -22,6 +22,19 @@ Cybersecurity track elevates **security (25)** and **problem-solving (15)**.
 
 Qualification requires ≥90 overall, ≥80% in critical categories, deployment + hidden tests + incident recovery + architecture (+ team when required), no critical vulns, and **human reviewer approval**. AI assists; humans decide.
 
+## Deploy on Vercel (test)
+
+See **[docs/VERCEL.md](docs/VERCEL.md)**. You need a Neon (or other) Postgres `DATABASE_URL`, then:
+
+```bash
+vercel login && vercel link
+vercel env add DATABASE_URL   # also SESSION_SECRET, SETUP_SECRET, EXECUTION_MODE=process, AI_FALLBACK_MOCK=true, NEXT_PUBLIC_APP_URL
+vercel --prod
+curl -X POST https://YOUR_APP.vercel.app/api/setup -H 'content-type: application/json' -d '{"secret":"YOUR_SETUP_SECRET","seed":true}'
+```
+
+Docker-based candidate isolation is not available on Vercel; use `EXECUTION_MODE=process` for UI/API testing.
+
 ## Quick start (local)
 
 ```bash
@@ -41,6 +54,8 @@ docker compose up --build
 ```
 
 Compose runs Postgres, Redis, MinIO, web, and worker. **Do not** treat Docker-socket mounts as production isolation — use microVMs/gVisor for hostile workloads.
+
+More detail: [docs/VERCEL.md](docs/VERCEL.md).
 
 ## Seed accounts
 
