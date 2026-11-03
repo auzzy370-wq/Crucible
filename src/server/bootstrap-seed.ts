@@ -6,6 +6,8 @@ import {
   CYBERSECURITY_WEIGHTS,
   SECURE_FULL_STACK_WEIGHTS,
 } from "@/server/scoring/policy";
+import { createWorkspaceForAssignment } from "@/server/execution/workspace";
+import { createTeam } from "@/server/teams/service";
 
 export async function seedDatabase() {
   console.log("Seeding Engineering Gauntlet…");
@@ -335,7 +337,169 @@ export async function seedDatabase() {
     create: { key: "retention_days", value: { candidateDataDays: 365, auditDays: 2555 } },
   });
 
-  // Note: assignments/workspaces created via API during demo to exercise full workflow.
+  // —— Ready-to-use assignments + workspaces (tests already placed in starters) ——
+  async function ensureAssignment(params: {
+    id: string;
+    assessmentId: string;
+    candidateId: string;
+    challengeSlug: string;
+    track: string;
+    language?: string;
+  }) {
+    const existing = await prisma.assessmentAssignment.findUnique({ where: { id: params.id } });
+    if (existing) {
+      const ws = await prisma.workspace.findUnique({ where: { assignmentId: existing.id } });
+      if (!ws) {
+        await createWorkspaceForAssignment({
+          assignmentId: existing.id,
+          challengeSlug: params.challengeSlug,
+          language: params.language ?? "typescript",
+          track: params.track,
+        });
+      }
+      return existing;
+    }
+    const assignment = await prisma.assessmentAssignment.create({
+      data: {
+        id: params.id,
+        assessmentId: params.assessmentId,
+        candidateId: params.candidateId,
+        assignedById: hiring.id,
+        status: "IN_PROGRESS",
+        startedAt: new Date(),
+        dueAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        currentLevel: 1,
+        maxLevelReached: 1,
+      },
+    });
+    await createWorkspaceForAssignment({
+      assignmentId: assignment.id,
+      challengeSlug: params.challengeSlug,
+      language: params.language ?? "typescript",
+      track: params.track,
+    });
+    return assignment;
+  }
+
+  const assignSaas = await ensureAssignment({
+    id: "assign-saas-casey",
+    assessmentId: assessmentSaas.id,
+    candidateId: candidate.id,
+    challengeSlug: "saas-nexus",
+    track: "SOFTWARE_ENGINEERING",
+  });
+
+  const assignCyber = await ensureAssignment({
+    id: "assign-appsec-sam",
+    assessmentId: assessmentCyber.id,
+    candidateId: cyberCandidate.id,
+    challengeSlug: "appsec-fortress",
+    track: "CYBERSECURITY",
+  });
+
+  const assignSoc = await ensureAssignment({
+    id: "assign-soc-sam",
+    assessmentId: "assess-soc-1",
+    candidateId: cyberCandidate.id,
+    challengeSlug: "soc-nightwatch",
+    track: "CYBERSECURITY",
+  });
+
+  const assignTeamCasey = await ensureAssignment({
+    id: "assign-team-casey",
+    assessmentId: assessmentTeam.id,
+    candidateId: candidate.id,
+    challengeSlug: "team-forge",
+    track: "SECURE_FULL_STACK",
+  });
+
+  await ensureAssignment({
+    id: "assign-team-taylor",
+    assessmentId: assessmentTeam.id,
+    candidateId: teammate.id,
+    challengeSlug: "team-forge",
+    track: "SECURE_FULL_STACK",
+  });
+
+  // Publish remaining catalog challenges as ready assessments (library already loaded)
+  for (const c of CHALLENGE_CATALOG) {
+    const challenge = await prisma.challenge.findUnique({ where: { slug: c.slug } });
+    if (!challenge) continue;
+    const assessId = `assess-lib-${c.slug}`;
+    await prisma.assessment.upsert({
+      where: { id: assessId },
+      update: { status: "PUBLISHED" },
+      create: {
+        id: assessId,
+        title: c.title,
+        description: c.summary,
+        challengeId: challenge.id,
+        track: c.track,
+        status: "PUBLISHED",
+        multiDay: true,
+        progressiveDiff: true,
+        allowTeam: c.type === "TEAM_PROJECT",
+        createdById: hiring.id,
+        scoringPolicyId:
+          c.track === "CYBERSECURITY"
+            ? cyberPolicy.id
+            : c.track === "SECURE_FULL_STACK"
+              ? securePolicy.id
+              : engPolicy.id,
+      },
+    });
+  }
+
+  // Team already formed for collaborative gauntlet
+  const existingTeam = await prisma.engineeringTeam.findFirst({
+    where: { name: "Forge Squad Alpha", assessmentId: assessmentTeam.id },
+  });
+  if (!existingTeam) {
+    try {
+      await createTeam({
+        name: "Forge Squad Alpha",
+        assessmentId: assessmentTeam.id,
+        managerId: hiring.id,
+        members: [
+          {
+            userId: candidate.id,
+            roleLabel: "API / backend owner",
+            duties: "Contracts, auth, persistence, integration tests",
+          },
+          {
+            userId: teammate.id,
+            roleLabel: "Client / security owner",
+            duties: "UI flows, threat checks, PR review",
+          },
+        ],
+      });
+    } catch {
+      // ignore if already exists from partial seed
+    }
+  }
+
+  // Incident runs ready for cyber candidate
+  const socScenario = await prisma.incidentScenario.findUnique({ where: { slug: "token-exfil-beacon" } });
+  if (socScenario) {
+    const existingRun = await prisma.incidentRun.findFirst({
+      where: { scenarioId: socScenario.id, candidateId: cyberCandidate.id },
+    });
+    if (!existingRun) {
+      await prisma.incidentRun.create({
+        data: {
+          scenarioId: socScenario.id,
+          candidateId: cyberCandidate.id,
+          assignmentId: assignSoc.id,
+          timeline: [{ at: new Date().toISOString(), event: "seeded_ready" }],
+        },
+      });
+    }
+  }
+
+  const workspaceCount = await prisma.workspace.count();
+  const fileCount = await prisma.workspaceFile.count();
+  const assignmentCount = await prisma.assessmentAssignment.count();
+
   const summary = {
     admin: admin.email,
     hiring: hiring.email,
@@ -347,6 +511,12 @@ export async function seedDatabase() {
     passwordCandidate: "Gauntlet!Cand1",
     assessments: [assessmentSaas.title, assessmentCyber.title, assessmentTeam.title],
     policies: [engPolicy.name, cyberPolicy.name, securePolicy.name],
+    ready: {
+      assignments: assignmentCount,
+      workspaces: workspaceCount,
+      workspaceFiles: fileCount,
+      demoAssignments: [assignSaas.id, assignCyber.id, assignSoc.id, assignTeamCasey.id],
+    },
   };
   console.log("Seed complete.");
   console.log(summary);

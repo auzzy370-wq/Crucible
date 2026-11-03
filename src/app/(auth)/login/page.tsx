@@ -63,11 +63,17 @@ export default function LoginPage() {
           <div className="mb-2 font-mono text-xs tracking-[0.35em] text-cyan-300">ENGINEERING GAUNTLET</div>
           <CardTitle className="text-2xl">Sign in to operations</CardTitle>
           <CardDescription>
-            Elite software engineering and cybersecurity qualification platform. Seeded admin and candidate accounts
-            available after setup.
+            Elite software engineering and cybersecurity qualification platform. Demo data is preloaded: challenges,
+            assessments, workspaces, and tests.
           </CardDescription>
         </CardHeader>
         <CardContent>
+          <div className="mb-4 rounded-lg border border-slate-800 bg-slate-950/80 p-3 font-mono text-xs text-slate-300">
+            <div className="mb-1 text-[10px] uppercase tracking-wider text-slate-500">Demo accounts</div>
+            <div>admin@gauntlet.local / Gauntlet!Admin1</div>
+            <div>cyber@gauntlet.local / Gauntlet!Cand1</div>
+            <div>candidate@gauntlet.local / Gauntlet!Cand1</div>
+          </div>
           {dbOk === false && (
             <div className="mb-4 rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-100">
               Database is not connected on this deploy. Add a Neon <span className="font-mono">DATABASE_URL</span> in
