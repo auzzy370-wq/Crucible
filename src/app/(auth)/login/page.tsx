@@ -11,8 +11,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 
 const DEMO_ACCOUNTS = [
   { label: "Admin", email: "admin@gauntlet.local", password: "Gauntlet!Admin1" },
+  { label: "Hiring", email: "hiring@gauntlet.local", password: "Gauntlet!Admin1" },
+  { label: "Reviewer", email: "reviewer@gauntlet.local", password: "Gauntlet!Admin1" },
   { label: "Candidate", email: "candidate@gauntlet.local", password: "Gauntlet!Cand1" },
   { label: "Cyber", email: "cyber@gauntlet.local", password: "Gauntlet!Cand1" },
+  { label: "Teammate", email: "teammate@gauntlet.local", password: "Gauntlet!Cand1" },
 ] as const;
 
 export default function LoginPage() {

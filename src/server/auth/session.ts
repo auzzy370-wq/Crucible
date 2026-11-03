@@ -9,6 +9,15 @@ const TTL_MS = 1000 * 60 * 60 * 24 * 14;
 
 export type AuthUser = Pick<User, "id" | "email" | "name" | "role" | "avatarUrl" | "githubLogin">;
 
+/** Secure cookies only on real HTTPS (Vercel). NODE_ENV=production on http://localhost must stay non-Secure or browsers drop the session. */
+function sessionCookieSecure() {
+  if (process.env.COOKIE_SECURE === "true") return true;
+  if (process.env.COOKIE_SECURE === "false") return false;
+  if (process.env.VERCEL === "1" || process.env.VERCEL === "true") return true;
+  const appUrl = process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "";
+  return appUrl.startsWith("https://");
+}
+
 export async function createSession(userId: string, meta?: { ip?: string; userAgent?: string }) {
   const token = nanoid(48);
   const expiresAt = new Date(Date.now() + TTL_MS);
@@ -25,7 +34,7 @@ export async function createSession(userId: string, meta?: { ip?: string; userAg
   jar.set(COOKIE, token, {
     httpOnly: true,
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    secure: sessionCookieSecure(),
     path: "/",
     expires: expiresAt,
   });
