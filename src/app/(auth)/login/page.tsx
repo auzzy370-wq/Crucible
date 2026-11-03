@@ -46,9 +46,10 @@ export default function LoginPage() {
         body: JSON.stringify({ email, password }),
       });
       const text = await res.text();
-      let json: { ok?: boolean; error?: { message?: string } } | null = null;
+      type LoginJson = { ok?: boolean; error?: { message?: string } };
+      let json: LoginJson | null = null;
       try {
-        json = text ? (JSON.parse(text) as typeof json) : null;
+        json = text ? (JSON.parse(text) as LoginJson) : null;
       } catch {
         json = null;
       }
