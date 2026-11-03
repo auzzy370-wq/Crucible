@@ -20,7 +20,9 @@ vercel env add SETUP_SECRET
 vercel env add AI_FALLBACK_MOCK
 vercel env add EXECUTION_MODE
 vercel env add NEXT_PUBLIC_APP_URL
-# optional: OPENAI_API_KEY, REDIS_URL, APP_URL
+# optional: OPENAI_API_KEY, APP_URL
+# Do NOT set REDIS_URL to redis://localhost — that hangs login on serverless.
+# Only set REDIS_URL to a real hosted Redis (e.g. Upstash) if you need rate limits.
 
 vercel --prod
 ```
@@ -36,6 +38,7 @@ Suggested values:
 | `EXECUTION_MODE` | `process` |
 | `NEXT_PUBLIC_APP_URL` | `https://your-app.vercel.app` |
 | `APP_URL` | same as above |
+| `REDIS_URL` | omit on Vercel, or use Upstash — never localhost |
 
 Add env vars for **Production**, **Preview**, and **Development** as needed. `DATABASE_URL` must also be available at **build** time so `prisma migrate deploy` can run.
 
