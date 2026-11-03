@@ -7,6 +7,9 @@ import { createSession } from "@/server/auth/session";
 import { rateLimit } from "@/server/security/rate-limit";
 import { writeAudit } from "@/server/security/audit";
 
+export const runtime = "nodejs";
+export const maxDuration = 30;
+
 const schema = z.object({
   email: z.string().email(),
   password: z.string().min(1),

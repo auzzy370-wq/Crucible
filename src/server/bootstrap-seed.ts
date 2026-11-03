@@ -12,12 +12,13 @@ import { createTeam } from "@/server/teams/service";
 export async function seedDatabase() {
   console.log("Seeding Engineering Gauntlet…");
 
-  const passwordHash = await bcrypt.hash("Gauntlet!Admin1", 12);
-  const candidateHash = await bcrypt.hash("Gauntlet!Cand1", 12);
+  // Cost 8 — bcryptjs at 12 often exceeds Vercel serverless login budgets.
+  const passwordHash = await bcrypt.hash("Gauntlet!Admin1", 8);
+  const candidateHash = await bcrypt.hash("Gauntlet!Cand1", 8);
 
   const admin = await prisma.user.upsert({
     where: { email: "admin@gauntlet.local" },
-    update: {},
+    update: { passwordHash },
     create: {
       email: "admin@gauntlet.local",
       name: "Super Admin",
@@ -28,7 +29,7 @@ export async function seedDatabase() {
 
   const hiring = await prisma.user.upsert({
     where: { email: "hiring@gauntlet.local" },
-    update: {},
+    update: { passwordHash },
     create: {
       email: "hiring@gauntlet.local",
       name: "Harper Manager",
@@ -39,7 +40,7 @@ export async function seedDatabase() {
 
   const reviewer = await prisma.user.upsert({
     where: { email: "reviewer@gauntlet.local" },
-    update: {},
+    update: { passwordHash },
     create: {
       email: "reviewer@gauntlet.local",
       name: "Riley Reviewer",
@@ -50,7 +51,7 @@ export async function seedDatabase() {
 
   const candidate = await prisma.user.upsert({
     where: { email: "candidate@gauntlet.local" },
-    update: {},
+    update: { passwordHash: candidateHash },
     create: {
       email: "candidate@gauntlet.local",
       name: "Casey Candidate",
@@ -81,7 +82,7 @@ export async function seedDatabase() {
 
   const cyberCandidate = await prisma.user.upsert({
     where: { email: "cyber@gauntlet.local" },
-    update: {},
+    update: { passwordHash: candidateHash },
     create: {
       email: "cyber@gauntlet.local",
       name: "Sam Security",
@@ -103,7 +104,7 @@ export async function seedDatabase() {
 
   const teammate = await prisma.user.upsert({
     where: { email: "teammate@gauntlet.local" },
-    update: {},
+    update: { passwordHash: candidateHash },
     create: {
       email: "teammate@gauntlet.local",
       name: "Taylor Teammate",

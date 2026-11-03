@@ -9,10 +9,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
+const DEMO_ACCOUNTS = [
+  { label: "Admin", email: "admin@gauntlet.local", password: "Gauntlet!Admin1" },
+  { label: "Candidate", email: "candidate@gauntlet.local", password: "Gauntlet!Cand1" },
+  { label: "Cyber", email: "cyber@gauntlet.local", password: "Gauntlet!Cand1" },
+] as const;
+
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("admin@gauntlet.local");
-  const [password, setPassword] = useState("Gauntlet!Admin1");
+  const [email, setEmail] = useState("candidate@gauntlet.local");
+  const [password, setPassword] = useState("Gauntlet!Cand1");
   const [loading, setLoading] = useState(false);
   const [dbOk, setDbOk] = useState<boolean | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -39,9 +45,19 @@ export default function LoginPage() {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
-      const json = await res.json().catch(() => null);
+      const text = await res.text();
+      let json: { ok?: boolean; error?: { message?: string } } | null = null;
+      try {
+        json = text ? (JSON.parse(text) as typeof json) : null;
+      } catch {
+        json = null;
+      }
       if (!res.ok || !json?.ok) {
-        throw new Error(json?.error?.message || `Login failed (${res.status})`);
+        const gateway =
+          res.status === 504 || res.status === 502 || res.status === 503
+            ? "Login timed out on the server. Retry once — cold starts can be slow."
+            : null;
+        throw new Error(json?.error?.message || gateway || `Login failed (${res.status})`);
       }
       toast.success("Authenticated");
       router.push("/dashboard");
@@ -68,11 +84,29 @@ export default function LoginPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="mb-4 rounded-lg border border-slate-800 bg-slate-950/80 p-3 font-mono text-xs text-slate-300">
-            <div className="mb-1 text-[10px] uppercase tracking-wider text-slate-500">Demo accounts</div>
-            <div>admin@gauntlet.local / Gauntlet!Admin1</div>
-            <div>cyber@gauntlet.local / Gauntlet!Cand1</div>
-            <div>candidate@gauntlet.local / Gauntlet!Cand1</div>
+          <div className="mb-4 rounded-lg border border-slate-800 bg-slate-950/80 p-3">
+            <div className="mb-2 font-mono text-[10px] uppercase tracking-wider text-slate-500">
+              Demo accounts — click to fill
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {DEMO_ACCOUNTS.map((account) => (
+                <button
+                  key={account.email}
+                  type="button"
+                  className="rounded-md border border-slate-700 bg-slate-900 px-2.5 py-1.5 font-mono text-xs text-slate-200 transition hover:border-cyan-500/50 hover:text-cyan-100"
+                  onClick={() => {
+                    setEmail(account.email);
+                    setPassword(account.password);
+                    setError(null);
+                  }}
+                >
+                  {account.label}
+                </button>
+              ))}
+            </div>
+            <div className="mt-2 font-mono text-[11px] text-slate-400">
+              {email} / {password}
+            </div>
           </div>
           {dbOk === false && (
             <div className="mb-4 rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-100">
