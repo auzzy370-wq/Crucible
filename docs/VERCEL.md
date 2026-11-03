@@ -79,7 +79,9 @@ That is Vercel’s edge gate — not an app bug.
 
 **Or skip claiming:** use the `*.tmp.now` link as-is (expires ~1 hour), or run locally on port `3847`.
 
-Do **not** claim a temp deploy if you only want a quick public demo URL.
+Do **not** claim a temp deploy if you only want a quick public demo URL. Claiming is what turns a working link into `403 FORBIDDEN`.
+
+If you already claimed and need the app immediately: disable Deployment Protection (above), or open the Cloud Agent port `3847` preview / a Cloudflare tunnel to that port instead of the Vercel URL.
 
 ## Limits on Vercel (intentional)
 
