@@ -19,7 +19,8 @@
     "release:check": "tsx scripts/release-check.ts",
     "release:prepare": "prisma migrate deploy && tsx prisma/seed.ts && tsx scripts/release-check.ts",
     "setup:local": "prisma db push && tsx prisma/seed.ts && tsx scripts/release-check.ts",
-    "vercel-build": "prisma generate && prisma migrate deploy && next build"
+    "vercel-build": "prisma generate && prisma migrate deploy && next build",
+    "test:smoke": "node scripts/platform-smoke.mjs"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",

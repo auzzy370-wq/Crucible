@@ -43,6 +43,21 @@ async function main() {
   const timedAssessments = await prisma.assessment.count({
     where: { status: "PUBLISHED", timedMinutes: { equals: 60 } },
   });
+  const [
+    codingProblems,
+    premiumChallenges,
+    premiumUsers,
+    studyEnrollments,
+    dailyChallenges,
+    playgrounds,
+  ] = await Promise.all([
+    prisma.challenge.count({ where: { type: "CODING_PROBLEM", isPublished: true } }),
+    prisma.challenge.count({ where: { isPremium: true } }),
+    prisma.user.count({ where: { plan: "PREMIUM" } }),
+    prisma.studyPlanEnrollment.count(),
+    prisma.dailyChallenge.count(),
+    prisma.playground.count(),
+  ]);
 
   const checks: { name: string; ok: boolean; detail: string }[] = [
     {
@@ -75,11 +90,36 @@ async function main() {
       ok: files > 0 && wsWithoutFiles === 0,
       detail: `${files} files, ${wsWithoutFiles} empty workspaces`,
     },
-    { name: "demo_users", ok: users >= 6, detail: `${users} users` },
+    { name: "demo_users", ok: users >= 7, detail: `${users} users (need ≥ 7 incl. premium)` },
     { name: "scoring_policies", ok: policies >= 3, detail: `${policies} policies` },
     { name: "incident_scenarios", ok: incidents >= 2, detail: `${incidents} scenarios` },
     { name: "architecture_seed", ok: architecture >= 1, detail: `${architecture} packages` },
     { name: "reviewer_queue", ok: underReview >= 1, detail: `${underReview} under review` },
+    {
+      name: "coding_problemset",
+      ok: codingProblems >= 10,
+      detail: `${codingProblems} CODING_PROBLEM challenges`,
+    },
+    {
+      name: "premium_content",
+      ok: premiumChallenges >= 1 && premiumUsers >= 1,
+      detail: `${premiumChallenges} premium challenges, ${premiumUsers} premium users`,
+    },
+    {
+      name: "study_plans_seeded",
+      ok: studyEnrollments >= 1,
+      detail: `${studyEnrollments} enrollments`,
+    },
+    {
+      name: "daily_challenge_ready",
+      ok: dailyChallenges >= 1,
+      detail: `${dailyChallenges} daily rows`,
+    },
+    {
+      name: "playgrounds_seeded",
+      ok: playgrounds >= 1,
+      detail: `${playgrounds} playgrounds`,
+    },
   ];
 
   const failed = checks.filter((c) => !c.ok);

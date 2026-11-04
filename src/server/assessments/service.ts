@@ -85,34 +85,68 @@ export async function assignAssessment(params: {
   }
 
   const timedMs = (assessment.timedMinutes ?? 60) * 60 * 1000;
-  const assignment = await prisma.assessmentAssignment.create({
-    data: {
-      assessmentId: params.assessmentId,
-      candidateId: params.candidateId,
-      assignedById: params.assignedById,
-      status: AssignmentStatus.ASSIGNED,
-      dueAt: params.dueAt ?? new Date(Date.now() + timedMs),
-      accommodations: params.accommodations,
+  const language = params.language ?? assessment.challenge.languages[0] ?? "typescript";
+
+  const existing = await prisma.assessmentAssignment.findUnique({
+    where: {
+      assessmentId_candidateId: {
+        assessmentId: params.assessmentId,
+        candidateId: params.candidateId,
+      },
     },
+    include: { workspace: true },
   });
 
-  await createWorkspaceForAssignment({
-    assignmentId: assignment.id,
-    challengeSlug: assessment.challenge.slug,
-    language: params.language ?? assessment.challenge.languages[0] ?? "typescript",
-    track: assessment.track,
-  });
+  let assignmentId: string;
+  if (existing) {
+    assignmentId = existing.id;
+    if (params.dueAt || params.accommodations) {
+      await prisma.assessmentAssignment.update({
+        where: { id: existing.id },
+        data: {
+          dueAt: params.dueAt ?? existing.dueAt,
+          accommodations: params.accommodations ?? existing.accommodations,
+        },
+      });
+    }
+    if (!existing.workspace) {
+      await createWorkspaceForAssignment({
+        assignmentId: existing.id,
+        challengeSlug: assessment.challenge.slug,
+        language,
+        track: assessment.track,
+      });
+    }
+  } else {
+    const created = await prisma.assessmentAssignment.create({
+      data: {
+        assessmentId: params.assessmentId,
+        candidateId: params.candidateId,
+        assignedById: params.assignedById,
+        status: AssignmentStatus.ASSIGNED,
+        dueAt: params.dueAt ?? new Date(Date.now() + timedMs),
+        accommodations: params.accommodations,
+      },
+    });
+    assignmentId = created.id;
+    await createWorkspaceForAssignment({
+      assignmentId: created.id,
+      challengeSlug: assessment.challenge.slug,
+      language,
+      track: assessment.track,
+    });
+  }
 
   await writeAudit({
     actorId: params.assignedById,
-    action: "assessment.assign",
+    action: existing ? "assessment.assign.reuse" : "assessment.assign",
     entityType: "AssessmentAssignment",
-    entityId: assignment.id,
+    entityId: assignmentId,
     metadata: { candidateId: params.candidateId, track: assessment.track },
   });
 
   return prisma.assessmentAssignment.findUniqueOrThrow({
-    where: { id: assignment.id },
+    where: { id: assignmentId },
     include: {
       assessment: { include: { challenge: true } },
       workspace: true,
