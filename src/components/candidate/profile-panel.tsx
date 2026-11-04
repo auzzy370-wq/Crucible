@@ -94,6 +94,10 @@ export function CandidateProfilePanel() {
               <option value="SOFTWARE_ENGINEERING">Software Engineering</option>
               <option value="CYBERSECURITY">Cybersecurity</option>
               <option value="SECURE_FULL_STACK">Secure Full-Stack</option>
+              <option value="PLATFORM_SRE">Platform / SRE</option>
+              <option value="DATA_ML">Data / ML Engineering</option>
+              <option value="MOBILE">Mobile Engineering</option>
+              <option value="PRIVACY_ENGINEERING">Privacy Engineering</option>
             </select>
           </div>
           <div className="space-y-2">

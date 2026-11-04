@@ -39,11 +39,71 @@ export const SECURE_FULL_STACK_WEIGHTS = {
   collaboration: 5,
 } as const;
 
+/** Platform / SRE: infrastructure, reliability, and incident craft. */
+export const PLATFORM_SRE_WEIGHTS = {
+  frontend: 3,
+  backend: 10,
+  database: 5,
+  architecture: 12,
+  infrastructure: 25,
+  security: 10,
+  testing: 10,
+  problemSolving: 15,
+  performance: 5,
+  collaboration: 5,
+} as const;
+
+/** Data / ML engineering: pipelines, features, serving. */
+export const DATA_ML_WEIGHTS = {
+  frontend: 3,
+  backend: 18,
+  database: 18,
+  architecture: 14,
+  infrastructure: 10,
+  security: 8,
+  testing: 12,
+  problemSolving: 10,
+  performance: 5,
+  collaboration: 2,
+} as const;
+
+/** Mobile engineering: client craft with security and performance. */
+export const MOBILE_WEIGHTS = {
+  frontend: 20,
+  backend: 12,
+  database: 5,
+  architecture: 10,
+  infrastructure: 8,
+  security: 15,
+  testing: 10,
+  problemSolving: 10,
+  performance: 8,
+  collaboration: 2,
+} as const;
+
+/** Privacy engineering: purpose, consent, minimization, evidence. */
+export const PRIVACY_WEIGHTS = {
+  frontend: 5,
+  backend: 12,
+  database: 10,
+  architecture: 12,
+  infrastructure: 8,
+  security: 25,
+  testing: 10,
+  problemSolving: 10,
+  performance: 3,
+  collaboration: 5,
+} as const;
+
 export type WeightMap = Record<keyof ScoreBreakdown, number>;
 
 export function weightsForTrack(track?: string): WeightMap {
   if (track === "CYBERSECURITY") return { ...CYBERSECURITY_WEIGHTS };
   if (track === "SECURE_FULL_STACK") return { ...SECURE_FULL_STACK_WEIGHTS };
+  if (track === "PLATFORM_SRE") return { ...PLATFORM_SRE_WEIGHTS };
+  if (track === "DATA_ML") return { ...DATA_ML_WEIGHTS };
+  if (track === "MOBILE") return { ...MOBILE_WEIGHTS };
+  if (track === "PRIVACY_ENGINEERING") return { ...PRIVACY_WEIGHTS };
   return { ...DEFAULT_WEIGHTS };
 }
 

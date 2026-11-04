@@ -1,5 +1,6 @@
 import { AssessmentTrack, ChallengeType } from "@prisma/client";
 import { CODING_PROBLEM_CATALOG } from "./coding-problems";
+import { buildExpandedCatalog } from "./catalog-bulk";
 
 export type ChallengeSeed = {
   slug: string;
@@ -1038,4 +1039,17 @@ const PROJECT_CATALOG: ChallengeSeed[] = [
   },
 ];
 
-export const CHALLENGE_CATALOG: ChallengeSeed[] = [...PROJECT_CATALOG, ...CODING_PROBLEM_CATALOG];
+const BASE_CATALOG: ChallengeSeed[] = [...PROJECT_CATALOG, ...CODING_PROBLEM_CATALOG];
+
+/** Full published library — base missions + expansions to ≥100 per track (incl. new sectors). */
+export const CHALLENGE_CATALOG: ChallengeSeed[] = [
+  ...BASE_CATALOG,
+  ...buildExpandedCatalog(BASE_CATALOG, 100),
+];
+
+/** Hand-authored + coding only — used when provisioning demo workspaces (not the full 700). */
+export const SEED_WORKSPACE_CATALOG: ChallengeSeed[] = BASE_CATALOG;
+
+export function isExpandedLibrarySlug(slug: string) {
+  return slug.startsWith("exp-");
+}

@@ -1,10 +1,14 @@
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db";
-import { CHALLENGE_CATALOG } from "@/server/challenges/catalog";
+import { CHALLENGE_CATALOG, SEED_WORKSPACE_CATALOG, isExpandedLibrarySlug } from "@/server/challenges/catalog";
 import {
   DEFAULT_WEIGHTS,
   CYBERSECURITY_WEIGHTS,
   SECURE_FULL_STACK_WEIGHTS,
+  PLATFORM_SRE_WEIGHTS,
+  DATA_ML_WEIGHTS,
+  MOBILE_WEIGHTS,
+  PRIVACY_WEIGHTS,
 } from "@/server/scoring/policy";
 import { createWorkspaceForAssignment, refreshWorkspaceStarters } from "@/server/execution/workspace";
 import { createTeam } from "@/server/teams/service";
@@ -193,6 +197,54 @@ export async function seedDatabase() {
       id: "policy-secure-elite",
       name: "Secure Full-Stack Elite Policy",
       weights: SECURE_FULL_STACK_WEIGHTS,
+      minOverall: 90,
+      minCategoryPct: 80,
+    },
+  });
+
+  const srePolicy = await prisma.scoringPolicy.upsert({
+    where: { id: "policy-sre-elite" },
+    update: { weights: PLATFORM_SRE_WEIGHTS },
+    create: {
+      id: "policy-sre-elite",
+      name: "Platform / SRE Elite Policy",
+      weights: PLATFORM_SRE_WEIGHTS,
+      minOverall: 90,
+      minCategoryPct: 80,
+    },
+  });
+
+  const dataPolicy = await prisma.scoringPolicy.upsert({
+    where: { id: "policy-data-elite" },
+    update: { weights: DATA_ML_WEIGHTS },
+    create: {
+      id: "policy-data-elite",
+      name: "Data / ML Elite Policy",
+      weights: DATA_ML_WEIGHTS,
+      minOverall: 90,
+      minCategoryPct: 80,
+    },
+  });
+
+  const mobilePolicy = await prisma.scoringPolicy.upsert({
+    where: { id: "policy-mobile-elite" },
+    update: { weights: MOBILE_WEIGHTS },
+    create: {
+      id: "policy-mobile-elite",
+      name: "Mobile Engineering Elite Policy",
+      weights: MOBILE_WEIGHTS,
+      minOverall: 90,
+      minCategoryPct: 80,
+    },
+  });
+
+  const privacyPolicy = await prisma.scoringPolicy.upsert({
+    where: { id: "policy-privacy-elite" },
+    update: { weights: PRIVACY_WEIGHTS },
+    create: {
+      id: "policy-privacy-elite",
+      name: "Privacy Engineering Elite Policy",
+      weights: PRIVACY_WEIGHTS,
       minOverall: 90,
       minCategoryPct: 80,
     },
@@ -498,7 +550,15 @@ export async function seedDatabase() {
         ? cyberPolicy.id
         : c.track === "SECURE_FULL_STACK"
           ? securePolicy.id
-          : engPolicy.id;
+          : c.track === "PLATFORM_SRE"
+            ? srePolicy.id
+            : c.track === "DATA_ML"
+              ? dataPolicy.id
+              : c.track === "MOBILE"
+                ? mobilePolicy.id
+                : c.track === "PRIVACY_ENGINEERING"
+                  ? privacyPolicy.id
+                  : engPolicy.id;
     const isLib = assessId.startsWith("assess-lib-");
     await prisma.assessment.upsert({
       where: { id: assessId },
@@ -546,11 +606,12 @@ export async function seedDatabase() {
     });
   }
 
-  // Assign every catalog challenge to the right demo candidate with a workspace
-  for (const c of CHALLENGE_CATALOG) {
+  // Assign hand-authored + coding challenges with workspaces (not the full expanded 700 library)
+  for (const c of SEED_WORKSPACE_CATALOG) {
+    if (isExpandedLibrarySlug(c.slug)) continue;
     const assessId = featuredBySlug[c.slug] ?? `assess-lib-${c.slug}`;
     const primary =
-      c.track === "CYBERSECURITY"
+      c.track === "CYBERSECURITY" || c.track === "PRIVACY_ENGINEERING"
         ? { user: cyberCandidate, key: "sam" }
         : { user: candidate, key: "casey" };
 

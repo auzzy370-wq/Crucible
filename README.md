@@ -8,11 +8,19 @@ The seed loads the **full challenge library as published 60-minute assessments**
 
 ## Tracks
 
+Each track ships **≥100 published challenges** (700 total in the expanded library).
+
 | Track | Focus |
 |-------|--------|
 | Software Engineering | SaaS, APIs, frontend, realtime, distributed systems, performance, architecture, ecommerce, AI SaaS |
 | Cybersecurity | AppSec, cloud security, threat modeling, SOC/IR, secure code review, cryptography, zero trust, detection, IAM, vuln triage, purple team, supply chain |
 | Secure Full-Stack | Product delivery with elevated security bar |
+| Platform / SRE | SLOs, on-call, canaries, DR, capacity, synthetics, change-fail |
+| Data / ML Engineering | ETL, CDC, feature stores, model registry, batch/online inference, DQ, lineage |
+| Mobile Engineering | Offline sync, push, deep links, attestation, IAP, OTA, mobile perf/a11y |
+| Privacy Engineering | Consent, DSAR, retention, DP, purpose limitation, transfers, DPIA |
+
+**Other sectors you could add next:** FinTech / payments risk, Game backend / multiplayer, Embedded / IoT security, Developer tooling / IDE plugins, Healthcare HITRUST-style workflows, Growth / experimentation eng.
 
 Skills on profiles are separated into **claimed**, **portfolio**, **assessment-verified**, and **human-reviewed**. Résumé claims never prove competence.
 
