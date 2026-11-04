@@ -250,34 +250,17 @@ export async function seedDatabase() {
     },
   });
 
-  for (const c of CHALLENGE_CATALOG) {
-    await prisma.challenge.upsert({
+  // Upsert hand-authored base; batch-insert the large expanded bank (thousands)
+  const existingSlugs = new Set(
+    (await prisma.challenge.findMany({ select: { slug: true } })).map((r) => r.slug),
+  );
+  const toCreate = CHALLENGE_CATALOG.filter((c) => !existingSlugs.has(c.slug));
+  const toRefresh = CHALLENGE_CATALOG.filter((c) => existingSlugs.has(c.slug) && !c.slug.startsWith("q-") && !c.slug.startsWith("exp-"));
+
+  for (const c of toRefresh) {
+    await prisma.challenge.update({
       where: { slug: c.slug },
-      update: {
-        title: c.title,
-        summary: c.summary,
-        description: c.description,
-        type: c.type,
-        track: c.track,
-        difficulty: c.difficulty,
-        estimatedDays: c.estimatedDays,
-        tags: c.tags,
-        languages: c.languages,
-        companies: c.companies ?? [],
-        frequency: c.frequency ?? 0,
-        avgMinutes: c.avgMinutes ?? (c.type === "CODING_PROBLEM" ? 30 : 60),
-        isPremium: c.isPremium ?? false,
-        publicRequirements: c.publicRequirements,
-        hiddenRequirements: c.hiddenRequirements,
-        adaptiveTrack: c.adaptiveTrack,
-        gradingRubric: c.gradingRubric,
-        mitreMappings: c.mitreMappings ?? [],
-        owaspMappings: c.owaspMappings ?? [],
-        controlledVulns: c.controlledVulns ?? undefined,
-        isPublished: true,
-      },
-      create: {
-        slug: c.slug,
+      data: {
         title: c.title,
         summary: c.summary,
         description: c.description,
@@ -301,6 +284,41 @@ export async function seedDatabase() {
         isPublished: true,
       },
     });
+  }
+
+  const chunk = 200;
+  for (let i = 0; i < toCreate.length; i += chunk) {
+    const slice = toCreate.slice(i, i + chunk);
+    await prisma.challenge.createMany({
+      data: slice.map((c) => ({
+        slug: c.slug,
+        title: c.title,
+        summary: c.summary,
+        description: c.description,
+        type: c.type,
+        track: c.track,
+        difficulty: c.difficulty,
+        estimatedDays: c.estimatedDays,
+        tags: c.tags,
+        languages: c.languages,
+        companies: c.companies ?? [],
+        frequency: c.frequency ?? 0,
+        avgMinutes: c.avgMinutes ?? (c.type === "CODING_PROBLEM" ? 30 : 60),
+        isPremium: c.isPremium ?? false,
+        publicRequirements: c.publicRequirements,
+        hiddenRequirements: c.hiddenRequirements,
+        adaptiveTrack: c.adaptiveTrack,
+        gradingRubric: c.gradingRubric,
+        mitreMappings: c.mitreMappings ?? [],
+        owaspMappings: c.owaspMappings ?? [],
+        controlledVulns: c.controlledVulns ?? undefined,
+        isPublished: true,
+      })),
+      skipDuplicates: true,
+    });
+    if (i === 0 || (i / chunk) % 5 === 0) {
+      console.log(`Challenges inserted ${Math.min(i + chunk, toCreate.length)}/${toCreate.length}`);
+    }
   }
 
   const saas = await prisma.challenge.findUniqueOrThrow({ where: { slug: "saas-nexus" } });
@@ -540,70 +558,105 @@ export async function seedDatabase() {
     "team-forge": assessmentTeam.id,
   };
 
-  // Publish every catalog challenge as a ready assessment
-  for (const c of CHALLENGE_CATALOG) {
-    const challenge = await prisma.challenge.findUnique({ where: { slug: c.slug } });
+  // Publish assessments — refresh featured; batch-create library assessments for new challenges
+  const policyFor = (track: string) =>
+    track === "CYBERSECURITY"
+      ? cyberPolicy.id
+      : track === "SECURE_FULL_STACK"
+        ? securePolicy.id
+        : track === "PLATFORM_SRE"
+          ? srePolicy.id
+          : track === "DATA_ML"
+            ? dataPolicy.id
+            : track === "MOBILE"
+              ? mobilePolicy.id
+              : track === "PRIVACY_ENGINEERING"
+                ? privacyPolicy.id
+                : engPolicy.id;
+
+  for (const slug of Object.keys(featuredBySlug)) {
+    const c = CHALLENGE_CATALOG.find((x) => x.slug === slug);
+    if (!c) continue;
+    const challenge = await prisma.challenge.findUnique({ where: { slug } });
     if (!challenge) continue;
-    const assessId = featuredBySlug[c.slug] ?? `assess-lib-${c.slug}`;
-    const policyId =
-      c.track === "CYBERSECURITY"
-        ? cyberPolicy.id
-        : c.track === "SECURE_FULL_STACK"
-          ? securePolicy.id
-          : c.track === "PLATFORM_SRE"
-            ? srePolicy.id
-            : c.track === "DATA_ML"
-              ? dataPolicy.id
-              : c.track === "MOBILE"
-                ? mobilePolicy.id
-                : c.track === "PRIVACY_ENGINEERING"
-                  ? privacyPolicy.id
-                  : engPolicy.id;
-    const isLib = assessId.startsWith("assess-lib-");
     await prisma.assessment.upsert({
-      where: { id: assessId },
-      update: {
-        status: "PUBLISHED",
-        scoringPolicyId: policyId,
-        timedMinutes: DEFAULT_TIMED_MINUTES,
-        multiDay: false,
-        ...(isLib
-          ? {
-              title: c.title,
-              description: `${c.summary} Timed ${DEFAULT_TIMED_MINUTES}-minute Crucible session.`,
-              allowTeam: c.type === "TEAM_PROJECT",
-              teamSizeMin: c.type === "TEAM_PROJECT" ? 2 : null,
-              teamSizeMax: c.type === "TEAM_PROJECT" ? 4 : null,
-            }
-          : {}),
-      },
+      where: { id: featuredBySlug[slug]! },
+      update: { status: "PUBLISHED", scoringPolicyId: policyFor(c.track), timedMinutes: DEFAULT_TIMED_MINUTES },
       create: {
-        id: assessId,
-        title: isLib
-          ? c.title
-          : c.slug === "saas-nexus"
+        id: featuredBySlug[slug]!,
+        title:
+          slug === "saas-nexus"
             ? "Elite SaaS Build — Nexus"
-            : c.slug === "appsec-fortress"
+            : slug === "appsec-fortress"
               ? "AppSec Fortress Qualification"
-              : c.slug === "soc-nightwatch"
+              : slug === "soc-nightwatch"
                 ? "SOC Nightwatch IR Simulation"
                 : "Team Forge Collaborative Delivery",
-        description: isLib
-          ? `${c.summary} Timed ${DEFAULT_TIMED_MINUTES}-minute Crucible session.`
-          : c.summary,
+        description: c.summary,
         challengeId: challenge.id,
         track: c.track,
         status: "PUBLISHED",
         timedMinutes: DEFAULT_TIMED_MINUTES,
         multiDay: false,
         progressiveDiff: true,
-        allowTeam: c.type === "TEAM_PROJECT",
-        teamSizeMin: c.type === "TEAM_PROJECT" ? 2 : undefined,
-        teamSizeMax: c.type === "TEAM_PROJECT" ? 4 : undefined,
         createdById: hiring.id,
-        scoringPolicyId: policyId,
+        scoringPolicyId: policyFor(c.track),
       },
     });
+  }
+
+  const challengeRows = await prisma.challenge.findMany({ select: { id: true, slug: true } });
+  const challengeIdBySlug = new Map(challengeRows.map((r) => [r.slug, r.id]));
+  const existingAssessIds = new Set(
+    (await prisma.assessment.findMany({ select: { id: true } })).map((a) => a.id),
+  );
+  const assessCreates: {
+    id: string;
+    title: string;
+    description: string;
+    challengeId: string;
+    track: (typeof CHALLENGE_CATALOG)[number]["track"];
+    status: "PUBLISHED";
+    timedMinutes: number;
+    multiDay: boolean;
+    progressiveDiff: boolean;
+    allowTeam: boolean;
+    teamSizeMin: number | null;
+    teamSizeMax: number | null;
+    createdById: string;
+    scoringPolicyId: string;
+  }[] = [];
+  for (const c of CHALLENGE_CATALOG) {
+    if (featuredBySlug[c.slug]) continue;
+    const assessId = `assess-lib-${c.slug}`;
+    if (existingAssessIds.has(assessId)) continue;
+    const challengeId = challengeIdBySlug.get(c.slug);
+    if (!challengeId) continue;
+    assessCreates.push({
+      id: assessId,
+      title: c.title,
+      description: `${c.summary} Timed ${DEFAULT_TIMED_MINUTES}-minute Crucible session.`,
+      challengeId,
+      track: c.track,
+      status: "PUBLISHED",
+      timedMinutes: DEFAULT_TIMED_MINUTES,
+      multiDay: false,
+      progressiveDiff: true,
+      allowTeam: c.type === "TEAM_PROJECT",
+      teamSizeMin: c.type === "TEAM_PROJECT" ? 2 : null,
+      teamSizeMax: c.type === "TEAM_PROJECT" ? 4 : null,
+      createdById: hiring.id,
+      scoringPolicyId: policyFor(c.track),
+    });
+  }
+  for (let i = 0; i < assessCreates.length; i += chunk) {
+    await prisma.assessment.createMany({
+      data: assessCreates.slice(i, i + chunk),
+      skipDuplicates: true,
+    });
+    if (i === 0 || (i / chunk) % 5 === 0) {
+      console.log(`Assessments inserted ${Math.min(i + chunk, assessCreates.length)}/${assessCreates.length}`);
+    }
   }
 
   // Assign hand-authored + coding challenges with workspaces (not the full expanded 700 library)

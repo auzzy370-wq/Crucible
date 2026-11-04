@@ -1,5 +1,6 @@
 import type { AssessmentTrack, ChallengeType } from "@prisma/client";
 import type { ChallengeSeed } from "./catalog";
+import { DIFFICULTY_BLURBS, difficultyBand, difficultyFromIndex } from "./difficulty";
 
 type Topic = {
   key: string;
@@ -43,7 +44,8 @@ function buildFromTopics(
     i += 1;
     if (existingSlugs.has(slug)) continue;
     existingSlugs.add(slug);
-    const difficulty = 3 + ((out.length + t.key.length) % 7); // 3..9
+    const difficulty = difficultyFromIndex(out.length + t.key.length + variant * 17);
+    const band = difficultyBand(difficulty);
     const titleVariant =
       variant === 0 ? t.title : `${t.title} (Variant ${variant + 1}: ${["latency", "multi-region", "chaos", "audit", "cost"][variant % 5]})`;
     out.push({
@@ -52,21 +54,22 @@ function buildFromTopics(
       summary: t.summary,
       description: `${t.summary}\n\nFocus: ${t.focus}. Ship working evidence in the Crucible workspace — public deliverables, tests, and architecture notes. Variant pressure: ${
         ["p95 latency budget", "multi-region failover", "chaos injection", "auditor evidence pack", "cost envelope"][variant % 5]
-      }.`,
+      }.\n\n## Difficulty\n**${band} (D${difficulty}/10)** — ${DIFFICULTY_BLURBS[band]}`,
       type: t.type,
       track,
       difficulty,
-      estimatedDays: difficulty >= 8 ? 3 : difficulty >= 6 ? 2 : 1,
-      tags: [...t.tags, "expanded-library"],
+      estimatedDays: difficulty >= 9 ? 3 : difficulty >= 7 ? 2 : 1,
+      tags: [...t.tags, "expanded-library", band.toLowerCase()],
       languages: t.languages ?? ["typescript", "python", "go"],
       publicRequirements: t.publicRequirements,
       hiddenRequirements: t.hiddenRequirements,
       adaptiveTrack: levels(t.focus),
-      gradingRubric: t.rubric,
+      gradingRubric: { ...t.rubric, problemSolving: band },
       mitreMappings: t.mitre,
       owaspMappings: t.owasp,
-      avgMinutes: 60,
+      avgMinutes: difficulty <= 3 ? 45 : difficulty <= 6 ? 60 : difficulty <= 8 ? 75 : 90,
       frequency: 20 + (out.length % 60),
+      isPremium: difficulty >= 9,
     });
   }
   return out;

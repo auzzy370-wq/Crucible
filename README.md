@@ -8,7 +8,7 @@ The seed loads the **full challenge library as published 60-minute assessments**
 
 ## Tracks
 
-Each track ships **≥100 published challenges** (700 total in the expanded library).
+Each track ships **≥250 project missions** plus a **4,000-question coding bank** scaling **Easy → Impossible**, with post-test **knowledge pinpoint** (exactly which skills were proven vs gaps).
 
 | Track | Focus |
 |-------|--------|

@@ -228,6 +228,7 @@ export async function getCandidateDetail(userId: string) {
   if (!profile) throw new AppError("Candidate profile not found", 404, "NOT_FOUND");
   return {
     ...profile,
+    knowledgeMap: profile.knowledgeMap,
     skillBuckets: {
       claimed: profile.skills.filter((s) => s.source === "CLAIMED"),
       portfolio: profile.skills.filter((s) => s.source === "PORTFOLIO"),

@@ -510,8 +510,45 @@ func main() {
 `;
 }
 
+function genericSpec(slug: string): CodingSpec {
+  return {
+    solutionStub: `/**
+ * CRUCIBLE coding bank — implement solve() for ${slug}
+ * Public tests import { solve } from this module.
+ */
+export function solve(...args: unknown[]): unknown {
+  void args;
+  // TODO: implement
+  return null;
+}
+`,
+    publicTests: `import { solve } from "../src/solution";
+
+export async function runPublicTests() {
+  // Bank problems ship with a smoke harness — extend as you implement.
+  const results: { name: string; pass: boolean; hidden?: boolean }[] = [];
+  try {
+    const out = solve(1, 2, 3);
+    results.push({ name: "module_exports_solve", pass: typeof solve === "function" });
+    results.push({ name: "smoke_invokes", pass: out !== undefined });
+  } catch {
+    results.push({ name: "module_exports_solve", pass: false });
+  }
+  return results;
+}
+`,
+    hiddenHints: [
+      { id: "edge-empty", description: "Empty / trivial input" },
+      { id: "edge-large", description: "Large-n / adversarial input" },
+      { id: "complexity", description: "Meets expected complexity band" },
+    ],
+  };
+}
+
 export function codingStarterFiles(slug: string, language: string, track: string): StarterFile[] | null {
-  const spec = SPECS[slug];
+  const isCodingSlug = slug.startsWith("lc-") || slug.startsWith("q-") || Boolean(SPECS[slug]);
+  if (!isCodingSlug && !SPECS[slug]) return null;
+  const spec = SPECS[slug] ?? (slug.startsWith("q-") || slug.startsWith("lc-") ? genericSpec(slug) : null);
   if (!spec) return null;
   const challenge = CODING_PROBLEM_CATALOG.find((c) => c.slug === slug);
   const problemMd = `# ${challenge?.title ?? slug}

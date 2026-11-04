@@ -34,6 +34,15 @@ export default async function PublicScorecardPage({
   const report = assignment.scoreReport;
   const verified =
     profile?.skills.filter((s) => s.source === "ASSESSMENT" || s.source === "HUMAN_REVIEW") ?? [];
+  const diagnostics = report.diagnostics as {
+    summary?: string;
+    knows?: { name: string; domain: string; evidence: string[] }[];
+    gaps?: { name: string; status: string; evidence: string[] }[];
+    nextFocus?: string[];
+    ceiling?: { note: string };
+    band?: string;
+    difficulty?: number;
+  } | null;
 
   const categories: [string, number][] = [
     ["Frontend", report.frontend],
@@ -96,6 +105,43 @@ export default async function PublicScorecardPage({
             </div>
           ))}
         </section>
+
+        {diagnostics && (
+          <section className="animate-rise space-y-3 rounded-xl border border-cyan-500/20 bg-cyan-500/5 p-5">
+            <p className="font-mono text-xs tracking-[0.25em] text-cyan-300">KNOWLEDGE PINPOINT</p>
+            <p className="text-slate-200">{diagnostics.summary}</p>
+            {diagnostics.band != null && (
+              <p className="font-mono text-xs text-slate-500">
+                {diagnostics.band} · D{diagnostics.difficulty ?? "—"}/10
+              </p>
+            )}
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <div className="text-xs uppercase tracking-wider text-emerald-400/80">Proven knows</div>
+                <ul className="mt-2 space-y-1 text-sm text-emerald-100/90">
+                  {(diagnostics.knows ?? []).slice(0, 10).map((k) => (
+                    <li key={k.name}>
+                      {k.name} <span className="text-slate-500">· {k.domain}</span>
+                    </li>
+                  ))}
+                  {!diagnostics.knows?.length && <li className="text-slate-500">None proven on this run</li>}
+                </ul>
+              </div>
+              <div>
+                <div className="text-xs uppercase tracking-wider text-amber-300/80">Gaps</div>
+                <ul className="mt-2 space-y-1 text-sm text-amber-50/90">
+                  {(diagnostics.gaps ?? []).slice(0, 10).map((g) => (
+                    <li key={g.name}>
+                      {g.name} <span className="text-slate-500">· {g.status}</span>
+                    </li>
+                  ))}
+                  {!diagnostics.gaps?.length && <li className="text-slate-500">No open gaps on this run</li>}
+                </ul>
+              </div>
+            </div>
+            {diagnostics.ceiling?.note && <p className="text-xs text-slate-500">{diagnostics.ceiling.note}</p>}
+          </section>
+        )}
 
         <section className="animate-rise space-y-3">
           <h2 className="text-sm font-semibold text-slate-100">Verified skills on this scorecard</h2>

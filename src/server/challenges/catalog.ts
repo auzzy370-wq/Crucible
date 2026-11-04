@@ -1,6 +1,7 @@
 import { AssessmentTrack, ChallengeType } from "@prisma/client";
 import { CODING_PROBLEM_CATALOG } from "./coding-problems";
 import { buildExpandedCatalog } from "./catalog-bulk";
+import { buildCodingBulk } from "./coding-bulk";
 
 export type ChallengeSeed = {
   slug: string;
@@ -1041,15 +1042,17 @@ const PROJECT_CATALOG: ChallengeSeed[] = [
 
 const BASE_CATALOG: ChallengeSeed[] = [...PROJECT_CATALOG, ...CODING_PROBLEM_CATALOG];
 
-/** Full published library — base missions + expansions to ≥100 per track (incl. new sectors). */
-export const CHALLENGE_CATALOG: ChallengeSeed[] = [
-  ...BASE_CATALOG,
-  ...buildExpandedCatalog(BASE_CATALOG, 100),
-];
+const slugSet = new Set(BASE_CATALOG.map((c) => c.slug));
+const EXPANDED_PROJECTS = buildExpandedCatalog(BASE_CATALOG, 250);
+for (const c of EXPANDED_PROJECTS) slugSet.add(c.slug);
+const CODING_BANK = buildCodingBulk(4000, slugSet);
 
-/** Hand-authored + coding only — used when provisioning demo workspaces (not the full 700). */
+/** Full library: hand-authored + 250/track missions + 4000 coding questions (Easy→Impossible). */
+export const CHALLENGE_CATALOG: ChallengeSeed[] = [...BASE_CATALOG, ...EXPANDED_PROJECTS, ...CODING_BANK];
+
+/** Hand-authored only — demo workspace provisioning (not thousands of workspaces). */
 export const SEED_WORKSPACE_CATALOG: ChallengeSeed[] = BASE_CATALOG;
 
 export function isExpandedLibrarySlug(slug: string) {
-  return slug.startsWith("exp-");
+  return slug.startsWith("exp-") || slug.startsWith("q-");
 }

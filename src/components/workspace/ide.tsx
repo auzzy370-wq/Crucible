@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { SessionTimer } from "@/components/assessment/session-timer";
 import { cn } from "@/lib/utils";
+import { difficultyBand, difficultyBandClass, type DifficultyBand } from "@/lib/difficulty";
 
 const Monaco = dynamic(() => import("@monaco-editor/react"), { ssr: false });
 
@@ -17,18 +18,24 @@ type FileRow = { id: string; path: string; content: string; language: string | n
 
 type CaseResult = { name: string; pass: boolean; hidden?: boolean };
 
-function difficultyLabel(difficulty: number) {
-  if (difficulty <= 3) return "Easy";
-  if (difficulty <= 6) return "Medium";
-  return "Hard";
+function difficultyLabel(difficulty: number): DifficultyBand {
+  return difficultyBand(difficulty);
 }
 
 function diffClass(difficulty: number) {
-  const L = difficultyLabel(difficulty);
-  if (L === "Easy") return "text-emerald-400 border-emerald-500/30";
-  if (L === "Medium") return "text-amber-300 border-amber-500/30";
-  return "text-rose-400 border-rose-500/30";
+  return difficultyBandClass(difficultyBand(difficulty));
 }
+
+type Pinpoint = {
+  summary: string;
+  verdict: string;
+  band: string;
+  difficulty: number;
+  knows: { name: string; domain: string; evidence: string[] }[];
+  gaps: { name: string; domain: string; status: string; evidence: string[] }[];
+  nextFocus: string[];
+  ceiling: { note: string };
+};
 
 function renderProblemBody(md: string) {
   // Lightweight markdown-ish rendering for problem statements
@@ -154,10 +161,25 @@ export function WorkspaceIde(props: {
     hiddenPassed: number;
     hiddenTotal: number;
   } | null>(null);
+  const [pinpoint, setPinpoint] = useState<Pinpoint | null>(null);
   const [panel, setPanel] = useState<"problem" | "code">("problem");
   const [projectPanel, setProjectPanel] = useState<"brief" | "code" | "evidence">("brief");
   const [checkedDeliverables, setCheckedDeliverables] = useState<Record<string, boolean>>({});
   const editorRef = useRef<{ editor: any; monaco: any } | null>(null);
+
+  async function refreshPinpoint(results?: CaseResult[]) {
+    try {
+      const res = await fetch(`/api/workspace/${props.workspaceId}/diagnostics`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ results: results ?? caseResults }),
+      });
+      const json = await res.json();
+      if (json.ok && json.data?.pinpoint) setPinpoint(json.data.pinpoint);
+    } catch {
+      /* non-blocking */
+    }
+  }
 
   const publicReqs = props.publicRequirements ?? [];
   const hiddenReqs = props.hiddenRequirements ?? [];
@@ -260,6 +282,9 @@ export function WorkspaceIde(props: {
       if (parsed.length) {
         setCaseResults(parsed);
         applyVerdict(parsed);
+        void refreshPinpoint(parsed);
+      } else {
+        void refreshPinpoint([]);
       }
     }
     toast.message(type === "test" ? "Public tests queued — check Judge panel" : "Job queued");
@@ -369,6 +394,9 @@ export function WorkspaceIde(props: {
           `Submission graded. Judge=${verdictLabel} overall=${json.data.report?.overall}\n` +
           `Share scorecard: /scorecard/${props.assignmentId}\n`,
       );
+      const diag = json.data.report?.diagnostics;
+      if (diag) setPinpoint(diag);
+      else void refreshPinpoint(merged);
     } finally {
       setBusy(false);
     }
@@ -747,6 +775,7 @@ export function WorkspaceIde(props: {
               ) : (
                 <p className="text-sm text-slate-500">Click Run for public examples, then Submit for the hidden harness.</p>
               )}
+              <PinpointPanel pinpoint={pinpoint} />
               <Textarea className="mt-3 min-h-[80px] font-mono text-xs" value={terminal} readOnly />
             </section>
           </div>
@@ -1105,6 +1134,9 @@ export function WorkspaceIde(props: {
               </div>
             </div>
           )}
+          <div className="rounded-xl border border-slate-800 bg-slate-950/70 p-3 sm:col-span-2 xl:col-span-1">
+            <PinpointPanel pinpoint={pinpoint} compact />
+          </div>
           <div className="rounded-xl border border-slate-800 bg-slate-950/70 p-3">
             <div className="mb-2 text-xs uppercase tracking-wider text-slate-500">Git</div>
             <Input value={commitMsg} onChange={(e) => setCommitMsg(e.target.value)} className="mb-2" />
@@ -1156,4 +1188,62 @@ function guessLang(path: string, fallback: string) {
   if (path.endsWith(".json")) return "json";
   if (path.endsWith(".yaml") || path.endsWith(".yml")) return "yaml";
   return fallback === "python" ? "python" : "typescript";
+}
+
+function PinpointPanel({ pinpoint, compact }: { pinpoint: Pinpoint | null; compact?: boolean }) {
+  if (!pinpoint) {
+    return (
+      <div className={cn("mt-3 rounded-lg border border-slate-800 bg-black/30 p-3", compact && "mt-0")}>
+        <div className="text-xs uppercase tracking-wider text-slate-500">Knowledge pinpoint</div>
+        <p className="mt-1 text-sm text-slate-500">
+          Run public + hidden tests to map exactly which skills this mission proves — and which gaps remain.
+        </p>
+      </div>
+    );
+  }
+  return (
+    <div className={cn("mt-3 space-y-2 rounded-lg border border-cyan-500/20 bg-cyan-500/5 p-3", compact && "mt-0")}>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="text-xs uppercase tracking-wider text-cyan-300/80">Knowledge pinpoint</div>
+        <span className="font-mono text-[11px] text-slate-400">
+          {pinpoint.band} · D{pinpoint.difficulty}
+        </span>
+      </div>
+      <p className="text-sm text-slate-200">{pinpoint.summary}</p>
+      {pinpoint.knows.length > 0 && (
+        <div>
+          <div className="text-[11px] uppercase tracking-wider text-emerald-400/80">Knows</div>
+          <ul className="mt-1 space-y-1">
+            {pinpoint.knows.slice(0, compact ? 4 : 8).map((k) => (
+              <li key={k.name} className="text-xs text-emerald-100/90">
+                <span className="font-medium">{k.name}</span>
+                <span className="text-slate-500"> · {k.domain}</span>
+                {k.evidence[0] ? <span className="block font-mono text-[10px] text-slate-500">{k.evidence[0]}</span> : null}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {pinpoint.gaps.length > 0 && (
+        <div>
+          <div className="text-[11px] uppercase tracking-wider text-amber-300/80">Gaps</div>
+          <ul className="mt-1 space-y-1">
+            {pinpoint.gaps.slice(0, compact ? 4 : 8).map((g) => (
+              <li key={g.name} className="text-xs text-amber-50/90">
+                <span className="font-medium">{g.name}</span>
+                <span className="text-slate-500"> · {g.status}</span>
+                {g.evidence[0] ? <span className="block font-mono text-[10px] text-slate-500">{g.evidence[0]}</span> : null}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {pinpoint.nextFocus.length > 0 && (
+        <div className="text-[11px] text-slate-400">
+          Next: {pinpoint.nextFocus.slice(0, 3).join(" · ")}
+        </div>
+      )}
+      <p className="text-[11px] text-slate-500">{pinpoint.ceiling.note}</p>
+    </div>
+  );
 }

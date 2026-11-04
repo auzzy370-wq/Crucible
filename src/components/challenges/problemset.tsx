@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { FREQUENCY_METHODOLOGY } from "@/lib/frequency";
+import { difficultyBand, type DifficultyBand } from "@/lib/difficulty";
 
 export type ProblemRow = {
   id: string;
@@ -29,16 +30,16 @@ export type ProblemRow = {
   workspaceId?: string | null;
 };
 
-function label(difficulty: number) {
-  if (difficulty <= 3) return "Easy" as const;
-  if (difficulty <= 6) return "Medium" as const;
-  return "Hard" as const;
+function label(difficulty: number): DifficultyBand {
+  return difficultyBand(difficulty);
 }
 
-function diffClass(d: "Easy" | "Medium" | "Hard") {
+function diffClass(d: DifficultyBand) {
   if (d === "Easy") return "text-emerald-400";
   if (d === "Medium") return "text-amber-300";
-  return "text-rose-400";
+  if (d === "Hard") return "text-rose-400";
+  if (d === "Expert") return "text-violet-300";
+  return "text-fuchsia-300";
 }
 
 export function Problemset(props: {
@@ -49,7 +50,7 @@ export function Problemset(props: {
 }) {
   const [mode, setMode] = useState<"problemset" | "projects">(props.initialMode ?? "problemset");
   const [q, setQ] = useState("");
-  const [diff, setDiff] = useState<"All" | "Easy" | "Medium" | "Hard">("All");
+  const [diff, setDiff] = useState<"All" | DifficultyBand>("All");
   const [tag, setTag] = useState<string>("All");
   const [company, setCompany] = useState<string>("All");
   const [sort, setSort] = useState<"frequency" | "time" | "title">("frequency");
@@ -86,7 +87,7 @@ export function Problemset(props: {
   }, [coding, diff, tag, company, q, sort]);
 
   const counts = useMemo(() => {
-    const c = { Easy: 0, Medium: 0, Hard: 0 };
+    const c: Record<DifficultyBand, number> = { Easy: 0, Medium: 0, Hard: 0, Expert: 0, Impossible: 0 };
     for (const p of coding) c[label(p.difficulty)] += 1;
     return c;
   }, [coding]);
@@ -146,7 +147,7 @@ export function Problemset(props: {
               className="sm:max-w-sm"
             />
             <div className="flex flex-wrap gap-2">
-              {(["All", "Easy", "Medium", "Hard"] as const).map((d) => (
+              {(["All", "Easy", "Medium", "Hard", "Expert", "Impossible"] as const).map((d) => (
                 <button
                   key={d}
                   type="button"
@@ -157,7 +158,7 @@ export function Problemset(props: {
                   )}
                 >
                   {d}
-                  {d !== "All" ? ` ${counts[d]}` : ""}
+                  {d !== "All" ? ` (${counts[d]})` : ""}
                 </button>
               ))}
             </div>

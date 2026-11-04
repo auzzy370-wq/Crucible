@@ -7,6 +7,7 @@ import {
   DEFAULT_WEIGHTS,
   weightsForTrack,
 } from "@/server/scoring/policy";
+import { buildAssignmentPinpoint, persistPinpoint, type CaseResult } from "@/server/scoring/diagnostics";
 
 export async function evaluateSubmission(submissionId: string) {
   const submission = await prisma.submission.findUnique({
@@ -219,43 +220,86 @@ export async function evaluateSubmission(submissionId: string) {
     });
   }
 
-  // Mark assessment-verified skills carefully (only from observed evidence)
-  const profile = await prisma.candidateProfile.findUnique({
-    where: { userId: submission.assignment.candidateId },
+  // Pinpoint exactly what tests prove this developer knows
+  const challenge = submission.assignment.assessment.challenge;
+  const cases = await collectCaseResults(
+    submission.assignmentId,
+    submission.assignment.workspace?.id ?? null,
+  );
+  const pinpoint = buildAssignmentPinpoint({
+    challengeSlug: challenge.slug,
+    challengeTitle: challenge.title,
+    difficulty: challenge.difficulty,
+    tags: challenge.tags,
+    cases,
   });
-  if (profile && hiddenTestsOk) {
-    const skills = ["automated-testing", submission.assignment.assessment.challenge.type.toLowerCase()];
-    for (const name of skills) {
-      await prisma.skillRecord.upsert({
-        where: {
-          profileId_name_source: {
-            profileId: profile.id,
-            name,
-            source: "ASSESSMENT",
-          },
-        },
-        create: {
-          profileId: profile.id,
-          name,
-          domain: "assessment",
-          source: "ASSESSMENT",
-          confidence: 0.8,
-          evidence: `Verified via assessment ${submission.assignmentId}`,
-        },
-        update: {
-          confidence: 0.8,
-          evidence: `Verified via assessment ${submission.assignmentId}`,
-        },
-      });
-    }
-  }
+  await persistPinpoint({
+    assignmentId: submission.assignmentId,
+    candidateId: submission.assignment.candidateId,
+    pinpoint,
+  });
+
+  await prisma.scoreReport.update({
+    where: { id: report.id },
+    data: { diagnostics: pinpoint as object },
+  });
 
   await prisma.assessmentAssignment.update({
     where: { id: submission.assignmentId },
     data: { status: humanApproved && mandatory.qualified ? "COMPLETED" : "UNDER_REVIEW" },
   });
 
-  return report;
+  return { ...report, diagnostics: pinpoint };
+}
+
+async function collectCaseResults(assignmentId: string, workspaceId: string | null): Promise<CaseResult[]> {
+  if (!workspaceId) return [];
+  const jobs = await prisma.executionJob.findMany({
+    where: { workspaceId, type: { in: ["test", "hidden_test"] } },
+    orderBy: { createdAt: "desc" },
+    take: 8,
+  });
+  const merged: CaseResult[] = [];
+  for (const job of jobs) {
+    const hidden = job.type === "hidden_test";
+    for (const r of parseCases(job.stdout)) {
+      const row = { ...r, hidden: r.hidden ?? hidden };
+      if (!merged.find((m) => m.name === row.name && Boolean(m.hidden) === Boolean(row.hidden))) {
+        merged.push(row);
+      }
+    }
+  }
+  // Also fold TestRun counters into synthetic cases when stdout missing
+  const runs = await prisma.testRun.findMany({
+    where: { submission: { assignmentId } },
+    orderBy: { createdAt: "desc" },
+    take: 2,
+  });
+  for (const run of runs) {
+    if (!merged.length) {
+      for (let i = 0; i < run.passed; i++) merged.push({ name: `public_pass_${i + 1}`, pass: true });
+      for (let i = 0; i < run.failed; i++) merged.push({ name: `public_fail_${i + 1}`, pass: false });
+      for (let i = 0; i < run.hiddenPassed; i++) merged.push({ name: `hidden_pass_${i + 1}`, pass: true, hidden: true });
+      for (let i = 0; i < run.hiddenFailed; i++) merged.push({ name: `hidden_fail_${i + 1}`, pass: false, hidden: true });
+    }
+  }
+  return merged;
+}
+
+function parseCases(stdout: string | null | undefined): CaseResult[] {
+  if (!stdout) return [];
+  try {
+    const line = stdout
+      .trim()
+      .split("\n")
+      .reverse()
+      .find((l) => l.trim().startsWith("{"));
+    if (!line) return [];
+    const parsed = JSON.parse(line) as { results?: CaseResult[] };
+    return parsed.results ?? [];
+  } catch {
+    return [];
+  }
 }
 
 function clamp(n: number) {
