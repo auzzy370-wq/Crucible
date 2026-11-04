@@ -1,7 +1,9 @@
 import { CODING_PROBLEM_CATALOG } from "@/server/challenges/coding-problems";
 import { CHALLENGE_CATALOG } from "@/server/challenges/catalog";
+import { entryPathForLanguage, normalizeCodingLanguage, type CodingLanguage } from "@/lib/coding-languages";
 import type { StarterFile } from "./starters";
 import { familyHarnessForSlug, familyTsFiles } from "./coding-family-harness";
+import { multilangStarterFiles } from "./coding-family-multilang";
 
 type CodingSpec = {
   solutionStub: string;
@@ -23,7 +25,7 @@ export function twoSum(nums: number[], target: number): number[] {
   return [];
 }
 `,
-    publicTests: `import { twoSum } from "../src/solution";
+    publicTests: `import { twoSum } from "../src/solution.ts";
 
 function samePair(a: number[], b: number[]) {
   if (a.length !== 2 || b.length !== 2) return false;
@@ -50,7 +52,7 @@ export async function runPublicTests() {
   return false;
 }
 `,
-    publicTests: `import { isValid } from "../src/solution";
+    publicTests: `import { isValid } from "../src/solution.ts";
 
 export async function runPublicTests() {
   return [
@@ -73,7 +75,7 @@ export async function runPublicTests() {
   return [];
 }
 `,
-    publicTests: `import { merge } from "../src/solution";
+    publicTests: `import { merge } from "../src/solution.ts";
 
 function eq(a: number[][], b: number[][]) {
   return JSON.stringify(a) === JSON.stringify(b);
@@ -109,7 +111,7 @@ export async function runPublicTests() {
   }
 }
 `,
-    publicTests: `import { LRUCache } from "../src/solution";
+    publicTests: `import { LRUCache } from "../src/solution.ts";
 
 export async function runPublicTests() {
   const c = new LRUCache(2);
@@ -139,7 +141,7 @@ export async function runPublicTests() {
   return false;
 }
 `,
-    publicTests: `import { canFinish } from "../src/solution";
+    publicTests: `import { canFinish } from "../src/solution.ts";
 
 export async function runPublicTests() {
   return [
@@ -161,7 +163,7 @@ export async function runPublicTests() {
   return false;
 }
 `,
-    publicTests: `import { wordBreak } from "../src/solution";
+    publicTests: `import { wordBreak } from "../src/solution.ts";
 
 export async function runPublicTests() {
   return [
@@ -198,7 +200,7 @@ export function deserialize(data: string): TreeNode | null {
   return null;
 }
 `,
-    publicTests: `import { TreeNode, serialize, deserialize } from "../src/solution";
+    publicTests: `import { TreeNode, serialize, deserialize } from "../src/solution.ts";
 
 function same(a: TreeNode | null, b: TreeNode | null): boolean {
   if (!a && !b) return true;
@@ -232,7 +234,7 @@ export async function runPublicTests() {
   }
 }
 `,
-    publicTests: `import { HitCounter } from "../src/solution";
+    publicTests: `import { HitCounter } from "../src/solution.ts";
 
 export async function runPublicTests() {
   const h = new HitCounter();
@@ -260,7 +262,7 @@ export async function runPublicTests() {
   return [];
 }
 `,
-    publicTests: `import { topKFrequent } from "../src/solution";
+    publicTests: `import { topKFrequent } from "../src/solution.ts";
 
 function sameSet(a: number[], b: number[]) {
   return [...a].sort((x, y) => x - y).join(",") === [...b].sort((x, y) => x - y).join(",");
@@ -282,7 +284,7 @@ export async function runPublicTests() {
   return "";
 }
 `,
-    publicTests: `import { minWindow } from "../src/solution";
+    publicTests: `import { minWindow } from "../src/solution.ts";
 
 export async function runPublicTests() {
   return [
@@ -304,7 +306,7 @@ export async function runPublicTests() {
   return false;
 }
 `,
-    publicTests: `import { strongPassword } from "../src/solution";
+    publicTests: `import { strongPassword } from "../src/solution.ts";
 
 export async function runPublicTests() {
   return [
@@ -330,7 +332,7 @@ export async function runPublicTests() {
   return { status: "ok", totalCharged: 0 };
 }
 `,
-    publicTests: `import { charge } from "../src/solution";
+    publicTests: `import { charge } from "../src/solution.ts";
 
 export async function runPublicTests() {
   const a = charge("a", 10);
@@ -526,15 +528,14 @@ ${challenge?.summary ?? ""}
 ${challenge?.description ?? "Implement the solution."}
 `;
 
-  const lang = language === "python" || language === "go" ? language : "typescript";
-  const entry =
-    lang === "python" ? "src/solution.py" : lang === "go" ? "solution/solution.go" : "src/solution.ts";
+  const lang = normalizeCodingLanguage(language);
+  const entry = entryPathForLanguage(lang);
 
   const readme = `# ${slug}
 
 Track: **${track}** · Language: **${lang}**
 
-CRUCIBLE coding lane — interview-grade public/hidden tests + skill pinpoint on Submit.
+CRUCIBLE coding lane — TypeScript · JavaScript · Python · Go · Rust · Java.
 
 1. Read the problem in the IDE **Problem** panel (or \`PROBLEM.md\`).
 2. Implement \`${entry}\`.
@@ -552,39 +553,41 @@ Do not modify hidden harness expectations dishonestly — graders check evidence
   const common: StarterFile[] = [
     { path: "README.md", content: readme, language: "markdown" },
     { path: "PROBLEM.md", content: problemMd, language: "markdown" },
-    {
-      path: "tests/hidden.manifest.json",
-      content: JSON.stringify({ tests: hiddenHints }, null, 2),
-      language: "json",
-    },
   ];
 
-  // Bank family problems: full TS harness (primary judge path)
+  // Coding bank: real judges in every supported language
   if (family && lang === "typescript") {
-    return [...common, ...familyTsFiles(slug, family)];
-  }
-
-  if (family && lang === "python") {
     return [
       ...common,
-      { path: "src/solution.py", content: family.pythonStub, language: "python" },
       {
-        path: "tests/run_public.py",
-        content: `def run():
-    print('{"results":[{"name":"python_bank","pass":False}]}')
-if __name__ == "__main__":
-    run()
-`,
-        language: "python",
+        path: "tests/hidden.manifest.json",
+        content: JSON.stringify({ tests: hiddenHints }, null, 2),
+        language: "json",
       },
+      ...familyTsFiles(slug, family),
     ];
   }
 
-  if (!spec) return family && lang === "typescript" ? [...common, ...familyTsFiles(slug, family)] : null;
+  if (family && lang !== "typescript") {
+    const multi = multilangStarterFiles(slug, lang as CodingLanguage);
+    if (multi) {
+      // multilang pack already includes hidden.manifest
+      return [...common.filter((f) => f.path !== "tests/hidden.manifest.json"), ...multi];
+    }
+  }
+
+  if (!spec) return null;
+
+  const manifest: StarterFile = {
+    path: "tests/hidden.manifest.json",
+    content: JSON.stringify({ tests: hiddenHints }, null, 2),
+    language: "json",
+  };
 
   if (lang === "python") {
     return [
       ...common,
+      manifest,
       { path: "src/solution.py", content: pythonStub(slug), language: "python" },
       { path: "tests/run_public.py", content: pythonPublicRunner(slug), language: "python" },
       { path: "tests/hidden_run.py", content: pythonHiddenRunner(slug), language: "python" },
@@ -594,6 +597,7 @@ if __name__ == "__main__":
   if (lang === "go") {
     return [
       ...common,
+      manifest,
       { path: "solution/solution.go", content: goStub(slug), language: "go" },
       {
         path: "go.mod",
@@ -604,13 +608,20 @@ if __name__ == "__main__":
     ];
   }
 
+  // Default curated lc-* problems to TypeScript harness (JS can reuse via transpile path later)
+  if (lang === "javascript") {
+    // Minimal JS mirror of TS stubs for curated set: still provide TS workspace when only SPECS exist
+    // Fall through to TypeScript starters for curated lc-* until per-slug JS ports exist.
+  }
+
   return [
     ...common,
+    manifest,
     { path: "src/solution.ts", content: spec.solutionStub, language: "typescript" },
     { path: "tests/public.test.ts", content: spec.publicTests, language: "typescript" },
     {
       path: "tests/run.ts",
-      content: `import { runPublicTests } from "./public.test";
+      content: `import { runPublicTests } from "./public.test.ts";
 const results = await runPublicTests();
 console.log(JSON.stringify({ results }));
 process.exit(results.every((r) => r.pass) ? 0 : 1);
@@ -624,7 +635,7 @@ process.exit(results.every((r) => r.pass) ? 0 : 1);
           name: slug,
           private: true,
           type: "module",
-          scripts: { test: "node --import tsx tests/run.ts" },
+          scripts: { test: "node --experimental-strip-types --disable-warning=ExperimentalWarning tests/run.ts" },
         },
         null,
         2,

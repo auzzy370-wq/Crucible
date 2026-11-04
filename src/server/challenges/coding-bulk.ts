@@ -232,7 +232,7 @@ export function buildCodingBulk(count = 4000, existingSlugs: Set<string>): Chall
       difficulty,
       estimatedDays: 1,
       tags: [...family.tags, band.toLowerCase(), "question-bank"],
-      languages: ["typescript", "python", "go"],
+      languages: ["typescript", "javascript", "python", "go", "rust", "java"],
       companies: [COMPANIES[n % COMPANIES.length]!, COMPANIES[(n * 3) % COMPANIES.length]!],
       frequency: Math.max(5, 100 - difficulty * 8 - (n % 17)),
       avgMinutes: difficulty <= 3 ? 15 : difficulty <= 6 ? 25 : difficulty <= 8 ? 40 : difficulty === 9 ? 55 : 75,

@@ -1184,10 +1184,14 @@ function guessLang(path: string, fallback: string) {
   if (path.endsWith(".py")) return "python";
   if (path.endsWith(".go")) return "go";
   if (path.endsWith(".rs")) return "rust";
+  if (path.endsWith(".java")) return "java";
   if (path.endsWith(".md")) return "markdown";
   if (path.endsWith(".json")) return "json";
   if (path.endsWith(".yaml") || path.endsWith(".yml")) return "yaml";
-  return fallback === "python" ? "python" : "typescript";
+  if (fallback === "python" || fallback === "go" || fallback === "rust" || fallback === "java" || fallback === "javascript") {
+    return fallback;
+  }
+  return "typescript";
 }
 
 function PinpointPanel({ pinpoint, compact }: { pinpoint: Pinpoint | null; compact?: boolean }) {

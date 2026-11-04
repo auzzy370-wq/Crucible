@@ -65,7 +65,7 @@ export const HIDDEN_CASES: Record<string, HiddenCase[]> = {
 export function hiddenTsRunnerSource(slug: string): string | null {
   switch (slug) {
     case "lc-two-sum":
-      return `import { twoSum } from "../src/solution";
+      return `import { twoSum } from "../src/solution.ts";
 function samePair(a: number[], b: number[]) {
   if (a.length !== 2 || b.length !== 2) return false;
   return (a[0] === b[0] && a[1] === b[1]) || (a[0] === b[1] && a[1] === b[0]);
@@ -82,7 +82,7 @@ console.log(JSON.stringify({ results }));
 process.exit(results.every((r) => r.pass) ? 0 : 1);
 `;
     case "lc-valid-parens":
-      return `import { isValid } from "../src/solution";
+      return `import { isValid } from "../src/solution.ts";
 const deep = "(".repeat(2000) + ")".repeat(2000);
 const many = "()".repeat(3000);
 const results = [
@@ -93,7 +93,7 @@ console.log(JSON.stringify({ results }));
 process.exit(results.every((r) => r.pass) ? 0 : 1);
 `;
     case "lc-merge-intervals":
-      return `import { merge } from "../src/solution";
+      return `import { merge } from "../src/solution.ts";
 function eq(a: number[][], b: number[][]) { return JSON.stringify(a) === JSON.stringify(b); }
 const results = [
   { name: "unsorted", pass: eq(merge([[8,10],[1,3],[2,6],[15,18]]), [[1,6],[8,10],[15,18]]), hidden: true },
@@ -103,7 +103,7 @@ console.log(JSON.stringify({ results }));
 process.exit(results.every((r) => r.pass) ? 0 : 1);
 `;
     case "lc-lru-cache":
-      return `import { LRUCache } from "../src/solution";
+      return `import { LRUCache } from "../src/solution.ts";
 const c1 = new LRUCache(1);
 c1.put(1, 1); c1.put(2, 2);
 const cap1 = c1.get(1) === -1 && c1.get(2) === 2;
@@ -118,7 +118,7 @@ console.log(JSON.stringify({ results }));
 process.exit(results.every((r) => r.pass) ? 0 : 1);
 `;
     case "lc-idempotent-charge":
-      return `import { charge } from "../src/solution";
+      return `import { charge } from "../src/solution.ts";
 const a = charge("x", 10);
 const b = charge("y", 5);
 const c = charge("x", 10);
@@ -131,7 +131,7 @@ console.log(JSON.stringify({ results }));
 process.exit(results.every((r) => r.pass) ? 0 : 1);
 `;
     case "lc-top-k-frequent":
-      return `import { topKFrequent } from "../src/solution";
+      return `import { topKFrequent } from "../src/solution.ts";
 function sameSet(a: number[], b: number[]) {
   return [...a].sort((x,y)=>x-y).join(",") === [...b].sort((x,y)=>x-y).join(",");
 }
@@ -143,7 +143,7 @@ console.log(JSON.stringify({ results }));
 process.exit(results.every((r) => r.pass) ? 0 : 1);
 `;
     case "lc-secure-password":
-      return `import { strongPassword } from "../src/solution";
+      return `import { strongPassword } from "../src/solution.ts";
 const results = [
   { name: "case_ban", pass: strongPassword("MyPaSsWoRd1!") === false, hidden: true },
   { name: "bounds", pass: strongPassword("Abcdef1!") === true && strongPassword("Ab1!xxxx".repeat(9)) === false, hidden: true },

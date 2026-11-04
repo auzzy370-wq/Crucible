@@ -5,6 +5,8 @@ import { ExecutionStatus } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { logger } from "@/lib/logger";
 import { writeAudit } from "@/server/security/audit";
+import { normalizeCodingLanguage } from "@/lib/coding-languages";
+import { multilangCommands } from "./coding-family-multilang";
 import { HIDDEN_CASES, hiddenTsRunnerSource } from "./hidden-harness";
 
 /**
@@ -33,49 +35,110 @@ export async function enqueueExecution(params: {
     params.timeoutSec ??
     (priority >= 10 ? 60 : 120);
 
-  let command = params.command ?? defaultCommand(params.type, workspace.language);
+  const lang = normalizeCodingLanguage(workspace.language);
+  let command = params.command ?? defaultCommand(params.type, lang);
 
-  // Coding hidden_test: materialize a real harness when we have one
-  if (params.type === "hidden_test" && workspace.language === "typescript") {
+  // Prefer workspace-authored commands.json when present (multilang bank)
+  try {
+    const cmdPath = path.join(workspace.rootPath, "tests", "commands.json");
+    const raw = await fs.readFile(cmdPath, "utf8");
+    const cmds = JSON.parse(raw) as { public?: string; hidden?: string };
+    if (params.type === "test" && cmds.public) command = cmds.public;
+    if (params.type === "hidden_test" && cmds.hidden) command = cmds.hidden;
+  } catch {
+    /* no commands.json */
+  }
+
+  // Coding hidden_test: materialize a real harness when we have one (TS curated)
+  if (params.type === "hidden_test" && lang === "typescript") {
     const slug = workspace.assignment.assessment.challenge.slug;
     const src = hiddenTsRunnerSource(slug);
     if (src) {
       const harnessPath = path.join(workspace.rootPath, "tests", "_hidden_run.ts");
       await fs.mkdir(path.dirname(harnessPath), { recursive: true });
       await fs.writeFile(harnessPath, src, "utf8");
-      command = "node --import tsx tests/_hidden_run.ts";
+      command = "node --experimental-strip-types --disable-warning=ExperimentalWarning tests/_hidden_run.ts";
     }
   }
 
-  if (params.type === "hidden_test" && workspace.language === "python") {
-    command =
-      params.command ??
-      "python3 -c \"import json,pathlib,sys; p=pathlib.Path('tests/hidden_run.py');\\n" +
-        "exec(compile(p.read_text(), str(p), 'exec')) if p.exists() else print(json.dumps({'results':[{'name':'no_hidden_harness','pass':False,'hidden':True}]})) or sys.exit(1)\"";
-    // Prefer dedicated file if present
-    try {
-      await fs.access(path.join(workspace.rootPath, "tests", "hidden_run.py"));
-      command = "python3 tests/hidden_run.py";
-    } catch {
-      /* keep fallback */
+  if (!params.command) {
+    const multi = multilangCommands(lang);
+    if (params.type === "test") {
+      if (lang === "python") {
+        try {
+          await fs.access(path.join(workspace.rootPath, "tests", "run_public.py"));
+          command = multi.public;
+        } catch {
+          /* keep default */
+        }
+      } else if (lang === "go") {
+        try {
+          await fs.access(path.join(workspace.rootPath, "tests", "run_public.go"));
+          command = multi.public;
+        } catch {
+          /* keep default */
+        }
+      } else if (lang === "rust") {
+        try {
+          await fs.access(path.join(workspace.rootPath, "Cargo.toml"));
+          command = multi.public;
+        } catch {
+          /* keep default */
+        }
+      } else if (lang === "java") {
+        try {
+          await fs.access(path.join(workspace.rootPath, "tests", "RunPublic.java"));
+          command = multi.public;
+        } catch {
+          /* keep default */
+        }
+      } else if (lang === "javascript") {
+        try {
+          await fs.access(path.join(workspace.rootPath, "tests", "run.js"));
+          command = multi.public;
+        } catch {
+          /* keep default */
+        }
+      }
     }
-  }
 
-  if (params.type === "test" && workspace.language === "python") {
-    try {
-      await fs.access(path.join(workspace.rootPath, "tests", "run_public.py"));
-      command = "python3 tests/run_public.py";
-    } catch {
-      command = defaultCommand("test", "python");
-    }
-  }
-
-  if (params.type === "test" && workspace.language === "go") {
-    try {
-      await fs.access(path.join(workspace.rootPath, "tests", "run_public.go"));
-      command = "go run tests/run_public.go";
-    } catch {
-      command = defaultCommand("test", "go");
+    if (params.type === "hidden_test") {
+      if (lang === "python") {
+        try {
+          await fs.access(path.join(workspace.rootPath, "tests", "hidden_run.py"));
+          command = multi.hidden;
+        } catch {
+          /* keep */
+        }
+      } else if (lang === "go") {
+        try {
+          await fs.access(path.join(workspace.rootPath, "tests", "hidden_run.go"));
+          command = multi.hidden;
+        } catch {
+          /* keep */
+        }
+      } else if (lang === "rust") {
+        try {
+          await fs.access(path.join(workspace.rootPath, "tests", "hidden_run.rs"));
+          command = multi.hidden;
+        } catch {
+          /* keep */
+        }
+      } else if (lang === "java") {
+        try {
+          await fs.access(path.join(workspace.rootPath, "tests", "HiddenRun.java"));
+          command = multi.hidden;
+        } catch {
+          /* keep */
+        }
+      } else if (lang === "javascript") {
+        try {
+          await fs.access(path.join(workspace.rootPath, "tests", "hidden_run.js"));
+          command = multi.hidden;
+        } catch {
+          /* keep */
+        }
+      }
     }
   }
 
@@ -113,11 +176,10 @@ function defaultCommand(type: string, language: string) {
   if (type === "benchmark") return "node -e \"console.log(JSON.stringify({p95_ms:42,throughput:100}))\"";
   if (type === "debug")
     return "node -e \"console.log(JSON.stringify({frames:[{fn:'solution',line:1,locals:{}}],status:'paused'}))\"";
-  if (language === "python")
-    return "python3 -c \"print('{\\\"results\\\":[{\\\"name\\\":\\\"noop\\\",\\\"pass\\\":true}]}')\"";
-  if (language === "go")
-    return "go run . 2>/dev/null || echo '{\"results\":[{\"name\":\"noop\",\"pass\":true}]}'";
-  return "node --import tsx tests/run.ts";
+  const lang = normalizeCodingLanguage(language);
+  if (type === "hidden_test") return multilangCommands(lang).hidden;
+  if (type === "test") return multilangCommands(lang).public;
+  return multilangCommands(lang).public;
 }
 
 export async function processJob(jobId: string) {
@@ -189,6 +251,9 @@ async function runInProcessSandbox(job: {
     RUN_SERVER: "0",
     GOPATH: "/tmp/go",
     GOCACHE: "/tmp/gocache",
+    CARGO_HOME: "/tmp/cargo",
+    CARGO_TARGET_DIR: "/tmp/crucible-target",
+    RUSTUP_HOME: process.env.RUSTUP_HOME,
   };
   return execCommand(job.command, job.workspace.rootPath, cleanEnv, job.timeoutSec);
 }
@@ -209,7 +274,9 @@ async function runInDocker(job: {
         ? "golang:1.22-alpine"
         : job.imageTag.includes("rust")
           ? "rust:1.78-alpine"
-          : "node:20-alpine";
+          : job.imageTag.includes("java")
+            ? "eclipse-temurin:21-jdk-alpine"
+            : "node:20-alpine";
 
   const network = job.networkMode === "none" ? "none" : "bridge";
   const dockerCmd = [

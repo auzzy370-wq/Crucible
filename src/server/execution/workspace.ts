@@ -4,16 +4,10 @@ import { prisma } from "@/lib/db";
 import { getStorageRoot } from "@/lib/storage";
 import { starterFilesForChallenge } from "./starters";
 
+import { imageTagForCodingLanguage } from "@/lib/coding-languages";
+
 function imageTagForLanguage(language: string) {
-  return language === "python"
-    ? "gauntlet/python:3.12"
-    : language === "go"
-      ? "gauntlet/go:1.22"
-      : language === "rust"
-        ? "gauntlet/rust:1.78"
-        : language === "csharp"
-          ? "gauntlet/dotnet:8"
-          : "gauntlet/node:20";
+  return imageTagForCodingLanguage(language);
 }
 
 export async function createWorkspaceForAssignment(params: {

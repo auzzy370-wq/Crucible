@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { CODING_LANGUAGES, CODING_LANGUAGE_LABELS, type CodingLanguage } from "@/lib/coding-languages";
 
 type DailyPayload = {
   dateKey: string;
@@ -32,18 +33,23 @@ function diffLabel(d: number) {
 export function DailyClient(props: { daily: DailyPayload }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
+  const [lang, setLang] = useState<CodingLanguage>("typescript");
   const c = props.daily.challenge;
 
   async function start() {
     setBusy(true);
     try {
-      const res = await fetch("/api/daily", { method: "POST" });
+      const res = await fetch("/api/daily", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ language: lang }),
+      });
       const json = await res.json();
       if (!json.ok) throw new Error(json.error?.message || "Could not start");
       toast.success(
         json.data.streak?.currentStreak
-          ? `Streak ${json.data.streak.currentStreak} 🔥`
-          : "Daily unlocked",
+          ? `Streak ${json.data.streak.currentStreak} · ${CODING_LANGUAGE_LABELS[lang]}`
+          : `Daily unlocked · ${CODING_LANGUAGE_LABELS[lang]}`,
       );
       if (json.data.workspaceId) router.push(`/workspace/${json.data.workspaceId}`);
       else router.refresh();
@@ -100,9 +106,22 @@ export function DailyClient(props: { daily: DailyPayload }) {
               ))}
           </div>
           <p className="text-sm text-slate-400">Suggested time · {c.avgMinutes ?? 30} minutes</p>
-          <Button disabled={busy} onClick={start}>
-            {busy ? "Opening…" : props.daily.completed ? "Open again" : "Start daily"}
-          </Button>
+          <div className="flex flex-wrap items-center gap-3">
+            <select
+              className="h-10 rounded-md border border-cyan-500/30 bg-slate-950 px-3 text-sm text-cyan-100"
+              value={lang}
+              onChange={(e) => setLang(e.target.value as CodingLanguage)}
+            >
+              {CODING_LANGUAGES.map((l) => (
+                <option key={l} value={l}>
+                  {CODING_LANGUAGE_LABELS[l]}
+                </option>
+              ))}
+            </select>
+            <Button disabled={busy} onClick={start}>
+              {busy ? "Opening…" : props.daily.completed ? "Open again" : "Start daily"}
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>

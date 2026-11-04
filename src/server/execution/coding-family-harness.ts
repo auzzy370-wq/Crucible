@@ -18,7 +18,7 @@ export function solve(nums: number[], target: number): number[] {
   return [];
 }
 `,
-    publicTests: `import { solve } from "../src/solution";
+    publicTests: `import { solve } from "../src/solution.ts";
 function samePair(a: number[], b: number[]) {
   if (a.length !== 2 || b.length !== 2) return false;
   return (a[0] === b[0] && a[1] === b[1]) || (a[0] === b[1] && a[1] === b[0]);
@@ -32,7 +32,7 @@ export async function runPublicTests() {
   ];
 }
 `,
-    hiddenRunner: `import { solve } from "../src/solution";
+    hiddenRunner: `import { solve } from "../src/solution.ts";
 function samePair(a: number[], b: number[]) {
   if (a.length !== 2 || b.length !== 2) return false;
   return (a[0] === b[0] && a[1] === b[1]) || (a[0] === b[1] && a[1] === b[0]);
@@ -63,7 +63,7 @@ export function solve(s: string, k: number): number {
   return 0;
 }
 `,
-    publicTests: `import { solve } from "../src/solution";
+    publicTests: `import { solve } from "../src/solution.ts";
 export async function runPublicTests() {
   return [
     { name: "example_1", pass: solve("eceba", 2) === 3 },
@@ -73,7 +73,7 @@ export async function runPublicTests() {
   ];
 }
 `,
-    hiddenRunner: `import { solve } from "../src/solution";
+    hiddenRunner: `import { solve } from "../src/solution.ts";
 const long = "ab".repeat(5000) + "c".repeat(100);
 const results = [
   { name: "long_s", pass: solve(long, 2) >= 10000, hidden: true },
@@ -97,7 +97,7 @@ export function solve(n: number, edges: number[][]): boolean {
   return false;
 }
 `,
-    publicTests: `import { solve } from "../src/solution";
+    publicTests: `import { solve } from "../src/solution.ts";
 export async function runPublicTests() {
   return [
     { name: "cycle", pass: solve(2, [[0, 1], [1, 0]]) === true },
@@ -107,7 +107,7 @@ export async function runPublicTests() {
   ];
 }
 `,
-    hiddenRunner: `import { solve } from "../src/solution";
+    hiddenRunner: `import { solve } from "../src/solution.ts";
 const edges = Array.from({ length: 2000 }, (_, i) => [i, i + 1]);
 edges.push([2000, 0]);
 const results = [
@@ -134,7 +134,7 @@ export function solve(s: string, wordDict: string[]): boolean {
   return false;
 }
 `,
-    publicTests: `import { solve } from "../src/solution";
+    publicTests: `import { solve } from "../src/solution.ts";
 export async function runPublicTests() {
   return [
     { name: "example_1", pass: solve("leetcode", ["leet", "code"]) === true },
@@ -144,7 +144,7 @@ export async function runPublicTests() {
   ];
 }
 `,
-    hiddenRunner: `import { solve } from "../src/solution";
+    hiddenRunner: `import { solve } from "../src/solution.ts";
 const results = [
   { name: "ambiguous", pass: solve("aaaaaaa", ["aaaa","aaa"]) === true, hidden: true },
   { name: "long", pass: solve("a".repeat(40), ["a","aa","aaa"]) === true, hidden: true },
@@ -169,7 +169,7 @@ export function solve(nums: number[], k: number): number[] {
   return [];
 }
 `,
-    publicTests: `import { solve } from "../src/solution";
+    publicTests: `import { solve } from "../src/solution.ts";
 function sameSet(a: number[], b: number[]) {
   return [...a].sort((x,y)=>x-y).join() === [...b].sort((x,y)=>x-y).join();
 }
@@ -181,7 +181,7 @@ export async function runPublicTests() {
   ];
 }
 `,
-    hiddenRunner: `import { solve } from "../src/solution";
+    hiddenRunner: `import { solve } from "../src/solution.ts";
 const nums = Array.from({ length: 20000 }, (_, i) => i % 50);
 const out = solve(nums, 5);
 const results = [
@@ -208,7 +208,7 @@ export function solve(intervals: number[][]): number[][] {
   return [];
 }
 `,
-    publicTests: `import { solve } from "../src/solution";
+    publicTests: `import { solve } from "../src/solution.ts";
 function eq(a: number[][], b: number[][]) {
   return JSON.stringify(a) === JSON.stringify(b);
 }
@@ -220,7 +220,7 @@ export async function runPublicTests() {
   ];
 }
 `,
-    hiddenRunner: `import { solve } from "../src/solution";
+    hiddenRunner: `import { solve } from "../src/solution.ts";
 function eq(a: number[][], b: number[][]) {
   return JSON.stringify(a) === JSON.stringify(b);
 }
@@ -249,7 +249,7 @@ export function solve(root: TreeNode | null): number {
   return 0;
 }
 `,
-    publicTests: `import { solve, type TreeNode } from "../src/solution";
+    publicTests: `import { solve, type TreeNode } from "../src/solution.ts";
 function n(val: number, left: TreeNode | null = null, right: TreeNode | null = null): TreeNode {
   return { val, left, right };
 }
@@ -261,7 +261,7 @@ export async function runPublicTests() {
   ];
 }
 `,
-    hiddenRunner: `import { solve, type TreeNode } from "../src/solution";
+    hiddenRunner: `import { solve, type TreeNode } from "../src/solution.ts";
 function skew(depth: number): TreeNode | null {
   let root: TreeNode | null = null;
   for (let i = depth; i >= 1; i--) root = { val: i, left: root, right: null };
@@ -291,7 +291,7 @@ export function solve(s: string): boolean {
   return false;
 }
 `,
-    publicTests: `import { solve } from "../src/solution";
+    publicTests: `import { solve } from "../src/solution.ts";
 export async function runPublicTests() {
   return [
     { name: "example_1", pass: solve("()") === true },
@@ -301,7 +301,7 @@ export async function runPublicTests() {
   ];
 }
 `,
-    hiddenRunner: `import { solve } from "../src/solution";
+    hiddenRunner: `import { solve } from "../src/solution.ts";
 const results = [
   { name: "deep", pass: solve("(".repeat(500) + ")".repeat(500)) === true, hidden: true },
   { name: "mismatch", pass: solve("([)]") === false, hidden: true },
@@ -326,7 +326,7 @@ export function solve(intentId: string, amount: number): { status: "ok" | "dupli
 }
 export function __reset() { ledger.clear(); }
 `,
-    publicTests: `import { solve, __reset } from "../src/solution";
+    publicTests: `import { solve, __reset } from "../src/solution.ts";
 export async function runPublicTests() {
   __reset();
   const a = solve("i1", 10);
@@ -339,7 +339,7 @@ export async function runPublicTests() {
   ];
 }
 `,
-    hiddenRunner: `import { solve, __reset } from "../src/solution";
+    hiddenRunner: `import { solve, __reset } from "../src/solution.ts";
 __reset();
 for (let i = 0; i < 100; i++) solve("storm", 1);
 const last = solve("storm", 1);
@@ -370,7 +370,7 @@ export function solve(a: string, b: string): boolean {
   return false;
 }
 `,
-    publicTests: `import { solve } from "../src/solution";
+    publicTests: `import { solve } from "../src/solution.ts";
 export async function runPublicTests() {
   return [
     { name: "equal", pass: solve("secret", "secret") === true },
@@ -380,7 +380,7 @@ export async function runPublicTests() {
   ];
 }
 `,
-    hiddenRunner: `import { solve } from "../src/solution";
+    hiddenRunner: `import { solve } from "../src/solution.ts";
 const results = [
   { name: "prefix", pass: solve("aaaa", "aaab") === false, hidden: true },
   { name: "long", pass: solve("x".repeat(1000), "x".repeat(1000)) === true, hidden: true },
@@ -403,7 +403,7 @@ export function solve(postings: { id: string; delta: number }[]): number {
   return 0;
 }
 `,
-    publicTests: `import { solve } from "../src/solution";
+    publicTests: `import { solve } from "../src/solution.ts";
 export async function runPublicTests() {
   return [
     { name: "example_1", pass: solve([{ id: "a", delta: 10 }, { id: "b", delta: -3 }]) === 7 },
@@ -412,7 +412,7 @@ export async function runPublicTests() {
   ];
 }
 `,
-    hiddenRunner: `import { solve } from "../src/solution";
+    hiddenRunner: `import { solve } from "../src/solution.ts";
 const many = Array.from({ length: 5000 }, (_, i) => ({ id: String(i), delta: 1 }));
 const results = [
   { name: "large", pass: solve(many) === 5000, hidden: true },
@@ -441,7 +441,7 @@ export function solve(key: string, now: number, limit: number): boolean {
 }
 export function __reset() { hits.clear(); }
 `,
-    publicTests: `import { solve, __reset } from "../src/solution";
+    publicTests: `import { solve, __reset } from "../src/solution.ts";
 export async function runPublicTests() {
   __reset();
   return [
@@ -452,7 +452,7 @@ export async function runPublicTests() {
   ];
 }
 `,
-    hiddenRunner: `import { solve, __reset } from "../src/solution";
+    hiddenRunner: `import { solve, __reset } from "../src/solution.ts";
 __reset();
 const results = [
   { name: "burst", pass: (() => { __reset(); return solve("k", 0, 1) && !solve("k", 0, 1); })(), hidden: true },
@@ -479,7 +479,7 @@ export function solve(text: string): string {
   return text;
 }
 `,
-    publicTests: `import { solve } from "../src/solution";
+    publicTests: `import { solve } from "../src/solution.ts";
 export async function runPublicTests() {
   return [
     { name: "simple", pass: solve("hi a@b.co") === "hi [EMAIL]" },
@@ -488,7 +488,7 @@ export async function runPublicTests() {
   ];
 }
 `,
-    hiddenRunner: `import { solve } from "../src/solution";
+    hiddenRunner: `import { solve } from "../src/solution.ts";
 const results = [
   { name: "plus", pass: solve("a+b@c.d") === "[EMAIL]", hidden: true },
   { name: "keep", pass: solve("contact us").includes("contact") === true, hidden: true },
@@ -512,7 +512,7 @@ export function solve(local: Mut[], remote: Mut[]): Mut[] {
   return [];
 }
 `,
-    publicTests: `import { solve } from "../src/solution";
+    publicTests: `import { solve } from "../src/solution.ts";
 function eq(a: { id: string; value: number }[], b: { id: string; value: number }[]) {
   return JSON.stringify(a.sort((x,y)=>x.id.localeCompare(y.id))) === JSON.stringify(b.sort((x,y)=>x.id.localeCompare(y.id)));
 }
@@ -524,7 +524,7 @@ export async function runPublicTests() {
   ];
 }
 `,
-    hiddenRunner: `import { solve } from "../src/solution";
+    hiddenRunner: `import { solve } from "../src/solution.ts";
 const results = [
   { name: "many", pass: solve(Array.from({length:100},(_,i)=>({id:String(i),value:i})), [{id:"0",value:999}]).find(x=>x.id==="0")?.value === 999, hidden: true },
 ];
@@ -545,7 +545,7 @@ export function solve(errors: number, total: number): number {
   return 0;
 }
 `,
-    publicTests: `import { solve } from "../src/solution";
+    publicTests: `import { solve } from "../src/solution.ts";
 export async function runPublicTests() {
   return [
     { name: "basic", pass: Math.abs(solve(1, 100) - 0.01) < 1e-9 },
@@ -554,7 +554,7 @@ export async function runPublicTests() {
   ];
 }
 `,
-    hiddenRunner: `import { solve } from "../src/solution";
+    hiddenRunner: `import { solve } from "../src/solution.ts";
 const results = [
   { name: "tiny", pass: Math.abs(solve(1, 1e6) - 1e-6) < 1e-12, hidden: true },
 ];
@@ -573,7 +573,7 @@ export function solve(n: number): number {
   return 0;
 }
 `,
-    publicTests: `import { solve } from "../src/solution";
+    publicTests: `import { solve } from "../src/solution.ts";
 export async function runPublicTests() {
   return [
     { name: "example_1", pass: solve(11) === 3 },
@@ -582,7 +582,7 @@ export async function runPublicTests() {
   ];
 }
 `,
-    hiddenRunner: `import { solve } from "../src/solution";
+    hiddenRunner: `import { solve } from "../src/solution.ts";
 const results = [
   { name: "max", pass: solve(0xffffffff >>> 0) === 32, hidden: true },
   { name: "alt", pass: solve(0b10101010) === 4, hidden: true },
@@ -621,7 +621,7 @@ export function familyTsFiles(slug: string, harness: FamilyHarness): StarterFile
     { path: "tests/public.test.ts", content: harness.publicTests, language: "typescript" },
     {
       path: "tests/run.ts",
-      content: `import { runPublicTests } from "./public.test";
+      content: `import { runPublicTests } from "./public.test.ts";
 const results = await runPublicTests();
 console.log(JSON.stringify({ results }));
 process.exit(results.every((r) => r.pass) ? 0 : 1);
@@ -636,7 +636,7 @@ process.exit(results.every((r) => r.pass) ? 0 : 1);
     {
       path: "package.json",
       content: JSON.stringify(
-        { name: slug, private: true, type: "module", scripts: { test: "node --import tsx tests/run.ts" } },
+        { name: slug, private: true, type: "module", scripts: { test: "node --experimental-strip-types --disable-warning=ExperimentalWarning tests/run.ts" } },
         null,
         2,
       ),

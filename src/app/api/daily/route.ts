@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { normalizeCodingLanguage } from "@/lib/coding-languages";
 import { jsonOk, withHandler } from "@/server/auth/api";
 import { requireUser } from "@/server/auth/session";
 import { createWorkspaceForAssignment } from "@/server/execution/workspace";
@@ -32,9 +33,16 @@ export async function GET() {
   });
 }
 
-export async function POST() {
+export async function POST(req: Request) {
   return withHandler(async () => {
     const user = await requireUser();
+    let language = "typescript";
+    try {
+      const body = (await req.json()) as { language?: string };
+      if (body?.language) language = normalizeCodingLanguage(body.language);
+    } catch {
+      /* empty body ok */
+    }
     const daily = await ensureDailyChallenge();
     const challenge = daily.challenge;
 
@@ -76,7 +84,7 @@ export async function POST() {
       await createWorkspaceForAssignment({
         assignmentId: assignment.id,
         challengeSlug: challenge.slug,
-        language: challenge.languages[0] ?? "typescript",
+        language,
         track: challenge.track,
       });
       assignment = await prisma.assessmentAssignment.findUniqueOrThrow({
@@ -87,7 +95,7 @@ export async function POST() {
       await createWorkspaceForAssignment({
         assignmentId: assignment.id,
         challengeSlug: challenge.slug,
-        language: challenge.languages[0] ?? "typescript",
+        language,
         track: challenge.track,
       });
       assignment = await prisma.assessmentAssignment.findUniqueOrThrow({

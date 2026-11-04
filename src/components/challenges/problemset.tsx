@@ -1,13 +1,16 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { FREQUENCY_METHODOLOGY } from "@/lib/frequency";
 import { ACCEPTANCE_METHODOLOGY, illustrativeAcceptance } from "@/lib/acceptance";
 import { difficultyBand, type DifficultyBand } from "@/lib/difficulty";
+import { CODING_LANGUAGES, CODING_LANGUAGE_LABELS, type CodingLanguage } from "@/lib/coding-languages";
 
 export type ProblemRow = {
   id: string;
@@ -56,8 +59,34 @@ export function Problemset(props: {
   const [tag, setTag] = useState<string>("All");
   const [company, setCompany] = useState<string>("All");
   const [sort, setSort] = useState<"frequency" | "time" | "title">("frequency");
+  const [lang, setLang] = useState<CodingLanguage>("typescript");
+  const [starting, setStarting] = useState<string | null>(null);
+  const router = useRouter();
 
   const coding = props.problems;
+
+  async function startProblem(p: ProblemRow) {
+    if (Boolean(p.isPremium) && !props.premium) {
+      router.push("/pricing");
+      return;
+    }
+    setStarting(p.id);
+    try {
+      const res = await fetch("/api/practice/start", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ challengeId: p.id, language: lang }),
+      });
+      const json = await res.json();
+      if (!json.ok) throw new Error(json.error?.message || "Could not start");
+      toast.success(`Opened in ${CODING_LANGUAGE_LABELS[lang]}`);
+      router.push(`/workspace/${json.data.workspaceId}`);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to start");
+    } finally {
+      setStarting(null);
+    }
+  }
   const allTags = useMemo(() => {
     const s = new Set<string>();
     for (const p of coding) for (const t of p.tags) if (t !== "coding") s.add(t);
@@ -101,7 +130,7 @@ export function Problemset(props: {
           <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">CRUCIBLE</p>
           <h1 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">Problemset</h1>
           <p className="mt-2 max-w-2xl text-slate-400">
-            Both lanes: interview-grade coding (Easy → Impossible, company tags, public + hidden judge) and
+            Both lanes: interview-grade coding in TypeScript, JavaScript, Python, Go, Rust, and Java — plus
             production missions. Submit pinpoints exactly which skills you proved.
           </p>
           <p className="mt-2 max-w-2xl text-xs text-slate-500" title={FREQUENCY_METHODOLOGY.detail}>
@@ -196,6 +225,18 @@ export function Problemset(props: {
               <option value="time">Sort: time</option>
               <option value="title">Sort: title</option>
             </select>
+            <select
+              className="h-10 rounded-md border border-cyan-500/30 bg-slate-950 px-3 text-sm text-cyan-100"
+              value={lang}
+              onChange={(e) => setLang(e.target.value as CodingLanguage)}
+              title="Language for Solve"
+            >
+              {CODING_LANGUAGES.map((l) => (
+                <option key={l} value={l}>
+                  {CODING_LANGUAGE_LABELS[l]}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="overflow-hidden rounded-xl border border-slate-800">
@@ -274,14 +315,15 @@ export function Problemset(props: {
                           <Link className="text-amber-300 hover:underline" href="/pricing">
                             Unlock →
                           </Link>
-                        ) : p.workspaceId ? (
-                          <Link className="text-cyan-300 hover:underline" href={`/workspace/${p.workspaceId}`}>
-                            Solve →
-                          </Link>
                         ) : (
-                          <Link className="text-slate-400 hover:underline" href="/assessments">
-                            Assign →
-                          </Link>
+                          <button
+                            type="button"
+                            disabled={starting === p.id}
+                            onClick={() => void startProblem(p)}
+                            className="text-cyan-300 hover:underline disabled:opacity-50"
+                          >
+                            {starting === p.id ? "Opening…" : `Solve (${CODING_LANGUAGE_LABELS[lang]}) →`}
+                          </button>
                         )}
                       </td>
                     </tr>
