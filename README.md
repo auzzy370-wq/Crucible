@@ -74,6 +74,7 @@ More detail: [docs/VERCEL.md](docs/VERCEL.md).
 | candidate@gauntlet.local | Gauntlet!Cand1 | Candidate (secure full-stack) |
 | cyber@gauntlet.local | Gauntlet!Cand1 | Candidate (cybersecurity) |
 | teammate@gauntlet.local | Gauntlet!Cand1 | Team member |
+| premium@gauntlet.local | Gauntlet!Cand1 | Candidate (Premium SaaS plan) |
 
 ## Core workflow
 

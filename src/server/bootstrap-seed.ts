@@ -51,11 +51,12 @@ export async function seedDatabase() {
 
   const candidate = await prisma.user.upsert({
     where: { email: "candidate@gauntlet.local" },
-    update: { passwordHash: candidateHash },
+    update: { passwordHash: candidateHash, plan: "FREE" },
     create: {
       email: "candidate@gauntlet.local",
       name: "Casey Candidate",
       role: "CANDIDATE",
+      plan: "FREE",
       passwordHash: candidateHash,
       githubLogin: "casey-candidate",
       candidateProfile: {
@@ -78,6 +79,31 @@ export async function seedDatabase() {
       },
     },
     include: { candidateProfile: true },
+  });
+
+  const premiumCandidate = await prisma.user.upsert({
+    where: { email: "premium@gauntlet.local" },
+    update: {
+      passwordHash: candidateHash,
+      plan: "PREMIUM",
+      planExpiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+    },
+    create: {
+      email: "premium@gauntlet.local",
+      name: "Parker Premium",
+      role: "CANDIDATE",
+      plan: "PREMIUM",
+      planExpiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+      passwordHash: candidateHash,
+      candidateProfile: {
+        create: {
+          headline: "Premium Crucible member",
+          preferredTrack: "SOFTWARE_ENGINEERING",
+          yearsExperience: 4,
+          languages: ["typescript", "python"],
+        },
+      },
+    },
   });
 
   const cyberCandidate = await prisma.user.upsert({
@@ -185,6 +211,10 @@ export async function seedDatabase() {
         estimatedDays: c.estimatedDays,
         tags: c.tags,
         languages: c.languages,
+        companies: c.companies ?? [],
+        frequency: c.frequency ?? 0,
+        avgMinutes: c.avgMinutes ?? (c.type === "CODING_PROBLEM" ? 30 : 60),
+        isPremium: c.isPremium ?? false,
         publicRequirements: c.publicRequirements,
         hiddenRequirements: c.hiddenRequirements,
         adaptiveTrack: c.adaptiveTrack,
@@ -205,6 +235,10 @@ export async function seedDatabase() {
         estimatedDays: c.estimatedDays,
         tags: c.tags,
         languages: c.languages,
+        companies: c.companies ?? [],
+        frequency: c.frequency ?? 0,
+        avgMinutes: c.avgMinutes ?? (c.type === "CODING_PROBLEM" ? 30 : 60),
+        isPremium: c.isPremium ?? false,
         publicRequirements: c.publicRequirements,
         hiddenRequirements: c.hiddenRequirements,
         adaptiveTrack: c.adaptiveTrack,
@@ -688,6 +722,41 @@ export async function seedDatabase() {
     });
   }
 
+  // SaaS: sample playgrounds for free + premium accounts
+  const playgroundCount = await prisma.playground.count({ where: { userId: candidate.id } });
+  if (playgroundCount === 0) {
+    await prisma.playground.create({
+      data: {
+        userId: candidate.id,
+        name: "Scratchpad",
+        folder: "Inbox",
+        language: "typescript",
+        content: `// Free plan: 3 playgrounds max. Upgrade for unlimited.\nexport function hello() {\n  return "crucible";\n}\n`,
+      },
+    });
+  }
+  const premiumPlaygrounds = await prisma.playground.count({ where: { userId: premiumCandidate.id } });
+  if (premiumPlaygrounds === 0) {
+    await prisma.playground.createMany({
+      data: [
+        {
+          userId: premiumCandidate.id,
+          name: "Graph drills",
+          folder: "Interview Prep",
+          language: "typescript",
+          content: `// Premium playground — unlimited folders\nexport function bfs() { return []; }\n`,
+        },
+        {
+          userId: premiumCandidate.id,
+          name: "Stripe idempotency notes",
+          folder: "Company Prep",
+          language: "typescript",
+          content: `// Company-specific scratch\nexport function charge() { return { ok: true }; }\n`,
+        },
+      ],
+    });
+  }
+
   const [
     workspaceCount,
     fileCount,
@@ -712,6 +781,7 @@ export async function seedDatabase() {
     hiring: hiring.email,
     reviewer: reviewer.email,
     candidate: candidate.email,
+    premiumCandidate: premiumCandidate.email,
     cyberCandidate: cyberCandidate.email,
     teammate: teammate.email,
     passwordAdmin: "Gauntlet!Admin1",

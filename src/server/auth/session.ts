@@ -7,7 +7,10 @@ import { AppError } from "@/lib/errors";
 const COOKIE = "gauntlet_session";
 const TTL_MS = 1000 * 60 * 60 * 24 * 14;
 
-export type AuthUser = Pick<User, "id" | "email" | "name" | "role" | "avatarUrl" | "githubLogin">;
+export type AuthUser = Pick<
+  User,
+  "id" | "email" | "name" | "role" | "avatarUrl" | "githubLogin" | "plan" | "planExpiresAt"
+>;
 
 /** Secure cookies only on real HTTPS (Vercel). NODE_ENV=production on http://localhost must stay non-Secure or browsers drop the session. */
 function sessionCookieSecure() {
@@ -62,8 +65,16 @@ export async function getSessionUser(): Promise<AuthUser | null> {
     if (session) await prisma.session.delete({ where: { id: session.id } });
     return null;
   }
-  const { id, email, name, role, avatarUrl, githubLogin } = session.user;
-  return { id, email, name, role, avatarUrl, githubLogin };
+  const { id, email, name, role, avatarUrl, githubLogin, plan, planExpiresAt } = session.user;
+  return { id, email, name, role, avatarUrl, githubLogin, plan, planExpiresAt };
+}
+
+export function isPremium(user: Pick<AuthUser, "plan" | "planExpiresAt" | "role"> | null | undefined) {
+  if (!user) return false;
+  if (user.role === "SUPER_ADMIN" || user.role === "HIRING_MANAGER") return true;
+  if (user.plan !== "PREMIUM") return false;
+  if (user.planExpiresAt && user.planExpiresAt < new Date()) return false;
+  return true;
 }
 
 export async function requireUser(roles?: Role[]): Promise<AuthUser> {

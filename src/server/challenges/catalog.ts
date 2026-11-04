@@ -19,6 +19,10 @@ export type ChallengeSeed = {
   owaspMappings?: string[];
   controlledVulns?: { id: string; name: string; severity: string; file: string }[];
   gradingRubric: Record<string, string>;
+  companies?: string[];
+  frequency?: number;
+  avgMinutes?: number;
+  isPremium?: boolean;
 };
 
 const PROJECT_CATALOG: ChallengeSeed[] = [

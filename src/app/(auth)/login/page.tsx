@@ -14,6 +14,7 @@ const DEMO_ACCOUNTS = [
   { label: "Hiring", email: "hiring@gauntlet.local", password: "Gauntlet!Admin1" },
   { label: "Reviewer", email: "reviewer@gauntlet.local", password: "Gauntlet!Admin1" },
   { label: "Candidate", email: "candidate@gauntlet.local", password: "Gauntlet!Cand1" },
+  { label: "Premium", email: "premium@gauntlet.local", password: "Gauntlet!Cand1" },
   { label: "Cyber", email: "cyber@gauntlet.local", password: "Gauntlet!Cand1" },
   { label: "Teammate", email: "teammate@gauntlet.local", password: "Gauntlet!Cand1" },
 ] as const;
@@ -93,8 +94,8 @@ export default function LoginPage() {
           </div>
           <CardTitle className="text-xl sm:text-2xl">Sign in to operations</CardTitle>
           <CardDescription>
-            Timed elite software engineering and cybersecurity assessments. Demo library is preloaded — challenges,
-            60-minute assessments, workspaces, and tests.
+            SaaS interview prep + elite assessments. Free problemset, or try Premium for company questions, Lightning
+            Judge, simulations, and unlimited playgrounds.
           </CardDescription>
         </CardHeader>
         <CardContent>

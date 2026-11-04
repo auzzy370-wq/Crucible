@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db";
-import { getSessionUser } from "@/server/auth/session";
+import { getSessionUser, isPremium } from "@/server/auth/session";
 import { Problemset } from "@/components/challenges/problemset";
 import { isCodingProblem } from "@/server/challenges/coding-problems";
 
@@ -53,6 +53,10 @@ export default async function ChallengesPage({
       tags: c.tags,
       languages: c.languages,
       estimatedDays: c.estimatedDays,
+      companies: c.companies,
+      frequency: c.frequency,
+      avgMinutes: c.avgMinutes,
+      isPremium: c.isPremium,
       owaspMappings: c.owaspMappings,
       mitreMappings: c.mitreMappings,
       assessmentId: assessment?.id ?? null,
@@ -68,6 +72,7 @@ export default async function ChallengesPage({
       problems={problems}
       projects={projects}
       initialMode={sp.view === "projects" ? "projects" : "problemset"}
+      premium={isPremium(user)}
     />
   );
 }

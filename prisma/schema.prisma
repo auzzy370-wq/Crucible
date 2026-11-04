@@ -101,6 +101,11 @@ enum QualificationTier {
   DISTINGUISHED
 }
 
+enum PlanTier {
+  FREE
+  PREMIUM
+}
+
 enum ReviewDecisionType {
   APPROVE
   REJECT
@@ -109,16 +114,18 @@ enum ReviewDecisionType {
 }
 
 model User {
-  id           String    @id @default(cuid())
-  email        String    @unique
-  passwordHash String
-  name         String
-  role         Role      @default(CANDIDATE)
-  avatarUrl    String?
-  githubLogin  String?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  lastLoginAt  DateTime?
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String
+  name          String
+  role          Role      @default(CANDIDATE)
+  plan          PlanTier  @default(FREE)
+  planExpiresAt DateTime?
+  avatarUrl     String?
+  githubLogin   String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  lastLoginAt   DateTime?
 
   sessions            Session[]
   candidateProfile    CandidateProfile?
@@ -131,6 +138,8 @@ model User {
   reviewNotes         ReviewNote[]
   followUpAnswers     FollowUpAnswer[]
   managedTeams        EngineeringTeam[]      @relation("TeamManager")
+  playgrounds         Playground[]
+  interviewSims       InterviewSimulation[]
 }
 
 model Session {
@@ -233,6 +242,10 @@ model Challenge {
   difficulty         Int             @default(1)
   estimatedDays      Int             @default(3)
   tags               String[]        @default([])
+  companies          String[]        @default([])
+  frequency          Int             @default(0)
+  avgMinutes         Int             @default(60)
+  isPremium          Boolean         @default(false)
   starterRepoPath    String?
   referenceSolution  String?
   hiddenRequirements Json?
@@ -248,8 +261,43 @@ model Challenge {
   createdAt          DateTime        @default(now())
   updatedAt          DateTime        @updatedAt
 
-  assessments Assessment[]
-  incidents   IncidentScenario[]
+  assessments   Assessment[]
+  incidents     IncidentScenario[]
+  interviewSims InterviewSimulation[]
+}
+
+model Playground {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  folder    String   @default("Inbox")
+  language  String   @default("typescript")
+  content   String   @default("// Crucible Playground\n")
+  layout    Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, folder])
+}
+
+model InterviewSimulation {
+  id           String   @id @default(cuid())
+  userId       String
+  company      String
+  role         String
+  challengeId  String
+  timedMinutes Int      @default(45)
+  status       String   @default("READY")
+  startedAt    DateTime?
+  finishedAt   DateTime?
+  score        Float?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  challenge    Challenge @relation(fields: [challengeId], references: [id])
+
+  @@index([userId, company])
 }
 
 model Assessment {

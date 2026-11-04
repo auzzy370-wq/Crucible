@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
-import { getSessionUser, canReview } from "@/server/auth/session";
+import { getSessionUser, canReview, isPremium } from "@/server/auth/session";
 import { WorkspaceIde } from "@/components/workspace/ide";
 import { isCodingProblem } from "@/server/challenges/coding-problems";
 
@@ -23,6 +23,7 @@ export default async function WorkspacePage({ params }: { params: Promise<{ id: 
 
   const challenge = workspace.assignment.assessment.challenge;
   const codingMode = isCodingProblem(challenge);
+  const premium = isPremium(user);
 
   return (
     <WorkspaceIde
@@ -47,6 +48,9 @@ export default async function WorkspacePage({ params }: { params: Promise<{ id: 
       tags={challenge.tags}
       problemDescription={challenge.description}
       problemSummary={challenge.summary}
+      premium={premium}
+      companies={challenge.companies}
+      isPremiumContent={challenge.isPremium}
     />
   );
 }

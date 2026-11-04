@@ -19,6 +19,9 @@ import {
   BrainCircuit,
   Menu,
   X,
+  Sparkles,
+  FlaskConical,
+  Timer,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -26,8 +29,11 @@ import { Badge } from "@/components/ui/badge";
 
 const NAV = [
   { href: "/dashboard", label: "Operations", icon: LayoutDashboard },
-  { href: "/assessments", label: "Assessments", icon: Crosshair },
   { href: "/challenges", label: "Problemset", icon: Boxes },
+  { href: "/interview", label: "Interview Sims", icon: Timer },
+  { href: "/playgrounds", label: "Playgrounds", icon: FlaskConical },
+  { href: "/pricing", label: "Premium", icon: Sparkles },
+  { href: "/assessments", label: "Assessments", icon: Crosshair },
   { href: "/candidates", label: "Candidates", icon: Users },
   { href: "/reviews", label: "Technical Review", icon: ScrollText },
   { href: "/teams", label: "Team Crucible", icon: Network },
@@ -73,7 +79,7 @@ export function AppShell({
   user,
   children,
 }: {
-  user: { name: string; email: string; role: string };
+  user: { name: string; email: string; role: string; plan?: string };
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
@@ -114,9 +120,17 @@ export function AppShell({
   const userBlock = (
     <div className="border-t border-slate-800/80 p-4">
       <div className="mb-3 min-w-0">
-        <div className="truncate text-sm font-medium text-slate-100">{user.name}</div>
+        <div className="flex items-center gap-2">
+          <div className="truncate text-sm font-medium text-slate-100">{user.name}</div>
+          {user.plan === "PREMIUM" && <Badge variant="amber">Premium</Badge>}
+        </div>
         <div className="truncate font-mono text-xs text-slate-500">{user.role}</div>
       </div>
+      {user.plan !== "PREMIUM" && (
+        <Link href="/pricing" className="mb-2 block text-center text-xs text-amber-200 hover:underline">
+          Upgrade to Premium →
+        </Link>
+      )}
       <Button variant="secondary" size="sm" className="w-full" onClick={logout}>
         <LogOut className="h-4 w-4" /> Sign out
       </Button>

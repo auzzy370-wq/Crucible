@@ -107,9 +107,14 @@ export function WorkspaceIde(props: {
   tags?: string[];
   problemDescription?: string;
   problemSummary?: string;
+  premium?: boolean;
+  companies?: string[];
+  isPremiumContent?: boolean;
 }) {
   const router = useRouter();
   const coding = Boolean(props.codingMode);
+  const premium = Boolean(props.premium);
+  const [debuggerOpen, setDebuggerOpen] = useState(false);
   const preferred = coding
     ? props.files.find((f) => f.path === "src/solution.ts")?.path ??
       props.files.find((f) => f.path.endsWith("solution.ts"))?.path
@@ -246,26 +251,46 @@ export function WorkspaceIde(props: {
                   {difficultyLabel(props.difficulty)}
                 </span>
               )}
+              {premium && <Badge variant="amber">Lightning Judge</Badge>}
+              {props.isPremiumContent && <Badge variant="amber">Premium</Badge>}
               <SessionTimer endsAt={props.dueAt} timedMinutes={props.timedMinutes} />
             </div>
             <h1 className="mt-2 break-words text-xl font-semibold sm:text-2xl">{props.title}</h1>
-            <p className="text-sm text-slate-400">{props.problemSummary || "Implement the solution and pass public + hidden tests."}</p>
+            <p className="text-sm text-slate-400">
+              {props.problemSummary || "Implement the solution and pass public + hidden tests."}
+              {(props.companies?.length ?? 0) > 0 ? ` · Asked at ${props.companies!.slice(0, 3).join(", ")}` : ""}
+            </p>
           </div>
           <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
             <Button className="w-full sm:w-auto" variant="secondary" disabled={busy} onClick={() => run("test")}>
-              Run
+              {premium ? "Run · priority" : "Run"}
             </Button>
             <Button className="w-full sm:w-auto" disabled={busy} onClick={submit}>
               Submit
             </Button>
-            <Button className="w-full sm:w-auto" variant="secondary" disabled={busy} onClick={() => run("hidden_test")}>
-              Hidden tests
+            <Button
+              className="w-full sm:w-auto"
+              variant="secondary"
+              disabled={!premium}
+              onClick={() => (premium ? setDebuggerOpen((v) => !v) : undefined)}
+              title={premium ? "Toggle debugger" : "Premium feature"}
+            >
+              Debugger
             </Button>
             <Button className="w-full sm:w-auto" variant="secondary" onClick={commit}>
               Commit
             </Button>
           </div>
         </div>
+        {debuggerOpen && premium && (
+          <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-3 text-sm text-amber-50">
+            <div className="font-medium">Interactive debugger</div>
+            <p className="mt-1 text-amber-100/80">
+              Breakpoints-ready panel (Premium). Step through failing cases without print-spam — wire a DAP adapter in
+              production; this demo surfaces the control surface in-editor.
+            </p>
+          </div>
+        )}
 
         {/* Mobile tabs */}
         <div className="flex gap-2 xl:hidden">
@@ -340,14 +365,27 @@ export function WorkspaceIde(props: {
                     automaticLayout: true,
                     wordWrap: "on",
                     scrollBeyondLastLine: false,
+                    quickSuggestions: premium,
+                    suggestOnTriggerCharacters: premium,
+                    wordBasedSuggestions: premium ? "currentDocument" : "off",
                   }}
                 />
               </div>
+              {!premium && (
+                <div className="border-t border-slate-800 px-3 py-2 text-xs text-slate-500">
+                  Autocomplete is a Premium feature.{" "}
+                  <a className="text-amber-300 hover:underline" href="/pricing">
+                    Upgrade
+                  </a>
+                </div>
+              )}
             </section>
 
             <section className="rounded-xl border border-slate-800 bg-slate-950/70 p-3">
               <div className="mb-2 flex items-center justify-between">
-                <div className="text-xs uppercase tracking-wider text-slate-500">Testcases</div>
+                <div className="text-xs uppercase tracking-wider text-slate-500">
+                  Testcases {premium ? "· Lightning queue" : ""}
+                </div>
                 <div className="font-mono text-xs text-slate-400">
                   {caseResults.length
                     ? `${caseResults.filter((c) => c.pass).length}/${caseResults.length} passed`
