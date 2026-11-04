@@ -52,7 +52,7 @@ export function LandingPage() {
             Evidence over puzzles.
           </h1>
           <p className="mt-5 max-w-lg text-base leading-relaxed text-slate-400 sm:text-lg">
-            Timed software engineering and cybersecurity assessments that verify what résumés claim — plus a LeetCode-style
+            Timed software engineering and cybersecurity assessments that verify what résumés claim — plus a company-tagged
             problemset with Lightning Judge for Premium prep.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
