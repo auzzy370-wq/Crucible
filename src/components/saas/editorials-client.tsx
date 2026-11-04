@@ -17,6 +17,12 @@ export function EditorialsClient() {
         setRows(json.data.editorials);
         setPremium(json.data.premium);
       }
+      const want = new URLSearchParams(window.location.search).get("slug");
+      if (want) {
+        const one = await fetch(`/api/editorials?slug=${encodeURIComponent(want)}`);
+        const oneJson = await one.json();
+        if (oneJson.ok) setActive(oneJson.data);
+      }
     })();
   }, []);
 
@@ -24,6 +30,9 @@ export function EditorialsClient() {
     const res = await fetch(`/api/editorials?slug=${encodeURIComponent(slug)}`);
     const json = await res.json();
     if (json.ok) setActive(json.data);
+    const url = new URL(window.location.href);
+    url.searchParams.set("slug", slug);
+    window.history.replaceState({}, "", url.toString());
   }
 
   return (

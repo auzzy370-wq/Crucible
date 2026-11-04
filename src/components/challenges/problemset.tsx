@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { FREQUENCY_METHODOLOGY } from "@/lib/frequency";
+import { ACCEPTANCE_METHODOLOGY, illustrativeAcceptance } from "@/lib/acceptance";
 import { difficultyBand, type DifficultyBand } from "@/lib/difficulty";
 
 export type ProblemRow = {
@@ -28,6 +29,7 @@ export type ProblemRow = {
   mitreMappings: string[];
   assessmentId?: string | null;
   workspaceId?: string | null;
+  editorialSlug?: string | null;
 };
 
 function label(difficulty: number): DifficultyBand {
@@ -103,7 +105,8 @@ export function Problemset(props: {
             production missions. Submit pinpoints exactly which skills you proved.
           </p>
           <p className="mt-2 max-w-2xl text-xs text-slate-500" title={FREQUENCY_METHODOLOGY.detail}>
-            Freq column: {FREQUENCY_METHODOLOGY.label}. {FREQUENCY_METHODOLOGY.detail}
+            Freq: {FREQUENCY_METHODOLOGY.label}. Acc: {ACCEPTANCE_METHODOLOGY.label} —{" "}
+            {ACCEPTANCE_METHODOLOGY.detail}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -206,6 +209,9 @@ export function Problemset(props: {
                   <th className="px-4 py-3 hidden md:table-cell" title={FREQUENCY_METHODOLOGY.detail}>
                     Freq*
                   </th>
+                  <th className="px-4 py-3 hidden md:table-cell" title={ACCEPTANCE_METHODOLOGY.detail}>
+                    Acc*
+                  </th>
                   <th className="px-4 py-3 hidden sm:table-cell">Time</th>
                   <th className="px-4 py-3">Open</th>
                 </tr>
@@ -214,6 +220,7 @@ export function Problemset(props: {
                 {filtered.map((p, i) => {
                   const L = label(p.difficulty);
                   const locked = Boolean(p.isPremium) && !props.premium;
+                  const acc = illustrativeAcceptance(p.difficulty, p.slug);
                   return (
                     <tr key={p.id} className="border-b border-slate-800/80 hover:bg-slate-900/50">
                       <td className="px-4 py-3 font-mono text-slate-500">{i + 1}</td>
@@ -221,6 +228,14 @@ export function Problemset(props: {
                         <div className="flex flex-wrap items-center gap-2">
                           <span className="font-medium text-slate-100">{p.title}</span>
                           {p.isPremium && <Badge variant="amber">Premium</Badge>}
+                          {p.editorialSlug && (
+                            <Link
+                              href={`/editorials?slug=${encodeURIComponent(p.editorialSlug)}`}
+                              className="font-mono text-[10px] text-cyan-400/80 hover:underline"
+                            >
+                              Editorial
+                            </Link>
+                          )}
                         </div>
                         <div className="mt-0.5 line-clamp-1 text-xs text-slate-500">{p.summary}</div>
                       </td>
@@ -243,6 +258,13 @@ export function Problemset(props: {
                       >
                         {p.frequency ?? 0}%
                         <span className="ml-1 text-[10px] text-slate-600">{FREQUENCY_METHODOLOGY.short}</span>
+                      </td>
+                      <td
+                        className="px-4 py-3 hidden font-mono text-xs text-slate-400 md:table-cell"
+                        title={ACCEPTANCE_METHODOLOGY.detail}
+                      >
+                        {acc}%
+                        <span className="ml-1 text-[10px] text-slate-600">{ACCEPTANCE_METHODOLOGY.short}</span>
                       </td>
                       <td className="px-4 py-3 hidden font-mono text-xs text-slate-400 sm:table-cell">
                         {p.avgMinutes ?? 60}m
@@ -267,7 +289,7 @@ export function Problemset(props: {
                 })}
                 {!filtered.length && (
                   <tr>
-                    <td colSpan={7} className="px-4 py-10 text-center text-slate-500">
+                    <td colSpan={8} className="px-4 py-10 text-center text-slate-500">
                       No problems match your filters.
                     </td>
                   </tr>

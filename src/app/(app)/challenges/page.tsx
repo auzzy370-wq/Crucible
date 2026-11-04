@@ -2,6 +2,7 @@ import { prisma } from "@/lib/db";
 import { getSessionUser, isPremium } from "@/server/auth/session";
 import { Problemset } from "@/components/challenges/problemset";
 import { isCodingProblem } from "@/server/challenges/coding-problems";
+import { editorialSlugByChallengeSlug, resolveEditorialSlug } from "@/server/saas/editorials";
 
 export default async function ChallengesPage({
   searchParams,
@@ -11,19 +12,22 @@ export default async function ChallengesPage({
   const sp = await searchParams;
   const user = await getSessionUser();
 
-  const challenges = await prisma.challenge.findMany({
-    where: {
-      isPublished: true,
-      ...(sp.track ? { track: sp.track as never } : {}),
-    },
-    include: {
-      assessments: {
-        where: { status: "PUBLISHED" },
-        take: 1,
+  const [challenges, editorialMap] = await Promise.all([
+    prisma.challenge.findMany({
+      where: {
+        isPublished: true,
+        ...(sp.track ? { track: sp.track as never } : {}),
       },
-    },
-    orderBy: [{ difficulty: "asc" }, { title: "asc" }],
-  });
+      include: {
+        assessments: {
+          where: { status: "PUBLISHED" },
+          take: 1,
+        },
+      },
+      orderBy: [{ difficulty: "asc" }, { title: "asc" }],
+    }),
+    editorialSlugByChallengeSlug(),
+  ]);
 
   const workspaceByAssessment = new Map<string, string>();
   if (user) {
@@ -61,6 +65,7 @@ export default async function ChallengesPage({
       mitreMappings: c.mitreMappings,
       assessmentId: assessment?.id ?? null,
       workspaceId: assessment ? workspaceByAssessment.get(assessment.id) ?? null : null,
+      editorialSlug: resolveEditorialSlug(c.slug, editorialMap),
     };
   });
 
