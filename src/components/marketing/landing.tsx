@@ -18,7 +18,7 @@ export function LandingPage(props: {
       <div className="landing-noise pointer-events-none absolute inset-0" aria-hidden />
       <div className="landing-mesh pointer-events-none absolute inset-0" aria-hidden />
       <div
-        className="landing-anim-ambient pointer-events-none absolute -left-1/4 top-[-10%] h-[70vh] w-[70vw] rounded-full bg-[radial-gradient(circle,rgba(122,243,215,0.14),transparent_68%)] blur-2xl"
+        className="landing-anim-ambient pointer-events-none absolute -left-1/4 top-[-10%] h-[70vh] w-[70vw] rounded-full bg-[radial-gradient(circle,rgba(34,211,238,0.14),transparent_68%)] blur-2xl"
         aria-hidden
       />
       <div
@@ -70,13 +70,13 @@ export function LandingPage(props: {
             <div className="landing-anim-cta mt-9 flex flex-wrap items-center gap-4">
               <Link
                 href="/register"
-                className="inline-flex min-h-12 items-center rounded-md bg-[var(--landing-teal)] px-6 text-sm font-semibold text-[#041016] transition hover:bg-[#a8f7e4]"
+                className="inline-flex min-h-12 items-center rounded-md bg-cyan-400 px-6 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300"
               >
                 Enter the crucible
               </Link>
               <Link
                 href="/login"
-                className="inline-flex min-h-12 items-center rounded-md border border-[var(--landing-line)] px-5 text-sm text-[var(--landing-ink)] transition hover:border-white/25"
+                className="inline-flex min-h-12 items-center rounded-md border border-slate-700 px-5 text-sm text-slate-100 transition hover:border-slate-500"
               >
                 View demo accounts
               </Link>
@@ -85,16 +85,16 @@ export function LandingPage(props: {
 
           {/* Dominant IDE visual plane — not a card collage */}
           <section className="landing-anim-ide relative lg:justify-self-stretch">
-            <div className="pointer-events-none absolute -inset-8 -z-10 bg-[radial-gradient(ellipse_at_center,rgba(122,243,215,0.12),transparent_65%)]" />
-            <div className="landing-ide-sheen relative overflow-hidden rounded-xl border border-white/[0.09] bg-[#070b10]/90 shadow-[0_40px_120px_-40px_rgba(0,0,0,0.85)] backdrop-blur-sm">
-              <div className="flex items-center gap-2 border-b border-white/[0.06] px-4 py-3">
-                <span className="h-2.5 w-2.5 rounded-full bg-white/15" />
-                <span className="h-2.5 w-2.5 rounded-full bg-white/15" />
-                <span className="h-2.5 w-2.5 rounded-full bg-white/15" />
-                <span className="ml-3 font-mono text-[10px] uppercase tracking-[0.22em] text-white/35">
+            <div className="pointer-events-none absolute -inset-8 -z-10 bg-[radial-gradient(ellipse_at_center,rgba(34,211,238,0.12),transparent_65%)]" />
+            <div className="landing-ide-sheen relative overflow-hidden rounded-xl border border-cyan-400/20 bg-[#070b12]/95 shadow-[0_40px_120px_-40px_rgba(0,0,0,0.85)] backdrop-blur-sm">
+              <div className="flex items-center gap-2 border-b border-slate-800/80 px-4 py-3">
+                <span className="h-2.5 w-2.5 rounded-full bg-slate-600" />
+                <span className="h-2.5 w-2.5 rounded-full bg-slate-600" />
+                <span className="h-2.5 w-2.5 rounded-full bg-slate-600" />
+                <span className="ml-3 font-mono text-[10px] uppercase tracking-[0.22em] text-slate-500">
                   workspace · evidence session
                 </span>
-                <span className="ml-auto font-mono text-[11px] text-amber-200/80">41:12</span>
+                <span className="ml-auto font-mono text-[11px] text-amber-300/90">41:12</span>
               </div>
               <div className="grid sm:grid-cols-[0.9fr_1.15fr]">
                 <aside className="hidden border-r border-white/[0.06] p-4 sm:block">
@@ -143,10 +143,10 @@ export function LandingPage(props: {
                     <span className="landing-cursor-blink text-[var(--landing-teal)]">await deployCheck();</span>
                   </pre>
                   <div className="mt-6 grid grid-cols-2 gap-2 font-mono text-[11px]">
-                    <div className="border border-emerald-400/20 bg-emerald-400/[0.06] px-3 py-2.5 text-emerald-200/90">
+                    <div className="border border-emerald-500/20 bg-emerald-500/5 px-3 py-2.5 text-emerald-200">
                       public · 3/3 Accepted
                     </div>
-                    <div className="border border-rose-400/25 bg-rose-400/[0.06] px-3 py-2.5 text-rose-200/90">
+                    <div className="border border-rose-500/25 bg-rose-500/5 px-3 py-2.5 text-rose-200">
                       hidden · harness failed
                     </div>
                   </div>

@@ -3,13 +3,13 @@
 @tailwind utilities;
 
 :root {
-  --bg-0: #05070c;
-  --bg-1: #0a0f18;
+  --bg-0: #070b12;
+  --bg-1: #0b1220;
   --bg-2: #111827;
   --line: #1f2a3d;
   --text: #e5eefb;
   --muted: #8aa0b8;
-  --accent: #5eead4;
+  --accent: #22d3ee;
   --accent-2: #34d399;
   --danger: #fb7185;
   --warning: #fbbf24;
@@ -94,17 +94,17 @@ body {
   font-family: var(--font-serif);
 }
 
-/* Landing — cinematic premium surface */
+/* Landing — cinematic premium surface (original CRUCIBLE cyan) */
 .landing-root {
-  --landing-ink: #f4f7fb;
-  --landing-mute: #9aabbf;
-  --landing-line: rgba(255, 255, 255, 0.08);
-  --landing-teal: #7af3d7;
+  --landing-ink: #e5eefb;
+  --landing-mute: #8aa0b8;
+  --landing-line: rgba(34, 211, 238, 0.14);
+  --landing-teal: #22d3ee;
   background:
-    radial-gradient(ellipse 90% 70% at 70% 20%, rgba(94, 234, 212, 0.09), transparent 55%),
-    radial-gradient(ellipse 60% 50% at 10% 80%, rgba(251, 146, 60, 0.06), transparent 50%),
-    radial-gradient(ellipse 50% 40% at 90% 90%, rgba(56, 189, 248, 0.05), transparent 45%),
-    linear-gradient(165deg, #03050a 0%, #070b12 42%, #0a1019 100%);
+    radial-gradient(ellipse 90% 70% at 70% 20%, rgba(34, 211, 238, 0.12), transparent 55%),
+    radial-gradient(ellipse 60% 50% at 10% 80%, rgba(52, 211, 153, 0.07), transparent 50%),
+    radial-gradient(ellipse 50% 40% at 90% 90%, rgba(251, 113, 133, 0.04), transparent 45%),
+    linear-gradient(165deg, #060910 0%, #070b12 42%, #0b1220 100%);
   color: var(--landing-ink);
 }
 
@@ -116,8 +116,8 @@ body {
 
 .landing-mesh {
   background:
-    linear-gradient(rgba(122, 243, 215, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(122, 243, 215, 0.03) 1px, transparent 1px);
+    linear-gradient(rgba(34, 211, 238, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(34, 211, 238, 0.04) 1px, transparent 1px);
   background-size: 72px 72px;
   mask-image: radial-gradient(ellipse 80% 70% at 60% 40%, black 20%, transparent 75%);
 }
