@@ -1,32 +1,53 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PLAN_PRICING, PREMIUM_FEATURES } from "@/lib/saas";
 
-export function PricingClient(props: { premium: boolean; planExpiresAt?: string | null }) {
+export function PricingClient(props: {
+  premium: boolean;
+  planExpiresAt?: string | null;
+  stripeConfigured: boolean;
+}) {
   const router = useRouter();
+  const params = useSearchParams();
   const [busy, setBusy] = useState(false);
   const [interval, setInterval] = useState<"monthly" | "yearly">("yearly");
+
+  useEffect(() => {
+    if (params.get("upgraded") === "1" || params.get("checkout") === "success") {
+      toast.success("Premium unlocked");
+      router.replace("/pricing");
+      router.refresh();
+    }
+    if (params.get("checkout") === "cancel") {
+      toast.message("Checkout canceled");
+      router.replace("/pricing");
+    }
+  }, [params, router]);
 
   async function upgrade() {
     setBusy(true);
     try {
-      const res = await fetch("/api/billing/upgrade", {
+      const res = await fetch("/api/billing/checkout", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ interval }),
       });
       const json = await res.json();
-      if (!json.ok) throw new Error(json.error?.message || "Upgrade failed");
+      if (!json.ok) throw new Error(json.error?.message || "Checkout failed");
+      if (json.data.url) {
+        window.location.href = json.data.url;
+        return;
+      }
       toast.success("Premium unlocked");
       router.refresh();
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Upgrade failed");
+      toast.error(e instanceof Error ? e.message : "Checkout failed");
     } finally {
       setBusy(false);
     }
@@ -40,8 +61,8 @@ export function PricingClient(props: { premium: boolean; planExpiresAt?: string 
           Interview prep that feels like the real loop
         </h1>
         <p className="mt-3 text-slate-400">
-          Free forever for core problemset practice. Premium unlocks company intel, lightning judging, simulations,
-          autocomplete, debugger, and unlimited playgrounds.
+          Free forever for core problemset practice. Premium unlocks company intel, Lightning Judge, study plans,
+          simulations, autocomplete, debugger, and unlimited playgrounds.
         </p>
         {props.premium && (
           <div className="mt-4 inline-flex items-center gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-sm text-amber-100">
@@ -61,8 +82,8 @@ export function PricingClient(props: { premium: boolean; planExpiresAt?: string 
           <CardContent className="space-y-4">
             <div className="font-mono text-3xl text-slate-100">$0</div>
             <ul className="space-y-2 text-sm text-slate-400">
-              <li>Public coding problems</li>
-              <li>60-minute timed sessions</li>
+              <li>Public coding problems + daily challenge</li>
+              <li>Free study plans (Meta 75, Google)</li>
               <li>3 playgrounds</li>
               <li>Standard judge queue</li>
             </ul>
@@ -102,9 +123,19 @@ export function PricingClient(props: { premium: boolean; planExpiresAt?: string 
               </Button>
             </div>
             <Button className="w-full" disabled={busy || props.premium} onClick={upgrade}>
-              {props.premium ? "Already Premium" : busy ? "Activating…" : "Upgrade to Premium"}
+              {props.premium
+                ? "Already Premium"
+                : busy
+                  ? "Redirecting…"
+                  : props.stripeConfigured
+                    ? "Checkout with Stripe"
+                    : "Upgrade to Premium"}
             </Button>
-            <p className="text-xs text-slate-500">Demo billing activates instantly — swap in Stripe Checkout for prod.</p>
+            <p className="text-xs text-slate-500">
+              {props.stripeConfigured
+                ? "Secure Stripe Checkout. Webhooks activate Premium on payment."
+                : "Demo mode — activates instantly. Set STRIPE_SECRET_KEY for real Checkout."}
+            </p>
           </CardContent>
         </Card>
       </section>

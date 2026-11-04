@@ -22,6 +22,8 @@ import {
   Sparkles,
   FlaskConical,
   Timer,
+  CalendarDays,
+  Route,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -29,7 +31,9 @@ import { Badge } from "@/components/ui/badge";
 
 const NAV = [
   { href: "/dashboard", label: "Operations", icon: LayoutDashboard },
+  { href: "/daily", label: "Daily Challenge", icon: CalendarDays },
   { href: "/challenges", label: "Problemset", icon: Boxes },
+  { href: "/study-plans", label: "Study Plans", icon: Route },
   { href: "/interview", label: "Interview Sims", icon: Timer },
   { href: "/playgrounds", label: "Playgrounds", icon: FlaskConical },
   { href: "/pricing", label: "Premium", icon: Sparkles },

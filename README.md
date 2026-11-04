@@ -76,6 +76,13 @@ More detail: [docs/VERCEL.md](docs/VERCEL.md).
 | teammate@gauntlet.local | Gauntlet!Cand1 | Team member |
 | premium@gauntlet.local | Gauntlet!Cand1 | Candidate (Premium SaaS plan) |
 
+## SaaS prep features
+
+- **Daily Challenge** — `/daily` with streak tracking
+- **Study Plans** — `/study-plans` (Meta 75, Stripe 2 Weeks, Google, Security)
+- **Premium Checkout** — `/pricing` uses Stripe when `STRIPE_SECRET_KEY` is set; otherwise instant mock upgrade
+- Webhook: `POST /api/billing/webhook` (set `STRIPE_WEBHOOK_SECRET`)
+
 ## Core workflow
 
 1. Admin/hiring manager creates an assessment from the challenge library (including cyber challenges). Default session length is **60 minutes**.

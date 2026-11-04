@@ -12,11 +12,15 @@ export default async function DashboardPage() {
   const isStaff = user && ["SUPER_ADMIN", "HIRING_MANAGER", "TECHNICAL_REVIEWER"].includes(user.role);
 
   if (!isStaff) {
-    const assignments = await prisma.assessmentAssignment.findMany({
-      where: { candidateId: user!.id },
-      include: { assessment: { include: { challenge: true } }, scoreReport: true, workspace: true },
-      orderBy: { createdAt: "desc" },
-    });
+    const [assignments, streak, enrollments] = await Promise.all([
+      prisma.assessmentAssignment.findMany({
+        where: { candidateId: user!.id },
+        include: { assessment: { include: { challenge: true } }, scoreReport: true, workspace: true },
+        orderBy: { createdAt: "desc" },
+      }),
+      prisma.userStreak.findUnique({ where: { userId: user!.id } }),
+      prisma.studyPlanEnrollment.count({ where: { userId: user!.id } }),
+    ]);
     return (
       <div className="animate-rise space-y-6">
         <header>
@@ -26,6 +30,20 @@ export default async function DashboardPage() {
             Complete timed, realistic engineering and cybersecurity assessments. Résumé claims are never treated as proof.
           </p>
         </header>
+        <section className="grid gap-3 sm:grid-cols-3">
+          <Link href="/daily" className="rounded-xl border border-cyan-500/20 bg-cyan-500/5 p-4 hover:bg-cyan-500/10">
+            <div className="text-xs uppercase tracking-wider text-slate-500">Daily challenge</div>
+            <div className="mt-1 font-mono text-2xl text-cyan-200">{streak?.currentStreak ?? 0} day streak</div>
+          </Link>
+          <Link href="/study-plans" className="rounded-xl border border-slate-800 bg-slate-950/60 p-4 hover:bg-slate-900">
+            <div className="text-xs uppercase tracking-wider text-slate-500">Study plans</div>
+            <div className="mt-1 font-mono text-2xl text-slate-100">{enrollments} enrolled</div>
+          </Link>
+          <Link href="/pricing" className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 hover:bg-amber-500/10">
+            <div className="text-xs uppercase tracking-wider text-slate-500">Plan</div>
+            <div className="mt-1 font-mono text-2xl text-amber-100">{user?.plan === "PREMIUM" ? "Premium" : "Free"}</div>
+          </Link>
+        </section>
         <div className="grid gap-4 md:grid-cols-2">
           {assignments.map((a) => (
             <Card key={a.id}>

@@ -1,0 +1,110 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+
+type DailyPayload = {
+  dateKey: string;
+  completed: boolean;
+  streak: { currentStreak: number; longestStreak: number; lastDateKey: string | null };
+  challenge: {
+    id: string;
+    slug: string;
+    title: string;
+    summary: string;
+    difficulty: number;
+    tags: string[];
+    avgMinutes: number | null;
+    companies: string[];
+  };
+};
+
+function diffLabel(d: number) {
+  if (d <= 3) return "Easy";
+  if (d <= 6) return "Medium";
+  return "Hard";
+}
+
+export function DailyClient(props: { daily: DailyPayload }) {
+  const router = useRouter();
+  const [busy, setBusy] = useState(false);
+  const c = props.daily.challenge;
+
+  async function start() {
+    setBusy(true);
+    try {
+      const res = await fetch("/api/daily", { method: "POST" });
+      const json = await res.json();
+      if (!json.ok) throw new Error(json.error?.message || "Could not start");
+      toast.success(
+        json.data.streak?.currentStreak
+          ? `Streak ${json.data.streak.currentStreak} 🔥`
+          : "Daily unlocked",
+      );
+      if (json.data.workspaceId) router.push(`/workspace/${json.data.workspaceId}`);
+      else router.refresh();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="animate-rise space-y-6">
+      <header className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">DAILY CHALLENGE</p>
+          <h1 className="mt-2 text-2xl font-semibold sm:text-3xl">One problem. Every day.</h1>
+          <p className="mt-2 max-w-2xl text-slate-400">
+            Keep your streak alive. Today&apos;s pick rotates from the free coding set — show up, solve, come back
+            tomorrow.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Badge variant="cyan">Streak {props.daily.streak.currentStreak}</Badge>
+          <Badge variant="amber">Best {props.daily.streak.longestStreak}</Badge>
+          <Badge>{props.daily.dateKey}</Badge>
+        </div>
+      </header>
+
+      <Card className="border-cyan-500/25 bg-gradient-to-br from-cyan-500/10 via-transparent to-transparent">
+        <CardHeader>
+          <div className="flex flex-wrap gap-2">
+            <Badge variant={c.difficulty <= 3 ? "emerald" : c.difficulty <= 6 ? "amber" : "rose"}>
+              {diffLabel(c.difficulty)}
+            </Badge>
+            {props.daily.completed && <Badge variant="emerald">Completed today</Badge>}
+            {(c.companies ?? []).slice(0, 3).map((co) => (
+              <Badge key={co} variant="cyan">
+                {co}
+              </Badge>
+            ))}
+          </div>
+          <CardTitle className="text-2xl">{c.title}</CardTitle>
+          <CardDescription>{c.summary}</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex flex-wrap gap-1">
+            {c.tags
+              .filter((t) => t !== "coding")
+              .slice(0, 6)
+              .map((t) => (
+                <span key={t} className="rounded border border-slate-800 px-2 py-0.5 font-mono text-[11px] text-slate-400">
+                  {t}
+                </span>
+              ))}
+          </div>
+          <p className="text-sm text-slate-400">Suggested time · {c.avgMinutes ?? 30} minutes</p>
+          <Button disabled={busy} onClick={start}>
+            {busy ? "Opening…" : props.daily.completed ? "Open again" : "Start daily"}
+          </Button>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

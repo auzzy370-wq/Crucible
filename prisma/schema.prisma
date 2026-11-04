@@ -140,6 +140,10 @@ model User {
   managedTeams        EngineeringTeam[]      @relation("TeamManager")
   playgrounds         Playground[]
   interviewSims       InterviewSimulation[]
+  studyEnrollments    StudyPlanEnrollment[]
+  dailyCompletions    DailyChallengeCompletion[]
+  streak              UserStreak?
+  stripeCustomerId    String?
 }
 
 model Session {
@@ -261,9 +265,10 @@ model Challenge {
   createdAt          DateTime        @default(now())
   updatedAt          DateTime        @updatedAt
 
-  assessments   Assessment[]
-  incidents     IncidentScenario[]
-  interviewSims InterviewSimulation[]
+  assessments     Assessment[]
+  incidents       IncidentScenario[]
+  interviewSims   InterviewSimulation[]
+  dailyChallenges DailyChallenge[]
 }
 
 model Playground {
@@ -696,6 +701,50 @@ model AuditLog {
 
   @@index([entityType, entityId])
   @@index([createdAt])
+}
+
+model StudyPlanEnrollment {
+  id               String   @id @default(cuid())
+  userId           String
+  planSlug         String
+  completedSlugs   String[] @default([])
+  startedAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, planSlug])
+  @@index([userId])
+}
+
+model DailyChallenge {
+  id          String   @id @default(cuid())
+  dateKey     String   @unique
+  challengeId String
+  createdAt   DateTime @default(now())
+  challenge   Challenge @relation(fields: [challengeId], references: [id])
+  completions DailyChallengeCompletion[]
+}
+
+model DailyChallengeCompletion {
+  id               String   @id @default(cuid())
+  userId           String
+  dailyChallengeId String
+  completedAt      DateTime @default(now())
+  user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dailyChallenge   DailyChallenge @relation(fields: [dailyChallengeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, dailyChallengeId])
+  @@index([userId])
+}
+
+model UserStreak {
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  currentStreak  Int      @default(0)
+  longestStreak  Int      @default(0)
+  lastDateKey    String?
+  updatedAt      DateTime @updatedAt
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model PlatformSetting {

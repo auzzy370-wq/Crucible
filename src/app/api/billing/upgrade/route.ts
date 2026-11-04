@@ -3,22 +3,22 @@ import { prisma } from "@/lib/db";
 import { jsonOk, withHandler } from "@/server/auth/api";
 import { requireUser } from "@/server/auth/session";
 import { writeAudit } from "@/server/security/audit";
+import { planDays } from "@/server/saas/stripe";
 
 const schema = z.object({
   interval: z.enum(["monthly", "yearly"]).default("monthly"),
 });
 
-/** Local/mock Stripe upgrade — flips plan to PREMIUM immediately. */
+/** @deprecated Prefer /api/billing/checkout — kept for demo one-click mock upgrades. */
 export async function POST(req: Request) {
   return withHandler(async () => {
     const user = await requireUser();
     const body = schema.parse(await req.json().catch(() => ({ interval: "monthly" })));
-    const days = body.interval === "yearly" ? 365 : 31;
     const updated = await prisma.user.update({
       where: { id: user.id },
       data: {
         plan: "PREMIUM",
-        planExpiresAt: new Date(Date.now() + days * 24 * 60 * 60 * 1000),
+        planExpiresAt: new Date(Date.now() + planDays(body.interval) * 24 * 60 * 60 * 1000),
       },
       select: { id: true, email: true, plan: true, planExpiresAt: true },
     });
@@ -31,7 +31,7 @@ export async function POST(req: Request) {
     });
     return jsonOk({
       ...updated,
-      message: "Premium activated (demo billing — wire Stripe for production).",
+      message: "Premium activated (demo). Use /api/billing/checkout for Stripe.",
     });
   });
 }

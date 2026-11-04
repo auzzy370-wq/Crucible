@@ -722,6 +722,34 @@ export async function seedDatabase() {
     });
   }
 
+  // SaaS: study plan enrollments + daily challenge
+  await prisma.studyPlanEnrollment.upsert({
+    where: { userId_planSlug: { userId: candidate.id, planSlug: "meta-75" } },
+    create: {
+      userId: candidate.id,
+      planSlug: "meta-75",
+      completedSlugs: ["lc-two-sum", "lc-valid-parens"],
+    },
+    update: {},
+  });
+  await prisma.studyPlanEnrollment.upsert({
+    where: { userId_planSlug: { userId: premiumCandidate.id, planSlug: "stripe-2-weeks" } },
+    create: {
+      userId: premiumCandidate.id,
+      planSlug: "stripe-2-weeks",
+      completedSlugs: ["lc-idempotent-charge"],
+    },
+    update: {},
+  });
+
+  const { ensureDailyChallenge } = await import("@/server/saas/daily");
+  const daily = await ensureDailyChallenge();
+  await prisma.userStreak.upsert({
+    where: { userId: candidate.id },
+    create: { userId: candidate.id, currentStreak: 2, longestStreak: 5, lastDateKey: daily.dateKey },
+    update: { currentStreak: 2, longestStreak: 5, lastDateKey: daily.dateKey },
+  });
+
   // SaaS: sample playgrounds for free + premium accounts
   const playgroundCount = await prisma.playground.count({ where: { userId: candidate.id } });
   if (playgroundCount === 0) {
