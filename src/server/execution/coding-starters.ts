@@ -348,6 +348,168 @@ export async function runPublicTests() {
   },
 };
 
+function pythonStub(slug: string): string {
+  const stubs: Record<string, string> = {
+    "lc-two-sum": `from typing import List
+
+def two_sum(nums: List[int], target: int) -> List[int]:
+    """Return indices of the two numbers that add up to target."""
+    # TODO: implement — aim for O(n)
+    return []
+`,
+    "lc-valid-parens": `def is_valid(s: str) -> bool:
+    # TODO: stack-based validation
+    return False
+`,
+    "lc-merge-intervals": `from typing import List
+
+def merge(intervals: List[List[int]]) -> List[List[int]]:
+    # TODO: sort + sweep
+    return []
+`,
+    "lc-top-k-frequent": `from typing import List
+
+def top_k_frequent(nums: List[int], k: int) -> List[int]:
+    # TODO: bucket or heap
+    return []
+`,
+    "lc-idempotent-charge": `_ledger: dict[str, int] = {}
+_total = 0
+
+def charge(intent_id: str, amount: int) -> dict:
+    # TODO: idempotent ledger
+    return {"status": "ok", "totalCharged": 0}
+`,
+  };
+  return (
+    stubs[slug] ??
+    `def solve(*args, **kwargs):
+    # TODO: implement
+    raise NotImplementedError
+`
+  );
+}
+
+function pythonPublicRunner(slug: string): string {
+  if (slug === "lc-two-sum") {
+    return `import json, sys
+sys.path.insert(0, "src")
+from solution import two_sum
+
+def same_pair(a, b):
+    if len(a) != 2 or len(b) != 2: return False
+    return (a[0]==b[0] and a[1]==b[1]) or (a[0]==b[1] and a[1]==b[0])
+
+results = [
+  {"name": "example_1", "pass": same_pair(two_sum([2,7,11,15], 9), [0,1])},
+  {"name": "example_2", "pass": same_pair(two_sum([3,2,4], 6), [1,2])},
+  {"name": "example_3", "pass": same_pair(two_sum([3,3], 6), [0,1])},
+]
+print(json.dumps({"results": results}))
+sys.exit(0 if all(r["pass"] for r in results) else 1)
+`;
+  }
+  if (slug === "lc-valid-parens") {
+    return `import json, sys
+sys.path.insert(0, "src")
+from solution import is_valid
+results = [
+  {"name": "example_1", "pass": is_valid("()") is True},
+  {"name": "example_2", "pass": is_valid("()[]{}") is True},
+  {"name": "example_3", "pass": is_valid("(]") is False},
+]
+print(json.dumps({"results": results}))
+sys.exit(0 if all(r["pass"] for r in results) else 1)
+`;
+  }
+  return `import json, sys
+print(json.dumps({"results": [{"name": "python_stub", "pass": False}]}))
+sys.exit(1)
+`;
+}
+
+function pythonHiddenRunner(slug: string): string {
+  if (slug === "lc-two-sum") {
+    return `import json, sys
+sys.path.insert(0, "src")
+from solution import two_sum
+
+def same_pair(a, b):
+    if len(a) != 2 or len(b) != 2: return False
+    return (a[0]==b[0] and a[1]==b[1]) or (a[0]==b[1] and a[1]==b[0])
+
+nums = list(range(5000)); nums[4998]=100000; nums[4999]=-99991
+results = [
+  {"name": "negatives", "pass": same_pair(two_sum([-1,-2,-3,-4,-5], -8), [2,4]), "hidden": True},
+  {"name": "large_n", "pass": same_pair(two_sum(nums, 9), [4998,4999]), "hidden": True},
+]
+print(json.dumps({"results": results}))
+sys.exit(0 if all(r["pass"] for r in results) else 1)
+`;
+  }
+  return `import json, sys
+print(json.dumps({"results": [{"name": "hidden_pending", "pass": False, "hidden": True}]}))
+sys.exit(1)
+`;
+}
+
+function goStub(slug: string): string {
+  if (slug === "lc-two-sum") {
+    return `package solution
+
+func TwoSum(nums []int, target int) []int {
+\t// TODO: implement — aim for O(n)
+\treturn nil
+}
+`;
+  }
+  return `package solution
+
+func Solve() {
+\t// TODO: implement
+}
+`;
+}
+
+function goPublicRunner(slug: string): string {
+  if (slug === "lc-two-sum") {
+    return `package main
+
+import (
+\t"encoding/json"
+\t"fmt"
+\t"os"
+\tsolution "crucible/solution"
+)
+
+func samePair(a, b []int) bool {
+\tif len(a) != 2 || len(b) != 2 { return false }
+\treturn (a[0]==b[0] && a[1]==b[1]) || (a[0]==b[1] && a[1]==b[0])
+}
+
+func main() {
+\ttype R struct { Name string \`json:"name"\`; Pass bool \`json:"pass"\` }
+\tresults := []R{
+\t\t{Name: "example_1", Pass: samePair(solution.TwoSum([]int{2,7,11,15}, 9), []int{0,1})},
+\t\t{Name: "example_2", Pass: samePair(solution.TwoSum([]int{3,2,4}, 6), []int{1,2})},
+\t}
+\tok := true
+\tfor _, r := range results { if !r.Pass { ok = false } }
+\tb, _ := json.Marshal(map[string]any{"results": results})
+\tfmt.Println(string(b))
+\tif !ok { os.Exit(1) }
+}
+`;
+  }
+  return `package main
+import ("encoding/json"; "fmt"; "os")
+func main() {
+  b, _ := json.Marshal(map[string]any{"results": []map[string]any{{"name":"go_stub","pass":false}}})
+  fmt.Println(string(b)); os.Exit(1)
+}
+`;
+}
+
 export function codingStarterFiles(slug: string, language: string, track: string): StarterFile[] | null {
   const spec = SPECS[slug];
   if (!spec) return null;
@@ -356,33 +518,63 @@ export function codingStarterFiles(slug: string, language: string, track: string
 
 ${challenge?.summary ?? ""}
 
-${challenge?.description ?? "Implement the solution in src/solution.ts."}
+${challenge?.description ?? "Implement the solution."}
 `;
+
+  const lang = language === "python" || language === "go" ? language : "typescript";
+  const entry =
+    lang === "python" ? "src/solution.py" : lang === "go" ? "solution/solution.go" : "src/solution.ts";
 
   const readme = `# ${slug}
 
-Track: **${track}** · Language: **${language}**
+Track: **${track}** · Language: **${lang}**
 
 CRUCIBLE coding problem — LeetCode-style.
 
 1. Read the problem in the IDE **Problem** panel (or \`PROBLEM.md\`).
-2. Implement \`src/solution.ts\`.
+2. Implement \`${entry}\`.
 3. Click **Run** to execute public tests.
 4. Click **Submit** for evaluation (includes hidden cases).
 
 Do not modify hidden harness expectations dishonestly — graders check evidence.
 `;
 
-  return [
+  const common: StarterFile[] = [
     { path: "README.md", content: readme, language: "markdown" },
     { path: "PROBLEM.md", content: problemMd, language: "markdown" },
-    { path: "src/solution.ts", content: spec.solutionStub, language: "typescript" },
-    { path: "tests/public.test.ts", content: spec.publicTests, language: "typescript" },
     {
       path: "tests/hidden.manifest.json",
       content: JSON.stringify({ tests: spec.hiddenHints }, null, 2),
       language: "json",
     },
+  ];
+
+  if (lang === "python") {
+    return [
+      ...common,
+      { path: "src/solution.py", content: pythonStub(slug), language: "python" },
+      { path: "tests/run_public.py", content: pythonPublicRunner(slug), language: "python" },
+      { path: "tests/hidden_run.py", content: pythonHiddenRunner(slug), language: "python" },
+    ];
+  }
+
+  if (lang === "go") {
+    return [
+      ...common,
+      { path: "solution/solution.go", content: goStub(slug), language: "go" },
+      {
+        path: "go.mod",
+        content: `module crucible\n\ngo 1.22\n`,
+        language: "go",
+      },
+      { path: "tests/run_public.go", content: goPublicRunner(slug), language: "go" },
+    ];
+  }
+
+  return [
+    ...common,
+    { path: "src/solution.ts", content: spec.solutionStub, language: "typescript" },
+    { path: "tests/public.test.ts", content: spec.publicTests, language: "typescript" },
     {
       path: "tests/run.ts",
       content: `import { runPublicTests } from "./public.test";

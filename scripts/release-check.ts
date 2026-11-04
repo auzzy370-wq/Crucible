@@ -43,6 +43,9 @@ async function main() {
   const timedAssessments = await prisma.assessment.count({
     where: { status: "PUBLISHED", timedMinutes: { equals: 60 } },
   });
+  const nullTimed = await prisma.assessment.count({
+    where: { status: "PUBLISHED", timedMinutes: null },
+  });
   const [
     codingProblems,
     premiumChallenges,
@@ -50,6 +53,10 @@ async function main() {
     studyEnrollments,
     dailyChallenges,
     playgrounds,
+    publicProfiles,
+    weeklyChallenges,
+    contests,
+    editorials,
   ] = await Promise.all([
     prisma.challenge.count({ where: { type: "CODING_PROBLEM", isPublished: true } }),
     prisma.challenge.count({ where: { isPremium: true } }),
@@ -57,6 +64,10 @@ async function main() {
     prisma.studyPlanEnrollment.count(),
     prisma.dailyChallenge.count(),
     prisma.playground.count(),
+    prisma.candidateProfile.count({ where: { publicEnabled: true, publicSlug: { not: null } } }),
+    prisma.weeklyChallenge.count(),
+    prisma.contest.count(),
+    prisma.editorial.count({ where: { published: true } }),
   ]);
 
   const checks: { name: string; ok: boolean; detail: string }[] = [
@@ -72,8 +83,8 @@ async function main() {
     },
     {
       name: "sixty_minute_timed_assessments",
-      ok: timedAssessments >= catalog,
-      detail: `${timedAssessments}/${catalog} with timedMinutes=60`,
+      ok: timedAssessments >= catalog && nullTimed === 0,
+      detail: `${timedAssessments}/${catalog} with timedMinutes=60 · null=${nullTimed}`,
     },
     {
       name: "assignments_for_full_library",
@@ -119,6 +130,26 @@ async function main() {
       name: "playgrounds_seeded",
       ok: playgrounds >= 1,
       detail: `${playgrounds} playgrounds`,
+    },
+    {
+      name: "public_qualification_profiles",
+      ok: publicProfiles >= 1,
+      detail: `${publicProfiles} public profiles`,
+    },
+    {
+      name: "weekly_broken_production",
+      ok: weeklyChallenges >= 1,
+      detail: `${weeklyChallenges} weekly challenges`,
+    },
+    {
+      name: "contest_arena",
+      ok: contests >= 1,
+      detail: `${contests} contests`,
+    },
+    {
+      name: "editorials_published",
+      ok: editorials >= 1,
+      detail: `${editorials} editorials`,
     },
   ];
 

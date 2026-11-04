@@ -1,6 +1,6 @@
 # CRUCIBLE
 
-**Release 1.1** — elite full-stack **software engineering** and **cybersecurity** assessment & qualification platform.
+**Release 1.4** — elite full-stack **software engineering** and **cybersecurity** assessment & qualification platform.
 
 Timed, evidence-based assessments. Candidates design, build, secure, test, deploy, and recover real systems — including AppSec labs, SOC/IR simulations, detection engineering, cloud hardening, and secure full-stack product builds. Résumés claim. **Crucible verifies.**
 
@@ -78,10 +78,20 @@ More detail: [docs/VERCEL.md](docs/VERCEL.md).
 
 ## SaaS prep features
 
+- **Public landing** — `/` converts logged-out visitors; signed-in users go to Operations
 - **Daily Challenge** — `/daily` with streak tracking
+- **Weekly broken production** — `/weekly` shared incident/SaaS failure for the week
+- **Contest Arena** — `/contest` optional heat + leaderboard
+- **Editorials** — `/editorials` free + Premium solutions after judge signal
 - **Study Plans** — `/study-plans` (Meta 75, Stripe 2 Weeks, Google, Security)
+- **Lightning Judge / Debugger / AI autocomplete** — Premium priority queue, interactive debugger, Monaco AI completions
+- **Hidden harnesses** — coding Submit runs real hidden fixtures (TS/Python); Python & Go starters included
+- **Public qualification profiles** — `/u/casey-elite`, `/u/sam-appsec`, `/u/premium-prep`
+- **Employer scorecards** — `/api/scorecards/[assignmentId]` HTML print + `?format=ats` text export
+- **Pair / interviewer shadow** — host a code from the IDE; guest joins the same workspace
 - **Premium Checkout** — `/pricing` uses Stripe when `STRIPE_SECRET_KEY` is set; otherwise instant mock upgrade
 - Webhook: `POST /api/billing/webhook` (set `STRIPE_WEBHOOK_SECRET`)
+- Frequency % is labeled **illustrative** (methodology in problemset UI)
 
 ## Core workflow
 

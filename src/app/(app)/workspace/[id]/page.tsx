@@ -17,7 +17,14 @@ export default async function WorkspacePage({ params }: { params: Promise<{ id: 
     },
   });
   if (!workspace) notFound();
-  if (workspace.assignment.candidateId !== user!.id && !canReview(user!.role)) {
+  const pairGuest = await prisma.pairSession.findFirst({
+    where: {
+      workspaceId: workspace.id,
+      guestId: user!.id,
+      status: { in: ["WAITING", "LIVE"] },
+    },
+  });
+  if (workspace.assignment.candidateId !== user!.id && !canReview(user!.role) && !pairGuest) {
     notFound();
   }
 

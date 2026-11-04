@@ -785,6 +785,83 @@ export async function seedDatabase() {
     });
   }
 
+  // Guarantee every published assessment is timed (backfill nulls)
+  const timedBackfill = await prisma.assessment.updateMany({
+    where: { status: "PUBLISHED", timedMinutes: null },
+    data: { timedMinutes: DEFAULT_TIMED_MINUTES },
+  });
+
+  // Public qualification profiles
+  for (const row of [
+    {
+      userId: candidate.id,
+      publicSlug: "casey-elite",
+      headline: "Full-stack engineer — assessment-verified",
+      bio: "Crucible-qualified software engineer. Skills below are assessment or human-review verified.",
+    },
+    {
+      userId: cyberCandidate.id,
+      publicSlug: "sam-appsec",
+      headline: "AppSec / IR — human-reviewed",
+      bio: "Cybersecurity track candidate. Public profile excludes claimed résumé skills.",
+    },
+    {
+      userId: premiumCandidate.id,
+      publicSlug: "premium-prep",
+      headline: "Premium prep · verified delivery",
+      bio: "Interview prep plus timed assessments. Shareable qualification page for employers.",
+    },
+  ]) {
+    await prisma.candidateProfile.upsert({
+      where: { userId: row.userId },
+      create: {
+        userId: row.userId,
+        publicSlug: row.publicSlug,
+        publicEnabled: true,
+        headline: row.headline,
+        bio: row.bio,
+      },
+      update: {
+        publicSlug: row.publicSlug,
+        publicEnabled: true,
+        headline: row.headline,
+        bio: row.bio,
+      },
+    });
+  }
+
+  // Ensure verified skills exist for public profiles
+  for (const row of [
+    { userId: candidate.id, name: "typescript", domain: "languages", source: "ASSESSMENT" as const },
+    { userId: candidate.id, name: "system-design", domain: "architecture", source: "HUMAN_REVIEW" as const },
+    { userId: cyberCandidate.id, name: "incident-response", domain: "cybersecurity", source: "ASSESSMENT" as const },
+    { userId: cyberCandidate.id, name: "appsec", domain: "cybersecurity", source: "HUMAN_REVIEW" as const },
+  ]) {
+    const profile = await prisma.candidateProfile.findUnique({ where: { userId: row.userId } });
+    if (!profile) continue;
+    await prisma.skillRecord.upsert({
+      where: {
+        profileId_name_source: { profileId: profile.id, name: row.name, source: row.source },
+      },
+      create: {
+        profileId: profile.id,
+        name: row.name,
+        domain: row.domain,
+        source: row.source,
+        confidence: 0.9,
+        evidence: "Seeded verified skill",
+      },
+      update: { confidence: 0.9, evidence: "Seeded verified skill" },
+    });
+  }
+
+  const { seedEditorials } = await import("@/server/saas/editorials");
+  await seedEditorials();
+  const { ensureWeeklyChallenge } = await import("@/server/saas/weekly");
+  await ensureWeeklyChallenge();
+  const { ensureActiveContest } = await import("@/server/saas/contests");
+  await ensureActiveContest();
+
   const [
     workspaceCount,
     fileCount,
@@ -815,6 +892,8 @@ export async function seedDatabase() {
     passwordAdmin: "Gauntlet!Admin1",
     passwordCandidate: "Gauntlet!Cand1",
     policies: [engPolicy.name, cyberPolicy.name, securePolicy.name],
+    timedMinutesBackfilled: timedBackfill.count,
+    publicProfiles: ["/u/casey-elite", "/u/sam-appsec", "/u/premium-prep"],
     ready: {
       publishedChallenges: challengeCount,
       publishedAssessments: assessmentCount,

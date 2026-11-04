@@ -144,6 +144,10 @@ model User {
   dailyCompletions    DailyChallengeCompletion[]
   streak              UserStreak?
   stripeCustomerId    String?
+  contestEntries      ContestEntry[]
+  pairSessionsHost    PairSession[] @relation("PairHost")
+  pairSessionsGuest   PairSession[] @relation("PairGuest")
+  weeklyCompletions   WeeklyChallengeCompletion[]
 }
 
 model Session {
@@ -163,6 +167,8 @@ model Session {
 model CandidateProfile {
   id               String   @id @default(cuid())
   userId           String   @unique
+  publicSlug       String?  @unique
+  publicEnabled    Boolean  @default(false)
   headline         String?
   bio              String?
   portfolioUrl     String?
@@ -265,10 +271,13 @@ model Challenge {
   createdAt          DateTime        @default(now())
   updatedAt          DateTime        @updatedAt
 
-  assessments     Assessment[]
-  incidents       IncidentScenario[]
-  interviewSims   InterviewSimulation[]
-  dailyChallenges DailyChallenge[]
+  assessments      Assessment[]
+  incidents        IncidentScenario[]
+  interviewSims    InterviewSimulation[]
+  dailyChallenges  DailyChallenge[]
+  weeklyChallenges WeeklyChallenge[]
+  editorials       Editorial[]
+  contestProblems  ContestProblem[]
 }
 
 model Playground {
@@ -458,6 +467,7 @@ model ExecutionJob {
   workspaceId  String
   type         String
   status       ExecutionStatus @default(QUEUED)
+  priority     Int             @default(0)
   imageTag     String
   command      String
   cpuLimit     String          @default("1")
@@ -474,7 +484,7 @@ model ExecutionJob {
   workspace    Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   testRun      TestRun?
 
-  @@index([status])
+  @@index([status, priority])
 }
 
 model TestRun {
@@ -751,4 +761,105 @@ model PlatformSetting {
   id    String @id @default(cuid())
   key   String @unique
   value Json
+}
+
+model WeeklyChallenge {
+  id          String   @id @default(cuid())
+  weekKey     String   @unique
+  challengeId String
+  title       String
+  synopsis    String
+  createdAt   DateTime @default(now())
+  challenge   Challenge @relation(fields: [challengeId], references: [id])
+  completions WeeklyChallengeCompletion[]
+}
+
+model WeeklyChallengeCompletion {
+  id                String   @id @default(cuid())
+  userId            String
+  weeklyChallengeId String
+  score             Float?
+  completedAt       DateTime @default(now())
+  user              User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  weeklyChallenge   WeeklyChallenge @relation(fields: [weeklyChallengeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, weeklyChallengeId])
+  @@index([userId])
+}
+
+model Contest {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  description String
+  startsAt    DateTime
+  endsAt      DateTime
+  isPremium   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  problems    ContestProblem[]
+  entries     ContestEntry[]
+}
+
+model ContestProblem {
+  id          String @id @default(cuid())
+  contestId   String
+  challengeId String
+  ordinal     Int    @default(0)
+  points      Int    @default(100)
+  contest     Contest   @relation(fields: [contestId], references: [id], onDelete: Cascade)
+  challenge   Challenge @relation(fields: [challengeId], references: [id])
+
+  @@unique([contestId, challengeId])
+  @@index([contestId])
+}
+
+model ContestEntry {
+  id          String   @id @default(cuid())
+  contestId   String
+  userId      String
+  score       Float    @default(0)
+  solvedCount Int      @default(0)
+  penaltyMin  Int      @default(0)
+  rank        Int?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  contest     Contest  @relation(fields: [contestId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([contestId, userId])
+  @@index([contestId, score])
+}
+
+model Editorial {
+  id          String   @id @default(cuid())
+  challengeId String
+  slug        String   @unique
+  title       String
+  bodyMd      String
+  approach    String?
+  complexity  String?
+  isPremium   Boolean  @default(true)
+  published   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+
+  @@index([challengeId])
+}
+
+model PairSession {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  workspaceId String
+  hostId      String
+  guestId     String?
+  guestRole   String   @default("SHADOW")
+  status      String   @default("WAITING")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  host        User     @relation("PairHost", fields: [hostId], references: [id], onDelete: Cascade)
+  guest       User?    @relation("PairGuest", fields: [guestId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId])
+  @@index([hostId])
 }

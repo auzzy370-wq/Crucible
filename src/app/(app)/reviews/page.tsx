@@ -93,6 +93,22 @@ export default function ReviewsPage() {
                   <Button size="sm" variant="outline" onClick={() => decide(item.id, "OVERRIDE_AI")}>
                     Override AI
                   </Button>
+                  <a
+                    className="inline-flex min-h-10 items-center rounded-md border border-slate-700 px-3 text-xs text-slate-200 hover:bg-slate-900 sm:min-h-8"
+                    href={`/api/scorecards/${item.id}`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Scorecard PDF
+                  </a>
+                  <a
+                    className="inline-flex min-h-10 items-center rounded-md border border-slate-700 px-3 text-xs text-slate-200 hover:bg-slate-900 sm:min-h-8"
+                    href={`/api/scorecards/${item.id}?format=ats`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    ATS export
+                  </a>
                 </div>
               </CardContent>
             </Card>

@@ -29,6 +29,12 @@ const schema = z.object({
   preferredTrack: z.nativeEnum(AssessmentTrack).optional(),
   accommodations: z.string().optional(),
   claimedSkills: z.array(z.object({ name: z.string(), domain: z.string() })).optional(),
+  publicSlug: z
+    .string()
+    .regex(/^[a-z0-9-]{3,40}$/)
+    .optional()
+    .or(z.literal("")),
+  publicEnabled: z.boolean().optional(),
 });
 
 export async function PUT(req: Request) {
@@ -41,17 +47,16 @@ export async function PUT(req: Request) {
       githubUrl: body.githubUrl || undefined,
       linkedInUrl: body.linkedInUrl || undefined,
     });
-    // cybersecurity field on profile
-    if (body.cybersecurity || body.preferredTrack) {
-      const { prisma } = await import("@/lib/db");
-      await prisma.candidateProfile.update({
-        where: { id: updated.id },
-        data: {
-          cybersecurity: body.cybersecurity,
-          preferredTrack: body.preferredTrack,
-        },
-      });
-    }
+    const { prisma } = await import("@/lib/db");
+    await prisma.candidateProfile.update({
+      where: { id: updated.id },
+      data: {
+        cybersecurity: body.cybersecurity,
+        preferredTrack: body.preferredTrack,
+        publicSlug: body.publicSlug === "" ? null : body.publicSlug || undefined,
+        publicEnabled: body.publicEnabled,
+      },
+    });
     return jsonOk(await getCandidateDetail(user.id));
   });
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -115,9 +115,20 @@ export function WorkspaceIde(props: {
   const coding = Boolean(props.codingMode);
   const premium = Boolean(props.premium);
   const [debuggerOpen, setDebuggerOpen] = useState(false);
+  const [debugState, setDebugState] = useState<{
+    status: string;
+    frames: { fn: string; file: string; line: number; locals: Record<string, string> }[];
+    caseHint?: string;
+    tip?: string;
+    breakpoint?: number;
+  } | null>(null);
+  const [bpLine, setBpLine] = useState(1);
+  const [pairCode, setPairCode] = useState<string | null>(null);
+  const [joinCode, setJoinCode] = useState("");
   const preferred = coding
     ? props.files.find((f) => f.path === "src/solution.ts")?.path ??
-      props.files.find((f) => f.path.endsWith("solution.ts"))?.path
+      props.files.find((f) => f.path === "src/solution.py")?.path ??
+      props.files.find((f) => f.path.endsWith("solution.ts") || f.path.endsWith("solution.py") || f.path.endsWith("solution.go"))?.path
     : undefined;
   const [files, setFiles] = useState(props.files);
   const [activePath, setActivePath] = useState(preferred ?? props.files[0]?.path ?? "README.md");
@@ -129,6 +140,7 @@ export function WorkspaceIde(props: {
   const [busy, setBusy] = useState(false);
   const [caseResults, setCaseResults] = useState<CaseResult[]>([]);
   const [panel, setPanel] = useState<"problem" | "code">("problem");
+  const editorRef = useRef<{ editor: any; monaco: any } | null>(null);
 
   async function save(content: string) {
     setFiles((prev) => prev.map((f) => (f.path === activePath ? { ...f, content } : f)));
@@ -233,6 +245,96 @@ export function WorkspaceIde(props: {
     }
   }
 
+  async function debugAction(action: "start" | "step" | "continue" | "set_breakpoint" | "clear") {
+    if (!premium) return toast.error("Debugger requires Premium");
+    const res = await fetch(`/api/workspace/${props.workspaceId}/debug`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ action, line: bpLine }),
+    });
+    const json = await res.json();
+    if (!json.ok) return toast.error(json.error?.message || "Debugger error");
+    setDebugState(json.data);
+    setDebuggerOpen(true);
+    if (json.data.breakpoint && editorRef.current?.editor) {
+      editorRef.current.editor.revealLineInCenter(json.data.breakpoint);
+    }
+  }
+
+  async function hostPair() {
+    const res = await fetch("/api/pair", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ workspaceId: props.workspaceId, guestRole: "SHADOW" }),
+    });
+    const json = await res.json();
+    if (!json.ok) return toast.error(json.error?.message || "Pair failed");
+    setPairCode(json.data.code);
+    toast.success(`Pair code ${json.data.code} — share with interviewer/shadow`);
+  }
+
+  async function joinPair() {
+    const res = await fetch("/api/pair", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ code: joinCode }),
+    });
+    const json = await res.json();
+    if (!json.ok) return toast.error(json.error?.message || "Join failed");
+    toast.success(`Joined as ${json.data.guestRole || "SHADOW"}`);
+    if (json.data.workspaceId) router.push(`/workspace/${json.data.workspaceId}`);
+  }
+
+  function wireAiComplete(editor: any, monaco: any) {
+    if (!premium || !monaco) return;
+    const provider = monaco.languages.registerCompletionItemProvider(
+      guessLang(activePath, props.language),
+      {
+        triggerCharacters: [".", " ", "(", "\n"],
+        provideCompletionItems: async (model: any, position: any) => {
+          const offset = model.getOffsetAt(position);
+          const value = model.getValue();
+          const prefix = value.slice(Math.max(0, offset - 2000), offset);
+          const suffix = value.slice(offset, offset + 500);
+          try {
+            const res = await fetch(`/api/workspace/${props.workspaceId}/complete`, {
+              method: "POST",
+              headers: { "content-type": "application/json" },
+              body: JSON.stringify({
+                path: activePath,
+                prefix,
+                suffix,
+                language: props.language,
+              }),
+            });
+            const json = await res.json();
+            if (!json.ok) return { suggestions: [] };
+            return {
+              suggestions: (json.data.suggestions as { label: string; insertText: string; detail: string }[]).map(
+                (s, i) => ({
+                  label: s.label,
+                  kind: monaco.languages.CompletionItemKind.Snippet,
+                  insertText: s.insertText,
+                  detail: s.detail,
+                  range: {
+                    startLineNumber: position.lineNumber,
+                    endLineNumber: position.lineNumber,
+                    startColumn: position.column,
+                    endColumn: position.column,
+                  },
+                  sortText: `0${i}`,
+                }),
+              ),
+            };
+          } catch {
+            return { suggestions: [] };
+          }
+        },
+      },
+    );
+    editor.onDidDispose(() => provider.dispose());
+  }
+
   const problemText =
     props.problemDescription ||
     files.find((f) => f.path === "PROBLEM.md")?.content ||
@@ -272,23 +374,85 @@ export function WorkspaceIde(props: {
               className="w-full sm:w-auto"
               variant="secondary"
               disabled={!premium}
-              onClick={() => (premium ? setDebuggerOpen((v) => !v) : undefined)}
-              title={premium ? "Toggle debugger" : "Premium feature"}
+              onClick={() => (premium ? debugAction("start") : toast.error("Debugger requires Premium"))}
+              title={premium ? "Start debugger" : "Premium feature"}
             >
               Debugger
             </Button>
             <Button className="w-full sm:w-auto" variant="secondary" onClick={commit}>
               Commit
             </Button>
+            <Button className="w-full sm:w-auto" variant="outline" onClick={hostPair}>
+              Pair / shadow
+            </Button>
           </div>
         </div>
+        {(pairCode || joinCode !== undefined) && (
+          <div className="flex flex-wrap items-end gap-2 rounded-xl border border-slate-800 bg-slate-950/60 p-3 text-sm">
+            {pairCode && (
+              <div className="font-mono text-cyan-200">
+                Host code: <span className="text-lg tracking-widest">{pairCode}</span>
+              </div>
+            )}
+            <Input
+              className="max-w-[160px]"
+              placeholder="Join code"
+              value={joinCode}
+              onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+            />
+            <Button size="sm" variant="secondary" onClick={joinPair}>
+              Join session
+            </Button>
+            <span className="text-xs text-slate-500">Live pair / interviewer shadow on this workspace</span>
+          </div>
+        )}
         {debuggerOpen && premium && (
           <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-3 text-sm text-amber-50">
-            <div className="font-medium">Interactive debugger</div>
-            <p className="mt-1 text-amber-100/80">
-              Breakpoints-ready panel (Premium). Step through failing cases without print-spam — wire a DAP adapter in
-              production; this demo surfaces the control surface in-editor.
-            </p>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="font-medium">
+                Interactive debugger · {debugState?.status ?? "idle"}
+                {debugState?.caseHint ? ` · case ${debugState.caseHint}` : ""}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Input
+                  className="h-8 w-20 bg-slate-950"
+                  type="number"
+                  min={1}
+                  value={bpLine}
+                  onChange={(e) => setBpLine(Number(e.target.value) || 1)}
+                  title="Breakpoint line"
+                />
+                <Button size="sm" variant="secondary" onClick={() => debugAction("set_breakpoint")}>
+                  Break
+                </Button>
+                <Button size="sm" variant="secondary" onClick={() => debugAction("step")}>
+                  Step
+                </Button>
+                <Button size="sm" variant="secondary" onClick={() => debugAction("continue")}>
+                  Continue
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => debugAction("clear")}>
+                  Stop
+                </Button>
+              </div>
+            </div>
+            {debugState?.tip && <p className="mt-2 text-xs text-amber-100/70">{debugState.tip}</p>}
+            {debugState?.frames?.length ? (
+              <ul className="mt-3 space-y-2 font-mono text-xs">
+                {debugState.frames.map((f, i) => (
+                  <li key={`${f.fn}-${i}`} className="rounded-md border border-amber-500/20 bg-black/20 px-3 py-2">
+                    <div>
+                      #{i} {f.fn} · {f.file}:{f.line}
+                    </div>
+                    <div className="mt-1 text-amber-100/70">
+                      {Object.entries(f.locals || {})
+                        .map(([k, v]) => `${k}=${v}`)
+                        .join(" · ") || "locals pending"}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
           </div>
         )}
 
@@ -358,6 +522,10 @@ export function WorkspaceIde(props: {
                   language={guessLang(activePath, props.language)}
                   value={active?.content ?? ""}
                   onChange={(v) => v !== undefined && save(v)}
+                  onMount={(editor, monaco) => {
+                    editorRef.current = { editor, monaco };
+                    wireAiComplete(editor, monaco);
+                  }}
                   options={{
                     minimap: { enabled: false },
                     fontSize: 13,
@@ -368,15 +536,21 @@ export function WorkspaceIde(props: {
                     quickSuggestions: premium,
                     suggestOnTriggerCharacters: premium,
                     wordBasedSuggestions: premium ? "currentDocument" : "off",
+                    glyphMargin: premium,
                   }}
                 />
               </div>
               {!premium && (
                 <div className="border-t border-slate-800 px-3 py-2 text-xs text-slate-500">
-                  Autocomplete is a Premium feature.{" "}
+                  AI autocomplete is a Premium feature.{" "}
                   <a className="text-amber-300 hover:underline" href="/pricing">
                     Upgrade
                   </a>
+                </div>
+              )}
+              {premium && (
+                <div className="border-t border-slate-800 px-3 py-2 text-xs text-slate-500">
+                  AI autocomplete active — trigger with typing or Ctrl+Space. Lightning Judge prioritizes your runs.
                 </div>
               )}
             </section>

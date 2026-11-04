@@ -43,6 +43,8 @@ export function CandidateProfilePanel() {
           .filter(Boolean),
         preferredTrack: profile.preferredTrack,
         accommodations: profile.accommodations,
+        publicSlug: profile.publicSlug || "",
+        publicEnabled: Boolean(profile.publicEnabled),
       }),
     });
     const json = await res.json();
@@ -104,6 +106,35 @@ export function CandidateProfilePanel() {
               value={profile.accommodations ?? ""}
               onChange={(e) => setProfile({ ...profile, accommodations: e.target.value })}
             />
+          </div>
+          <div className="space-y-2 rounded-lg border border-slate-800 p-3">
+            <Label>Public qualification profile</Label>
+            <p className="text-xs text-slate-500">
+              Share verified skills with employers. Claimed résumé skills never appear on the public page.
+            </p>
+            <Input
+              placeholder="public-slug"
+              value={profile.publicSlug ?? ""}
+              onChange={(e) =>
+                setProfile({
+                  ...profile,
+                  publicSlug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""),
+                })
+              }
+            />
+            <label className="flex items-center gap-2 text-sm text-slate-300">
+              <input
+                type="checkbox"
+                checked={Boolean(profile.publicEnabled)}
+                onChange={(e) => setProfile({ ...profile, publicEnabled: e.target.checked })}
+              />
+              Publish at /u/{profile.publicSlug || "…"}
+            </label>
+            {profile.publicEnabled && profile.publicSlug && (
+              <a className="text-sm text-cyan-300 hover:underline" href={`/u/${profile.publicSlug}`} target="_blank" rel="noreferrer">
+                Open public profile →
+              </a>
+            )}
           </div>
           <Button onClick={save}>Save profile</Button>
         </CardContent>

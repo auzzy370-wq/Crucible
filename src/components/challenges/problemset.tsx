@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { FREQUENCY_METHODOLOGY } from "@/lib/frequency";
 
 export type ProblemRow = {
   id: string;
@@ -99,6 +100,9 @@ export function Problemset(props: {
           <p className="mt-2 max-w-2xl text-slate-400">
             Company-tagged interview questions with frequency and time filters. Premium unlocks exclusive problems,
             solutions, and Lightning Judge.
+          </p>
+          <p className="mt-2 max-w-2xl text-xs text-slate-500" title={FREQUENCY_METHODOLOGY.detail}>
+            Freq column: {FREQUENCY_METHODOLOGY.label}. {FREQUENCY_METHODOLOGY.detail}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -198,7 +202,9 @@ export function Problemset(props: {
                   <th className="px-4 py-3">Title</th>
                   <th className="px-4 py-3 hidden lg:table-cell">Companies</th>
                   <th className="px-4 py-3">Difficulty</th>
-                  <th className="px-4 py-3 hidden md:table-cell">Freq</th>
+                  <th className="px-4 py-3 hidden md:table-cell" title={FREQUENCY_METHODOLOGY.detail}>
+                    Freq*
+                  </th>
                   <th className="px-4 py-3 hidden sm:table-cell">Time</th>
                   <th className="px-4 py-3">Open</th>
                 </tr>
@@ -230,8 +236,12 @@ export function Problemset(props: {
                         </div>
                       </td>
                       <td className={cn("px-4 py-3 font-medium", diffClass(L))}>{L}</td>
-                      <td className="px-4 py-3 hidden font-mono text-xs text-slate-400 md:table-cell">
+                      <td
+                        className="px-4 py-3 hidden font-mono text-xs text-slate-400 md:table-cell"
+                        title={FREQUENCY_METHODOLOGY.detail}
+                      >
                         {p.frequency ?? 0}%
+                        <span className="ml-1 text-[10px] text-slate-600">{FREQUENCY_METHODOLOGY.short}</span>
                       </td>
                       <td className="px-4 py-3 hidden font-mono text-xs text-slate-400 sm:table-cell">
                         {p.avgMinutes ?? 60}m
