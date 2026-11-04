@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   LayoutDashboard,
   Users,
@@ -27,48 +27,64 @@ import {
   Trophy,
   BookOpen,
   AlertTriangle,
+  UserRound,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
-const NAV = [
-  { href: "/dashboard", label: "Operations", icon: LayoutDashboard },
+type NavItem = {
+  href: string;
+  label: string;
+  icon: typeof LayoutDashboard;
+  roles?: string[];
+};
+
+const NAV: NavItem[] = [
+  { href: "/dashboard", label: "Home", icon: LayoutDashboard },
   { href: "/daily", label: "Daily Challenge", icon: CalendarDays },
   { href: "/weekly", label: "Broken Production", icon: AlertTriangle },
   { href: "/challenges", label: "Problemset", icon: Boxes },
-  { href: "/contest", label: "Contest Arena", icon: Trophy },
-  { href: "/editorials", label: "Editorials", icon: BookOpen },
   { href: "/study-plans", label: "Study Plans", icon: Route },
   { href: "/interview", label: "Interview Sims", icon: Timer },
   { href: "/playgrounds", label: "Playgrounds", icon: FlaskConical },
+  { href: "/contest", label: "Contest Arena", icon: Trophy },
+  { href: "/editorials", label: "Editorials", icon: BookOpen },
   { href: "/pricing", label: "Premium", icon: Sparkles },
-  { href: "/assessments", label: "Assessments", icon: Crosshair },
-  { href: "/candidates", label: "Candidates", icon: Users },
-  { href: "/reviews", label: "Technical Review", icon: ScrollText },
-  { href: "/teams", label: "Team Crucible", icon: Network },
+  { href: "/candidates", label: "My Profile", icon: UserRound, roles: ["CANDIDATE", "TEAM_MEMBER"] },
+  { href: "/assessments", label: "Assessments", icon: Crosshair, roles: ["SUPER_ADMIN", "HIRING_MANAGER", "TECHNICAL_REVIEWER"] },
+  { href: "/candidates", label: "Candidates", icon: Users, roles: ["SUPER_ADMIN", "HIRING_MANAGER", "TECHNICAL_REVIEWER"] },
+  { href: "/reviews", label: "Technical Review", icon: ScrollText, roles: ["SUPER_ADMIN", "HIRING_MANAGER", "TECHNICAL_REVIEWER"] },
+  { href: "/teams", label: "Team Crucible", icon: Network, roles: ["SUPER_ADMIN", "HIRING_MANAGER", "TECHNICAL_REVIEWER", "TEAM_MEMBER"] },
   { href: "/incidents", label: "Incident Sims", icon: Siren },
-  { href: "/architecture", label: "Architecture", icon: BrainCircuit },
+  { href: "/architecture", label: "Architecture", icon: BrainCircuit, roles: ["SUPER_ADMIN", "HIRING_MANAGER", "TECHNICAL_REVIEWER"] },
   { href: "/workspace", label: "Workspace", icon: Terminal },
-  { href: "/admin", label: "Admin / Security", icon: Shield },
+  { href: "/admin", label: "Admin / Security", icon: Shield, roles: ["SUPER_ADMIN"] },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
 function NavLinks({
   pathname,
+  role,
   onNavigate,
 }: {
   pathname: string;
+  role: string;
   onNavigate?: () => void;
 }) {
+  const items = useMemo(
+    () => NAV.filter((item) => !item.roles || item.roles.includes(role)),
+    [role],
+  );
+
   return (
     <nav className="space-y-1 px-3 pb-6">
-      {NAV.map((item) => {
+      {items.map((item) => {
         const Icon = item.icon;
         const active = pathname === item.href || pathname.startsWith(item.href + "/");
         return (
           <Link
-            key={item.href}
+            key={`${item.href}-${item.label}`}
             href={item.href}
             onClick={onNavigate}
             className={cn(
@@ -95,6 +111,7 @@ export function AppShell({
   const pathname = usePathname();
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  const isCandidate = user.role === "CANDIDATE" || user.role === "TEAM_MEMBER";
 
   useEffect(() => {
     setOpen(false);
@@ -149,7 +166,6 @@ export function AppShell({
 
   return (
     <div className="min-h-screen lg:grid lg:grid-cols-[260px_1fr]">
-      {/* Mobile top bar */}
       <header className="sticky top-0 z-40 flex items-center justify-between gap-3 border-b border-slate-800/80 bg-slate-950/95 px-4 py-3 backdrop-blur lg:hidden safe-top">
         <Link href="/dashboard" className="min-w-0">
           {brand}
@@ -166,7 +182,6 @@ export function AppShell({
         </Button>
       </header>
 
-      {/* Mobile drawer */}
       <div
         className={cn(
           "fixed inset-0 z-50 lg:hidden",
@@ -197,32 +212,35 @@ export function AppShell({
           </div>
           <div className="px-5 pb-3">
             <Badge variant="cyan" className="mb-2">
-              Elite Qualification
+              {isCandidate ? "Candidate prep" : "Elite Qualification"}
             </Badge>
             <p className="text-xs leading-relaxed text-slate-400">
-              Software engineering & cybersecurity tracks. Demonstrated ability over résumé claims.
+              {isCandidate
+                ? "Daily → solve → Submit with hidden harness → share your verified profile."
+                : "Software engineering & cybersecurity tracks. Demonstrated ability over résumé claims."}
             </p>
           </div>
           <div className="flex-1 overflow-y-auto overscroll-contain">
-            <NavLinks pathname={pathname} onNavigate={() => setOpen(false)} />
+            <NavLinks pathname={pathname} role={user.role} onNavigate={() => setOpen(false)} />
           </div>
           {userBlock}
         </aside>
       </div>
 
-      {/* Desktop sidebar */}
       <aside className="hidden border-r border-slate-800/80 bg-slate-950/80 backdrop-blur lg:flex lg:flex-col">
         <div className="px-5 py-5">{brand}</div>
         <div className="px-5 pb-4">
           <Badge variant="cyan" className="mb-2">
-            Elite Qualification
+            {isCandidate ? "Candidate prep" : "Elite Qualification"}
           </Badge>
           <p className="text-xs leading-relaxed text-slate-400">
-            Software engineering & cybersecurity tracks. Demonstrated ability over résumé claims.
+            {isCandidate
+              ? "Daily → solve → Submit with hidden harness → share your verified profile."
+              : "Software engineering & cybersecurity tracks. Demonstrated ability over résumé claims."}
           </p>
         </div>
         <div className="flex-1 overflow-y-auto">
-          <NavLinks pathname={pathname} />
+          <NavLinks pathname={pathname} role={user.role} />
         </div>
         {userBlock}
       </aside>

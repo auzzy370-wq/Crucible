@@ -12,7 +12,7 @@ export default async function DashboardPage() {
   const isStaff = user && ["SUPER_ADMIN", "HIRING_MANAGER", "TECHNICAL_REVIEWER"].includes(user.role);
 
   if (!isStaff) {
-    const [assignments, streak, enrollments] = await Promise.all([
+    const [assignments, streak, enrollments, profile, daily] = await Promise.all([
       prisma.assessmentAssignment.findMany({
         where: { candidateId: user!.id },
         include: { assessment: { include: { challenge: true } }, scoreReport: true, workspace: true },
@@ -20,16 +20,81 @@ export default async function DashboardPage() {
       }),
       prisma.userStreak.findUnique({ where: { userId: user!.id } }),
       prisma.studyPlanEnrollment.count({ where: { userId: user!.id } }),
+      prisma.candidateProfile.findUnique({ where: { userId: user!.id } }),
+      prisma.dailyChallenge.findFirst({
+        orderBy: { dateKey: "desc" },
+        include: { challenge: true },
+      }),
     ]);
+
+    const codingOpen =
+      assignments.find(
+        (a) =>
+          a.workspace &&
+          a.assessment.challenge.type === "CODING_PROBLEM" &&
+          !["COMPLETED", "FAILED", "EXPIRED"].includes(a.status),
+      ) ?? assignments.find((a) => a.workspace);
+
+    const completedWithScore = assignments.filter((a) => a.scoreReport);
+    const firstRunDone = Boolean(streak?.currentStreak) && completedWithScore.length > 0;
+
     return (
       <div className="animate-rise space-y-6">
         <header>
           <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">CANDIDATE PORTAL</p>
-          <h1 className="mt-2 text-2xl font-semibold sm:text-3xl tracking-tight">Your Crucible assignments</h1>
+          <h1 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">
+            {firstRunDone ? "Your Crucible" : "Start here"}
+          </h1>
           <p className="mt-2 max-w-2xl text-slate-400">
-            Complete timed, realistic engineering and cybersecurity assessments. Résumé claims are never treated as proof.
+            One loop: Daily challenge → solve in the IDE → Submit (public + hidden) → share your verified profile.
           </p>
         </header>
+
+        <section className="rounded-2xl border border-cyan-500/20 bg-cyan-500/5 p-5">
+          <div className="text-xs font-medium uppercase tracking-wider text-cyan-200/80">First-run path</div>
+          <ol className="mt-4 grid gap-3 md:grid-cols-3">
+            <li className="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
+              <div className="font-mono text-xs text-slate-500">1</div>
+              <div className="mt-1 font-medium text-slate-100">Daily challenge</div>
+              <p className="mt-1 text-sm text-slate-400">
+                {daily?.challenge?.title ?? "Today’s problem"} · streak {streak?.currentStreak ?? 0}
+              </p>
+              <Link href="/daily" className="mt-3 inline-block text-sm text-cyan-300 hover:underline">
+                Open daily →
+              </Link>
+            </li>
+            <li className="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
+              <div className="font-mono text-xs text-slate-500">2</div>
+              <div className="mt-1 font-medium text-slate-100">Solve + Submit</div>
+              <p className="mt-1 text-sm text-slate-400">
+                Run public tests, then Submit for the hidden harness.
+              </p>
+              <Link
+                href={codingOpen?.workspace ? `/workspace/${codingOpen.workspace.id}` : "/challenges"}
+                className="mt-3 inline-block text-sm text-cyan-300 hover:underline"
+              >
+                {codingOpen?.workspace ? "Continue workspace →" : "Open problemset →"}
+              </Link>
+            </li>
+            <li className="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
+              <div className="font-mono text-xs text-slate-500">3</div>
+              <div className="mt-1 font-medium text-slate-100">Share verified profile</div>
+              <p className="mt-1 text-sm text-slate-400">
+                Employers see assessment-verified skills only — never résumé claims.
+              </p>
+              {profile?.publicEnabled && profile.publicSlug ? (
+                <Link href={`/u/${profile.publicSlug}`} className="mt-3 inline-block text-sm text-cyan-300 hover:underline">
+                  View /u/{profile.publicSlug} →
+                </Link>
+              ) : (
+                <Link href="/candidates" className="mt-3 inline-block text-sm text-cyan-300 hover:underline">
+                  Publish profile →
+                </Link>
+              )}
+            </li>
+          </ol>
+        </section>
+
         <section className="grid gap-3 sm:grid-cols-3">
           <Link href="/daily" className="rounded-xl border border-cyan-500/20 bg-cyan-500/5 p-4 hover:bg-cyan-500/10">
             <div className="text-xs uppercase tracking-wider text-slate-500">Daily challenge</div>
@@ -44,6 +109,7 @@ export default async function DashboardPage() {
             <div className="mt-1 font-mono text-2xl text-amber-100">{user?.plan === "PREMIUM" ? "Premium" : "Free"}</div>
           </Link>
         </section>
+
         <div className="grid gap-4 md:grid-cols-2">
           {assignments.map((a) => (
             <Card key={a.id}>
@@ -64,10 +130,6 @@ export default async function DashboardPage() {
                   <span>Status</span>
                   <span className="font-mono text-slate-200">{a.status}</span>
                 </div>
-                <div className="flex justify-between text-slate-400">
-                  <span>Adaptive level</span>
-                  <span className="font-mono text-slate-200">{a.currentLevel}</span>
-                </div>
                 {(a.assessment.timedMinutes || a.dueAt) && (
                   <div className="flex items-center justify-between gap-2 text-slate-400">
                     <span>Session</span>
@@ -79,24 +141,31 @@ export default async function DashboardPage() {
                   </div>
                 )}
                 {a.scoreReport && (
-                  <div className="flex justify-between text-slate-400">
+                  <div className="flex flex-wrap items-center justify-between gap-2 text-slate-400">
                     <span>Score</span>
                     <span className="font-mono text-cyan-300">{formatScore(a.scoreReport.overall)}</span>
                   </div>
                 )}
-                <Link
-                  className="text-cyan-300 hover:underline"
-                  href={a.workspace ? `/workspace/${a.workspace.id}` : "/workspace"}
-                >
-                  {a.workspace ? "Open workspace →" : "View workspaces →"}
-                </Link>
+                <div className="flex flex-wrap gap-3">
+                  <Link
+                    className="text-cyan-300 hover:underline"
+                    href={a.workspace ? `/workspace/${a.workspace.id}` : "/workspace"}
+                  >
+                    {a.workspace ? "Open workspace →" : "View workspaces →"}
+                  </Link>
+                  {a.scoreReport && (
+                    <Link className="text-emerald-300 hover:underline" href={`/scorecard/${a.id}`} target="_blank">
+                      Share scorecard →
+                    </Link>
+                  )}
+                </div>
               </CardContent>
             </Card>
           ))}
           {!assignments.length && (
             <Card className="md:col-span-2">
               <CardContent className="py-10 text-center text-slate-400">
-                No assignments yet. A hiring manager will assign software engineering or cybersecurity assessments.
+                No assignments yet. Start with the daily challenge while a manager assigns assessments.
               </CardContent>
             </Card>
           )}
@@ -123,7 +192,7 @@ export default async function DashboardPage() {
       <header className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">OPERATIONS DASHBOARD</p>
-          <h1 className="mt-2 text-2xl font-semibold sm:text-3xl tracking-tight">Crucible operations</h1>
+          <h1 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">Crucible operations</h1>
           <p className="mt-2 max-w-3xl text-slate-400">
             Premium hiring operations for exceptional software engineers and cybersecurity practitioners.
             Timed assessments. Scores calibrated to challenge difficulty — not population percentiles.

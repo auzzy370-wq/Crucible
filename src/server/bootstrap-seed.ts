@@ -791,25 +791,31 @@ export async function seedDatabase() {
     data: { timedMinutes: DEFAULT_TIMED_MINUTES },
   });
 
-  // Public qualification profiles
+  // Public qualification profiles (finished — with years + completed scorecards)
   for (const row of [
     {
       userId: candidate.id,
       publicSlug: "casey-elite",
       headline: "Full-stack engineer — assessment-verified",
       bio: "Crucible-qualified software engineer. Skills below are assessment or human-review verified.",
+      yearsExperience: 6,
+      preferredTrack: "SECURE_FULL_STACK" as const,
     },
     {
       userId: cyberCandidate.id,
       publicSlug: "sam-appsec",
       headline: "AppSec / IR — human-reviewed",
       bio: "Cybersecurity track candidate. Public profile excludes claimed résumé skills.",
+      yearsExperience: 5,
+      preferredTrack: "CYBERSECURITY" as const,
     },
     {
       userId: premiumCandidate.id,
       publicSlug: "premium-prep",
       headline: "Premium prep · verified delivery",
       bio: "Interview prep plus timed assessments. Shareable qualification page for employers.",
+      yearsExperience: 4,
+      preferredTrack: "SOFTWARE_ENGINEERING" as const,
     },
   ]) {
     await prisma.candidateProfile.upsert({
@@ -820,12 +826,81 @@ export async function seedDatabase() {
         publicEnabled: true,
         headline: row.headline,
         bio: row.bio,
+        yearsExperience: row.yearsExperience,
+        preferredTrack: row.preferredTrack,
       },
       update: {
         publicSlug: row.publicSlug,
         publicEnabled: true,
         headline: row.headline,
         bio: row.bio,
+        yearsExperience: row.yearsExperience,
+        preferredTrack: row.preferredTrack,
+      },
+    });
+  }
+
+  // Finish showcase assignments so public profiles show real scorecards
+  for (const row of [
+    {
+      assignmentId: assignSaas.id,
+      overall: 93,
+      tier: "ELITE" as const,
+      qualified: true,
+      security: 90,
+      architecture: 94,
+      backend: 95,
+    },
+    {
+      assignmentId: assignCyber.id,
+      overall: 91,
+      tier: "ELITE" as const,
+      qualified: true,
+      security: 96,
+      architecture: 88,
+      backend: 86,
+    },
+  ]) {
+    await prisma.assessmentAssignment.update({
+      where: { id: row.assignmentId },
+      data: { status: "COMPLETED", submittedAt: new Date() },
+    });
+    await prisma.scoreReport.upsert({
+      where: { assignmentId: row.assignmentId },
+      create: {
+        assignmentId: row.assignmentId,
+        overall: row.overall,
+        frontend: 88,
+        backend: row.backend,
+        database: 90,
+        architecture: row.architecture,
+        infrastructure: 87,
+        security: row.security,
+        testing: 89,
+        problemSolving: 92,
+        performance: 85,
+        collaboration: 86,
+        qualified: row.qualified,
+        tier: row.tier,
+        calibrated: true,
+        mandatoryFailures: [],
+      },
+      update: {
+        overall: row.overall,
+        frontend: 88,
+        backend: row.backend,
+        database: 90,
+        architecture: row.architecture,
+        infrastructure: 87,
+        security: row.security,
+        testing: 89,
+        problemSolving: 92,
+        performance: 85,
+        collaboration: 86,
+        qualified: row.qualified,
+        tier: row.tier,
+        calibrated: true,
+        mandatoryFailures: [],
       },
     });
   }

@@ -139,8 +139,37 @@ export function WorkspaceIde(props: {
   );
   const [busy, setBusy] = useState(false);
   const [caseResults, setCaseResults] = useState<CaseResult[]>([]);
+  const [judgeVerdict, setJudgeVerdict] = useState<{
+    label: "Accepted" | "Wrong Answer" | "Hidden failed" | "Pending";
+    publicPassed: number;
+    publicTotal: number;
+    hiddenPassed: number;
+    hiddenTotal: number;
+  } | null>(null);
   const [panel, setPanel] = useState<"problem" | "code">("problem");
   const editorRef = useRef<{ editor: any; monaco: any } | null>(null);
+
+  function applyVerdict(results: CaseResult[]) {
+    const pub = results.filter((r) => !r.hidden);
+    const hid = results.filter((r) => r.hidden);
+    const publicPassed = pub.filter((r) => r.pass).length;
+    const hiddenPassed = hid.filter((r) => r.pass).length;
+    let label: "Accepted" | "Wrong Answer" | "Hidden failed" | "Pending" = "Pending";
+    if (pub.length || hid.length) {
+      if (pub.some((r) => !r.pass)) label = "Wrong Answer";
+      else if (hid.length && hid.some((r) => !r.pass)) label = "Hidden failed";
+      else if (pub.length && (!hid.length || hid.every((r) => r.pass))) label = "Accepted";
+      else if (!pub.length && hid.every((r) => r.pass)) label = "Accepted";
+      else label = "Wrong Answer";
+    }
+    setJudgeVerdict({
+      label,
+      publicPassed,
+      publicTotal: pub.length,
+      hiddenPassed,
+      hiddenTotal: hid.length,
+    });
+  }
 
   async function save(content: string) {
     setFiles((prev) => prev.map((f) => (f.path === activePath ? { ...f, content } : f)));
@@ -208,7 +237,16 @@ export function WorkspaceIde(props: {
       /* ignore */
     }
     setBusy(false);
-    toast.message(type === "test" ? "Public tests queued — check Cases / Jobs" : "Job queued");
+    // Re-parse from latest job props after refresh cycles
+    const job = props.jobs.find((j) => j.type === type) ?? props.jobs[0];
+    if (job?.stdout) {
+      const parsed = parseCases(job.stdout);
+      if (parsed.length) {
+        setCaseResults(parsed);
+        applyVerdict(parsed);
+      }
+    }
+    toast.message(type === "test" ? "Public tests queued — check Judge panel" : "Job queued");
   }
 
   const latestTestJob = useMemo(() => {
@@ -218,28 +256,103 @@ export function WorkspaceIde(props: {
   useEffect(() => {
     if (latestTestJob?.stdout) {
       const parsed = parseCases(latestTestJob.stdout);
-      if (parsed.length) setCaseResults(parsed);
+      if (parsed.length) {
+        setCaseResults(parsed);
+        applyVerdict(parsed);
+      }
     }
   }, [latestTestJob?.id, latestTestJob?.stdout]);
 
   async function submit() {
     setBusy(true);
     setTerminal((t) => t + `\n$ submit\n`);
+    setJudgeVerdict({
+      label: "Pending",
+      publicPassed: 0,
+      publicTotal: 0,
+      hiddenPassed: 0,
+      hiddenTotal: 0,
+    });
     try {
-      await fetch(`/api/workspace/${props.workspaceId}/execute`, {
+      // Run public then hidden so the judge panel can show both lanes
+      const publicRes = await fetch(`/api/workspace/${props.workspaceId}/execute`, {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ type: coding ? "hidden_test" : "test" }),
+        body: JSON.stringify({ type: "test" }),
       });
+      const publicJson = await publicRes.json();
+      if (coding) {
+        await fetch(`/api/workspace/${props.workspaceId}/execute`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ type: "hidden_test" }),
+        });
+      }
       const res = await fetch(`/api/assignments/${props.assignmentId}/submit`, { method: "POST" });
       const json = await res.json();
       if (!json.ok) {
         toast.error(json.error?.message || "Submit failed");
         return;
       }
-      toast.success(`Submitted. Overall ${json.data.report?.overall ?? "—"}`);
-      setTerminal((t) => t + `Submission graded. Report overall=${json.data.report?.overall}\n`);
+
+      // Collect stdout from the most recent jobs after settle
+      for (let i = 0; i < 6; i++) {
+        await new Promise((r) => setTimeout(r, 500));
+      }
       router.refresh();
+
+      const merged: CaseResult[] = [];
+      for (const job of props.jobs.slice(0, 6)) {
+        const parsed = parseCases(job.stdout);
+        for (const r of parsed) {
+          if (!merged.find((m) => m.name === r.name && Boolean(m.hidden) === Boolean(r.hidden))) {
+            merged.push(r);
+          }
+        }
+      }
+      // Prefer stdout from the just-queued public job if present in response
+      if (publicJson?.ok && publicJson.data?.stdout) {
+        for (const r of parseCases(publicJson.data.stdout)) {
+          if (!merged.find((m) => m.name === r.name && Boolean(m.hidden) === Boolean(r.hidden))) {
+            merged.push(r);
+          }
+        }
+      }
+
+      // Fetch fresh job list via page refresh data — also hit a lightweight poll on jobs already in props after refresh
+      const detail = await fetch(`/api/workspace/${props.workspaceId}/files`).catch(() => null);
+      void detail;
+
+      if (merged.length) {
+        setCaseResults(merged);
+        applyVerdict(merged);
+      } else {
+        // Fallback verdict from score alone
+        const overall = json.data.report?.overall;
+        setJudgeVerdict({
+          label: overall != null && overall >= 80 ? "Accepted" : "Pending",
+          publicPassed: caseResults.filter((c) => !c.hidden && c.pass).length,
+          publicTotal: caseResults.filter((c) => !c.hidden).length || caseResults.length,
+          hiddenPassed: caseResults.filter((c) => c.hidden && c.pass).length,
+          hiddenTotal: caseResults.filter((c) => c.hidden).length,
+        });
+      }
+
+      const verdictLabel =
+        merged.length === 0
+          ? "Submitted"
+          : merged.some((r) => !r.hidden && !r.pass)
+            ? "Wrong Answer"
+            : merged.some((r) => r.hidden && !r.pass)
+              ? "Hidden failed"
+              : "Accepted";
+      toast.success(`${verdictLabel} · overall ${json.data.report?.overall ?? "—"}`);
+      setTerminal(
+        (t) =>
+          t +
+          `Submission graded. Judge=${verdictLabel} overall=${json.data.report?.overall}\n` +
+          `Share scorecard: /scorecard/${props.assignmentId}\n`,
+      );
     } finally {
       setBusy(false);
     }
@@ -558,7 +671,7 @@ export function WorkspaceIde(props: {
             <section className="rounded-xl border border-slate-800 bg-slate-950/70 p-3">
               <div className="mb-2 flex items-center justify-between">
                 <div className="text-xs uppercase tracking-wider text-slate-500">
-                  Testcases {premium ? "· Lightning queue" : ""}
+                  Judge {premium ? "· Lightning queue" : ""}
                 </div>
                 <div className="font-mono text-xs text-slate-400">
                   {caseResults.length
@@ -568,11 +681,36 @@ export function WorkspaceIde(props: {
                       : "not run"}
                 </div>
               </div>
+              {judgeVerdict && (
+                <div
+                  className={cn(
+                    "mb-3 rounded-lg border px-3 py-2",
+                    judgeVerdict.label === "Accepted"
+                      ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-100"
+                      : judgeVerdict.label === "Hidden failed"
+                        ? "border-amber-500/30 bg-amber-500/10 text-amber-50"
+                        : judgeVerdict.label === "Wrong Answer"
+                          ? "border-rose-500/30 bg-rose-500/10 text-rose-100"
+                          : "border-slate-700 bg-slate-900/80 text-slate-300",
+                  )}
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <span className="text-sm font-semibold">{judgeVerdict.label}</span>
+                    <span className="font-mono text-[11px] opacity-80">
+                      public {judgeVerdict.publicPassed}/{judgeVerdict.publicTotal || "—"} · hidden{" "}
+                      {judgeVerdict.hiddenPassed}/{judgeVerdict.hiddenTotal || "—"}
+                    </span>
+                  </div>
+                  <p className="mt-1 text-[11px] opacity-75">
+                    Public examples vs hidden harness — Submit is only Accepted when both lanes pass.
+                  </p>
+                </div>
+              )}
               {caseResults.length ? (
                 <ul className="space-y-1.5">
                   {caseResults.map((c) => (
                     <li
-                      key={c.name}
+                      key={`${c.hidden ? "h" : "p"}-${c.name}`}
                       className={cn(
                         "flex items-center justify-between rounded-md border px-3 py-2 font-mono text-xs",
                         c.pass
@@ -580,13 +718,18 @@ export function WorkspaceIde(props: {
                           : "border-rose-500/20 bg-rose-500/5 text-rose-200",
                       )}
                     >
-                      <span>{c.name}</span>
-                      <span>{c.pass ? "Accepted" : "Wrong Answer"}</span>
+                      <span>
+                        {c.hidden ? "hidden · " : "public · "}
+                        {c.name}
+                      </span>
+                      <span>
+                        {c.pass ? "Accepted" : c.hidden ? "Hidden failed" : "Wrong Answer"}
+                      </span>
                     </li>
                   ))}
                 </ul>
               ) : (
-                <p className="text-sm text-slate-500">Click Run to execute public examples against your solution.</p>
+                <p className="text-sm text-slate-500">Click Run for public examples, then Submit for the hidden harness.</p>
               )}
               <Textarea className="mt-3 min-h-[80px] font-mono text-xs" value={terminal} readOnly />
             </section>

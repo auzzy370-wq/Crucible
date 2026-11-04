@@ -94,6 +94,14 @@ export default function ReviewsPage() {
                     Override AI
                   </Button>
                   <a
+                    className="inline-flex min-h-10 items-center rounded-md border border-cyan-500/30 px-3 text-xs text-cyan-200 hover:bg-cyan-500/10 sm:min-h-8"
+                    href={`/scorecard/${item.id}`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Share scorecard link
+                  </a>
+                  <a
                     className="inline-flex min-h-10 items-center rounded-md border border-slate-700 px-3 text-xs text-slate-200 hover:bg-slate-900 sm:min-h-8"
                     href={`/api/scorecards/${item.id}`}
                     target="_blank"

@@ -20,7 +20,12 @@ export default async function PublicQualificationProfile({
         select: {
           name: true,
           assignments: {
-            where: { status: { in: ["COMPLETED", "UNDER_REVIEW"] } },
+            where: {
+              OR: [
+                { status: { in: ["COMPLETED", "UNDER_REVIEW"] } },
+                { scoreReport: { isNot: null } },
+              ],
+            },
             include: {
               assessment: { select: { title: true, track: true } },
               scoreReport: true,
@@ -36,6 +41,8 @@ export default async function PublicQualificationProfile({
 
   const verified = profile.skills.filter((s) => s.source === "ASSESSMENT" || s.source === "HUMAN_REVIEW");
   const portfolio = profile.skills.filter((s) => s.source === "PORTFOLIO");
+  const scored = profile.user.assignments.filter((a) => a.scoreReport);
+  const best = scored.reduce((m, a) => Math.max(m, a.scoreReport?.overall ?? 0), 0);
 
   return (
     <div className="min-h-screen">
@@ -59,6 +66,8 @@ export default async function PublicQualificationProfile({
           <div className="mt-4 flex flex-wrap gap-2">
             <Badge variant="cyan">{profile.preferredTrack}</Badge>
             {profile.yearsExperience != null && <Badge>{profile.yearsExperience}+ years</Badge>}
+            {verified.length > 0 && <Badge variant="emerald">{verified.length} verified skills</Badge>}
+            {best > 0 && <Badge variant="amber">Best {formatScore(best)}</Badge>}
           </div>
         </div>
 
@@ -94,7 +103,10 @@ export default async function PublicQualificationProfile({
           <h2 className="text-sm font-semibold tracking-wide text-slate-100">Assessments</h2>
           <div className="space-y-2">
             {profile.user.assignments.map((a) => (
-              <div key={a.id} className="rounded-xl border border-slate-800 bg-slate-950/50 px-4 py-3">
+              <div
+                key={a.id}
+                className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-800 bg-slate-950/50 px-4 py-3"
+              >
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="font-medium">{a.assessment.title}</span>
                   <Badge variant={a.assessment.track === "CYBERSECURITY" ? "violet" : "cyan"}>
@@ -107,6 +119,11 @@ export default async function PublicQualificationProfile({
                     </>
                   )}
                 </div>
+                {a.scoreReport && (
+                  <Link href={`/scorecard/${a.id}`} className="text-sm text-cyan-300 hover:underline">
+                    Scorecard →
+                  </Link>
+                )}
               </div>
             ))}
             {!profile.user.assignments.length && (

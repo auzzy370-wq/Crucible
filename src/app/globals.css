@@ -3,17 +3,18 @@
 @tailwind utilities;
 
 :root {
-  --bg-0: #070b12;
-  --bg-1: #0b1220;
+  --bg-0: #05070c;
+  --bg-1: #0a0f18;
   --bg-2: #111827;
   --line: #1f2a3d;
   --text: #e5eefb;
   --muted: #8aa0b8;
-  --accent: #22d3ee;
+  --accent: #5eead4;
   --accent-2: #34d399;
   --danger: #fb7185;
   --warning: #fbbf24;
   --font-display: "IBM Plex Sans", "Segoe UI", sans-serif;
+  --font-serif: var(--font-instrument), "Times New Roman", serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
 }
 
@@ -87,6 +88,147 @@ body {
 
 .pulse-live {
   animation: pulse-ring 2.4s infinite;
+}
+
+.font-serif-display {
+  font-family: var(--font-serif);
+}
+
+/* Landing — cinematic premium surface */
+.landing-root {
+  --landing-ink: #f4f7fb;
+  --landing-mute: #9aabbf;
+  --landing-line: rgba(255, 255, 255, 0.08);
+  --landing-teal: #7af3d7;
+  background:
+    radial-gradient(ellipse 90% 70% at 70% 20%, rgba(94, 234, 212, 0.09), transparent 55%),
+    radial-gradient(ellipse 60% 50% at 10% 80%, rgba(251, 146, 60, 0.06), transparent 50%),
+    radial-gradient(ellipse 50% 40% at 90% 90%, rgba(56, 189, 248, 0.05), transparent 45%),
+    linear-gradient(165deg, #03050a 0%, #070b12 42%, #0a1019 100%);
+  color: var(--landing-ink);
+}
+
+.landing-noise {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+  opacity: 0.035;
+  mix-blend-mode: overlay;
+}
+
+.landing-mesh {
+  background:
+    linear-gradient(rgba(122, 243, 215, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(122, 243, 215, 0.03) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: radial-gradient(ellipse 80% 70% at 60% 40%, black 20%, transparent 75%);
+}
+
+@keyframes landing-fade-up {
+  from {
+    opacity: 0.35;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes landing-ide-in {
+  from {
+    opacity: 0.45;
+    transform: translateY(24px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes landing-sheen {
+  0% {
+    transform: translateX(-120%) skewX(-12deg);
+  }
+  100% {
+    transform: translateX(220%) skewX(-12deg);
+  }
+}
+
+@keyframes landing-cursor {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes landing-drift {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(-2%, 1.5%);
+  }
+}
+
+.landing-anim-brand {
+  animation: landing-fade-up 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.landing-anim-copy {
+  animation: landing-fade-up 1s cubic-bezier(0.22, 1, 0.36, 1) 0.12s both;
+}
+
+.landing-anim-cta {
+  animation: landing-fade-up 1s cubic-bezier(0.22, 1, 0.36, 1) 0.22s both;
+}
+
+.landing-anim-ide {
+  animation: landing-ide-in 1.15s cubic-bezier(0.22, 1, 0.36, 1) 0.18s both;
+}
+
+.landing-anim-ambient {
+  animation: landing-drift 18s ease-in-out infinite;
+}
+
+.landing-cursor-blink::after {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 1.05em;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  background: var(--landing-teal);
+  animation: landing-cursor 1.05s steps(1) infinite;
+}
+
+.landing-ide-sheen::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.06) 48%,
+    transparent 56%
+  );
+  animation: landing-sheen 4.5s ease-in-out 1.2s both;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-anim-brand,
+  .landing-anim-copy,
+  .landing-anim-cta,
+  .landing-anim-ide,
+  .landing-anim-ambient,
+  .landing-ide-sheen::before,
+  .landing-cursor-blink::after {
+    animation: none !important;
+  }
 }
 
 ::-webkit-scrollbar {
