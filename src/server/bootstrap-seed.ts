@@ -422,33 +422,183 @@ export async function seedDatabase() {
     track: "SECURE_FULL_STACK",
   });
 
-  // Publish remaining catalog challenges as ready assessments (library already loaded)
+  // Featured assessment IDs for challenges that already have named gauntlets
+  const featuredBySlug: Record<string, string> = {
+    "saas-nexus": assessmentSaas.id,
+    "appsec-fortress": assessmentCyber.id,
+    "soc-nightwatch": "assess-soc-1",
+    "team-forge": assessmentTeam.id,
+  };
+
+  // Publish every catalog challenge as a ready assessment
   for (const c of CHALLENGE_CATALOG) {
     const challenge = await prisma.challenge.findUnique({ where: { slug: c.slug } });
     if (!challenge) continue;
-    const assessId = `assess-lib-${c.slug}`;
+    const assessId = featuredBySlug[c.slug] ?? `assess-lib-${c.slug}`;
+    const policyId =
+      c.track === "CYBERSECURITY"
+        ? cyberPolicy.id
+        : c.track === "SECURE_FULL_STACK"
+          ? securePolicy.id
+          : engPolicy.id;
+    const isLib = assessId.startsWith("assess-lib-");
     await prisma.assessment.upsert({
       where: { id: assessId },
-      update: { status: "PUBLISHED" },
+      update: {
+        status: "PUBLISHED",
+        scoringPolicyId: policyId,
+        ...(isLib
+          ? {
+              title: c.title,
+              description: c.summary,
+              allowTeam: c.type === "TEAM_PROJECT",
+              teamSizeMin: c.type === "TEAM_PROJECT" ? 2 : null,
+              teamSizeMax: c.type === "TEAM_PROJECT" ? 4 : null,
+            }
+          : {}),
+      },
       create: {
         id: assessId,
-        title: c.title,
-        description: c.summary,
+        title: isLib
+          ? c.title
+          : c.slug === "saas-nexus"
+            ? "Elite SaaS Build — Nexus"
+            : c.slug === "appsec-fortress"
+              ? "AppSec Fortress Qualification"
+              : c.slug === "soc-nightwatch"
+                ? "SOC Nightwatch IR Simulation"
+                : "Team Forge Collaborative Delivery",
+        description: isLib ? c.summary : c.summary,
         challengeId: challenge.id,
         track: c.track,
         status: "PUBLISHED",
         multiDay: true,
         progressiveDiff: true,
         allowTeam: c.type === "TEAM_PROJECT",
+        teamSizeMin: c.type === "TEAM_PROJECT" ? 2 : undefined,
+        teamSizeMax: c.type === "TEAM_PROJECT" ? 4 : undefined,
         createdById: hiring.id,
-        scoringPolicyId:
-          c.track === "CYBERSECURITY"
-            ? cyberPolicy.id
-            : c.track === "SECURE_FULL_STACK"
-              ? securePolicy.id
-              : engPolicy.id,
+        scoringPolicyId: policyId,
       },
     });
+  }
+
+  // Assign every catalog challenge to the right demo candidate with a workspace
+  for (const c of CHALLENGE_CATALOG) {
+    const assessId = featuredBySlug[c.slug] ?? `assess-lib-${c.slug}`;
+    const primary =
+      c.track === "CYBERSECURITY"
+        ? { user: cyberCandidate, key: "sam" }
+        : { user: candidate, key: "casey" };
+
+    // Featured assignments already created above with stable IDs
+    const featuredAssignId =
+      c.slug === "saas-nexus"
+        ? "assign-saas-casey"
+        : c.slug === "appsec-fortress"
+          ? "assign-appsec-sam"
+          : c.slug === "soc-nightwatch"
+            ? "assign-soc-sam"
+            : c.slug === "team-forge"
+              ? "assign-team-casey"
+              : null;
+
+    if (!featuredAssignId) {
+      await ensureAssignment({
+        id: `assign-lib-${c.slug}-${primary.key}`,
+        assessmentId: assessId,
+        candidateId: primary.user.id,
+        challengeSlug: c.slug,
+        track: c.track,
+        language: c.languages[0] === "python" ? "python" : "typescript",
+      });
+    }
+  }
+
+  // Mark SOC assignment under review with a seed score report for the reviewer queue
+  await prisma.assessmentAssignment.update({
+    where: { id: assignSoc.id },
+    data: { status: "UNDER_REVIEW", submittedAt: new Date() },
+  });
+  const socReport = await prisma.scoreReport.findUnique({ where: { assignmentId: assignSoc.id } });
+  if (!socReport) {
+    await prisma.scoreReport.create({
+      data: {
+        assignmentId: assignSoc.id,
+        overall: 88,
+        frontend: 70,
+        backend: 80,
+        database: 75,
+        architecture: 85,
+        infrastructure: 82,
+        security: 92,
+        testing: 84,
+        problemSolving: 90,
+        performance: 78,
+        collaboration: 80,
+        qualified: false,
+        tier: "NOT_QUALIFIED",
+        mandatoryFailures: ["Human review pending — containment timeline completeness"],
+        calibrated: true,
+      },
+    });
+  }
+
+  // Architecture packages ready for staff + candidates to inspect
+  for (const row of [
+    {
+      id: "arch-casey-saas",
+      assignmentId: assignSaas.id,
+      title: "Nexus multi-tenant SaaS architecture",
+    },
+    {
+      id: "arch-sam-appsec",
+      assignmentId: assignCyber.id,
+      title: "AppSec fortress trust boundaries",
+    },
+  ] as const) {
+    const existingArch = await prisma.architectureSubmission.findUnique({ where: { id: row.id } });
+    if (!existingArch) {
+      await prisma.architectureSubmission.create({
+        data: {
+          id: row.id,
+          assignmentId: row.assignmentId,
+          proposal: `# ${row.title}
+
+## Components
+- Edge API
+- Auth service
+- Primary datastore
+- Async workers
+
+## Trust boundaries
+- Public internet → edge
+- Edge → private services
+- Secrets only via vault / env injection
+
+## Failure modes
+- Dependency outage
+- Poisoned queue messages
+- Credential leak
+
+## Mitigations
+- Idempotency keys
+- Least privilege IAM
+- Structured audit logs
+`,
+          diagrams: {
+            overview: "edge -> api -> db; api -> queue -> workers",
+            trust: ["public", "edge", "private-services", "data"],
+          },
+          answers: {
+            scaling: "Stateless API + managed Postgres + queue consumers",
+            security: "mTLS between services, short-lived tokens, audit trail",
+          },
+          score: 82,
+          feedback: "Solid trust-boundary articulation. Expand blast-radius analysis for queue poison messages.",
+        },
+      });
+    }
   }
 
   // Team already formed for collaborative gauntlet
@@ -479,29 +629,64 @@ export async function seedDatabase() {
     }
   }
 
-  // Incident runs ready for cyber candidate
-  const socScenario = await prisma.incidentScenario.findUnique({ where: { slug: "token-exfil-beacon" } });
-  if (socScenario) {
+  // Incident runs ready for cyber + SE candidates
+  for (const row of [
+    { slug: "token-exfil-beacon", candidateId: cyberCandidate.id, assignmentId: assignSoc.id },
+    { slug: "checkout-dup-payments", candidateId: candidate.id, assignmentId: assignSaas.id },
+  ]) {
+    const scenario = await prisma.incidentScenario.findUnique({ where: { slug: row.slug } });
+    if (!scenario) continue;
     const existingRun = await prisma.incidentRun.findFirst({
-      where: { scenarioId: socScenario.id, candidateId: cyberCandidate.id },
+      where: { scenarioId: scenario.id, candidateId: row.candidateId },
     });
     if (!existingRun) {
       await prisma.incidentRun.create({
         data: {
-          scenarioId: socScenario.id,
-          candidateId: cyberCandidate.id,
-          assignmentId: assignSoc.id,
+          scenarioId: scenario.id,
+          candidateId: row.candidateId,
+          assignmentId: row.assignmentId,
           timeline: [{ at: new Date().toISOString(), event: "seeded_ready" }],
         },
       });
     }
   }
 
-  const workspaceCount = await prisma.workspace.count();
-  const fileCount = await prisma.workspaceFile.count();
-  const assignmentCount = await prisma.assessmentAssignment.count();
+  // Follow-up question queued on SOC for the candidate
+  const existingFollowup = await prisma.followUpQuestion.findFirst({
+    where: { assignmentId: assignSoc.id },
+  });
+  if (!existingFollowup) {
+    await prisma.followUpQuestion.create({
+      data: {
+        assignmentId: assignSoc.id,
+        prompt:
+          "Walk through how you would revoke the compromised service token without dropping legitimate checkout traffic.",
+        basedOnPath: "playbooks/IR_TEMPLATE.md",
+        difficulty: 2,
+      },
+    });
+  }
+
+  const [
+    workspaceCount,
+    fileCount,
+    assignmentCount,
+    assessmentCount,
+    challengeCount,
+    architectureCount,
+    incidentRunCount,
+  ] = await Promise.all([
+    prisma.workspace.count(),
+    prisma.workspaceFile.count(),
+    prisma.assessmentAssignment.count(),
+    prisma.assessment.count({ where: { status: "PUBLISHED" } }),
+    prisma.challenge.count({ where: { isPublished: true } }),
+    prisma.architectureSubmission.count(),
+    prisma.incidentRun.count(),
+  ]);
 
   const summary = {
+    releaseReady: true,
     admin: admin.email,
     hiring: hiring.email,
     reviewer: reviewer.email,
@@ -510,16 +695,19 @@ export async function seedDatabase() {
     teammate: teammate.email,
     passwordAdmin: "Gauntlet!Admin1",
     passwordCandidate: "Gauntlet!Cand1",
-    assessments: [assessmentSaas.title, assessmentCyber.title, assessmentTeam.title],
     policies: [engPolicy.name, cyberPolicy.name, securePolicy.name],
     ready: {
+      publishedChallenges: challengeCount,
+      publishedAssessments: assessmentCount,
       assignments: assignmentCount,
       workspaces: workspaceCount,
       workspaceFiles: fileCount,
-      demoAssignments: [assignSaas.id, assignCyber.id, assignSoc.id, assignTeamCasey.id],
+      architecturePackages: architectureCount,
+      incidentRuns: incidentRunCount,
+      featuredAssignments: [assignSaas.id, assignCyber.id, assignSoc.id, assignTeamCasey.id],
     },
   };
-  console.log("Seed complete.");
+  console.log("Seed complete — full platform ready.");
   console.log(summary);
   return summary;
 }

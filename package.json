@@ -1,6 +1,6 @@
 {
   "name": "engineering-gauntlet",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack -p 3847",
@@ -16,7 +16,9 @@
     "db:reset": "prisma migrate reset --force",
     "test:e2e": "tsx scripts/e2e.ts",
     "test:unit": "tsx scripts/unit-smoke.ts",
-    "setup:local": "prisma db push && tsx prisma/seed.ts",
+    "release:check": "tsx scripts/release-check.ts",
+    "release:prepare": "prisma migrate deploy && tsx prisma/seed.ts && tsx scripts/release-check.ts",
+    "setup:local": "prisma db push && tsx prisma/seed.ts && tsx scripts/release-check.ts",
     "vercel-build": "prisma generate && prisma migrate deploy && next build"
   },
   "dependencies": {

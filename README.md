@@ -1,8 +1,10 @@
 # ENGINEERING GAUNTLET
 
-Elite full-stack **software engineering** and **cybersecurity** assessment & qualification platform.
+**Release 1.0** — elite full-stack **software engineering** and **cybersecurity** assessment & qualification platform.
 
 This is not a LeetCode clone. Candidates design, build, secure, test, deploy, and recover real systems — including AppSec labs, SOC/IR simulations, detection engineering, cloud hardening, and secure full-stack product builds.
+
+The seed loads the **full challenge library as published assessments** with demo assignments, workspaces, and tests already placed. See [docs/RELEASE.md](docs/RELEASE.md).
 
 ## Tracks
 
@@ -43,9 +45,14 @@ cp .env.example .env
 npm install
 npx prisma db push
 npm run db:seed
+npm run release:check
 npm run dev          # http://localhost:3847
 npm run dev:worker   # optional execution worker
 ```
+
+Presentation deck: http://localhost:3847/presentation.html  
+Speaker script: http://localhost:3847/presentation-script.html
+
 
 ### Docker Compose
 

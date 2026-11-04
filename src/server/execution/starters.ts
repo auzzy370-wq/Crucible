@@ -189,11 +189,52 @@ export async function runPublicTests() {
   }
 
   if (track === "CYBERSECURITY") {
+    const extras: StarterFile[] = [];
+    if (slug === "cloud-bastion") {
+      extras.push({
+        path: "infra/baseline.tf",
+        content: `# Harden this baseline — overly permissive for the lab\nresource "aws_security_group" "wide_open" {\n  ingress {\n    from_port   = 0\n    to_port     = 0\n    protocol    = "-1"\n    cidr_blocks = ["0.0.0.0/0"]\n  }\n}\n`,
+        language: "hcl",
+      });
+    }
+    if (slug === "detect-forge") {
+      extras.push({
+        path: "detections/sigma_stub.yml",
+        content: `title: Suspicious token use\nstatus: experimental\nlogsource:\n  product: linux\ndetection:\n  selection:\n    EventID: 1\n  condition: selection\n`,
+        language: "yaml",
+      });
+    }
+    if (slug === "cipher-ops") {
+      extras.push({
+        path: "src/crypto_lab.ts",
+        content: `// Broken constructions for the lab — replace with AEAD + vetted KDF\nexport function weakHash(pw: string) {\n  return Buffer.from(pw).toString("hex");\n}\n`,
+        language: "typescript",
+      });
+    }
+    if (slug === "zero-trust-edge") {
+      extras.push({
+        path: "policy/access.json",
+        content: JSON.stringify(
+          { default: "allow", routes: [{ path: "/**", auth: "none" }] },
+          null,
+          2,
+        ),
+        language: "json",
+      });
+    }
+    if (slug === "threat-lattice") {
+      extras.push({
+        path: "docs/DFD.md",
+        content: `# Data-flow diagram notes\n\n1. External user\n2. Edge gateway\n3. App services\n4. Datastores\n`,
+        language: "markdown",
+      });
+    }
     return [
       ...common,
+      ...extras,
       {
         path: "src/main.ts",
-        content: `// Cybersecurity assessment entrypoint\nexport function health() {\n  return { ok: true, track: "CYBERSECURITY" };\n}\n`,
+        content: `// Cybersecurity assessment entrypoint (${slug})\nexport function health() {\n  return { ok: true, track: "CYBERSECURITY", slug: "${slug}" };\n}\n`,
         language: "typescript",
       },
       {
@@ -201,14 +242,36 @@ export async function runPublicTests() {
         content: `import { health } from "../src/main";
 export async function runPublicTests() {
   const h = health();
-  return [{ name: "health", pass: !!h.ok }];
+  return [
+    { name: "health", pass: !!h.ok },
+    { name: "slug_bound", pass: h.slug === "${slug}" },
+  ];
 }
 `,
         language: "typescript",
       },
       {
+        path: "tests/hidden.manifest.json",
+        content: JSON.stringify(
+          {
+            tests: [
+              { id: "mitigation-evidence", description: "Primary mitigations implemented with tests" },
+              { id: "no-critical-open", description: "No unresolved critical findings in lab scope" },
+            ],
+          },
+          null,
+          2,
+        ),
+        language: "json",
+      },
+      {
         path: "docs/THREAT_MODEL.md",
         content: `# Threat Model\n\n## Assets\n## Trust boundaries\n## STRIDE\n## Mitigations\n`,
+        language: "markdown",
+      },
+      {
+        path: "docs/FINDINGS.md",
+        content: `# Findings\n\n| ID | Severity | Evidence | Fix |\n|----|----------|----------|-----|\n|    |          |          |     |\n`,
         language: "markdown",
       },
     ];
