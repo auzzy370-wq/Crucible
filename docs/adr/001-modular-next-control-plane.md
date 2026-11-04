@@ -6,7 +6,7 @@ Accepted
 
 ## Context
 
-ENGINEERING GAUNTLET needs a production-oriented control plane (RBAC, assessments, review) and a hard isolation boundary for untrusted candidate code, including cybersecurity vuln labs.
+CRUCIBLE needs a production-oriented control plane (RBAC, assessments, review) and a hard isolation boundary for untrusted candidate code, including cybersecurity vuln labs.
 
 ## Decision
 

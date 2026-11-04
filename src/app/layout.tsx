@@ -17,9 +17,9 @@ const mono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ENGINEERING GAUNTLET",
+  title: "CRUCIBLE",
   description:
-    "Elite full-stack and cybersecurity engineering assessment & qualification platform.",
+    "CRUCIBLE — elite software engineering and cybersecurity assessments. Prove the craft in timed, evidence-based gauntlets.",
 };
 
 export const viewport = {

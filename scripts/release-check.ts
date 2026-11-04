@@ -1,5 +1,5 @@
 /**
- * Release readiness gate for Engineering Gauntlet.
+ * Release readiness gate for CRUCIBLE.
  * Run after seed: npx tsx scripts/release-check.ts
  */
 import { PrismaClient } from "@prisma/client";
@@ -40,6 +40,10 @@ async function main() {
     where: { workspace: null },
   });
 
+  const timedAssessments = await prisma.assessment.count({
+    where: { status: "PUBLISHED", timedMinutes: { equals: 60 } },
+  });
+
   const checks: { name: string; ok: boolean; detail: string }[] = [
     {
       name: "catalog_challenges_published",
@@ -50,6 +54,11 @@ async function main() {
       name: "published_assessments_cover_catalog",
       ok: assessments >= catalog,
       detail: `${assessments} published (need ≥ ${catalog})`,
+    },
+    {
+      name: "sixty_minute_timed_assessments",
+      ok: timedAssessments >= catalog,
+      detail: `${timedAssessments}/${catalog} with timedMinutes=60`,
     },
     {
       name: "assignments_for_full_library",

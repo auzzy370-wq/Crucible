@@ -27,10 +27,10 @@ import { Badge } from "@/components/ui/badge";
 const NAV = [
   { href: "/dashboard", label: "Operations", icon: LayoutDashboard },
   { href: "/assessments", label: "Assessments", icon: Crosshair },
-  { href: "/challenges", label: "Challenge Library", icon: Boxes },
+  { href: "/challenges", label: "Problemset", icon: Boxes },
   { href: "/candidates", label: "Candidates", icon: Users },
   { href: "/reviews", label: "Technical Review", icon: ScrollText },
-  { href: "/teams", label: "Team Gauntlets", icon: Network },
+  { href: "/teams", label: "Team Crucible", icon: Network },
   { href: "/incidents", label: "Incident Sims", icon: Siren },
   { href: "/architecture", label: "Architecture", icon: BrainCircuit },
   { href: "/workspace", label: "Workspace", icon: Terminal },
@@ -102,11 +102,11 @@ export function AppShell({
   const brand = (
     <div className="flex items-center gap-3">
       <div className="pulse-live flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-cyan-400/40 bg-cyan-400/10 font-mono text-sm font-bold text-cyan-300">
-        EG
+        CR
       </div>
       <div className="min-w-0">
-        <div className="truncate text-sm font-semibold tracking-[0.18em] text-slate-100">ENGINEERING</div>
-        <div className="truncate text-xs font-semibold tracking-[0.28em] text-cyan-300">GAUNTLET</div>
+        <div className="truncate text-sm font-semibold tracking-[0.22em] text-slate-100">CRUCIBLE</div>
+        <div className="truncate text-[10px] font-medium tracking-[0.18em] text-cyan-300/90">PROVE THE CRAFT</div>
       </div>
     </div>
   );

@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatScore } from "@/lib/utils";
+import { SessionTimer } from "@/components/assessment/session-timer";
 
 export default async function DashboardPage() {
   const user = await getSessionUser();
@@ -20,9 +21,9 @@ export default async function DashboardPage() {
       <div className="animate-rise space-y-6">
         <header>
           <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">CANDIDATE PORTAL</p>
-          <h1 className="mt-2 text-2xl font-semibold sm:text-3xl tracking-tight">Your gauntlet assignments</h1>
+          <h1 className="mt-2 text-2xl font-semibold sm:text-3xl tracking-tight">Your Crucible assignments</h1>
           <p className="mt-2 max-w-2xl text-slate-400">
-            Complete realistic engineering and cybersecurity projects. Résumé claims are never treated as proof.
+            Complete timed, realistic engineering and cybersecurity assessments. Résumé claims are never treated as proof.
           </p>
         </header>
         <div className="grid gap-4 md:grid-cols-2">
@@ -49,6 +50,16 @@ export default async function DashboardPage() {
                   <span>Adaptive level</span>
                   <span className="font-mono text-slate-200">{a.currentLevel}</span>
                 </div>
+                {(a.assessment.timedMinutes || a.dueAt) && (
+                  <div className="flex items-center justify-between gap-2 text-slate-400">
+                    <span>Session</span>
+                    <SessionTimer
+                      endsAt={a.dueAt?.toISOString()}
+                      timedMinutes={a.assessment.timedMinutes}
+                      compact
+                    />
+                  </div>
+                )}
                 {a.scoreReport && (
                   <div className="flex justify-between text-slate-400">
                     <span>Score</span>
@@ -94,10 +105,10 @@ export default async function DashboardPage() {
       <header className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">OPERATIONS DASHBOARD</p>
-          <h1 className="mt-2 text-2xl font-semibold sm:text-3xl tracking-tight">Engineering & Cyber Qualification</h1>
+          <h1 className="mt-2 text-2xl font-semibold sm:text-3xl tracking-tight">Crucible operations</h1>
           <p className="mt-2 max-w-3xl text-slate-400">
             Premium hiring operations for exceptional software engineers and cybersecurity practitioners.
-            Scores are calibrated to challenge difficulty — not population percentiles.
+            Timed assessments. Scores calibrated to challenge difficulty — not population percentiles.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">

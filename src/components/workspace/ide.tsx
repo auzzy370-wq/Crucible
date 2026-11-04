@@ -1,17 +1,93 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { SessionTimer } from "@/components/assessment/session-timer";
+import { cn } from "@/lib/utils";
 
 const Monaco = dynamic(() => import("@monaco-editor/react"), { ssr: false });
 
 type FileRow = { id: string; path: string; content: string; language: string | null };
+
+type CaseResult = { name: string; pass: boolean; hidden?: boolean };
+
+function difficultyLabel(difficulty: number) {
+  if (difficulty <= 3) return "Easy";
+  if (difficulty <= 6) return "Medium";
+  return "Hard";
+}
+
+function diffClass(difficulty: number) {
+  const L = difficultyLabel(difficulty);
+  if (L === "Easy") return "text-emerald-400 border-emerald-500/30";
+  if (L === "Medium") return "text-amber-300 border-amber-500/30";
+  return "text-rose-400 border-rose-500/30";
+}
+
+function renderProblemBody(md: string) {
+  // Lightweight markdown-ish rendering for problem statements
+  const blocks = md.split(/\n\n+/);
+  return blocks.map((block, i) => {
+    const lines = block.split("\n");
+    if (lines[0]?.startsWith("## ")) {
+      return (
+        <div key={i} className="space-y-2">
+          <h3 className="text-sm font-semibold tracking-wide text-slate-100">{lines[0].replace(/^##\s+/, "")}</h3>
+          {lines.slice(1).map((l, j) => (
+            <p key={j} className="text-sm leading-relaxed text-slate-300 whitespace-pre-wrap">
+              {formatInline(l)}
+            </p>
+          ))}
+        </div>
+      );
+    }
+    if (lines[0]?.startsWith("```")) {
+      const code = lines.slice(1).filter((l) => !l.startsWith("```")).join("\n");
+      return (
+        <pre key={i} className="overflow-x-auto rounded-lg border border-slate-800 bg-black/40 p-3 font-mono text-xs text-cyan-100">
+          {code}
+        </pre>
+      );
+    }
+    return (
+      <p key={i} className="text-sm leading-relaxed text-slate-300 whitespace-pre-wrap">
+        {lines.map((l, j) => (
+          <span key={j}>
+            {formatInline(l)}
+            {j < lines.length - 1 ? "\n" : null}
+          </span>
+        ))}
+      </p>
+    );
+  });
+}
+
+function formatInline(text: string) {
+  const parts = text.split(/(`[^`]+`|\*\*[^*]+\*\*)/g);
+  return parts.map((p, i) => {
+    if (p.startsWith("`") && p.endsWith("`")) {
+      return (
+        <code key={i} className="rounded bg-slate-800 px-1 py-0.5 font-mono text-[12px] text-cyan-200">
+          {p.slice(1, -1)}
+        </code>
+      );
+    }
+    if (p.startsWith("**") && p.endsWith("**")) {
+      return (
+        <strong key={i} className="font-semibold text-slate-100">
+          {p.slice(2, -2)}
+        </strong>
+      );
+    }
+    return <span key={i}>{p}</span>;
+  });
+}
 
 export function WorkspaceIde(props: {
   workspaceId: string;
@@ -23,14 +99,31 @@ export function WorkspaceIde(props: {
   commits: { sha: string; message: string; createdAt: string }[];
   jobs: { id: string; type: string; status: string; stdout: string | null; stderr: string | null }[];
   role: string;
+  timedMinutes?: number | null;
+  dueAt?: string | null;
+  startedAt?: string | null;
+  codingMode?: boolean;
+  difficulty?: number;
+  tags?: string[];
+  problemDescription?: string;
+  problemSummary?: string;
 }) {
   const router = useRouter();
+  const coding = Boolean(props.codingMode);
+  const preferred = coding
+    ? props.files.find((f) => f.path === "src/solution.ts")?.path ??
+      props.files.find((f) => f.path.endsWith("solution.ts"))?.path
+    : undefined;
   const [files, setFiles] = useState(props.files);
-  const [activePath, setActivePath] = useState(props.files[0]?.path ?? "README.md");
+  const [activePath, setActivePath] = useState(preferred ?? props.files[0]?.path ?? "README.md");
   const active = useMemo(() => files.find((f) => f.path === activePath), [files, activePath]);
-  const [commitMsg, setCommitMsg] = useState("feat: progress on assessment");
-  const [terminal, setTerminal] = useState("Ready. Tests execute in an isolated worker/sandbox.\n");
+  const [commitMsg, setCommitMsg] = useState(coding ? "feat: solve coding problem" : "feat: progress on assessment");
+  const [terminal, setTerminal] = useState(
+    coding ? "Ready. Run public tests, then Submit for hidden evaluation.\n" : "Ready. Tests execute in an isolated worker/sandbox.\n",
+  );
   const [busy, setBusy] = useState(false);
+  const [caseResults, setCaseResults] = useState<CaseResult[]>([]);
+  const [panel, setPanel] = useState<"problem" | "code">("problem");
 
   async function save(content: string) {
     setFiles((prev) => prev.map((f) => (f.path === activePath ? { ...f, content } : f)));
@@ -55,9 +148,25 @@ export function WorkspaceIde(props: {
     router.refresh();
   }
 
+  function parseCases(stdout: string | null | undefined): CaseResult[] {
+    if (!stdout) return [];
+    try {
+      const line = stdout
+        .trim()
+        .split("\n")
+        .reverse()
+        .find((l) => l.trim().startsWith("{"));
+      if (!line) return [];
+      const parsed = JSON.parse(line) as { results?: CaseResult[] };
+      return parsed.results ?? [];
+    } catch {
+      return [];
+    }
+  }
+
   async function run(type: "test" | "hidden_test" | "deploy_check") {
     setBusy(true);
-    setTerminal((t) => t + `\n$ enqueue ${type}\n`);
+    setTerminal((t) => t + `\n$ ${type === "test" ? "run" : type}\n`);
     const res = await fetch(`/api/workspace/${props.workspaceId}/execute`, {
       method: "POST",
       headers: { "content-type": "application/json" },
@@ -69,21 +178,210 @@ export function WorkspaceIde(props: {
       return toast.error(json.error?.message || "Execution failed");
     }
     setTerminal((t) => t + `queued job ${json.data.id} (${json.data.status})\n`);
-    setTimeout(() => {
+
+    // Poll briefly for process-mode completion
+    for (let i = 0; i < 8; i++) {
+      await new Promise((r) => setTimeout(r, 700));
       router.refresh();
-      setBusy(false);
-    }, 2000);
+    }
+    try {
+      const jobsRes = await fetch(`/api/workspace/${props.workspaceId}/execute`, { method: "GET" }).catch(() => null);
+      void jobsRes;
+    } catch {
+      /* ignore */
+    }
+    setBusy(false);
+    toast.message(type === "test" ? "Public tests queued — check Cases / Jobs" : "Job queued");
   }
+
+  const latestTestJob = useMemo(() => {
+    return props.jobs.find((j) => j.type === "test" || j.type === "hidden_test");
+  }, [props.jobs]);
+
+  useEffect(() => {
+    if (latestTestJob?.stdout) {
+      const parsed = parseCases(latestTestJob.stdout);
+      if (parsed.length) setCaseResults(parsed);
+    }
+  }, [latestTestJob?.id, latestTestJob?.stdout]);
 
   async function submit() {
     setBusy(true);
-    const res = await fetch(`/api/assignments/${props.assignmentId}/submit`, { method: "POST" });
-    const json = await res.json();
-    setBusy(false);
-    if (!json.ok) return toast.error(json.error?.message || "Submit failed");
-    toast.success(`Submitted. Overall ${json.data.report?.overall ?? "—"}`);
-    setTerminal((t) => t + `\nSubmission graded. Report overall=${json.data.report?.overall}\n`);
-    router.refresh();
+    setTerminal((t) => t + `\n$ submit\n`);
+    try {
+      await fetch(`/api/workspace/${props.workspaceId}/execute`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ type: coding ? "hidden_test" : "test" }),
+      });
+      const res = await fetch(`/api/assignments/${props.assignmentId}/submit`, { method: "POST" });
+      const json = await res.json();
+      if (!json.ok) {
+        toast.error(json.error?.message || "Submit failed");
+        return;
+      }
+      toast.success(`Submitted. Overall ${json.data.report?.overall ?? "—"}`);
+      setTerminal((t) => t + `Submission graded. Report overall=${json.data.report?.overall}\n`);
+      router.refresh();
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const problemText =
+    props.problemDescription ||
+    files.find((f) => f.path === "PROBLEM.md")?.content ||
+    props.problemSummary ||
+    "";
+
+  if (coding) {
+    return (
+      <div className="animate-rise space-y-3">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant={props.track === "CYBERSECURITY" ? "violet" : "cyan"}>{props.track}</Badge>
+              {props.difficulty != null && (
+                <span className={cn("rounded-md border px-2 py-0.5 text-xs font-semibold", diffClass(props.difficulty))}>
+                  {difficultyLabel(props.difficulty)}
+                </span>
+              )}
+              <SessionTimer endsAt={props.dueAt} timedMinutes={props.timedMinutes} />
+            </div>
+            <h1 className="mt-2 break-words text-xl font-semibold sm:text-2xl">{props.title}</h1>
+            <p className="text-sm text-slate-400">{props.problemSummary || "Implement the solution and pass public + hidden tests."}</p>
+          </div>
+          <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+            <Button className="w-full sm:w-auto" variant="secondary" disabled={busy} onClick={() => run("test")}>
+              Run
+            </Button>
+            <Button className="w-full sm:w-auto" disabled={busy} onClick={submit}>
+              Submit
+            </Button>
+            <Button className="w-full sm:w-auto" variant="secondary" disabled={busy} onClick={() => run("hidden_test")}>
+              Hidden tests
+            </Button>
+            <Button className="w-full sm:w-auto" variant="secondary" onClick={commit}>
+              Commit
+            </Button>
+          </div>
+        </div>
+
+        {/* Mobile tabs */}
+        <div className="flex gap-2 xl:hidden">
+          <button
+            type="button"
+            className={cn(
+              "flex-1 rounded-lg border px-3 py-2 text-sm",
+              panel === "problem" ? "border-cyan-400/40 bg-cyan-500/10 text-cyan-100" : "border-slate-700 text-slate-400",
+            )}
+            onClick={() => setPanel("problem")}
+          >
+            Problem
+          </button>
+          <button
+            type="button"
+            className={cn(
+              "flex-1 rounded-lg border px-3 py-2 text-sm",
+              panel === "code" ? "border-cyan-400/40 bg-cyan-500/10 text-cyan-100" : "border-slate-700 text-slate-400",
+            )}
+            onClick={() => setPanel("code")}
+          >
+            Code
+          </button>
+        </div>
+
+        <div className="grid min-h-0 gap-3 xl:grid-cols-[minmax(280px,0.95fr)_minmax(0,1.15fr)]">
+          <aside
+            className={cn(
+              "max-h-[70vh] space-y-4 overflow-y-auto rounded-xl border border-slate-800 bg-slate-950/70 p-4",
+              panel === "code" ? "hidden xl:block" : "block",
+            )}
+          >
+            <div className="flex flex-wrap gap-1">
+              {(props.tags ?? [])
+                .filter((t) => !["coding", "easy", "medium", "hard"].includes(t))
+                .map((t) => (
+                  <span key={t} className="rounded border border-slate-800 px-2 py-0.5 font-mono text-[11px] text-slate-400">
+                    {t}
+                  </span>
+                ))}
+            </div>
+            <div className="space-y-4">{renderProblemBody(problemText)}</div>
+          </aside>
+
+          <div className={cn("space-y-3", panel === "problem" ? "hidden xl:block" : "block")}>
+            <section className="overflow-hidden rounded-xl border border-slate-800 bg-[#0d1117]">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 px-3 py-2">
+                <select
+                  className="max-w-full rounded border border-slate-700 bg-slate-950 px-2 py-1 font-mono text-xs text-slate-300"
+                  value={activePath}
+                  onChange={(e) => setActivePath(e.target.value)}
+                >
+                  {files.map((f) => (
+                    <option key={f.id} value={f.path}>
+                      {f.path}
+                    </option>
+                  ))}
+                </select>
+                <span className="font-mono text-[10px] uppercase tracking-wider text-slate-500">{props.language}</span>
+              </div>
+              <div className="h-[42vh] min-h-[260px] sm:h-[48vh]">
+                <Monaco
+                  height="100%"
+                  theme="vs-dark"
+                  language={guessLang(activePath, props.language)}
+                  value={active?.content ?? ""}
+                  onChange={(v) => v !== undefined && save(v)}
+                  options={{
+                    minimap: { enabled: false },
+                    fontSize: 13,
+                    fontFamily: "IBM Plex Mono, ui-monospace, monospace",
+                    automaticLayout: true,
+                    wordWrap: "on",
+                    scrollBeyondLastLine: false,
+                  }}
+                />
+              </div>
+            </section>
+
+            <section className="rounded-xl border border-slate-800 bg-slate-950/70 p-3">
+              <div className="mb-2 flex items-center justify-between">
+                <div className="text-xs uppercase tracking-wider text-slate-500">Testcases</div>
+                <div className="font-mono text-xs text-slate-400">
+                  {caseResults.length
+                    ? `${caseResults.filter((c) => c.pass).length}/${caseResults.length} passed`
+                    : latestTestJob
+                      ? latestTestJob.status
+                      : "not run"}
+                </div>
+              </div>
+              {caseResults.length ? (
+                <ul className="space-y-1.5">
+                  {caseResults.map((c) => (
+                    <li
+                      key={c.name}
+                      className={cn(
+                        "flex items-center justify-between rounded-md border px-3 py-2 font-mono text-xs",
+                        c.pass
+                          ? "border-emerald-500/20 bg-emerald-500/5 text-emerald-200"
+                          : "border-rose-500/20 bg-rose-500/5 text-rose-200",
+                      )}
+                    >
+                      <span>{c.name}</span>
+                      <span>{c.pass ? "Accepted" : "Wrong Answer"}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-slate-500">Click Run to execute public examples against your solution.</p>
+              )}
+              <Textarea className="mt-3 min-h-[80px] font-mono text-xs" value={terminal} readOnly />
+            </section>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -93,10 +391,12 @@ export function WorkspaceIde(props: {
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant={props.track === "CYBERSECURITY" ? "violet" : "cyan"}>{props.track}</Badge>
             <Badge>{props.language}</Badge>
+            <SessionTimer endsAt={props.dueAt} timedMinutes={props.timedMinutes} />
           </div>
           <h1 className="mt-2 break-words text-xl font-semibold sm:text-2xl">{props.title}</h1>
           <p className="text-sm text-slate-400">
-            Isolated workspace · sandboxed execution · evidence-based grading
+            Isolated Crucible workspace · sandboxed execution · evidence-based grading
+            {props.timedMinutes ? ` · ${props.timedMinutes}-minute session` : ""}
           </p>
         </div>
         <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
@@ -115,7 +415,6 @@ export function WorkspaceIde(props: {
         </div>
       </div>
 
-      {/* Mobile file picker */}
       <div className="xl:hidden">
         <label className="mb-1 block text-xs uppercase tracking-wider text-slate-500" htmlFor="ide-file">
           File

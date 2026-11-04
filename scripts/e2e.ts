@@ -1,5 +1,5 @@
 /**
- * End-to-end workflow verification for Engineering Gauntlet.
+ * End-to-end workflow verification for CRUCIBLE.
  * Exercises: admin assessment exists → candidate login → assign → workspace → commit → tests → submit → review.
  */
 const BASE = process.env.APP_URL || "http://localhost:3847";

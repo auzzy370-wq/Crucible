@@ -16,7 +16,7 @@ async function tick() {
 }
 
 async function main() {
-  logger.info("Engineering Gauntlet execution worker starting", {
+  logger.info("CRUCIBLE execution worker starting", {
     mode: process.env.EXECUTION_MODE ?? "process",
   });
   await tick();

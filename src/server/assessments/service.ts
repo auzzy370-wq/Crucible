@@ -36,8 +36,8 @@ export async function createAssessment(params: {
       challengeId: params.challengeId,
       track: challenge.track,
       status: AssessmentStatus.PUBLISHED,
-      timedMinutes: params.timedMinutes,
-      multiDay: params.multiDay ?? true,
+      timedMinutes: params.timedMinutes ?? 60,
+      multiDay: params.multiDay ?? false,
       allowTeam: params.allowTeam ?? challenge.type === "TEAM_PROJECT",
       teamSizeMin: params.teamSizeMin,
       teamSizeMax: params.teamSizeMax,
@@ -84,13 +84,14 @@ export async function assignAssessment(params: {
     throw new AppError("Invalid candidate", 400, "INVALID_CANDIDATE");
   }
 
+  const timedMs = (assessment.timedMinutes ?? 60) * 60 * 1000;
   const assignment = await prisma.assessmentAssignment.create({
     data: {
       assessmentId: params.assessmentId,
       candidateId: params.candidateId,
       assignedById: params.assignedById,
       status: AssignmentStatus.ASSIGNED,
-      dueAt: params.dueAt,
+      dueAt: params.dueAt ?? new Date(Date.now() + timedMs),
       accommodations: params.accommodations,
     },
   });
@@ -121,12 +122,19 @@ export async function assignAssessment(params: {
 }
 
 export async function startAssignment(assignmentId: string, userId: string) {
-  const assignment = await prisma.assessmentAssignment.findUnique({ where: { id: assignmentId } });
+  const assignment = await prisma.assessmentAssignment.findUnique({
+    where: { id: assignmentId },
+    include: { assessment: true },
+  });
   if (!assignment) throw new AppError("Assignment not found", 404, "NOT_FOUND");
   if (assignment.candidateId !== userId) throw new AppError("Forbidden", 403, "FORBIDDEN");
+  const startedAt = assignment.startedAt ?? new Date();
+  const timedMinutes = assignment.assessment.timedMinutes ?? 60;
+  const dueAt =
+    assignment.dueAt ?? new Date(startedAt.getTime() + timedMinutes * 60 * 1000);
   return prisma.assessmentAssignment.update({
     where: { id: assignmentId },
-    data: { status: "IN_PROGRESS", startedAt: assignment.startedAt ?? new Date() },
+    data: { status: "IN_PROGRESS", startedAt, dueAt },
   });
 }
 

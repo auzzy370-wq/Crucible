@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { getSessionUser, canReview } from "@/server/auth/session";
 import { WorkspaceIde } from "@/components/workspace/ide";
+import { isCodingProblem } from "@/server/challenges/coding-problems";
 
 export default async function WorkspacePage({ params }: { params: Promise<{ id: string }> }) {
   const user = await getSessionUser();
@@ -16,12 +17,12 @@ export default async function WorkspacePage({ params }: { params: Promise<{ id: 
     },
   });
   if (!workspace) notFound();
-  if (
-    workspace.assignment.candidateId !== user!.id &&
-    !canReview(user!.role)
-  ) {
+  if (workspace.assignment.candidateId !== user!.id && !canReview(user!.role)) {
     notFound();
   }
+
+  const challenge = workspace.assignment.assessment.challenge;
+  const codingMode = isCodingProblem(challenge);
 
   return (
     <WorkspaceIde
@@ -38,6 +39,14 @@ export default async function WorkspacePage({ params }: { params: Promise<{ id: 
       }))}
       jobs={workspace.jobs}
       role={user!.role}
+      timedMinutes={workspace.assignment.assessment.timedMinutes}
+      dueAt={workspace.assignment.dueAt?.toISOString() ?? null}
+      startedAt={workspace.assignment.startedAt?.toISOString() ?? null}
+      codingMode={codingMode}
+      difficulty={challenge.difficulty}
+      tags={challenge.tags}
+      problemDescription={challenge.description}
+      problemSummary={challenge.summary}
     />
   );
 }

@@ -19,6 +19,7 @@ type Assessment = {
   description: string;
   track: string;
   status: string;
+  timedMinutes?: number | null;
   challenge: Challenge;
   _count: { assignments: number };
   createdBy: { name: string };
@@ -43,9 +44,12 @@ export function AssessmentsClient(props: {
 }) {
   const router = useRouter();
   const canManage = ["SUPER_ADMIN", "HIRING_MANAGER"].includes(props.role);
-  const [title, setTitle] = useState("New elite assessment");
-  const [description, setDescription] = useState("Demonstrate end-to-end engineering ownership.");
+  const [title, setTitle] = useState("New Crucible assessment");
+  const [description, setDescription] = useState(
+    "Demonstrate end-to-end engineering ownership in a timed Crucible session.",
+  );
   const [challengeId, setChallengeId] = useState(props.challenges[0]?.id ?? "");
+  const [timedMinutes, setTimedMinutes] = useState(60);
   const [assignAssessmentId, setAssignAssessmentId] = useState(props.assessments[0]?.id ?? "");
   const [candidateId, setCandidateId] = useState(props.candidates[0]?.id ?? "");
 
@@ -53,7 +57,7 @@ export function AssessmentsClient(props: {
     const res = await fetch("/api/assessments", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ title, description, challengeId }),
+      body: JSON.stringify({ title, description, challengeId, timedMinutes }),
     });
     const json = await res.json();
     if (!json.ok) return toast.error(json.error?.message || "Failed");
@@ -79,8 +83,8 @@ export function AssessmentsClient(props: {
         <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">ASSESSMENT MANAGEMENT</p>
         <h1 className="mt-2 text-2xl font-semibold sm:text-3xl">Assign real engineering work</h1>
         <p className="mt-2 max-w-3xl text-slate-400">
-          Create assessments from the challenge library — including cybersecurity labs — and assign candidates to
-          isolated workspaces.
+          Create timed Crucible assessments from the challenge library — including cybersecurity labs — and assign
+          candidates to isolated workspaces. Default session length is 60 minutes.
         </p>
       </header>
 
@@ -89,7 +93,7 @@ export function AssessmentsClient(props: {
           <Card>
             <CardHeader>
               <CardTitle>Create assessment</CardTitle>
-              <CardDescription>Track is inherited from the selected challenge.</CardDescription>
+              <CardDescription>Track is inherited from the selected challenge. Default timer: 60 minutes.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="space-y-2">
@@ -113,6 +117,16 @@ export function AssessmentsClient(props: {
                     </option>
                   ))}
                 </select>
+              </div>
+              <div className="space-y-2">
+                <Label>Timed session (minutes)</Label>
+                <Input
+                  type="number"
+                  min={15}
+                  max={480}
+                  value={timedMinutes}
+                  onChange={(e) => setTimedMinutes(Number(e.target.value) || 60)}
+                />
               </div>
               <Button onClick={createAssessment}>Publish assessment</Button>
             </CardContent>
@@ -167,12 +181,14 @@ export function AssessmentsClient(props: {
                 <div className="flex flex-wrap gap-2">
                   <Badge variant={a.track === "CYBERSECURITY" ? "violet" : "cyan"}>{a.track}</Badge>
                   <Badge>{a.status}</Badge>
+                  <Badge variant="emerald">{a.timedMinutes ?? 60}m</Badge>
                 </div>
                 <CardTitle className="text-base">{a.title}</CardTitle>
                 <CardDescription>{a.challenge.title}</CardDescription>
               </CardHeader>
               <CardContent className="text-sm text-slate-400">
-                {a._count.assignments} assignments · created by {a.createdBy.name}
+                {a._count.assignments} assignments · {a.timedMinutes ?? 60}-minute session · created by{" "}
+                {a.createdBy.name}
               </CardContent>
             </Card>
           ))}

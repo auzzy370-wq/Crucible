@@ -1,12 +1,17 @@
+import { codingStarterFiles } from "./coding-starters";
+
 export type StarterFile = { path: string; content: string; language?: string };
 
 export function starterFilesForChallenge(slug: string, language: string, track: string): StarterFile[] {
+  const coding = codingStarterFiles(slug, language, track);
+  if (coding) return coding;
+
   const readme = `# ${slug}
 
 Track: **${track}**
 Language preference: **${language}**
 
-This is your isolated Engineering Gauntlet workspace.
+This is your isolated CRUCIBLE workspace.
 Build a working solution. Commit often. Tests and hidden evaluations run in a sandboxed worker.
 
 ## Rules

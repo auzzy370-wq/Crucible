@@ -1,4 +1,4 @@
-# Deploy Engineering Gauntlet on Vercel
+# Deploy CRUCIBLE on Vercel
 
 Vercel runs the Next.js control plane. You still need a **hosted Postgres** database (Neon is the simplest free option). Redis is optional (rate limiting fails open). Sandboxed Docker execution is **not** available on Vercel — the app uses `EXECUTION_MODE=process` for demo/testing.
 

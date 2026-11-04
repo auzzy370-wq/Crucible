@@ -1,17 +1,17 @@
-# ENGINEERING GAUNTLET
+# CRUCIBLE
 
-**Release 1.0** — elite full-stack **software engineering** and **cybersecurity** assessment & qualification platform.
+**Release 1.1** — elite full-stack **software engineering** and **cybersecurity** assessment & qualification platform.
 
-This is not a LeetCode clone. Candidates design, build, secure, test, deploy, and recover real systems — including AppSec labs, SOC/IR simulations, detection engineering, cloud hardening, and secure full-stack product builds.
+Timed, evidence-based assessments. Candidates design, build, secure, test, deploy, and recover real systems — including AppSec labs, SOC/IR simulations, detection engineering, cloud hardening, and secure full-stack product builds. Résumés claim. **Crucible verifies.**
 
-The seed loads the **full challenge library as published assessments** with demo assignments, workspaces, and tests already placed. See [docs/RELEASE.md](docs/RELEASE.md).
+The seed loads the **full challenge library as published 60-minute assessments** with demo assignments, workspaces, and tests already placed. See [docs/RELEASE.md](docs/RELEASE.md).
 
 ## Tracks
 
 | Track | Focus |
 |-------|--------|
-| Software Engineering | SaaS, realtime, distributed systems, ecommerce, AI SaaS |
-| Cybersecurity | AppSec, cloud security, threat modeling, SOC/IR, secure code review, cryptography, zero trust, detection, IAM, vuln triage |
+| Software Engineering | SaaS, APIs, frontend, realtime, distributed systems, performance, architecture, ecommerce, AI SaaS |
+| Cybersecurity | AppSec, cloud security, threat modeling, SOC/IR, secure code review, cryptography, zero trust, detection, IAM, vuln triage, purple team, supply chain |
 | Secure Full-Stack | Product delivery with elevated security bar |
 
 Skills on profiles are separated into **claimed**, **portfolio**, **assessment-verified**, and **human-reviewed**. Résumé claims never prove competence.
@@ -77,36 +77,19 @@ More detail: [docs/VERCEL.md](docs/VERCEL.md).
 
 ## Core workflow
 
-1. Admin/hiring manager creates an assessment from the challenge library (including cyber challenges).
+1. Admin/hiring manager creates an assessment from the challenge library (including cyber challenges). Default session length is **60 minutes**.
 2. Candidate registers / uses seed account; uploads PDF résumé (claims only).
-3. Manager assigns assessment → isolated workspace provisioned.
+3. Manager assigns assessment → isolated workspace provisioned with a live countdown.
 4. Candidate builds in Monaco IDE, commits, runs sandboxed tests / hidden tests / deploy checks.
 5. Submit → evidence-based AI evaluation (no invented test results; mock LLM if no API key).
-6. Candidate completes architecture package, incident/SOC simulation, follow-ups, optional team gauntlet.
+6. Candidate completes architecture package, incident/SOC simulation, follow-ups, optional team crucible.
 7. Human reviewer approves/rejects with documented reasoning.
 8. Qualification report + skill lanes updated.
 
 ## AI configuration
 
-Set `OPENAI_API_KEY` and optional `OPENAI_BASE_URL` / `OPENAI_MODEL`. Without a key, `AI_FALLBACK_MOCK=true` uses deterministic evidence-based heuristics. Providers are managed in Admin; keys stay in env vars.
+Set `OPENAI_API_KEY` (and optional `OPENAI_BASE_URL` / `OPENAI_MODEL`). With `AI_FALLBACK_MOCK=true`, grading uses deterministic mock scores when no key is present — fine for demos.
 
-## Execution security
+## License
 
-- `EXECUTION_MODE=process` — constrained local fallback for development.
-- `EXECUTION_MODE=docker` — disposable containers with CPU/memory/timeouts, dropped caps, no new privileges.
-- Candidate code, uploads, and AI instructions are untrusted.
-- Production should prefer Firecracker/gVisor; no host credentials or Docker socket inside workloads.
-
-## Tests
-
-```bash
-npm run test:unit
-npm run dev   # separate terminal
-npm run test:e2e
-```
-
-## Docs
-
-- `docs/SECURITY.md` — threat model & isolation
-- `docs/ARCHITECTURE.md` — system design
-- `docs/adr/` — architecture decision records
+Private / proprietary unless otherwise noted.

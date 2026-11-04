@@ -89,12 +89,12 @@ export default function LoginPage() {
       <Card className="animate-rise relative w-full max-w-md border-cyan-500/20">
         <CardHeader>
           <div className="mb-2 font-mono text-[10px] tracking-[0.3em] text-cyan-300 sm:text-xs sm:tracking-[0.35em]">
-            ENGINEERING GAUNTLET
+            CRUCIBLE
           </div>
           <CardTitle className="text-xl sm:text-2xl">Sign in to operations</CardTitle>
           <CardDescription>
-            Elite software engineering and cybersecurity qualification platform. Demo data is preloaded: challenges,
-            assessments, workspaces, and tests.
+            Timed elite software engineering and cybersecurity assessments. Demo library is preloaded — challenges,
+            60-minute assessments, workspaces, and tests.
           </CardDescription>
         </CardHeader>
         <CardContent>

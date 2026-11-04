@@ -1,10 +1,11 @@
-# Engineering Gauntlet — Release 1.0
+# CRUCIBLE — Release 1.1
 
 ## What “ready for release” means
 
-- All **19 catalog challenges** published
-- Matching **published assessments** for every challenge
+- Full **challenge catalog** published (40+ challenges across SE, Cyber, Secure Full-Stack)
+- Matching **published assessments** for every challenge (default **60-minute** timed sessions)
 - Demo candidates have **assignments + workspaces + starter tests** for the full library
+- Live **session countdown** on dashboard + workspace IDE
 - Scoring policies for SE / Cyber / Secure Full-Stack
 - Incident scenarios, architecture packages, and at least one item in the reviewer queue
 - Auth, dashboards, IDE, assessments, reviews, teams, incidents, admin surfaces wired
@@ -38,13 +39,3 @@ npm start              # http://localhost:3847
 2. **Do not** set `REDIS_URL=localhost`
 3. Deploy, then `POST /api/setup` with `{ "secret": "<SETUP_SECRET>", "seed": true }`
 4. Disable Deployment Protection if you see `403 FORBIDDEN`
-5. See [VERCEL.md](./VERCEL.md)
-
-## Verify
-
-```bash
-npm run release:check
-curl -s http://localhost:3847/api/setup
-```
-
-Expect published challenges ≥ 19, assignments covering the library, and `databaseReachable: true`.

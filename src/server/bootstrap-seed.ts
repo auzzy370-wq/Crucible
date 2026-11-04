@@ -10,7 +10,7 @@ import { createWorkspaceForAssignment } from "@/server/execution/workspace";
 import { createTeam } from "@/server/teams/service";
 
 export async function seedDatabase() {
-  console.log("Seeding Engineering Gauntlet…");
+  console.log("Seeding CRUCIBLE…");
 
   // Cost 8 — bcryptjs at 12 often exceeds Vercel serverless login budgets.
   const passwordHash = await bcrypt.hash("Gauntlet!Admin1", 8);
@@ -222,17 +222,20 @@ export async function seedDatabase() {
   const soc = await prisma.challenge.findUniqueOrThrow({ where: { slug: "soc-nightwatch" } });
   const teamChallenge = await prisma.challenge.findUniqueOrThrow({ where: { slug: "team-forge" } });
 
+  const DEFAULT_TIMED_MINUTES = 60;
+
   const assessmentSaas = await prisma.assessment.upsert({
     where: { id: "assess-saas-1" },
-    update: {},
+    update: { timedMinutes: DEFAULT_TIMED_MINUTES, status: "PUBLISHED" },
     create: {
       id: "assess-saas-1",
       title: "Elite SaaS Build — Nexus",
-      description: "Individual full-stack SaaS assessment with adaptive difficulty.",
+      description: "Individual full-stack SaaS assessment with adaptive difficulty. Timed 60-minute session.",
       challengeId: saas.id,
       track: "SOFTWARE_ENGINEERING",
       status: "PUBLISHED",
-      multiDay: true,
+      timedMinutes: DEFAULT_TIMED_MINUTES,
+      multiDay: false,
       progressiveDiff: true,
       createdById: hiring.id,
       scoringPolicyId: engPolicy.id,
@@ -241,15 +244,16 @@ export async function seedDatabase() {
 
   const assessmentCyber = await prisma.assessment.upsert({
     where: { id: "assess-cyber-1" },
-    update: {},
+    update: { timedMinutes: DEFAULT_TIMED_MINUTES, status: "PUBLISHED" },
     create: {
       id: "assess-cyber-1",
       title: "AppSec Fortress Qualification",
-      description: "Cybersecurity track — controlled vulnerability lab with fix + regression requirements.",
+      description: "Cybersecurity track — controlled vulnerability lab with fix + regression requirements. Timed 60 minutes.",
       challengeId: appsec.id,
       track: "CYBERSECURITY",
       status: "PUBLISHED",
-      multiDay: true,
+      timedMinutes: DEFAULT_TIMED_MINUTES,
+      multiDay: false,
       progressiveDiff: true,
       allowTeam: false,
       createdById: hiring.id,
@@ -259,15 +263,16 @@ export async function seedDatabase() {
 
   await prisma.assessment.upsert({
     where: { id: "assess-soc-1" },
-    update: {},
+    update: { timedMinutes: DEFAULT_TIMED_MINUTES, status: "PUBLISHED" },
     create: {
       id: "assess-soc-1",
       title: "SOC Nightwatch IR Simulation",
-      description: "Incident response and detection engineering simulation.",
+      description: "Incident response and detection engineering simulation. Timed 60-minute IR window.",
       challengeId: soc.id,
       track: "CYBERSECURITY",
       status: "PUBLISHED",
-      timedMinutes: 240,
+      timedMinutes: DEFAULT_TIMED_MINUTES,
+      multiDay: false,
       createdById: hiring.id,
       scoringPolicyId: cyberPolicy.id,
     },
@@ -275,14 +280,16 @@ export async function seedDatabase() {
 
   const assessmentTeam = await prisma.assessment.upsert({
     where: { id: "assess-team-1" },
-    update: {},
+    update: { timedMinutes: DEFAULT_TIMED_MINUTES, status: "PUBLISHED" },
     create: {
       id: "assess-team-1",
       title: "Team Forge Collaborative Delivery",
-      description: "2–4 engineers, shared ownership, integration quality.",
+      description: "2–4 engineers, shared ownership, integration quality. Timed collaborative session.",
       challengeId: teamChallenge.id,
       track: "SECURE_FULL_STACK",
       status: "PUBLISHED",
+      timedMinutes: DEFAULT_TIMED_MINUTES,
+      multiDay: false,
       allowTeam: true,
       teamSizeMin: 2,
       teamSizeMax: 4,
@@ -349,6 +356,14 @@ export async function seedDatabase() {
   }) {
     const existing = await prisma.assessmentAssignment.findUnique({ where: { id: params.id } });
     if (existing) {
+      const startedAt = existing.startedAt ?? new Date();
+      const refreshed = await prisma.assessmentAssignment.update({
+        where: { id: existing.id },
+        data: {
+          startedAt,
+          dueAt: new Date(startedAt.getTime() + DEFAULT_TIMED_MINUTES * 60 * 1000),
+        },
+      });
       const ws = await prisma.workspace.findUnique({ where: { assignmentId: existing.id } });
       if (!ws) {
         await createWorkspaceForAssignment({
@@ -358,8 +373,9 @@ export async function seedDatabase() {
           track: params.track,
         });
       }
-      return existing;
+      return refreshed;
     }
+    const startedAt = new Date();
     const assignment = await prisma.assessmentAssignment.create({
       data: {
         id: params.id,
@@ -367,8 +383,8 @@ export async function seedDatabase() {
         candidateId: params.candidateId,
         assignedById: hiring.id,
         status: "IN_PROGRESS",
-        startedAt: new Date(),
-        dueAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        startedAt,
+        dueAt: new Date(startedAt.getTime() + DEFAULT_TIMED_MINUTES * 60 * 1000),
         currentLevel: 1,
         maxLevelReached: 1,
       },
@@ -447,10 +463,12 @@ export async function seedDatabase() {
       update: {
         status: "PUBLISHED",
         scoringPolicyId: policyId,
+        timedMinutes: DEFAULT_TIMED_MINUTES,
+        multiDay: false,
         ...(isLib
           ? {
               title: c.title,
-              description: c.summary,
+              description: `${c.summary} Timed ${DEFAULT_TIMED_MINUTES}-minute Crucible session.`,
               allowTeam: c.type === "TEAM_PROJECT",
               teamSizeMin: c.type === "TEAM_PROJECT" ? 2 : null,
               teamSizeMax: c.type === "TEAM_PROJECT" ? 4 : null,
@@ -468,11 +486,14 @@ export async function seedDatabase() {
               : c.slug === "soc-nightwatch"
                 ? "SOC Nightwatch IR Simulation"
                 : "Team Forge Collaborative Delivery",
-        description: isLib ? c.summary : c.summary,
+        description: isLib
+          ? `${c.summary} Timed ${DEFAULT_TIMED_MINUTES}-minute Crucible session.`
+          : c.summary,
         challengeId: challenge.id,
         track: c.track,
         status: "PUBLISHED",
-        multiDay: true,
+        timedMinutes: DEFAULT_TIMED_MINUTES,
+        multiDay: false,
         progressiveDiff: true,
         allowTeam: c.type === "TEAM_PROJECT",
         teamSizeMin: c.type === "TEAM_PROJECT" ? 2 : undefined,

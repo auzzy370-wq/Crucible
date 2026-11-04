@@ -42,6 +42,7 @@ enum ChallengeType {
   TEAM_PROJECT
   PRODUCTION_INCIDENT
   DATABASE
+  CODING_PROBLEM
   // Cybersecurity specialization track
   APPSEC
   CLOUD_SECURITY
