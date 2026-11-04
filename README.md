@@ -2,7 +2,7 @@
 
 **Release 1.4** — elite full-stack **software engineering** and **cybersecurity** assessment & qualification platform — **and** an interview-grade coding lane.
 
-Timed, evidence-based assessments. Grind Easy→Impossible coding with public/hidden judges *and* design, build, secure, test, deploy, and recover real systems. Résumés claim. **Crucible verifies.**
+Timed, evidence-based assessments. Grind Easy→Impossible coding in **TypeScript, JavaScript, Python, Go, Rust, and Java** with public/hidden judges *and* design, build, secure, test, deploy, and recover real systems. Résumés claim. **Crucible verifies.**
 
 The seed loads the **full challenge library as published 60-minute assessments** with demo assignments, workspaces, and tests already placed. See [docs/RELEASE.md](docs/RELEASE.md).
 
