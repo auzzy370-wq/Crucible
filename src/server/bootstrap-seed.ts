@@ -1035,7 +1035,15 @@ export async function seedDatabase() {
     teammate: teammate.email,
     passwordAdmin: "Gauntlet!Admin1",
     passwordCandidate: "Gauntlet!Cand1",
-    policies: [engPolicy.name, cyberPolicy.name, securePolicy.name],
+    policies: [
+      engPolicy.name,
+      cyberPolicy.name,
+      securePolicy.name,
+      srePolicy.name,
+      dataPolicy.name,
+      mobilePolicy.name,
+      privacyPolicy.name,
+    ],
     timedMinutesBackfilled: timedBackfill.count,
     publicProfiles: ["/u/casey-elite", "/u/sam-appsec", "/u/premium-prep"],
     ready: {
