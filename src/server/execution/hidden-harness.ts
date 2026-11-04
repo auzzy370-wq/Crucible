@@ -1,3 +1,5 @@
+import { familyHarnessForSlug } from "./coding-family-harness";
+
 /**
  * Coding-problem hidden cases keyed by challenge slug.
  * Executed against candidate solution evidence (AST-free runtime eval via process runner files).
@@ -149,7 +151,9 @@ const results = [
 console.log(JSON.stringify({ results }));
 process.exit(results.every((r) => r.pass) ? 0 : 1);
 `;
-    default:
-      return null;
+    default: {
+      const family = familyHarnessForSlug(slug);
+      return family?.hiddenRunner ?? null;
+    }
   }
 }

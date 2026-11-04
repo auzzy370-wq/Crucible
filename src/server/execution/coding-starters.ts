@@ -1,5 +1,7 @@
 import { CODING_PROBLEM_CATALOG } from "@/server/challenges/coding-problems";
+import { CHALLENGE_CATALOG } from "@/server/challenges/catalog";
 import type { StarterFile } from "./starters";
+import { familyHarnessForSlug, familyTsFiles } from "./coding-family-harness";
 
 type CodingSpec = {
   solutionStub: string;
@@ -510,47 +512,13 @@ func main() {
 `;
 }
 
-function genericSpec(slug: string): CodingSpec {
-  return {
-    solutionStub: `/**
- * CRUCIBLE coding bank — implement solve() for ${slug}
- * Public tests import { solve } from this module.
- */
-export function solve(...args: unknown[]): unknown {
-  void args;
-  // TODO: implement
-  return null;
-}
-`,
-    publicTests: `import { solve } from "../src/solution";
-
-export async function runPublicTests() {
-  // Bank problems ship with a smoke harness — extend as you implement.
-  const results: { name: string; pass: boolean; hidden?: boolean }[] = [];
-  try {
-    const out = solve(1, 2, 3);
-    results.push({ name: "module_exports_solve", pass: typeof solve === "function" });
-    results.push({ name: "smoke_invokes", pass: out !== undefined });
-  } catch {
-    results.push({ name: "module_exports_solve", pass: false });
-  }
-  return results;
-}
-`,
-    hiddenHints: [
-      { id: "edge-empty", description: "Empty / trivial input" },
-      { id: "edge-large", description: "Large-n / adversarial input" },
-      { id: "complexity", description: "Meets expected complexity band" },
-    ],
-  };
-}
-
 export function codingStarterFiles(slug: string, language: string, track: string): StarterFile[] | null {
-  const isCodingSlug = slug.startsWith("lc-") || slug.startsWith("q-") || Boolean(SPECS[slug]);
-  if (!isCodingSlug && !SPECS[slug]) return null;
-  const spec = SPECS[slug] ?? (slug.startsWith("q-") || slug.startsWith("lc-") ? genericSpec(slug) : null);
-  if (!spec) return null;
-  const challenge = CODING_PROBLEM_CATALOG.find((c) => c.slug === slug);
+  const family = familyHarnessForSlug(slug);
+  const spec = SPECS[slug];
+  if (!spec && !family && !slug.startsWith("lc-") && !slug.startsWith("q-")) return null;
+
+  const challenge =
+    CODING_PROBLEM_CATALOG.find((c) => c.slug === slug) ?? CHALLENGE_CATALOG.find((c) => c.slug === slug);
   const problemMd = `# ${challenge?.title ?? slug}
 
 ${challenge?.summary ?? ""}
@@ -566,25 +534,53 @@ ${challenge?.description ?? "Implement the solution."}
 
 Track: **${track}** · Language: **${lang}**
 
-CRUCIBLE coding problem — LeetCode-style.
+CRUCIBLE coding lane — interview-grade public/hidden tests + skill pinpoint on Submit.
 
 1. Read the problem in the IDE **Problem** panel (or \`PROBLEM.md\`).
 2. Implement \`${entry}\`.
-3. Click **Run** to execute public tests.
-4. Click **Submit** for evaluation (includes hidden cases).
+3. Click **Run** for public tests.
+4. Click **Submit** for hidden cases + knowledge pinpoint.
 
 Do not modify hidden harness expectations dishonestly — graders check evidence.
 `;
+
+  const hiddenHints = family?.hiddenHints ?? spec?.hiddenHints ?? [
+    { id: "edge", description: "Edge cases" },
+    { id: "scale", description: "Scale / adversarial" },
+  ];
 
   const common: StarterFile[] = [
     { path: "README.md", content: readme, language: "markdown" },
     { path: "PROBLEM.md", content: problemMd, language: "markdown" },
     {
       path: "tests/hidden.manifest.json",
-      content: JSON.stringify({ tests: spec.hiddenHints }, null, 2),
+      content: JSON.stringify({ tests: hiddenHints }, null, 2),
       language: "json",
     },
   ];
+
+  // Bank family problems: full TS harness (primary judge path)
+  if (family && lang === "typescript") {
+    return [...common, ...familyTsFiles(slug, family)];
+  }
+
+  if (family && lang === "python") {
+    return [
+      ...common,
+      { path: "src/solution.py", content: family.pythonStub, language: "python" },
+      {
+        path: "tests/run_public.py",
+        content: `def run():
+    print('{"results":[{"name":"python_bank","pass":False}]}')
+if __name__ == "__main__":
+    run()
+`,
+        language: "python",
+      },
+    ];
+  }
+
+  if (!spec) return family && lang === "typescript" ? [...common, ...familyTsFiles(slug, family)] : null;
 
   if (lang === "python") {
     return [

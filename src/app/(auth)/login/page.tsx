@@ -94,7 +94,7 @@ export default function LoginPage() {
           </div>
           <CardTitle className="text-xl sm:text-2xl">Sign in to operations</CardTitle>
           <CardDescription>
-            SaaS interview prep + elite assessments. Free problemset, or try Premium for company questions, Lightning
+            Interview coding + elite production assessments. Free problemset, or Premium for company questions, Lightning
             Judge, simulations, and unlimited playgrounds.
           </CardDescription>
         </CardHeader>

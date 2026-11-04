@@ -473,12 +473,9 @@ export function isCodingProblem(challenge: { type?: string; tags?: string[]; slu
   return (
     challenge.type === "CODING_PROBLEM" ||
     challenge.tags?.includes("coding") === true ||
-    (challenge.slug?.startsWith("lc-") ?? false)
+    (challenge.slug?.startsWith("lc-") ?? false) ||
+    (challenge.slug?.startsWith("q-") ?? false)
   );
 }
 
-export function difficultyLabel(difficulty: number): "Easy" | "Medium" | "Hard" {
-  if (difficulty <= 3) return "Easy";
-  if (difficulty <= 6) return "Medium";
-  return "Hard";
-}
+export { difficultyBand as difficultyLabel } from "@/lib/difficulty";

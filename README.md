@@ -1,8 +1,8 @@
 # CRUCIBLE
 
-**Release 1.4** — elite full-stack **software engineering** and **cybersecurity** assessment & qualification platform.
+**Release 1.4** — elite full-stack **software engineering** and **cybersecurity** assessment & qualification platform — **and** an interview-grade coding lane.
 
-Timed, evidence-based assessments. Candidates design, build, secure, test, deploy, and recover real systems — including AppSec labs, SOC/IR simulations, detection engineering, cloud hardening, and secure full-stack product builds. Résumés claim. **Crucible verifies.**
+Timed, evidence-based assessments. Grind Easy→Impossible coding with public/hidden judges *and* design, build, secure, test, deploy, and recover real systems. Résumés claim. **Crucible verifies.**
 
 The seed loads the **full challenge library as published 60-minute assessments** with demo assignments, workspaces, and tests already placed. See [docs/RELEASE.md](docs/RELEASE.md).
 

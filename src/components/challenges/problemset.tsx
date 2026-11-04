@@ -99,8 +99,8 @@ export function Problemset(props: {
           <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">CRUCIBLE</p>
           <h1 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">Problemset</h1>
           <p className="mt-2 max-w-2xl text-slate-400">
-            Company-tagged interview questions with frequency and time filters. Premium unlocks exclusive problems,
-            solutions, and Lightning Judge.
+            Both lanes: interview-grade coding (Easy → Impossible, company tags, public + hidden judge) and
+            production missions. Submit pinpoints exactly which skills you proved.
           </p>
           <p className="mt-2 max-w-2xl text-xs text-slate-500" title={FREQUENCY_METHODOLOGY.detail}>
             Freq column: {FREQUENCY_METHODOLOGY.label}. {FREQUENCY_METHODOLOGY.detail}
