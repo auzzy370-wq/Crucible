@@ -12,7 +12,16 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { formatScore } from "@/lib/utils";
 
-type Challenge = { id: string; title: string; track: string; slug: string };
+type Challenge = {
+  id: string;
+  title: string;
+  track: string;
+  slug: string;
+  summary?: string;
+  difficulty?: number;
+  publicRequirements?: string[];
+  tags?: string[];
+};
 type Assessment = {
   id: string;
   title: string;
@@ -29,7 +38,20 @@ type Assignment = {
   id: string;
   status: string;
   currentLevel: number;
-  assessment: { id: string; title: string; track: string; challenge: { summary: string } };
+  maxLevelReached?: number;
+  assessment: {
+    id: string;
+    title: string;
+    track: string;
+    challenge: {
+      summary: string;
+      title?: string;
+      difficulty?: number;
+      publicRequirements?: string[];
+      tags?: string[];
+      adaptiveTrack?: { level: number; title: string }[] | null;
+    };
+  };
   candidate: { id: string; name: string; email: string };
   workspace: { id: string } | null;
   scoreReport: { overall: number; qualified: boolean; tier: string } | null;
@@ -175,51 +197,78 @@ export function AssessmentsClient(props: {
       <section className="space-y-3">
         <h2 className="text-lg font-semibold">Published assessments</h2>
         <div className="grid gap-3 md:grid-cols-2">
-          {props.assessments.map((a) => (
-            <Card key={a.id}>
-              <CardHeader>
-                <div className="flex flex-wrap gap-2">
-                  <Badge variant={a.track === "CYBERSECURITY" ? "violet" : "cyan"}>{a.track}</Badge>
-                  <Badge>{a.status}</Badge>
-                  <Badge variant="emerald">{a.timedMinutes ?? 60}m</Badge>
-                </div>
-                <CardTitle className="text-base">{a.title}</CardTitle>
-                <CardDescription>{a.challenge.title}</CardDescription>
-              </CardHeader>
-              <CardContent className="text-sm text-slate-400">
-                {a._count.assignments} assignments · {a.timedMinutes ?? 60}-minute session · created by{" "}
-                {a.createdBy.name}
-              </CardContent>
-            </Card>
-          ))}
+          {props.assessments.map((a) => {
+            const reqs = a.challenge.publicRequirements ?? [];
+            return (
+              <Card key={a.id}>
+                <CardHeader>
+                  <div className="flex flex-wrap gap-2">
+                    <Badge variant={a.track === "CYBERSECURITY" ? "violet" : "cyan"}>{a.track}</Badge>
+                    <Badge>{a.status}</Badge>
+                    <Badge variant="emerald">{a.timedMinutes ?? 60}m</Badge>
+                    {a.challenge.difficulty != null && <Badge variant="amber">D{a.challenge.difficulty}</Badge>}
+                  </div>
+                  <CardTitle className="text-base">{a.title}</CardTitle>
+                  <CardDescription>{a.challenge.title}</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3 text-sm text-slate-400">
+                  {a.challenge.summary && <p className="text-slate-300">{a.challenge.summary}</p>}
+                  {reqs.length > 0 && (
+                    <ul className="space-y-1 text-xs text-slate-500">
+                      {reqs.slice(0, 4).map((r) => (
+                        <li key={r} className="flex gap-2">
+                          <span className="text-cyan-500">▸</span>
+                          <span>{r}</span>
+                        </li>
+                      ))}
+                      {reqs.length > 4 && <li className="text-slate-600">+{reqs.length - 4} more deliverables</li>}
+                    </ul>
+                  )}
+                  <div>
+                    {a._count.assignments} assignments · {a.timedMinutes ?? 60}-minute session · created by{" "}
+                    {a.createdBy.name}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       </section>
 
       <section className="space-y-3">
         <h2 className="text-lg font-semibold">Assignments</h2>
         <div className="grid gap-3 md:hidden">
-          {props.assignments.map((a) => (
-            <Card key={a.id}>
-              <CardContent className="space-y-2 pt-4 text-sm">
-                <div className="font-medium text-slate-100">{a.candidate.name}</div>
-                <div className="text-slate-400">{a.assessment.title}</div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <Badge variant={a.assessment.track === "CYBERSECURITY" ? "violet" : "cyan"}>
-                    {a.assessment.track}
-                  </Badge>
-                  <span className="font-mono text-xs text-slate-300">{a.status}</span>
-                  <span className="font-mono text-xs text-cyan-300">
-                    {a.scoreReport ? formatScore(a.scoreReport.overall) : "—"}
-                  </span>
-                </div>
-                {a.workspace ? (
-                  <Link className="inline-block text-cyan-300 hover:underline" href={`/workspace/${a.workspace.id}`}>
-                    Open workspace →
-                  </Link>
-                ) : null}
-              </CardContent>
-            </Card>
-          ))}
+          {props.assignments.map((a) => {
+            const ch = a.assessment.challenge;
+            const reqs = ch.publicRequirements ?? [];
+            return (
+              <Card key={a.id}>
+                <CardContent className="space-y-2 pt-4 text-sm">
+                  <div className="font-medium text-slate-100">{a.candidate.name}</div>
+                  <div className="text-slate-400">{a.assessment.title}</div>
+                  <p className="text-xs text-slate-500">{ch.summary}</p>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge variant={a.assessment.track === "CYBERSECURITY" ? "violet" : "cyan"}>
+                      {a.assessment.track}
+                    </Badge>
+                    <span className="font-mono text-xs text-slate-300">{a.status}</span>
+                    <span className="font-mono text-xs text-emerald-300">L{a.currentLevel}</span>
+                    <span className="font-mono text-xs text-cyan-300">
+                      {a.scoreReport ? formatScore(a.scoreReport.overall) : "—"}
+                    </span>
+                  </div>
+                  {reqs.length > 0 && (
+                    <div className="text-[11px] text-slate-500">{reqs.length} deliverables in mission brief</div>
+                  )}
+                  {a.workspace ? (
+                    <Link className="inline-block text-cyan-300 hover:underline" href={`/workspace/${a.workspace.id}`}>
+                      Open workspace →
+                    </Link>
+                  ) : null}
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
         <div className="hidden overflow-x-auto rounded-xl border border-slate-800 md:block">
           <table className="min-w-full text-left text-sm">
@@ -227,37 +276,51 @@ export function AssessmentsClient(props: {
               <tr>
                 <th className="px-4 py-3">Candidate</th>
                 <th className="px-4 py-3">Assessment</th>
+                <th className="px-4 py-3">Mission</th>
                 <th className="px-4 py-3">Track</th>
+                <th className="px-4 py-3">Level</th>
                 <th className="px-4 py-3">Status</th>
                 <th className="px-4 py-3">Score</th>
                 <th className="px-4 py-3">Workspace</th>
               </tr>
             </thead>
             <tbody>
-              {props.assignments.map((a) => (
-                <tr key={a.id} className="border-t border-slate-800/80">
-                  <td className="px-4 py-3">{a.candidate.name}</td>
-                  <td className="px-4 py-3">{a.assessment.title}</td>
-                  <td className="px-4 py-3">
-                    <Badge variant={a.assessment.track === "CYBERSECURITY" ? "violet" : "cyan"}>
-                      {a.assessment.track}
-                    </Badge>
-                  </td>
-                  <td className="px-4 py-3 font-mono text-xs">{a.status}</td>
-                  <td className="px-4 py-3 font-mono">
-                    {a.scoreReport ? formatScore(a.scoreReport.overall) : "—"}
-                  </td>
-                  <td className="px-4 py-3">
-                    {a.workspace ? (
-                      <Link className="text-cyan-300 hover:underline" href={`/workspace/${a.workspace.id}`}>
-                        Open
-                      </Link>
-                    ) : (
-                      "—"
-                    )}
-                  </td>
-                </tr>
-              ))}
+              {props.assignments.map((a) => {
+                const ch = a.assessment.challenge;
+                const reqCount = ch.publicRequirements?.length ?? 0;
+                return (
+                  <tr key={a.id} className="border-t border-slate-800/80 align-top">
+                    <td className="px-4 py-3">{a.candidate.name}</td>
+                    <td className="px-4 py-3">
+                      <div>{a.assessment.title}</div>
+                      <div className="mt-1 max-w-xs text-xs text-slate-500 line-clamp-2">{ch.summary}</div>
+                    </td>
+                    <td className="px-4 py-3 font-mono text-xs text-slate-400">
+                      {reqCount ? `${reqCount} deliverables` : "—"}
+                      {ch.difficulty != null ? ` · D${ch.difficulty}` : ""}
+                    </td>
+                    <td className="px-4 py-3">
+                      <Badge variant={a.assessment.track === "CYBERSECURITY" ? "violet" : "cyan"}>
+                        {a.assessment.track}
+                      </Badge>
+                    </td>
+                    <td className="px-4 py-3 font-mono text-xs text-emerald-300">L{a.currentLevel}</td>
+                    <td className="px-4 py-3 font-mono text-xs">{a.status}</td>
+                    <td className="px-4 py-3 font-mono">
+                      {a.scoreReport ? formatScore(a.scoreReport.overall) : "—"}
+                    </td>
+                    <td className="px-4 py-3">
+                      {a.workspace ? (
+                        <Link className="text-cyan-300 hover:underline" href={`/workspace/${a.workspace.id}`}>
+                          Open
+                        </Link>
+                      ) : (
+                        "—"
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

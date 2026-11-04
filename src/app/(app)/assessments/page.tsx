@@ -32,13 +32,40 @@ export default async function AssessmentsPage() {
     }),
   ]);
 
+  const serializeChallenge = (c: (typeof challenges)[number] | (typeof assessments)[number]["challenge"]) => ({
+    id: c.id,
+    title: c.title,
+    track: c.track,
+    slug: c.slug,
+    summary: "summary" in c ? c.summary : undefined,
+    difficulty: "difficulty" in c ? c.difficulty : undefined,
+    tags: "tags" in c ? c.tags : undefined,
+    publicRequirements: ("publicRequirements" in c ? (c.publicRequirements as string[] | null) : null) ?? [],
+  });
+
   return (
     <AssessmentsClient
       role={user!.role}
-      assessments={assessments}
-      challenges={challenges}
+      assessments={assessments.map((a) => ({
+        ...a,
+        challenge: serializeChallenge(a.challenge),
+      }))}
+      challenges={challenges.map(serializeChallenge)}
       candidates={candidates}
-      assignments={assignments}
+      assignments={assignments.map((a) => ({
+        ...a,
+        assessment: {
+          ...a.assessment,
+          challenge: {
+            summary: a.assessment.challenge.summary,
+            title: a.assessment.challenge.title,
+            difficulty: a.assessment.challenge.difficulty,
+            tags: a.assessment.challenge.tags,
+            publicRequirements: (a.assessment.challenge.publicRequirements as string[] | null) ?? [],
+            adaptiveTrack: a.assessment.challenge.adaptiveTrack as { level: number; title: string }[] | null,
+          },
+        },
+      }))}
     />
   );
 }

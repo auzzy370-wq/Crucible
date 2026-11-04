@@ -6,7 +6,7 @@ import {
   CYBERSECURITY_WEIGHTS,
   SECURE_FULL_STACK_WEIGHTS,
 } from "@/server/scoring/policy";
-import { createWorkspaceForAssignment } from "@/server/execution/workspace";
+import { createWorkspaceForAssignment, refreshWorkspaceStarters } from "@/server/execution/workspace";
 import { createTeam } from "@/server/teams/service";
 
 export async function seedDatabase() {
@@ -405,6 +405,14 @@ export async function seedDatabase() {
           challengeSlug: params.challengeSlug,
           language: params.language ?? "typescript",
           track: params.track,
+        });
+      } else {
+        await refreshWorkspaceStarters({
+          workspaceId: ws.id,
+          challengeSlug: params.challengeSlug,
+          language: params.language ?? ws.language ?? "typescript",
+          track: params.track,
+          force: true,
         });
       }
       return refreshed;

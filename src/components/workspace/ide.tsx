@@ -110,6 +110,14 @@ export function WorkspaceIde(props: {
   premium?: boolean;
   companies?: string[];
   isPremiumContent?: boolean;
+  publicRequirements?: string[];
+  hiddenRequirements?: string[];
+  adaptiveTrack?: { level: number; title: string; criteria: string }[];
+  gradingRubric?: Record<string, string>;
+  currentLevel?: number;
+  maxLevelReached?: number;
+  owaspMappings?: string[];
+  mitreMappings?: string[];
 }) {
   const router = useRouter();
   const coding = Boolean(props.codingMode);
@@ -147,7 +155,15 @@ export function WorkspaceIde(props: {
     hiddenTotal: number;
   } | null>(null);
   const [panel, setPanel] = useState<"problem" | "code">("problem");
+  const [projectPanel, setProjectPanel] = useState<"brief" | "code" | "evidence">("brief");
+  const [checkedDeliverables, setCheckedDeliverables] = useState<Record<string, boolean>>({});
   const editorRef = useRef<{ editor: any; monaco: any } | null>(null);
+
+  const publicReqs = props.publicRequirements ?? [];
+  const hiddenReqs = props.hiddenRequirements ?? [];
+  const adaptive = props.adaptiveTrack ?? [];
+  const rubric = props.gradingRubric ?? {};
+  const deliverableDone = publicReqs.filter((r) => checkedDeliverables[r]).length;
 
   function applyVerdict(results: CaseResult[]) {
     const pub = results.filter((r) => !r.hidden);
@@ -739,6 +755,9 @@ export function WorkspaceIde(props: {
     );
   }
 
+  const briefFile = files.find((f) => f.path === "BRIEF.md")?.content;
+  const checklistFile = files.find((f) => f.path === "CHECKLIST.md")?.content;
+
   return (
     <div className="animate-rise space-y-4">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
@@ -746,11 +765,24 @@ export function WorkspaceIde(props: {
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant={props.track === "CYBERSECURITY" ? "violet" : "cyan"}>{props.track}</Badge>
             <Badge>{props.language}</Badge>
+            {props.difficulty != null && (
+              <span className={cn("rounded-md border px-2 py-0.5 text-xs font-semibold", diffClass(props.difficulty))}>
+                {difficultyLabel(props.difficulty)} · {props.difficulty}/10
+              </span>
+            )}
+            {props.currentLevel != null && (
+              <Badge variant="emerald">
+                Level {props.currentLevel}
+                {props.maxLevelReached && props.maxLevelReached > props.currentLevel
+                  ? ` · peak ${props.maxLevelReached}`
+                  : ""}
+              </Badge>
+            )}
             <SessionTimer endsAt={props.dueAt} timedMinutes={props.timedMinutes} />
           </div>
           <h1 className="mt-2 break-words text-xl font-semibold sm:text-2xl">{props.title}</h1>
           <p className="text-sm text-slate-400">
-            Isolated Crucible workspace · sandboxed execution · evidence-based grading
+            {props.problemSummary || "Mission brief · sandboxed evidence · adaptive grading"}
             {props.timedMinutes ? ` · ${props.timedMinutes}-minute session` : ""}
           </p>
         </div>
@@ -770,67 +802,309 @@ export function WorkspaceIde(props: {
         </div>
       </div>
 
-      <div className="xl:hidden">
-        <label className="mb-1 block text-xs uppercase tracking-wider text-slate-500" htmlFor="ide-file">
-          File
-        </label>
-        <select
-          id="ide-file"
-          className="flex min-h-11 w-full rounded-md border border-slate-700 bg-slate-950 px-3 text-base text-slate-100"
-          value={activePath}
-          onChange={(e) => setActivePath(e.target.value)}
-        >
-          {files.map((f) => (
-            <option key={f.id} value={f.path}>
-              {f.path}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div className="grid min-h-0 gap-3 xl:grid-cols-[220px_1fr_300px]">
-        <aside className="hidden rounded-xl border border-slate-800 bg-slate-950/70 p-3 xl:block">
-          <div className="mb-2 text-xs uppercase tracking-wider text-slate-500">Files</div>
-          <ul className="space-y-1">
-            {files.map((f) => (
-              <li key={f.id}>
-                <button
-                  className={`w-full rounded px-2 py-1.5 text-left font-mono text-xs ${
-                    f.path === activePath ? "bg-cyan-500/10 text-cyan-200" : "text-slate-400 hover:bg-slate-900"
-                  }`}
-                  onClick={() => setActivePath(f.path)}
-                >
-                  {f.path}
-                </button>
-              </li>
-            ))}
-          </ul>
-        </aside>
-
-        <section className="min-w-0 overflow-hidden rounded-xl border border-slate-800 bg-[#0d1117]">
-          <div className="truncate border-b border-slate-800 px-3 py-2 font-mono text-xs text-slate-400">
-            {activePath}
+      {/* Progress strip */}
+      <div className="grid gap-2 sm:grid-cols-3">
+        <div className="rounded-xl border border-slate-800 bg-slate-950/60 px-3 py-2">
+          <div className="text-[10px] uppercase tracking-wider text-slate-500">Deliverables</div>
+          <div className="mt-1 font-mono text-sm text-cyan-200">
+            {deliverableDone}/{publicReqs.length || "—"} checked
           </div>
-          <div className="h-[42vh] min-h-[240px] sm:h-[52vh] lg:h-[58vh]">
-            <Monaco
-              height="100%"
-              theme="vs-dark"
-              language={guessLang(activePath, props.language)}
-              value={active?.content ?? ""}
-              onChange={(v) => v !== undefined && save(v)}
-              options={{
-                minimap: { enabled: false },
-                fontSize: 13,
-                fontFamily: "IBM Plex Mono, ui-monospace, monospace",
-                automaticLayout: true,
-                wordWrap: "on",
-                scrollBeyondLastLine: false,
+          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-800">
+            <div
+              className="h-full rounded-full bg-cyan-400/80 transition-all"
+              style={{
+                width: `${publicReqs.length ? Math.round((deliverableDone / publicReqs.length) * 100) : 0}%`,
               }}
             />
           </div>
-        </section>
+        </div>
+        <div className="rounded-xl border border-slate-800 bg-slate-950/60 px-3 py-2">
+          <div className="text-[10px] uppercase tracking-wider text-slate-500">Public tests</div>
+          <div className="mt-1 font-mono text-sm text-slate-200">
+            {caseResults.filter((c) => !c.hidden).length
+              ? `${caseResults.filter((c) => !c.hidden && c.pass).length}/${caseResults.filter((c) => !c.hidden).length}`
+              : "not run"}
+          </div>
+        </div>
+        <div className="rounded-xl border border-slate-800 bg-slate-950/60 px-3 py-2">
+          <div className="text-[10px] uppercase tracking-wider text-slate-500">Adaptive</div>
+          <div className="mt-1 font-mono text-sm text-emerald-200">
+            L{props.currentLevel ?? 1}
+            {adaptive.length ? ` / ${adaptive.length}` : ""}
+            {adaptive.find((l) => l.level === (props.currentLevel ?? 1))
+              ? ` · ${adaptive.find((l) => l.level === (props.currentLevel ?? 1))!.title}`
+              : ""}
+          </div>
+        </div>
+      </div>
 
-        <aside className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1 xl:space-y-0">
+      <div className="flex gap-2 xl:hidden">
+        {(
+          [
+            ["brief", "Mission"],
+            ["code", "Workspace"],
+            ["evidence", "Evidence"],
+          ] as const
+        ).map(([id, label]) => (
+          <button
+            key={id}
+            type="button"
+            className={cn(
+              "flex-1 rounded-lg border px-3 py-2 text-sm",
+              projectPanel === id ? "border-cyan-400/40 bg-cyan-500/10 text-cyan-100" : "border-slate-700 text-slate-400",
+            )}
+            onClick={() => setProjectPanel(id)}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      <div className="grid min-h-0 gap-3 xl:grid-cols-[minmax(300px,0.95fr)_minmax(0,1.2fr)_minmax(240px,0.75fr)]">
+        {/* Mission brief */}
+        <aside
+          className={cn(
+            "max-h-[75vh] space-y-4 overflow-y-auto rounded-xl border border-slate-800 bg-slate-950/70 p-4",
+            projectPanel === "brief" ? "block" : "hidden xl:block",
+          )}
+        >
+          <div>
+            <div className="text-xs uppercase tracking-wider text-slate-500">Mission brief</div>
+            <p className="mt-2 text-sm leading-relaxed text-slate-300">
+              {props.problemSummary || "Ship evidence against the public deliverables; hidden harnesses grade the rest."}
+            </p>
+          </div>
+
+          {(props.tags?.length ?? 0) > 0 && (
+            <div className="flex flex-wrap gap-1">
+              {props.tags!.map((t) => (
+                <span key={t} className="rounded border border-slate-800 px-2 py-0.5 font-mono text-[11px] text-slate-400">
+                  {t}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {(props.owaspMappings?.length || props.mitreMappings?.length) && (
+            <div className="space-y-1 text-xs text-slate-400">
+              {props.owaspMappings?.length ? (
+                <div>
+                  <span className="text-slate-500">OWASP · </span>
+                  {props.owaspMappings.join(", ")}
+                </div>
+              ) : null}
+              {props.mitreMappings?.length ? (
+                <div>
+                  <span className="text-slate-500">MITRE · </span>
+                  {props.mitreMappings.join(", ")}
+                </div>
+              ) : null}
+            </div>
+          )}
+
+          <div>
+            <div className="mb-2 flex items-center justify-between">
+              <div className="text-xs uppercase tracking-wider text-slate-500">Public deliverables</div>
+              <button
+                type="button"
+                className="text-[11px] text-cyan-300 hover:underline"
+                onClick={() => {
+                  setActivePath("CHECKLIST.md");
+                  setProjectPanel("code");
+                }}
+              >
+                Open CHECKLIST.md
+              </button>
+            </div>
+            <ul className="space-y-2">
+              {(publicReqs.length ? publicReqs : ["Working solution with tests"]).map((r) => (
+                <li key={r}>
+                  <label className="flex cursor-pointer items-start gap-2 text-sm text-slate-300">
+                    <input
+                      type="checkbox"
+                      className="mt-1 accent-cyan-400"
+                      checked={!!checkedDeliverables[r]}
+                      onChange={(e) => setCheckedDeliverables((prev) => ({ ...prev, [r]: e.target.checked }))}
+                    />
+                    <span>{r}</span>
+                  </label>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {hiddenReqs.length > 0 && (
+            <div>
+              <div className="mb-2 text-xs uppercase tracking-wider text-slate-500">Hidden evaluation bar</div>
+              <ul className="space-y-1.5 text-sm text-slate-400">
+                {hiddenReqs.map((r) => (
+                  <li key={r} className="flex gap-2">
+                    <span className="text-amber-400/80">●</span>
+                    <span>{r}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {Object.keys(rubric).length > 0 && (
+            <div>
+              <div className="mb-2 text-xs uppercase tracking-wider text-slate-500">Rubric</div>
+              <ul className="space-y-2">
+                {Object.entries(rubric).map(([k, v]) => (
+                  <li key={k} className="rounded-lg border border-slate-800 bg-black/20 px-3 py-2">
+                    <div className="text-xs font-semibold uppercase tracking-wide text-cyan-200/90">{k}</div>
+                    <div className="mt-0.5 text-sm text-slate-400">{v}</div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {adaptive.length > 0 && (
+            <div>
+              <div className="mb-2 text-xs uppercase tracking-wider text-slate-500">Adaptive levels</div>
+              <ol className="space-y-1.5">
+                {adaptive.map((l) => {
+                  const current = (props.currentLevel ?? 1) === l.level;
+                  const cleared = (props.maxLevelReached ?? 1) > l.level || ((props.currentLevel ?? 1) > l.level);
+                  return (
+                    <li
+                      key={l.level}
+                      className={cn(
+                        "rounded-md border px-2.5 py-1.5 text-xs",
+                        current
+                          ? "border-cyan-400/40 bg-cyan-500/10 text-cyan-100"
+                          : cleared
+                            ? "border-emerald-500/20 bg-emerald-500/5 text-emerald-100/80"
+                            : "border-slate-800 text-slate-500",
+                      )}
+                    >
+                      <span className="font-mono">L{l.level}</span> {l.title}
+                      <div className="mt-0.5 text-[11px] opacity-80">{l.criteria}</div>
+                    </li>
+                  );
+                })}
+              </ol>
+            </div>
+          )}
+
+          {(briefFile || checklistFile) && (
+            <div className="flex flex-wrap gap-2 border-t border-slate-800 pt-3">
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={() => {
+                  setActivePath("BRIEF.md");
+                  setProjectPanel("code");
+                }}
+              >
+                BRIEF.md
+              </Button>
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={() => {
+                  setActivePath("docs/ARCHITECTURE.md");
+                  setProjectPanel("code");
+                }}
+              >
+                Architecture
+              </Button>
+            </div>
+          )}
+
+          {props.problemDescription && (
+            <div className="border-t border-slate-800 pt-3">
+              <div className="mb-2 text-xs uppercase tracking-wider text-slate-500">Full brief</div>
+              <div className="space-y-3 text-sm text-slate-400">{renderProblemBody(props.problemDescription)}</div>
+            </div>
+          )}
+        </aside>
+
+        {/* Editor + files */}
+        <div className={cn("space-y-3", projectPanel === "code" ? "block" : "hidden xl:block")}>
+          <div className="flex flex-wrap gap-2 xl:hidden">
+            <select
+              className="min-h-11 flex-1 rounded-md border border-slate-700 bg-slate-950 px-3 text-sm text-slate-100"
+              value={activePath}
+              onChange={(e) => setActivePath(e.target.value)}
+            >
+              {files.map((f) => (
+                <option key={f.id} value={f.path}>
+                  {f.path}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="grid min-h-0 gap-3 xl:grid-cols-[200px_1fr]">
+            <aside className="hidden rounded-xl border border-slate-800 bg-slate-950/70 p-3 xl:block">
+              <div className="mb-2 text-xs uppercase tracking-wider text-slate-500">Files · {files.length}</div>
+              <ul className="max-h-[58vh] space-y-1 overflow-auto">
+                {files.map((f) => (
+                  <li key={f.id}>
+                    <button
+                      className={`w-full rounded px-2 py-1.5 text-left font-mono text-xs ${
+                        f.path === activePath ? "bg-cyan-500/10 text-cyan-200" : "text-slate-400 hover:bg-slate-900"
+                      }`}
+                      onClick={() => setActivePath(f.path)}
+                    >
+                      {f.path}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </aside>
+            <section className="min-w-0 overflow-hidden rounded-xl border border-slate-800 bg-[#0d1117]">
+              <div className="truncate border-b border-slate-800 px-3 py-2 font-mono text-xs text-slate-400">
+                {activePath}
+              </div>
+              <div className="h-[42vh] min-h-[240px] sm:h-[52vh] lg:h-[58vh]">
+                <Monaco
+                  height="100%"
+                  theme="vs-dark"
+                  language={guessLang(activePath, props.language)}
+                  value={active?.content ?? ""}
+                  onChange={(v) => v !== undefined && save(v)}
+                  options={{
+                    minimap: { enabled: false },
+                    fontSize: 13,
+                    fontFamily: "IBM Plex Mono, ui-monospace, monospace",
+                    automaticLayout: true,
+                    wordWrap: "on",
+                    scrollBeyondLastLine: false,
+                  }}
+                />
+              </div>
+            </section>
+          </div>
+        </div>
+
+        {/* Evidence / git / jobs */}
+        <aside
+          className={cn(
+            "grid gap-3 sm:grid-cols-2 xl:grid-cols-1",
+            projectPanel === "evidence" ? "block" : "hidden xl:grid",
+          )}
+        >
+          {judgeVerdict && (
+            <div
+              className={cn(
+                "rounded-xl border px-3 py-2 sm:col-span-2 xl:col-span-1",
+                judgeVerdict.label === "Accepted"
+                  ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-100"
+                  : judgeVerdict.label === "Wrong Answer"
+                    ? "border-rose-500/30 bg-rose-500/10 text-rose-100"
+                    : "border-slate-700 bg-slate-950/70 text-slate-300",
+              )}
+            >
+              <div className="text-sm font-semibold">{judgeVerdict.label}</div>
+              <div className="mt-1 font-mono text-[11px] opacity-80">
+                public {judgeVerdict.publicPassed}/{judgeVerdict.publicTotal || "—"} · hidden{" "}
+                {judgeVerdict.hiddenPassed}/{judgeVerdict.hiddenTotal || "—"}
+              </div>
+            </div>
+          )}
           <div className="rounded-xl border border-slate-800 bg-slate-950/70 p-3">
             <div className="mb-2 text-xs uppercase tracking-wider text-slate-500">Git</div>
             <Input value={commitMsg} onChange={(e) => setCommitMsg(e.target.value)} className="mb-2" />

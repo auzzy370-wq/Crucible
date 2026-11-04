@@ -31,6 +31,11 @@ export default async function WorkspacePage({ params }: { params: Promise<{ id: 
   const challenge = workspace.assignment.assessment.challenge;
   const codingMode = isCodingProblem(challenge);
   const premium = isPremium(user);
+  const adaptiveTrack =
+    (challenge.adaptiveTrack as { level: number; title: string; criteria: string }[] | null) ?? [];
+  const gradingRubric = (challenge.gradingRubric as Record<string, string> | null) ?? {};
+  const publicRequirements = (challenge.publicRequirements as string[] | null) ?? [];
+  const hiddenRequirements = (challenge.hiddenRequirements as string[] | null) ?? [];
 
   return (
     <WorkspaceIde
@@ -58,6 +63,14 @@ export default async function WorkspacePage({ params }: { params: Promise<{ id: 
       premium={premium}
       companies={challenge.companies}
       isPremiumContent={challenge.isPremium}
+      publicRequirements={publicRequirements}
+      hiddenRequirements={hiddenRequirements}
+      adaptiveTrack={adaptiveTrack}
+      gradingRubric={gradingRubric}
+      currentLevel={workspace.assignment.currentLevel}
+      maxLevelReached={workspace.assignment.maxLevelReached}
+      owaspMappings={challenge.owaspMappings ?? undefined}
+      mitreMappings={challenge.mitreMappings ?? undefined}
     />
   );
 }

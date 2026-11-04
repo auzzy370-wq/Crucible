@@ -4,6 +4,18 @@ import { prisma } from "@/lib/db";
 import { getStorageRoot } from "@/lib/storage";
 import { starterFilesForChallenge } from "./starters";
 
+function imageTagForLanguage(language: string) {
+  return language === "python"
+    ? "gauntlet/python:3.12"
+    : language === "go"
+      ? "gauntlet/go:1.22"
+      : language === "rust"
+        ? "gauntlet/rust:1.78"
+        : language === "csharp"
+          ? "gauntlet/dotnet:8"
+          : "gauntlet/node:20";
+}
+
 export async function createWorkspaceForAssignment(params: {
   assignmentId: string;
   challengeSlug: string;
@@ -20,22 +32,11 @@ export async function createWorkspaceForAssignment(params: {
     await fs.writeFile(full, file.content, "utf8");
   }
 
-  const imageTag =
-    params.language === "python"
-      ? "gauntlet/python:3.12"
-      : params.language === "go"
-        ? "gauntlet/go:1.22"
-        : params.language === "rust"
-          ? "gauntlet/rust:1.78"
-          : params.language === "csharp"
-            ? "gauntlet/dotnet:8"
-            : "gauntlet/node:20";
-
   const workspace = await prisma.workspace.create({
     data: {
       assignmentId: params.assignmentId,
       language: params.language,
-      imageTag,
+      imageTag: imageTagForLanguage(params.language),
       rootPath,
       gitRemoteUrl: `local://gauntlet/${params.assignmentId}`,
       status: "ready",
@@ -58,6 +59,52 @@ export async function createWorkspaceForAssignment(params: {
   });
 
   return workspace;
+}
+
+/** Re-scaffold starter files for an existing workspace (seed / platform upgrades). */
+export async function refreshWorkspaceStarters(params: {
+  workspaceId: string;
+  challengeSlug: string;
+  language: string;
+  track: string;
+  force?: boolean;
+}) {
+  const workspace = await prisma.workspace.findUniqueOrThrow({
+    where: { id: params.workspaceId },
+    include: { files: true, commits: { take: 1 } },
+  });
+  const files = starterFilesForChallenge(params.challengeSlug, params.language, params.track);
+  const onlyInit = workspace.commits.length <= 1 && workspace.files.every((f) => f.path !== "BRIEF.md" || (f.content?.length ?? 0) < 200);
+  if (!params.force && !onlyInit) {
+    // Still upsert mission brief docs so candidates get updated briefs without wiping code
+    const briefPaths = new Set(["BRIEF.md", "CHECKLIST.md", "docs/ARCHITECTURE.md", "README.md"]);
+    for (const file of files.filter((f) => briefPaths.has(f.path))) {
+      await upsertWorkspaceFile({
+        workspaceId: workspace.id,
+        filePath: file.path,
+        content: file.content,
+        language: file.language,
+      });
+    }
+    return { refreshed: "briefs", count: briefPaths.size };
+  }
+
+  for (const file of files) {
+    const full = path.join(workspace.rootPath, file.path);
+    await fs.mkdir(path.dirname(full), { recursive: true });
+    await fs.writeFile(full, file.content, "utf8");
+    await prisma.workspaceFile.upsert({
+      where: { workspaceId_path: { workspaceId: workspace.id, path: file.path } },
+      create: {
+        workspaceId: workspace.id,
+        path: file.path,
+        content: file.content,
+        language: file.language,
+      },
+      update: { content: file.content, language: file.language },
+    });
+  }
+  return { refreshed: "full", count: files.length };
 }
 
 export async function upsertWorkspaceFile(params: {
