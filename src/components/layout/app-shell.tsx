@@ -19,13 +19,11 @@ import {
   Menu,
   X,
   Sparkles,
-  FlaskConical,
   Timer,
   CalendarDays,
   Route,
   Trophy,
   BookOpen,
-  AlertTriangle,
   UserRound,
   BarChart3,
   type LucideIcon,
@@ -50,54 +48,54 @@ type NavGroup = {
 };
 
 const NAV_GROUPS: NavGroup[] = [
+  /** Learner: Learn → Practice → Compete → You */
   {
-    id: "practice",
-    title: "Learn",
+    id: "learn",
+    title: "1 · Learn",
     roles: ["CANDIDATE", "TEAM_MEMBER"],
     items: [
-      { href: "/learn", label: "Learning hub", icon: BookOpen, hint: "Interview + AI Craft" },
-      { href: "/learn/interview", label: "Interview Craft", icon: Timer, hint: "Coding · design · behavioral" },
-      { href: "/learn/ai", label: "AI Craft", icon: BrainCircuit, hint: "Prompt → ship AI" },
-      { href: "/dashboard", label: "Home", icon: LayoutDashboard, hint: "Your loop" },
-      { href: "/daily", label: "Daily", icon: CalendarDays, hint: "One timed session today" },
-      { href: "/challenges", label: "Problem bank", icon: Boxes, hint: "Browse & practice" },
-      { href: "/workspace", label: "Open workspaces", icon: Terminal, hint: "Continue where you left off" },
+      { href: "/dashboard", label: "Home", icon: LayoutDashboard, hint: "What’s next" },
+      { href: "/learn", label: "Learn", icon: BookOpen, hint: "Interview + AI lessons" },
+      { href: "/study-plans", label: "Study plans", icon: Route, hint: "Company & role packs" },
     ],
   },
   {
-    id: "prep",
-    title: "Train deeper",
+    id: "practice",
+    title: "2 · Practice",
     roles: ["CANDIDATE", "TEAM_MEMBER"],
     items: [
-      { href: "/roadmap", label: "Adaptive roadmap", icon: Route, hint: "Skill tree & next problems" },
-      { href: "/study-plans", label: "Study plans", icon: BookOpen },
-      { href: "/interview", label: "Company mocks", icon: Timer },
-      { href: "/weekly", label: "Broken prod", icon: AlertTriangle },
-      { href: "/editorials", label: "Editorials", icon: BookOpen },
-      { href: "/playgrounds", label: "Playgrounds", icon: FlaskConical },
-      { href: "/contest", label: "Contest", icon: Trophy },
+      { href: "/daily", label: "Daily", icon: CalendarDays, hint: "One timed session" },
+      { href: "/challenges", label: "Problem bank", icon: Boxes, hint: "Browse & solve" },
+      { href: "/interview", label: "Company mocks", icon: Timer, hint: "Timed interview sim" },
+      { href: "/workspace", label: "Workspaces", icon: Terminal, hint: "Open IDE sessions" },
     ],
   },
   {
     id: "compete",
-    title: "Compete",
+    title: "3 · Compete",
     roles: ["CANDIDATE", "TEAM_MEMBER"],
     items: [
-      { href: "/tournaments", label: "Tournaments", icon: Trophy, hint: "Live & scheduled" },
-      { href: "/leaderboards", label: "Leaderboards", icon: BarChart3, hint: "Human · AI · Teams" },
-      { href: "/ai-vs-human", label: "AI vs Human", icon: BrainCircuit, hint: "Identical challenges" },
-      { href: "/research-frontier", label: "Research Frontier", icon: FlaskConical, hint: "D10 challenges" },
-      { href: "/benchmarks", label: "Benchmarks", icon: Crosshair, hint: "Compare reports" },
+      { href: "/ai-vs-human", label: "AI vs Human", icon: BrainCircuit, hint: "Same challenge, fair judge" },
+      { href: "/tournaments", label: "Tournaments", icon: Trophy, hint: "Live events" },
+      { href: "/leaderboards", label: "Leaderboards", icon: BarChart3, hint: "Standings" },
     ],
   },
   {
-    id: "profile",
-    title: "Your proof",
+    id: "you",
+    title: "4 · You",
     roles: ["CANDIDATE", "TEAM_MEMBER"],
     items: [
-      { href: "/candidates", label: "Verified profile", icon: UserRound },
-      { href: "/pricing", label: "Premium", icon: Sparkles },
+      { href: "/candidates", label: "Verified profile", icon: UserRound, hint: "Proof employers see" },
       { href: "/settings", label: "Settings", icon: Settings },
+    ],
+  },
+  {
+    id: "team-member",
+    title: "Team",
+    roles: ["TEAM_MEMBER"],
+    items: [
+      { href: "/teams", label: "Team crucible", icon: Network },
+      { href: "/incidents", label: "Incident sims", icon: Siren },
     ],
   },
   {
@@ -105,60 +103,33 @@ const NAV_GROUPS: NavGroup[] = [
     title: "Hire",
     roles: ["SUPER_ADMIN", "HIRING_MANAGER", "TECHNICAL_REVIEWER"],
     items: [
-      { href: "/dashboard", label: "Hiring home", icon: LayoutDashboard, hint: "Test pipeline" },
-      { href: "/analytics", label: "Analytics", icon: BarChart3, hint: "Scores & funnel" },
-      {
-        href: "/assessments",
-        label: "Assessments",
-        icon: Crosshair,
-        hint: "Create & assign tests",
-        roles: ["SUPER_ADMIN", "HIRING_MANAGER"],
-      },
-      { href: "/candidates", label: "Candidates", icon: Users, hint: "Profiles & evidence" },
-      { href: "/reviews", label: "Reviews", icon: ScrollText, hint: "Human hire decisions" },
+      { href: "/dashboard", label: "Home", icon: LayoutDashboard, hint: "Pipeline" },
+      { href: "/assessments", label: "Assessments", icon: Crosshair, hint: "Create & assign", roles: ["SUPER_ADMIN", "HIRING_MANAGER"] },
+      { href: "/candidates", label: "Candidates", icon: Users, hint: "Evidence" },
+      { href: "/reviews", label: "Reviews", icon: ScrollText, hint: "Hire decisions" },
+      { href: "/analytics", label: "Analytics", icon: BarChart3 },
     ],
   },
   {
-    id: "team",
-    title: "Team & sims",
-    roles: ["SUPER_ADMIN", "HIRING_MANAGER", "TECHNICAL_REVIEWER", "TEAM_MEMBER"],
-    items: [
-      { href: "/teams", label: "Team crucible", icon: Network },
-      { href: "/incidents", label: "Incident sims", icon: Siren },
-      { href: "/architecture", label: "Architecture", icon: BrainCircuit, roles: ["SUPER_ADMIN", "HIRING_MANAGER", "TECHNICAL_REVIEWER"] },
-    ],
-  },
-  {
-    id: "library",
-    title: "Library",
+    id: "staff-tools",
+    title: "Tools",
     roles: ["SUPER_ADMIN", "HIRING_MANAGER", "TECHNICAL_REVIEWER"],
     items: [
       { href: "/challenges", label: "Challenge bank", icon: Boxes },
       { href: "/workspace", label: "Workspaces", icon: Terminal },
-      { href: "/editorials", label: "Editorials", icon: BookOpen },
-      { href: "/research-frontier", label: "Research Frontier", icon: FlaskConical },
+      { href: "/teams", label: "Team crucible", icon: Network },
+      { href: "/incidents", label: "Incident sims", icon: Siren },
+      { href: "/architecture", label: "Architecture", icon: BrainCircuit, roles: ["SUPER_ADMIN", "HIRING_MANAGER", "TECHNICAL_REVIEWER"] },
       { href: "/ai-vs-human", label: "AI vs Human", icon: BrainCircuit },
-      { href: "/leaderboards", label: "Leaderboards", icon: BarChart3 },
-      { href: "/tournaments", label: "Tournaments", icon: Trophy },
+      { href: "/admin", label: "Admin", icon: Shield, roles: ["SUPER_ADMIN"] },
     ],
   },
   {
-    id: "admin",
-    title: "Admin",
-    roles: ["SUPER_ADMIN"],
-    items: [
-      { href: "/admin", label: "Control plane", icon: Shield, hint: "Users, library, jobs, analytics" },
-      { href: "/benchmarks", label: "Benchmarks", icon: Crosshair, hint: "AI vs human reports" },
-      { href: "/pricing", label: "Billing plans", icon: Sparkles },
-      { href: "/settings", label: "Settings", icon: Settings },
-    ],
-  },
-  {
-    id: "staff-settings",
+    id: "staff-account",
     title: "Account",
-    roles: ["HIRING_MANAGER", "TECHNICAL_REVIEWER"],
+    roles: ["SUPER_ADMIN", "HIRING_MANAGER", "TECHNICAL_REVIEWER"],
     items: [
-      { href: "/pricing", label: "Premium", icon: Sparkles },
+      { href: "/pricing", label: "Billing", icon: Sparkles },
       { href: "/settings", label: "Settings", icon: Settings },
     ],
   },
@@ -194,7 +165,10 @@ function NavLinks({
           <div className="space-y-0.5">
             {group.items.map((item) => {
               const Icon = item.icon;
-              const active = pathname === item.href || pathname.startsWith(item.href + "/");
+              // Prefer exact / child match; avoid /learn lighting up unrelated paths.
+              const active =
+                pathname === item.href ||
+                (item.href !== "/" && pathname.startsWith(`${item.href}/`));
               return (
                 <Link
                   key={`${group.id}-${item.href}-${item.label}`}
@@ -306,21 +280,21 @@ export function AppShell({
         ] as const)
     : ([
         { href: "/dashboard", label: "Home", icon: LayoutDashboard },
-        { href: "/daily", label: "Daily", icon: CalendarDays },
-        { href: "/challenges", label: "Bank", icon: Boxes },
-        { href: "/workspace", label: "IDE", icon: Terminal },
+        { href: "/learn", label: "Learn", icon: BookOpen },
+        { href: "/challenges", label: "Practice", icon: Boxes },
+        { href: "/ai-vs-human", label: "Compete", icon: BrainCircuit },
       ] as const);
 
   const inWorkspaceSession = /^\/workspace\/[^/]+/.test(pathname);
 
   const journeyCopy = isCandidate
     ? {
-        badge: "Learning path",
-        body: "1 · Practice daily or bank → 2 · Pass public + hidden judges → 3 · Share verified proof with employers",
+        badge: "Your path",
+        body: "Learn → Practice → Compete → prove it on your profile",
       }
     : {
         badge: "Hiring path",
-        body: "1 · Create a timed test → 2 · Assign candidates → 3 · Review evidence → decide",
+        body: "Create a test → assign → review evidence → decide",
       };
 
   return (

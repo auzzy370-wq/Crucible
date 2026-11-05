@@ -130,8 +130,8 @@ export default async function LearnHubPage() {
         {[
           { href: "/daily", title: "Daily", body: "One timed session today" },
           { href: "/challenges", title: "Problem bank", body: "Browse & practice" },
-          { href: "/study-plans", title: "Study plans", body: "Interview + AI paths" },
-          { href: "/interview", title: "Company mocks", body: "Timed evidence sessions" },
+          { href: "/study-plans", title: "Study plans", body: "Company & role packs" },
+          { href: "/interview", title: "Company mocks", body: "Timed interview sims" },
         ].map((c) => (
           <Link
             key={c.href}
@@ -142,6 +142,25 @@ export default async function LearnHubPage() {
             <p className="mt-1 text-sm text-slate-500">{c.body}</p>
           </Link>
         ))}
+      </section>
+
+      <section>
+        <h2 className="text-sm font-semibold text-slate-300">Also useful</h2>
+        <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-sm">
+          {[
+            { href: "/roadmap", label: "Adaptive roadmap" },
+            { href: "/playgrounds", label: "Playgrounds" },
+            { href: "/weekly", label: "Broken prod" },
+            { href: "/contest", label: "Contest" },
+            { href: "/editorials", label: "Editorials" },
+            { href: "/research-frontier", label: "Research Frontier" },
+            { href: "/benchmarks", label: "Benchmarks" },
+          ].map((l) => (
+            <Link key={l.href} href={l.href} className="text-slate-500 hover:text-cyan-300 hover:underline">
+              {l.label}
+            </Link>
+          ))}
+        </div>
       </section>
     </div>
   );
