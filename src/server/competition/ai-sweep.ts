@@ -66,7 +66,7 @@ export async function sweepAiAcrossAssessments(opts: {
     targets.push(c);
   }
 
-  const limit = Math.min(opts.limit ?? 40, 80);
+  const limit = Math.min(opts.limit ?? 200, 500);
   const slice = targets.slice(0, limit);
   const results: SweepResult[] = [];
 

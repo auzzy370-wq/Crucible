@@ -175,6 +175,16 @@ export async function evaluateSubmission(submissionId: string) {
     },
   });
 
+  const strengths = Array.isArray(ai.data?.strengths) ? ai.data.strengths : [];
+  const weaknesses = Array.isArray(ai.data?.weaknesses) ? ai.data.weaknesses : [];
+  const followUps = Array.isArray(ai.data?.followUpQuestions) ? ai.data.followUpQuestions : [];
+  const narrative =
+    typeof ai.data?.narrative === "string" && ai.data.narrative
+      ? ai.data.narrative
+      : "Evidence-based automated evaluation completed.";
+  const categoryNotes =
+    ai.data?.categoryNotes && typeof ai.data.categoryNotes === "object" ? ai.data.categoryNotes : {};
+
   const report = await prisma.scoreReport.upsert({
     where: { assignmentId: submission.assignmentId },
     create: {
@@ -194,11 +204,11 @@ export async function evaluateSubmission(submissionId: string) {
           observed: evidencePack.verifiedFacts
             ? JSON.stringify(evidencePack.verifiedFacts)
             : "See evaluation report",
-          automated: ai.data.categoryNotes?.[criterion],
-          strengths: ai.data.strengths.slice(0, 2),
-          weaknesses: ai.data.weaknesses.slice(0, 2),
-          explanation: ai.data.narrative,
-          followUps: ai.data.followUpQuestions.slice(0, 2),
+          automated: categoryNotes[criterion],
+          strengths: strengths.slice(0, 2),
+          weaknesses: weaknesses.slice(0, 2),
+          explanation: narrative,
+          followUps: followUps.slice(0, 2),
         })),
       },
     },
@@ -214,7 +224,8 @@ export async function evaluateSubmission(submissionId: string) {
   });
 
   // Persist follow-up questions for verification of real engineering knowledge
-  for (const prompt of ai.data.followUpQuestions.slice(0, 4)) {
+  for (const prompt of followUps.slice(0, 4)) {
+    if (!prompt) continue;
     await prisma.followUpQuestion.create({
       data: { assignmentId: submission.assignmentId, prompt, difficulty: 3 },
     });

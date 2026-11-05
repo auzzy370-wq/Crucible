@@ -102,17 +102,21 @@ export function AiVsHumanClient() {
   async function runSweep() {
     setSweeping(true);
     try {
-      const res = await fetch("/api/competition/benchmark/sweep", {
+      const res = await fetch("/api/admin/assessments/auto-run", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ aiModelId: modelId || undefined, limit: 40 }),
+        body: JSON.stringify({
+          aiModelId: modelId || undefined,
+          assignmentLimit: 200,
+          aiLimit: 200,
+        }),
       });
       const json = await res.json();
-      if (!json.ok) throw new Error(json.error?.message || "Sweep failed");
+      if (!json.ok) throw new Error(json.error?.message || "Auto-run failed");
       toast.success(json.data.summary);
       await loadRuns();
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Sweep failed");
+      toast.error(e instanceof Error ? e.message : "Auto-run failed");
     } finally {
       setSweeping(false);
     }
@@ -235,12 +239,12 @@ export function AiVsHumanClient() {
           </Button>
           {isAdmin && (
             <Button variant="secondary" disabled={sweeping} onClick={() => void runSweep()}>
-              {sweeping ? "Sweeping assessments…" : "Auto-run all assessments"}
+              {sweeping ? "Running all & posting scores…" : "Auto-run all & post scores"}
             </Button>
           )}
           <span className="text-xs text-slate-500">
             {isAdmin
-              ? "Admin sweep posts scores for every judgable assessment to the leaderboard."
+              ? "Admin-only: scores every assignment workspace, then AI-benches judgable assessments."
               : "Starts with Two Sum — easiest verified smoke test."}
           </span>
         </div>
