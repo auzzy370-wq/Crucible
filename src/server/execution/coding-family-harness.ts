@@ -37,7 +37,7 @@ function samePair(a: number[], b: number[]) {
   if (a.length !== 2 || b.length !== 2) return false;
   return (a[0] === b[0] && a[1] === b[1]) || (a[0] === b[1] && a[1] === b[0]);
 }
-const big = Array.from({ length: 8000 }, (_, i) => i);
+const big = Array.from({ length: 8000 }, (_, i) => i * 10);
 big[7998] = 500000; big[7999] = -499991;
 const results = [
   { name: "large_n", pass: samePair(solve(big, 9), [7998, 7999]), hidden: true },

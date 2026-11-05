@@ -73,8 +73,10 @@ function samePair(a: number[], b: number[]) {
 const results = [
   { name: "negatives", pass: samePair(twoSum([-1, -2, -3, -4, -5], -8), [2, 4]), hidden: true },
   { name: "large_n", pass: (() => {
-    const nums = Array.from({ length: 5000 }, (_, i) => i);
-    nums[4998] = 100000; nums[4999] = -99991;
+    // Unique pair at the end — fillers never sum to target.
+    const nums = Array.from({ length: 5000 }, (_, i) => i * 10);
+    nums[4998] = 1_000_000;
+    nums[4999] = -999_991;
     return samePair(twoSum(nums, 9), [4998, 4999]);
   })(), hidden: true },
 ];

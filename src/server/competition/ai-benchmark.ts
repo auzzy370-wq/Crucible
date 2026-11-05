@@ -1,7 +1,9 @@
 import { prisma } from "@/lib/db";
 import { completeJson, envHasKey } from "@/server/ai/provider";
 import { familyHarnessForSlug } from "@/server/execution/coding-family-harness";
+import { codingStarterFiles } from "@/server/execution/coding-starters";
 import { extractPublicPrompt } from "@/server/competition/prompt-public";
+import { canJudgeAiSlug, judgeAiTypescript } from "@/server/competition/ai-local-judge";
 import { AppError } from "@/lib/errors";
 
 export type BenchDiagnostics = {
@@ -36,8 +38,16 @@ export async function runAiBenchmark(opts: {
   if (!challenge.isPublished) throw new AppError("Challenge not published", 400, "NOT_PUBLISHED");
   if (!model.enabled) throw new AppError("Model disabled", 400, "MODEL_DISABLED");
 
+  if (!canJudgeAiSlug(challenge.slug)) {
+    throw new AppError(
+      "This challenge has no local coding harness for AI vs Human. Pick an lc-* or q-* coding problem.",
+      400,
+      "NO_HARNESS",
+    );
+  }
+
   const publicPrompt = extractPublicPrompt(challenge);
-  const harness = familyHarnessForSlug(challenge.slug);
+  const stubHint = solutionStubForPrompt(challenge.slug);
 
   const run = await prisma.aiBenchmarkRun.create({
     data: {
@@ -56,9 +66,17 @@ export async function runAiBenchmark(opts: {
       code: string;
       explanation?: string;
     }>({
-      system: `You are competing in Crucible AI vs Human. Return JSON {"language":"typescript","code":"..."}.
-Implement the required function only. Do not invent hidden tests. No markdown.`,
-      user: publicPrompt,
+      system: `You are competing in Crucible AI vs Human.
+Return ONE JSON object: {"language":"typescript","code":"<full file>"}.
+Rules:
+- Implement a correct TypeScript solution that passes the public examples.
+- Keep the exact export name from the signature / stub (e.g. twoSum, solve, isValid).
+- No markdown fences inside code. No invented hidden tests.
+- Prefer O(n) / stated complexity when given.`,
+      user: [
+        publicPrompt,
+        stubHint ? `\n## Starter signature (keep these exports)\n\`\`\`typescript\n${stubHint}\n\`\`\`` : "",
+      ].join("\n"),
       providerOverride: {
         name: `${model.provider}:${model.slug}`,
         baseUrl: model.baseUrl ?? undefined,
@@ -67,34 +85,62 @@ Implement the required function only. Do not invent hidden tests. No markdown.`,
       },
       fallback: {
         language: "typescript",
-        code:
-          harness?.solutionStub ??
-          `export function solve(...args: unknown[]): unknown {\n  return null;\n}\n`,
+        code: stubHint || `export function solve(...args: unknown[]): unknown {\n  return null;\n}\n`,
         explanation: "Mock fallback — no API key; experimental only.",
       },
     });
 
     const latencyMs = Date.now() - started;
-    const publicEval = evaluatePublicAgainstHarness(data.code, challenge.slug);
-    const hiddenEval = evaluateHiddenBlind(challenge.slug, data.code);
+    if (!data?.code || typeof data.code !== "string" || data.code.trim().length < 20) {
+      throw new AppError("Model returned empty or invalid code", 502, "EMPTY_CODE");
+    }
+
+    // Real sandbox re-judge (same public + hidden harnesses humans use)
+    const judged = mocked
+      ? {
+          public: {
+            passed: 0,
+            total: 1,
+            runtimeMs: 0,
+            firstFailure: "Mocked run — not judged as a real solve.",
+            category: "wrong_answer" as const,
+          },
+          hidden: { passed: 0, total: 0, runtimeMs: 0 },
+        }
+      : await judgeAiTypescript(challenge.slug, data.code);
+
+    const publicEval = judged.public;
+    const hiddenEval = judged.hidden;
 
     const correct =
+      !mocked &&
       publicEval.total > 0 &&
       publicEval.passed === publicEval.total &&
       (hiddenEval.total === 0 || hiddenEval.passed === hiddenEval.total);
 
     const diagnostics: BenchDiagnostics = correct
       ? { category: "accepted", publicSummary: "All evaluated suites passed." }
-      : publicEval.passed < publicEval.total
+      : mocked
         ? {
-            category: "wrong_answer",
-            publicSummary: `Public ${publicEval.passed}/${publicEval.total} failed.`,
-            safeDetail: publicEval.firstFailure,
+            category: "incomplete",
+            publicSummary: "Experimental mock — configure GROQ_API_KEY / OPENROUTER_API_KEY for verified runs.",
           }
-        : {
-            category: "wrong_answer",
-            publicSummary: "Hidden suite incomplete or failed (inputs not disclosed).",
-          };
+        : publicEval.category === "compile_error" || publicEval.category === "runtime_error"
+          ? {
+              category: publicEval.category,
+              publicSummary: `Public suite ${publicEval.category.replace("_", " ")}.`,
+              safeDetail: publicEval.firstFailure,
+            }
+          : publicEval.passed < publicEval.total
+            ? {
+                category: "wrong_answer",
+                publicSummary: `Public ${publicEval.passed}/${publicEval.total} passed.`,
+                safeDetail: publicEval.firstFailure,
+              }
+            : {
+                category: "wrong_answer",
+                publicSummary: `Hidden ${hiddenEval.passed}/${hiddenEval.total} passed (inputs not disclosed).`,
+              };
 
     const updated = await prisma.aiBenchmarkRun.update({
       where: { id: run.id },
@@ -102,7 +148,7 @@ Implement the required function only. Do not invent hidden tests. No markdown.`,
         status: "COMPLETED",
         resultClass: mocked ? "experimental" : "verified",
         latencyMs,
-        runtimeMs: publicEval.runtimeMs ?? latencyMs,
+        runtimeMs: publicEval.runtimeMs || hiddenEval.runtimeMs || latencyMs,
         passedPublic: publicEval.passed,
         totalPublic: publicEval.total,
         passedHidden: hiddenEval.passed,
@@ -139,46 +185,12 @@ Implement the required function only. Do not invent hidden tests. No markdown.`,
   }
 }
 
-function evaluatePublicAgainstHarness(code: string, slug: string): {
-  passed: number;
-  total: number;
-  runtimeMs?: number;
-  firstFailure?: string;
-} {
-  const harness = familyHarnessForSlug(slug);
-  if (!harness) {
-    return { passed: 0, total: 0, firstFailure: "No public harness bound for local eval." };
-  }
-  const needsSolve = /export function solve/.test(harness.solutionStub);
-  const hasSolve = /export\s+(?:async\s+)?function\s+solve|export\s*\{\s*solve/.test(code);
-  if (needsSolve && !hasSolve) {
-    return { passed: 0, total: 1, firstFailure: "Missing required export `solve`." };
-  }
-  const names = [...harness.publicTests.matchAll(/name:\s*["'`]([^"'`]+)["'`]/g)].map((m) => m[1]!);
-  const total = Math.max(1, names.length);
-  // Only treat as stub when the body is tiny / clearly unimplemented — real solutions
-  // often contain a trailing `return []` / `return 0` after real logic.
-  const stripped = code.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "").trim();
-  const looksStub =
-    stripped.length < 120 ||
-    /TODO|not implemented|return\s+null\s*;\s*\}?\s*$/i.test(stripped) ||
-    (/^\s*export\s+function[\s\S]{0,80}\{\s*return\s+(\[\s*\]|0|null|false)\s*;\s*\}\s*$/i.test(stripped));
-  if (looksStub) {
-    return { passed: 0, total, firstFailure: "Solution appears to be an unimplemented stub." };
-  }
-  return {
-    passed: needsSolve && hasSolve ? Math.min(1, total) : 0,
-    total,
-    firstFailure: needsSolve && hasSolve ? "Public signature ok; full sandbox re-judge pending." : undefined,
-  };
-}
-
-function evaluateHiddenBlind(slug: string, code: string): { passed: number; total: number } {
-  const harness = familyHarnessForSlug(slug);
-  if (!harness) return { passed: 0, total: 0 };
-  const names = [...harness.hiddenRunner.matchAll(/name:\s*["'`]([^"'`]+)["'`]/g)].map((m) => m[1]!);
-  void code;
-  return { passed: 0, total: names.length };
+function solutionStubForPrompt(slug: string): string | null {
+  const family = familyHarnessForSlug(slug);
+  if (family?.solutionStub) return family.solutionStub.trim();
+  const files = codingStarterFiles(slug, "typescript", "SOFTWARE_ENGINEERING");
+  const sol = files?.find((f) => f.path === "src/solution.ts");
+  return sol?.content.trim() ?? null;
 }
 
 export function publicAiRunView(run: {

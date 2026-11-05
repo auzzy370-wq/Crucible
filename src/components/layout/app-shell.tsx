@@ -85,7 +85,7 @@ const NAV_GROUPS: NavGroup[] = [
     title: "4 · You",
     roles: ["CANDIDATE", "TEAM_MEMBER"],
     items: [
-      { href: "/candidates", label: "Verified profile", icon: UserRound, hint: "Proof employers see" },
+      { href: "/candidates", label: "Your profile", icon: UserRound, hint: "Skills you’ve cleared" },
       { href: "/settings", label: "Settings", icon: Settings },
     ],
   },
@@ -290,7 +290,7 @@ export function AppShell({
   const journeyCopy = isCandidate
     ? {
         badge: "Your path",
-        body: "Learn → Practice → Compete → prove it on your profile",
+        body: "Learn the craft → solve problems under the judge → level up",
       }
     : {
         badge: "Hiring path",

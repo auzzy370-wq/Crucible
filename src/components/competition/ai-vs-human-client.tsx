@@ -28,11 +28,22 @@ export function AiVsHumanClient() {
   }
 
   async function loadChallenges() {
-    const res = await fetch("/api/challenges?take=40");
+    // Prefer curated lc-* coding problems (real harnesses). Fall back to q-* bank.
+    const res = await fetch("/api/challenges?take=80&q=lc-");
     const json = await res.json();
     if (json.ok) {
       const list = Array.isArray(json.data) ? json.data : json.data.challenges ?? json.data.items ?? [];
-      const arr = (list as any[]).filter((c) => !c.type || c.type === "CODING_PROBLEM").slice(0, 40);
+      let arr = (list as any[])
+        .filter((c) => (!c.type || c.type === "CODING_PROBLEM") && String(c.slug || "").startsWith("lc-"))
+        .slice(0, 40);
+      if (!arr.length) {
+        const res2 = await fetch("/api/challenges?take=80&q=q-");
+        const json2 = await res2.json();
+        const list2 = Array.isArray(json2.data) ? json2.data : json2.data?.challenges ?? [];
+        arr = (list2 as any[])
+          .filter((c) => (!c.type || c.type === "CODING_PROBLEM") && String(c.slug || "").startsWith("q-"))
+          .slice(0, 40);
+      }
       setChallenges(arr);
       if (!challengeId && arr[0]) setChallengeId(arr[0].id);
     }
@@ -86,9 +97,8 @@ export function AiVsHumanClient() {
         <p className="font-mono text-xs tracking-[0.3em] text-violet-300">AI × HUMAN</p>
         <h1 className="mt-2 font-serif-display text-2xl sm:text-3xl">AI vs Human benchmarks</h1>
         <p className="mt-2 max-w-2xl text-slate-400">
-          Identical public statements for humans and models. Free default: Groq / OpenRouter. Hidden tests never
-          leave the judge. Mocked runs are labeled experimental — a single miss never proves a model cannot solve a
-          problem.
+          Models get the same public statement humans see, then the real public + hidden harnesses grade the code.
+          Free default: Groq / OpenRouter. A miss is a data point — not a claim the model can never solve it.
         </p>
       </header>
 
