@@ -66,7 +66,8 @@ const NAV_GROUPS: NavGroup[] = [
     title: "Train deeper",
     roles: ["CANDIDATE", "TEAM_MEMBER"],
     items: [
-      { href: "/study-plans", label: "Study plans", icon: Route },
+      { href: "/roadmap", label: "Adaptive roadmap", icon: Route, hint: "Skill tree & next problems" },
+      { href: "/study-plans", label: "Study plans", icon: BookOpen },
       { href: "/interview", label: "Company mocks", icon: Timer },
       { href: "/weekly", label: "Broken prod", icon: AlertTriangle },
       { href: "/editorials", label: "Editorials", icon: BookOpen },

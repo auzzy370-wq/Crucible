@@ -8,7 +8,11 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { FREQUENCY_METHODOLOGY } from "@/lib/frequency";
-import { ACCEPTANCE_METHODOLOGY, illustrativeAcceptance } from "@/lib/acceptance";
+import {
+  ACCEPTANCE_METHODOLOGY,
+  LIVE_ACCEPTANCE_METHODOLOGY,
+  illustrativeAcceptance,
+} from "@/lib/acceptance";
 import { difficultyBand, type DifficultyBand } from "@/lib/difficulty";
 import { CODING_LANGUAGES, CODING_LANGUAGE_LABELS, type CodingLanguage } from "@/lib/coding-languages";
 import { trackBadgeVariant, trackLabel } from "@/lib/tracks";
@@ -65,9 +69,80 @@ export function Problemset(props: {
   const [lang, setLang] = useState<CodingLanguage>("typescript");
   const [starting, setStarting] = useState<string | null>(null);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [bookmarkedIds, setBookmarkedIds] = useState<Set<string>>(new Set());
+  const [liveAcc, setLiveAcc] = useState<
+    Record<string, { acceptancePct: number; submissions: number }>
+  >({});
+  const [bookmarksOnly, setBookmarksOnly] = useState(false);
   const router = useRouter();
 
   const coding = props.problems;
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const [bmRes, accRes] = await Promise.all([
+          fetch("/api/bookmarks"),
+          fetch("/api/practice/acceptance"),
+        ]);
+        const bmJson = await bmRes.json().catch(() => null);
+        const accJson = await accRes.json().catch(() => null);
+        if (cancelled) return;
+        if (bmJson?.ok && Array.isArray(bmJson.data?.bookmarks)) {
+          setBookmarkedIds(
+            new Set(
+              (bmJson.data.bookmarks as { challenge: { id: string } }[]).map((b) => b.challenge.id),
+            ),
+          );
+        }
+        if (accJson?.ok && accJson.data?.byId) {
+          setLiveAcc(accJson.data.byId as Record<string, { acceptancePct: number; submissions: number }>);
+        }
+      } catch {
+        /* optional enrichment */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  async function toggleBookmark(challengeId: string) {
+    const on = bookmarkedIds.has(challengeId);
+    try {
+      if (on) {
+        const res = await fetch(`/api/bookmarks?challengeId=${encodeURIComponent(challengeId)}`, {
+          method: "DELETE",
+        });
+        const json = await res.json();
+        if (!json.ok) throw new Error(json.error?.message || "Failed");
+        setBookmarkedIds((prev) => {
+          const next = new Set(prev);
+          next.delete(challengeId);
+          return next;
+        });
+      } else {
+        const res = await fetch("/api/bookmarks", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ challengeId }),
+        });
+        const json = await res.json();
+        if (!json.ok) throw new Error(json.error?.message || "Failed");
+        setBookmarkedIds((prev) => new Set(prev).add(challengeId));
+        toast.success("Bookmarked");
+      }
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Bookmark failed");
+    }
+  }
+
+  function acceptanceFor(p: ProblemRow): { pct: number; live: boolean } {
+    const live = liveAcc[p.id];
+    if (live) return { pct: live.acceptancePct, live: true };
+    return { pct: illustrativeAcceptance(p.difficulty, p.slug), live: false };
+  }
 
   async function startProblem(p: ProblemRow) {
     if (Boolean(p.isPremium) && !props.premium) {
@@ -106,6 +181,7 @@ export function Problemset(props: {
   const filtered = useMemo(() => {
     const rows = coding.filter((p) => {
       const L = label(p.difficulty);
+      if (bookmarksOnly && !bookmarkedIds.has(p.id)) return false;
       if (diff !== "All" && L !== diff) return false;
       if (tag !== "All" && !p.tags.includes(tag)) return false;
       if (company !== "All" && !(p.companies ?? []).includes(company)) return false;
@@ -119,7 +195,7 @@ export function Problemset(props: {
       return a.title.localeCompare(b.title);
     });
     return rows;
-  }, [coding, diff, tag, company, q, sort]);
+  }, [coding, diff, tag, company, q, sort, bookmarksOnly, bookmarkedIds]);
 
   useEffect(() => {
     setVisibleCount(PAGE_SIZE);
@@ -150,8 +226,8 @@ export function Problemset(props: {
             Go, Rust, Java. Public checks first; hidden harnesses decide Accepted.
           </p>
           <p className="mt-2 max-w-2xl text-xs text-slate-500" title={FREQUENCY_METHODOLOGY.detail}>
-            Freq: {FREQUENCY_METHODOLOGY.label}. Acc: {ACCEPTANCE_METHODOLOGY.label} —{" "}
-            {ACCEPTANCE_METHODOLOGY.detail}
+            Freq: {FREQUENCY_METHODOLOGY.label}. Acc: live when ≥3 hidden submits, otherwise{" "}
+            {ACCEPTANCE_METHODOLOGY.short}.
           </p>
         </div>
         <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
@@ -258,6 +334,20 @@ export function Problemset(props: {
                 ))}
               </select>
             </div>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => setBookmarksOnly((v) => !v)}
+                className={cn(
+                  "min-h-10 rounded-md border px-3 text-xs",
+                  bookmarksOnly
+                    ? "border-amber-500/40 bg-amber-500/10 text-amber-100"
+                    : "border-slate-700 text-slate-400",
+                )}
+              >
+                ★ Bookmarks{bookmarkedIds.size ? ` (${bookmarkedIds.size})` : ""}
+              </button>
+            </div>
           </div>
 
           <p className="font-mono text-[11px] text-slate-500">
@@ -269,12 +359,23 @@ export function Problemset(props: {
             {visible.map((p, i) => {
               const L = label(p.difficulty);
               const locked = Boolean(p.isPremium) && !props.premium;
-              const acc = illustrativeAcceptance(p.difficulty, p.slug);
+              const acc = acceptanceFor(p);
+              const starred = bookmarkedIds.has(p.id);
               return (
                 <article key={p.id} className="rounded-xl border border-slate-800 bg-slate-950/70 p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <div className="font-mono text-[10px] text-slate-600">#{i + 1}</div>
+                      <div className="flex items-center gap-2 font-mono text-[10px] text-slate-600">
+                        <span>#{i + 1}</span>
+                        <button
+                          type="button"
+                          className={cn("text-sm", starred ? "text-amber-300" : "text-slate-600")}
+                          onClick={() => void toggleBookmark(p.id)}
+                          aria-label={starred ? "Remove bookmark" : "Bookmark"}
+                        >
+                          {starred ? "★" : "☆"}
+                        </button>
+                      </div>
                       <h2 className="mt-0.5 text-base font-medium leading-snug text-slate-100">{p.title}</h2>
                       <p className="mt-1 line-clamp-2 text-xs text-slate-500">{p.summary}</p>
                     </div>
@@ -296,9 +397,12 @@ export function Problemset(props: {
                       Freq {p.frequency ?? 0}%
                       <span className="text-slate-600"> {FREQUENCY_METHODOLOGY.short}</span>
                     </span>
-                    <span>
-                      Acc {acc}%
-                      <span className="text-slate-600"> {ACCEPTANCE_METHODOLOGY.short}</span>
+                    <span title={acc.live ? LIVE_ACCEPTANCE_METHODOLOGY.detail : ACCEPTANCE_METHODOLOGY.detail}>
+                      Acc {acc.pct}%
+                      <span className="text-slate-600">
+                        {" "}
+                        {acc.live ? LIVE_ACCEPTANCE_METHODOLOGY.short : ACCEPTANCE_METHODOLOGY.short}
+                      </span>
                     </span>
                     <span>{p.avgMinutes ?? 60}m</span>
                     {p.editorialSlug && (
@@ -344,6 +448,7 @@ export function Problemset(props: {
             <table className="w-full min-w-[720px] text-left text-sm">
               <thead className="border-b border-slate-800 bg-slate-950/80 text-xs uppercase tracking-wider text-slate-500">
                 <tr>
+                  <th className="px-4 py-3 w-10">★</th>
                   <th className="px-4 py-3 w-14">#</th>
                   <th className="px-4 py-3">Title</th>
                   <th className="px-4 py-3 hidden lg:table-cell">Companies</th>
@@ -362,9 +467,20 @@ export function Problemset(props: {
                 {visible.map((p, i) => {
                   const L = label(p.difficulty);
                   const locked = Boolean(p.isPremium) && !props.premium;
-                  const acc = illustrativeAcceptance(p.difficulty, p.slug);
+                  const acc = acceptanceFor(p);
+                  const starred = bookmarkedIds.has(p.id);
                   return (
                     <tr key={p.id} className="border-b border-slate-800/80 hover:bg-slate-900/50">
+                      <td className="px-2 py-3 text-center">
+                        <button
+                          type="button"
+                          className={cn("text-sm", starred ? "text-amber-300" : "text-slate-600 hover:text-slate-400")}
+                          onClick={() => void toggleBookmark(p.id)}
+                          aria-label={starred ? "Remove bookmark" : "Bookmark"}
+                        >
+                          {starred ? "★" : "☆"}
+                        </button>
+                      </td>
                       <td className="px-4 py-3 font-mono text-slate-500">{i + 1}</td>
                       <td className="px-4 py-3">
                         <div className="flex flex-wrap items-center gap-2">
@@ -398,9 +514,14 @@ export function Problemset(props: {
                         {p.frequency ?? 0}%
                         <span className="ml-1 text-[10px] text-slate-600">{FREQUENCY_METHODOLOGY.short}</span>
                       </td>
-                      <td className="px-4 py-3 font-mono text-xs text-slate-400" title={ACCEPTANCE_METHODOLOGY.detail}>
-                        {acc}%
-                        <span className="ml-1 text-[10px] text-slate-600">{ACCEPTANCE_METHODOLOGY.short}</span>
+                      <td
+                        className="px-4 py-3 font-mono text-xs text-slate-400"
+                        title={acc.live ? LIVE_ACCEPTANCE_METHODOLOGY.detail : ACCEPTANCE_METHODOLOGY.detail}
+                      >
+                        {acc.pct}%
+                        <span className="ml-1 text-[10px] text-slate-600">
+                          {acc.live ? LIVE_ACCEPTANCE_METHODOLOGY.short : ACCEPTANCE_METHODOLOGY.short}
+                        </span>
                       </td>
                       <td className="px-4 py-3 font-mono text-xs text-slate-400">{p.avgMinutes ?? 60}m</td>
                       <td className="px-4 py-3">
@@ -424,7 +545,7 @@ export function Problemset(props: {
                 })}
                 {!filtered.length && (
                   <tr>
-                    <td colSpan={8} className="px-4 py-10 text-center text-slate-500">
+                    <td colSpan={9} className="px-4 py-10 text-center text-slate-500">
                       No problems match your filters.
                     </td>
                   </tr>

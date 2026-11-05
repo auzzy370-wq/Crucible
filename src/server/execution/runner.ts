@@ -8,6 +8,7 @@ import { writeAudit } from "@/server/security/audit";
 import { normalizeCodingLanguage } from "@/lib/coding-languages";
 import { multilangCommands } from "./coding-family-multilang";
 import { HIDDEN_CASES, hiddenTsRunnerSource } from "./hidden-harness";
+import { customPyRunnerSource, customTsRunnerSource } from "./custom-harness";
 
 /**
  * Secure execution architecture:
@@ -17,6 +18,8 @@ import { HIDDEN_CASES, hiddenTsRunnerSource } from "./hidden-harness";
  * - Production should use microVMs (Firecracker) / gVisor — Docker socket must not be exposed to candidates.
  */
 
+export type CustomCase = { name?: string; args: unknown[]; expected?: unknown };
+
 export async function enqueueExecution(params: {
   workspaceId: string;
   type: "test" | "hidden_test" | "deploy_check" | "benchmark" | "shell" | "debug";
@@ -24,6 +27,8 @@ export async function enqueueExecution(params: {
   timeoutSec?: number;
   /** Lightning Judge — Premium callers pass higher priority (processed first). */
   priority?: number;
+  /** Candidate-authored cases — never used for official grading. */
+  customCases?: CustomCase[];
 }) {
   const workspace = await prisma.workspace.findUniqueOrThrow({
     where: { id: params.workspaceId },
@@ -61,7 +66,21 @@ export async function enqueueExecution(params: {
     }
   }
 
-  if (!params.command) {
+  // Custom cases — materialize harness + override command (still type "test" for UX)
+  if (params.customCases?.length) {
+    const testsDir = path.join(workspace.rootPath, "tests");
+    await fs.mkdir(testsDir, { recursive: true });
+    await fs.writeFile(path.join(testsDir, "custom_cases.json"), JSON.stringify(params.customCases, null, 2), "utf8");
+    if (lang === "python") {
+      await fs.writeFile(path.join(testsDir, "custom_run.py"), customPyRunnerSource(), "utf8");
+      command = "python3 tests/custom_run.py";
+    } else {
+      await fs.writeFile(path.join(testsDir, "custom_run.ts"), customTsRunnerSource(), "utf8");
+      command = "node --experimental-strip-types --disable-warning=ExperimentalWarning tests/custom_run.ts";
+    }
+  }
+
+  if (!params.command && !params.customCases?.length) {
     const multi = multilangCommands(lang);
     if (params.type === "test") {
       if (lang === "python") {

@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { SessionTimer } from "@/components/assessment/session-timer";
+import { PracticeAssist } from "@/components/workspace/practice-assist";
 import { cn } from "@/lib/utils";
 import { difficultyBand, difficultyBandClass, type DifficultyBand } from "@/lib/difficulty";
 
@@ -110,6 +111,8 @@ export function WorkspaceIde(props: {
   dueAt?: string | null;
   startedAt?: string | null;
   codingMode?: boolean;
+  challengeSlug?: string;
+  challengeId?: string;
   difficulty?: number;
   tags?: string[];
   problemDescription?: string;
@@ -654,6 +657,18 @@ export function WorkspaceIde(props: {
                 ))}
             </div>
             <div className="space-y-4">{renderProblemBody(problemText)}</div>
+            {props.challengeSlug && (
+              <PracticeAssist
+                challengeSlug={props.challengeSlug}
+                workspaceId={props.workspaceId}
+                onCustomRun={() => {
+                  setTerminal((t) => t + "\n$ custom cases queued\n");
+                  for (let i = 0; i < 6; i++) {
+                    window.setTimeout(() => router.refresh(), 700 * (i + 1));
+                  }
+                }}
+              />
+            )}
           </aside>
 
           <div className={cn("space-y-3", panel === "problem" ? "hidden xl:block" : "block")}>
@@ -682,6 +697,15 @@ export function WorkspaceIde(props: {
                   onMount={(editor, monaco) => {
                     editorRef.current = { editor, monaco };
                     wireAiComplete(editor, monaco);
+                    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyF, () => {
+                      editor.getAction("editor.action.formatDocument")?.run();
+                    });
+                    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
+                      void run("test");
+                    });
+                    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.Enter, () => {
+                      void submit();
+                    });
                   }}
                   options={{
                     minimap: { enabled: false },
@@ -690,6 +714,7 @@ export function WorkspaceIde(props: {
                     automaticLayout: true,
                     wordWrap: "on",
                     scrollBeyondLastLine: false,
+                    formatOnPaste: true,
                     quickSuggestions: premium,
                     suggestOnTriggerCharacters: premium,
                     wordBasedSuggestions: premium ? "currentDocument" : "off",
@@ -697,19 +722,18 @@ export function WorkspaceIde(props: {
                   }}
                 />
               </div>
-              {!premium && (
-                <div className="border-t border-slate-800 px-3 py-2 text-xs text-slate-500">
-                  AI autocomplete is a Premium feature.{" "}
-                  <a className="text-amber-300 hover:underline" href="/pricing">
-                    Upgrade
-                  </a>
-                </div>
-              )}
-              {premium && (
-                <div className="border-t border-slate-800 px-3 py-2 text-xs text-slate-500">
-                  AI autocomplete active — trigger with typing or Ctrl+Space. Lightning Judge prioritizes your runs.
-                </div>
-              )}
+              <div className="border-t border-slate-800 px-3 py-2 text-xs text-slate-500">
+                Shortcuts: Ctrl/⌘+Enter Run · Ctrl/⌘+Shift+Enter Submit · Ctrl/⌘+Shift+F Format
+                {premium ? " · AI autocomplete on" : " · "}
+                {!premium && (
+                  <>
+                    {" "}
+                    <a className="text-amber-300 hover:underline" href="/pricing">
+                      Upgrade for AI autocomplete + debugger
+                    </a>
+                  </>
+                )}
+              </div>
             </section>
 
             <section className="rounded-xl border border-slate-800 bg-slate-950/70 p-3">

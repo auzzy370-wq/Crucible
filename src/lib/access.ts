@@ -44,6 +44,7 @@ export const PAGE_ROLE_ACCESS: { prefix: string; roles: readonly string[] }[] = 
   { prefix: "/weekly", roles: CANDIDATE_ROLES },
   { prefix: "/contest", roles: CANDIDATE_ROLES },
   { prefix: "/study-plans", roles: CANDIDATE_ROLES },
+  { prefix: "/roadmap", roles: CANDIDATE_ROLES },
   { prefix: "/interview", roles: CANDIDATE_ROLES },
   { prefix: "/playgrounds", roles: CANDIDATE_ROLES },
 ];

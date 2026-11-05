@@ -1052,6 +1052,10 @@ export async function seedDatabase() {
     });
   }
 
+  const { upsertAdvancedMissions } = await import("@/server/challenges/mission-advanced");
+  const advancedCount = await upsertAdvancedMissions(prisma);
+  console.log(`Advanced missions upserted: ${advancedCount}`);
+
   const { seedEditorials } = await import("@/server/saas/editorials");
   await seedEditorials();
   const { ensureWeeklyChallenge } = await import("@/server/saas/weekly");

@@ -179,6 +179,11 @@ model User {
   pairSessionsHost    PairSession[] @relation("PairHost")
   pairSessionsGuest   PairSession[] @relation("PairGuest")
   weeklyCompletions   WeeklyChallengeCompletion[]
+  bookmarks           ProblemBookmark[]
+  discussions         ProblemDiscussion[]
+  integrityEvents     IntegrityEvent[]
+  following           DeveloperFollow[] @relation("FollowFollower")
+  followers           DeveloperFollow[] @relation("FollowFollowing")
 }
 
 model Session {
@@ -300,6 +305,8 @@ model Challenge {
   mitreMappings      String[]        @default([])
   owaspMappings      String[]        @default([])
   languages          String[]        @default(["typescript", "python", "go"])
+  /** Progressive unlock hints (string[]). Null → synthesized from requirements at read time. */
+  hints              Json?
   isPublished        Boolean         @default(true)
   createdAt          DateTime        @default(now())
   updatedAt          DateTime        @updatedAt
@@ -311,6 +318,77 @@ model Challenge {
   weeklyChallenges WeeklyChallenge[]
   editorials       Editorial[]
   contestProblems  ContestProblem[]
+  bookmarks        ProblemBookmark[]
+  discussions      ProblemDiscussion[]
+  integrityEvents  IntegrityEvent[]
+}
+
+/** LeetCode-style problem bookmarks (favorites). */
+model ProblemBookmark {
+  id          String   @id @default(cuid())
+  userId      String
+  challengeId String
+  createdAt   DateTime @default(now())
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  challenge Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, challengeId])
+  @@index([userId, createdAt])
+}
+
+/** Problem discussion threads (LeetCode-style boards). */
+model ProblemDiscussion {
+  id          String   @id @default(cuid())
+  challengeId String
+  userId      String
+  parentId    String?
+  body        String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  challenge Challenge           @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  user      User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parent    ProblemDiscussion?  @relation("DiscussionReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   ProblemDiscussion[] @relation("DiscussionReplies")
+
+  @@index([challengeId, createdAt])
+  @@index([userId])
+}
+
+/** Assessment integrity signals — never auto-fail; always human-reviewable. */
+model IntegrityEvent {
+  id           String   @id @default(cuid())
+  userId       String
+  challengeId  String?
+  assignmentId String?
+  kind         String
+  severity     String   @default("info")
+  score        Float?
+  detail       Json?
+  reviewed     Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  challenge Challenge? @relation(fields: [challengeId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([challengeId, kind])
+  @@index([reviewed, createdAt])
+}
+
+/** Developer following graph for community. */
+model DeveloperFollow {
+  id          String   @id @default(cuid())
+  followerId  String
+  followingId String
+  createdAt   DateTime @default(now())
+
+  follower  User @relation("FollowFollower", fields: [followerId], references: [id], onDelete: Cascade)
+  following User @relation("FollowFollowing", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId])
+  @@index([followingId])
 }
 
 model Playground {

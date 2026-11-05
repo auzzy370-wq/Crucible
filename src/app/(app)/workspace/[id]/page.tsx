@@ -57,6 +57,8 @@ export default async function WorkspacePage({ params }: { params: Promise<{ id: 
       dueAt={workspace.assignment.dueAt?.toISOString() ?? null}
       startedAt={workspace.assignment.startedAt?.toISOString() ?? null}
       codingMode={codingMode}
+      challengeSlug={challenge.slug}
+      challengeId={challenge.id}
       difficulty={challenge.difficulty}
       tags={challenge.tags}
       problemDescription={challenge.description}

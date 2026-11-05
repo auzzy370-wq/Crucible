@@ -131,6 +131,12 @@ More detail: [docs/VERCEL.md](docs/VERCEL.md).
 - **Hiring analytics** — `/analytics` for Super Admin, Hiring Manager, and Technical Reviewer
 - **Admin control plane** — `/admin` (Super Admin) overview, analytics, users/roles/plans, assignments, challenge library publish/premium, execution drain/retry, AI providers, audit log, system posture
 - **Role visibility** — nav and page guards limit each role to surfaces they can use (candidates ↔ practice; hiring ↔ ops/reviews/analytics; Super Admin ↔ control plane)
+- **Bookmarks + live acceptance** — star problems in the bank; Acc shows live % after ≥3 hidden submits
+- **Practice assist in IDE** — progressive hints, submission history, custom test cases, related problems, discussions
+- **Adaptive roadmap** — `/roadmap` skill tree, weak tags, rising difficulty recommendations
+- **Assessment integrity** — advisory similarity / fingerprint signals on submit (`IntegrityEvent`); humans review — never auto-fail
+- **Advanced missions** — payments ledger, cache-stampede incident, OAuth BFF, data pipeline, k8s rollout, RAG eval, outbox, N+1 kill
+- Advancement audit + backlog: [docs/ADVANCEMENT_AUDIT.md](docs/ADVANCEMENT_AUDIT.md) · [docs/ADVANCEMENT_PROGRESS.md](docs/ADVANCEMENT_PROGRESS.md)
 
 ## Core workflow
 

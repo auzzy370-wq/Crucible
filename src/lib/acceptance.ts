@@ -6,6 +6,13 @@ export const ACCEPTANCE_METHODOLOGY = {
     "Estimated from difficulty band and problem family until enough live submits exist. Not a measured population rate.",
 } as const;
 
+/** Shown when ≥3 live hidden_test submissions exist for a problem. */
+export const LIVE_ACCEPTANCE_METHODOLOGY = {
+  label: "Live acceptance",
+  short: "live",
+  detail: "Measured from hidden harness submissions on Crucible (min 3 runs).",
+} as const;
+
 /** Deterministic 8–72% style rate from difficulty + slug. */
 export function illustrativeAcceptance(difficulty: number, slug: string): number {
   let h = 0;

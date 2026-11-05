@@ -15,7 +15,10 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
     const { id } = await ctx.params;
     const assignment = await prisma.assessmentAssignment.findUnique({
       where: { id },
-      include: { workspace: true },
+      include: {
+        workspace: { include: { files: { where: { path: { startsWith: "src/solution" } } } } },
+        assessment: { select: { challengeId: true } },
+      },
     });
     if (!assignment || assignment.candidateId !== user.id) {
       throw new AppError("Forbidden", 403, "FORBIDDEN");
@@ -36,6 +39,23 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
       data: { status: "GRADING", submittedAt: new Date() },
     });
 
+    // Advisory integrity scan — never auto-fails the candidate
+    let integrity: { fingerprint: string; flagged: boolean; maxOverlap?: number } | null = null;
+    try {
+      const { scanSubmissionSimilarity } = await import("@/server/integrity/similarity");
+      const solutionText = assignment.workspace.files.map((f) => f.content).join("\n");
+      if (solutionText.trim()) {
+        integrity = await scanSubmissionSimilarity({
+          userId: user.id,
+          challengeId: assignment.assessment.challengeId,
+          assignmentId: id,
+          solutionText,
+        });
+      }
+    } catch {
+      /* non-blocking */
+    }
+
     await enqueueExecution({ workspaceId: assignment.workspace.id, type: "test" });
     await enqueueExecution({ workspaceId: assignment.workspace.id, type: "hidden_test" });
     await enqueueExecution({ workspaceId: assignment.workspace.id, type: "deploy_check" });
@@ -49,8 +69,9 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
       action: "assignment.submit",
       entityType: "Submission",
       entityId: submission.id,
+      metadata: integrity ? { integrityFlagged: integrity.flagged } : undefined,
     });
 
-    return jsonOk({ submission, report });
+    return jsonOk({ submission, report, integrity });
   });
 }

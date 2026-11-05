@@ -8,6 +8,16 @@ import { AppError } from "@/lib/errors";
 const schema = z.object({
   type: z.enum(["test", "hidden_test", "deploy_check", "benchmark", "shell", "debug"]),
   command: z.string().optional(),
+  customCases: z
+    .array(
+      z.object({
+        name: z.string().max(80).optional(),
+        args: z.array(z.unknown()).max(12),
+        expected: z.unknown().optional(),
+      }),
+    )
+    .max(20)
+    .optional(),
 });
 
 export async function POST(req: Request, ctx: { params: Promise<{ id: string }> }) {
@@ -36,7 +46,8 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
       type: body.type,
       command: body.command,
       priority,
+      customCases: body.customCases,
     });
-    return jsonOk({ ...job, lightning: priority >= 10 }, { status: 202 });
+    return jsonOk({ ...job, lightning: priority >= 10, custom: Boolean(body.customCases?.length) }, { status: 202 });
   });
 }
