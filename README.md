@@ -100,8 +100,10 @@ More detail: [docs/VERCEL.md](docs/VERCEL.md).
 - **Premium Checkout** — `/pricing` uses Stripe when `STRIPE_SECRET_KEY` is set; otherwise instant mock upgrade
 - Webhook: `POST /api/billing/webhook` (set `STRIPE_WEBHOOK_SECRET`)
 - Frequency % is labeled **illustrative** (methodology in problemset UI)
-- **Settings** — `/settings` account, practice preferences (headline, bio, skills, links), privacy/public slug, password, and session revoke
-- **Admin control plane** — `/admin` (Super Admin) overview, users/roles/plans, assignments, challenge library publish/premium, execution drain/retry, AI providers, audit log, system posture
+- **Settings** — `/settings` account, practice preferences (headline, bio, skills, links), privacy/public slug, password, and session revoke (staff see account/security/sessions only)
+- **Hiring analytics** — `/analytics` for Super Admin, Hiring Manager, and Technical Reviewer
+- **Admin control plane** — `/admin` (Super Admin) overview, analytics, users/roles/plans, assignments, challenge library publish/premium, execution drain/retry, AI providers, audit log, system posture
+- **Role visibility** — nav and page guards limit each role to surfaces they can use (candidates ↔ practice; hiring ↔ ops/reviews/analytics; Super Admin ↔ control plane)
 
 ## Core workflow
 

@@ -8,9 +8,19 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { AnalyticsPanel } from "@/components/analytics/analytics-panel";
 import { cn, formatScore } from "@/lib/utils";
 
-type Tab = "overview" | "users" | "assignments" | "library" | "jobs" | "ai" | "audit" | "system";
+type Tab =
+  | "overview"
+  | "analytics"
+  | "users"
+  | "assignments"
+  | "library"
+  | "jobs"
+  | "ai"
+  | "audit"
+  | "system";
 
 const ROLES = ["SUPER_ADMIN", "HIRING_MANAGER", "TECHNICAL_REVIEWER", "CANDIDATE", "TEAM_MEMBER"] as const;
 const PLANS = ["FREE", "PREMIUM"] as const;
@@ -41,6 +51,7 @@ export function AdminClient() {
   const [assignments, setAssignments] = useState<any>(null);
   const [assignQ, setAssignQ] = useState("");
   const [assignStatus, setAssignStatus] = useState("All");
+  const [analytics, setAnalytics] = useState<any>(null);
   const [busy, setBusy] = useState(false);
   const [form, setForm] = useState({
     name: "Secondary OpenAI-compatible",
@@ -117,6 +128,13 @@ export function AdminClient() {
     setAssignments(json.data);
   }
 
+  async function loadAnalytics() {
+    const res = await fetch("/api/admin/analytics");
+    const json = await res.json();
+    if (!json.ok) return toast.error(json.error?.message || "Failed");
+    setAnalytics(json.data);
+  }
+
   useEffect(() => {
     void loadOverview();
   }, []);
@@ -129,6 +147,7 @@ export function AdminClient() {
     if (tab === "overview") void loadOverview();
     if (tab === "library") void loadLibrary();
     if (tab === "assignments") void loadAssignments();
+    if (tab === "analytics") void loadAnalytics();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tab]);
 
@@ -249,6 +268,7 @@ export function AdminClient() {
 
   const tabs: { id: Tab; label: string }[] = [
     { id: "overview", label: "Overview" },
+    { id: "analytics", label: "Analytics" },
     { id: "users", label: "Users" },
     { id: "assignments", label: "Assignments" },
     { id: "library", label: "Library" },
@@ -396,6 +416,22 @@ export function AdminClient() {
             </Link>
           </div>
         </>
+      )}
+
+      {tab === "analytics" && (
+        <div className="space-y-4">
+          <div>
+            <h2 className="text-lg font-medium text-slate-100">Platform analytics</h2>
+            <p className="text-sm text-slate-400">
+              Qualification funnel, score distributions, track health, and 30-day activity — Super Admin only.
+            </p>
+          </div>
+          {analytics ? (
+            <AnalyticsPanel data={analytics} />
+          ) : (
+            <p className="text-slate-400">Loading analytics…</p>
+          )}
+        </div>
       )}
 
       {tab === "users" && (

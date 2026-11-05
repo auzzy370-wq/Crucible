@@ -1,12 +1,11 @@
-import { redirect } from "next/navigation";
 import { ensureDailyChallenge } from "@/server/saas/daily";
-import { getSessionUser } from "@/server/auth/session";
+import { CANDIDATE_ROLES } from "@/lib/access";
+import { requirePageRoles } from "@/server/auth/page-guard";
 import { prisma } from "@/lib/db";
 import { DailyClient } from "@/components/saas/daily-client";
 
 export default async function DailyPage() {
-  const user = await getSessionUser();
-  if (!user) redirect("/login");
+  const user = await requirePageRoles(CANDIDATE_ROLES);
   const daily = await ensureDailyChallenge();
   const completion = await prisma.dailyChallengeCompletion.findUnique({
     where: { userId_dailyChallengeId: { userId: user.id, dailyChallengeId: daily.id } },

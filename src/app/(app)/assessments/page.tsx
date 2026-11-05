@@ -1,10 +1,16 @@
 import { prisma } from "@/lib/db";
-import { getSessionUser } from "@/server/auth/session";
+import { requirePageRoles } from "@/server/auth/page-guard";
 import { AssessmentsClient } from "@/components/assessment/assessments-client";
 
 export default async function AssessmentsPage() {
-  const user = await getSessionUser();
-  const isCandidate = user?.role === "CANDIDATE" || user?.role === "TEAM_MEMBER";
+  const user = await requirePageRoles([
+    "SUPER_ADMIN",
+    "HIRING_MANAGER",
+    "TECHNICAL_REVIEWER",
+    "CANDIDATE",
+    "TEAM_MEMBER",
+  ]);
+  const isCandidate = user.role === "CANDIDATE" || user.role === "TEAM_MEMBER";
 
   // Do not hydrate the full seeded library (5k+ assessments) into the page —
   // keep every challenge available via a lean picker, but only list active / owned assessments.

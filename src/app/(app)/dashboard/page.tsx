@@ -258,6 +258,19 @@ export default async function DashboardPage() {
             </Link>
           </li>
         </ol>
+        <div className="mt-4">
+          <Link href="/analytics" className="text-sm text-cyan-300 hover:underline">
+            Open hiring analytics →
+          </Link>
+          {user.role === "SUPER_ADMIN" && (
+            <>
+              <span className="mx-2 text-slate-600">·</span>
+              <Link href="/admin" className="text-sm text-cyan-300 hover:underline">
+                Control plane →
+              </Link>
+            </>
+          )}
+        </div>
       </section>
 
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">

@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import { settingsTabsForRole } from "@/lib/access";
 
 type Tab = "account" | "preferences" | "security" | "sessions" | "privacy";
 
@@ -23,8 +24,9 @@ const TRACKS = [
   { value: "PRIVACY_ENGINEERING", label: "Privacy Engineering" },
 ] as const;
 
-export function SettingsClient() {
-  const [tab, setTab] = useState<Tab>("account");
+export function SettingsClient({ role }: { role: string }) {
+  const allowedTabs = settingsTabsForRole(role as never);
+  const [tab, setTab] = useState<Tab>(allowedTabs[0] ?? "account");
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -211,13 +213,14 @@ export function SettingsClient() {
     }
   }
 
-  const tabs: { id: Tab; label: string }[] = [
-    { id: "account", label: "Account" },
-    { id: "preferences", label: "Preferences" },
-    { id: "privacy", label: "Privacy" },
-    { id: "security", label: "Security" },
-    { id: "sessions", label: "Sessions" },
-  ];
+  const tabLabels: Record<Tab, string> = {
+    account: "Account",
+    preferences: "Preferences",
+    privacy: "Privacy",
+    security: "Security",
+    sessions: "Sessions",
+  };
+  const tabs = allowedTabs.map((id) => ({ id, label: tabLabels[id] }));
 
   if (loading) {
     return <p className="text-slate-400">Loading settings…</p>;

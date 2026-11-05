@@ -27,6 +27,7 @@ import {
   BookOpen,
   AlertTriangle,
   UserRound,
+  BarChart3,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -89,7 +90,14 @@ const NAV_GROUPS: NavGroup[] = [
     roles: ["SUPER_ADMIN", "HIRING_MANAGER", "TECHNICAL_REVIEWER"],
     items: [
       { href: "/dashboard", label: "Ops home", icon: LayoutDashboard, hint: "Pipeline overview" },
-      { href: "/assessments", label: "Assessments", icon: Crosshair, hint: "Create & assign" },
+      { href: "/analytics", label: "Analytics", icon: BarChart3, hint: "Scores & funnel" },
+      {
+        href: "/assessments",
+        label: "Assessments",
+        icon: Crosshair,
+        hint: "Create & assign",
+        roles: ["SUPER_ADMIN", "HIRING_MANAGER"],
+      },
       { href: "/candidates", label: "Candidates", icon: Users, hint: "Profiles & evidence" },
       { href: "/reviews", label: "Reviews", icon: ScrollText, hint: "Human decisions" },
     ],
@@ -119,7 +127,7 @@ const NAV_GROUPS: NavGroup[] = [
     title: "Admin",
     roles: ["SUPER_ADMIN"],
     items: [
-      { href: "/admin", label: "Security / admin", icon: Shield },
+      { href: "/admin", label: "Control plane", icon: Shield, hint: "Users, library, jobs, analytics" },
       { href: "/pricing", label: "Billing plans", icon: Sparkles },
       { href: "/settings", label: "Settings", icon: Settings },
     ],
@@ -250,7 +258,7 @@ export function AppShell({
           {isCandidate ? "Candidate" : isStaff ? "Hiring team" : user.role}
         </div>
       </div>
-      {user.plan !== "PREMIUM" && (
+      {user.plan !== "PREMIUM" && !isStaff && (
         <Link href="/pricing" className="mb-2 block text-center text-xs text-amber-200 hover:underline">
           Upgrade to Premium →
         </Link>
@@ -262,12 +270,19 @@ export function AppShell({
   );
 
   const mobileTabs = isStaff
-    ? ([
-        { href: "/dashboard", label: "Home", icon: LayoutDashboard },
-        { href: "/assessments", label: "Assign", icon: Crosshair },
-        { href: "/candidates", label: "People", icon: Users },
-        { href: "/reviews", label: "Review", icon: ScrollText },
-      ] as const)
+    ? user.role === "TECHNICAL_REVIEWER"
+      ? ([
+          { href: "/dashboard", label: "Home", icon: LayoutDashboard },
+          { href: "/analytics", label: "Stats", icon: BarChart3 },
+          { href: "/candidates", label: "People", icon: Users },
+          { href: "/reviews", label: "Review", icon: ScrollText },
+        ] as const)
+      : ([
+          { href: "/dashboard", label: "Home", icon: LayoutDashboard },
+          { href: "/analytics", label: "Stats", icon: BarChart3 },
+          { href: "/assessments", label: "Assign", icon: Crosshair },
+          { href: "/reviews", label: "Review", icon: ScrollText },
+        ] as const)
     : ([
         { href: "/dashboard", label: "Home", icon: LayoutDashboard },
         { href: "/daily", label: "Daily", icon: CalendarDays },

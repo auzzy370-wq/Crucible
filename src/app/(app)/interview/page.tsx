@@ -1,11 +1,11 @@
-import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
-import { getSessionUser, isPremium } from "@/server/auth/session";
+import { isPremium } from "@/server/auth/session";
+import { CANDIDATE_ROLES } from "@/lib/access";
+import { requirePageRoles } from "@/server/auth/page-guard";
 import { InterviewClient } from "@/components/saas/interview-client";
 
 export default async function InterviewPage() {
-  const user = await getSessionUser();
-  if (!user) redirect("/login");
+  const user = await requirePageRoles(CANDIDATE_ROLES);
   const sims = await prisma.interviewSimulation.findMany({
     where: { userId: user.id },
     include: { challenge: { select: { title: true, slug: true, difficulty: true } } },

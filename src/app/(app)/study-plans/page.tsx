@@ -1,12 +1,12 @@
-import { redirect } from "next/navigation";
-import { getSessionUser, isPremium } from "@/server/auth/session";
+import { isPremium } from "@/server/auth/session";
+import { CANDIDATE_ROLES } from "@/lib/access";
+import { requirePageRoles } from "@/server/auth/page-guard";
 import { StudyPlansClient } from "@/components/saas/study-plans-client";
 import { prisma } from "@/lib/db";
 import { STUDY_PLANS } from "@/server/saas/study-plans";
 
 export default async function StudyPlansPage() {
-  const user = await getSessionUser();
-  if (!user) redirect("/login");
+  const user = await requirePageRoles(CANDIDATE_ROLES);
   const enrollments = await prisma.studyPlanEnrollment.findMany({ where: { userId: user.id } });
   const bySlug = new Map(enrollments.map((e) => [e.planSlug, e]));
   const challenges = await prisma.challenge.findMany({
