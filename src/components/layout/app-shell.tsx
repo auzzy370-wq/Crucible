@@ -76,6 +76,18 @@ const NAV_GROUPS: NavGroup[] = [
     ],
   },
   {
+    id: "compete",
+    title: "Compete",
+    roles: ["CANDIDATE", "TEAM_MEMBER"],
+    items: [
+      { href: "/tournaments", label: "Tournaments", icon: Trophy, hint: "Live & scheduled" },
+      { href: "/leaderboards", label: "Leaderboards", icon: BarChart3, hint: "Human · AI · Teams" },
+      { href: "/ai-vs-human", label: "AI vs Human", icon: BrainCircuit, hint: "Identical challenges" },
+      { href: "/research-frontier", label: "Research Frontier", icon: FlaskConical, hint: "D10 challenges" },
+      { href: "/benchmarks", label: "Benchmarks", icon: Crosshair, hint: "Compare reports" },
+    ],
+  },
+  {
     id: "profile",
     title: "Your proof",
     roles: ["CANDIDATE", "TEAM_MEMBER"],
@@ -121,6 +133,10 @@ const NAV_GROUPS: NavGroup[] = [
       { href: "/challenges", label: "Challenge bank", icon: Boxes },
       { href: "/workspace", label: "Workspaces", icon: Terminal },
       { href: "/editorials", label: "Editorials", icon: BookOpen },
+      { href: "/research-frontier", label: "Research Frontier", icon: FlaskConical },
+      { href: "/ai-vs-human", label: "AI vs Human", icon: BrainCircuit },
+      { href: "/leaderboards", label: "Leaderboards", icon: BarChart3 },
+      { href: "/tournaments", label: "Tournaments", icon: Trophy },
     ],
   },
   {
@@ -129,6 +145,7 @@ const NAV_GROUPS: NavGroup[] = [
     roles: ["SUPER_ADMIN"],
     items: [
       { href: "/admin", label: "Control plane", icon: Shield, hint: "Users, library, jobs, analytics" },
+      { href: "/benchmarks", label: "Benchmarks", icon: Crosshair, hint: "AI vs human reports" },
       { href: "/pricing", label: "Billing plans", icon: Sparkles },
       { href: "/settings", label: "Settings", icon: Settings },
     ],

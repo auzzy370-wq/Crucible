@@ -1114,6 +1114,12 @@ export async function seedDatabase() {
       featuredAssignments: [assignSaas.id, assignCyber.id, assignSoc.id, assignTeamCasey.id],
     },
   };
+  const { ensureDefaultAiModels } = await import("@/server/competition/ai-benchmark");
+  const { upsertResearchFrontier } = await import("@/server/competition/research-frontier");
+  const aiModels = await ensureDefaultAiModels();
+  const frontier = await upsertResearchFrontier();
+  console.log(`Competition: ${aiModels.length} AI models, ${frontier} Research Frontier seeds`);
+
   console.log("Seed complete — full platform ready.");
   console.log(summary);
   return summary;

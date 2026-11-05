@@ -36,6 +36,8 @@ export async function ensureActiveContest() {
       startsAt,
       endsAt,
       isPremium: false,
+      mode: "HUMAN",
+      status: "LIVE",
       problems: {
         create: coding.map((c, i) => ({
           challengeId: c.id,

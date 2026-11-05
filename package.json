@@ -15,7 +15,7 @@
     "db:seed": "tsx prisma/seed.ts",
     "db:reset": "prisma migrate reset --force",
     "test:e2e": "tsx scripts/e2e.ts",
-    "test:unit": "tsx scripts/unit-smoke.ts",
+    "test:unit": "tsx scripts/unit-smoke.ts && tsx scripts/competition-unit.ts",
     "release:check": "tsx scripts/release-check.ts",
     "release:prepare": "prisma migrate deploy && tsx prisma/seed.ts && tsx scripts/release-check.ts",
     "setup:local": "prisma db push && tsx prisma/seed.ts && tsx scripts/release-check.ts",

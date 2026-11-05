@@ -9,11 +9,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AnalyticsPanel } from "@/components/analytics/analytics-panel";
+import { AdminCompetitionPanel } from "@/components/competition/admin-competition-panel";
 import { cn, formatScore } from "@/lib/utils";
 
 type Tab =
   | "overview"
   | "analytics"
+  | "competition"
   | "users"
   | "assignments"
   | "library"
@@ -327,6 +329,7 @@ export function AdminClient() {
   const tabs: { id: Tab; label: string }[] = [
     { id: "overview", label: "Overview" },
     { id: "analytics", label: "Analytics" },
+    { id: "competition", label: "Competition" },
     { id: "users", label: "Users" },
     { id: "assignments", label: "Assignments" },
     { id: "library", label: "Library" },
@@ -492,6 +495,8 @@ export function AdminClient() {
           )}
         </div>
       )}
+
+      {tab === "competition" && <AdminCompetitionPanel />}
 
       {tab === "users" && (
         <Card>

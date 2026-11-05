@@ -105,7 +105,22 @@ export function WorkspaceIde(props: {
   language: string;
   files: FileRow[];
   commits: { sha: string; message: string; createdAt: string }[];
-  jobs: { id: string; type: string; status: string; stdout: string | null; stderr: string | null }[];
+  jobs: {
+    id: string;
+    type: string;
+    status: string;
+    stdout: string | null;
+    stderr: string | null;
+    diagnostic?: {
+      category: string;
+      contestantFault: boolean;
+      public: boolean;
+      summary: string;
+      expected?: string;
+      actual?: string;
+      hint?: string;
+    };
+  }[];
   role: string;
   timedMinutes?: number | null;
   dueAt?: string | null;
@@ -163,6 +178,15 @@ export function WorkspaceIde(props: {
     publicTotal: number;
     hiddenPassed: number;
     hiddenTotal: number;
+  } | null>(null);
+  const [lastDiagnostic, setLastDiagnostic] = useState<{
+    category: string;
+    contestantFault: boolean;
+    public: boolean;
+    summary: string;
+    expected?: string;
+    actual?: string;
+    hint?: string;
   } | null>(null);
   const [pinpoint, setPinpoint] = useState<Pinpoint | null>(null);
   const [panel, setPanel] = useState<"problem" | "code">("problem");
@@ -273,7 +297,36 @@ export function WorkspaceIde(props: {
     }
     try {
       const jobsRes = await fetch(`/api/workspace/${props.workspaceId}/execute`, { method: "GET" }).catch(() => null);
-      void jobsRes;
+      if (jobsRes) {
+        const jobsJson = await jobsRes.json();
+        if (jobsJson.ok && Array.isArray(jobsJson.data?.jobs)) {
+          const latest = jobsJson.data.jobs.find((j: { type: string }) => j.type === type) ?? jobsJson.data.jobs[0];
+          if (latest?.diagnostic) {
+            setLastDiagnostic(latest.diagnostic);
+            setTerminal(
+              (t) =>
+                t +
+                `diagnostic: ${latest.diagnostic.category} — ${latest.diagnostic.summary}` +
+                (latest.diagnostic.expected != null ? `\n  expected: ${latest.diagnostic.expected}` : "") +
+                (latest.diagnostic.actual != null ? `\n  actual: ${latest.diagnostic.actual}` : "") +
+                (latest.diagnostic.hint ? `\n  hint: ${latest.diagnostic.hint}` : "") +
+                (latest.diagnostic.contestantFault === false ? `\n  (infrastructure — not counted as your failure)` : "") +
+                `\n`,
+            );
+          }
+          if (latest?.stdout) {
+            const parsed = parseCases(latest.stdout);
+            if (parsed.length) {
+              setCaseResults(parsed);
+              applyVerdict(parsed);
+              void refreshPinpoint(parsed);
+              setBusy(false);
+              toast.message(type === "test" ? "Public tests finished — check Judge panel" : "Job finished");
+              return;
+            }
+          }
+        }
+      }
     } catch {
       /* ignore */
     }
@@ -772,6 +825,18 @@ export function WorkspaceIde(props: {
                   <p className="mt-1 text-[11px] opacity-75">
                     Public examples vs hidden harness — Submit is only Accepted when both lanes pass.
                   </p>
+                  {lastDiagnostic && (
+                    <div className="mt-2 space-y-1 border-t border-white/10 pt-2 font-mono text-[11px]">
+                      <div>
+                        {lastDiagnostic.category}
+                        {!lastDiagnostic.contestantFault ? " · infrastructure (not your fail)" : ""}
+                      </div>
+                      <div className="opacity-90">{lastDiagnostic.summary}</div>
+                      {lastDiagnostic.expected != null && <div>expected: {lastDiagnostic.expected}</div>}
+                      {lastDiagnostic.actual != null && <div>actual: {lastDiagnostic.actual}</div>}
+                      {lastDiagnostic.hint && <div className="opacity-75">{lastDiagnostic.hint}</div>}
+                    </div>
+                  )}
                 </div>
               )}
               {caseResults.length ? (

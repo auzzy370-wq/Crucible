@@ -7,10 +7,10 @@ import { AppError } from "@/lib/errors";
 
 export async function GET(req: Request) {
   return withHandler(async () => {
-    await requireUser();
     const { searchParams } = new URL(req.url);
     const track = searchParams.get("track");
     const type = searchParams.get("type");
+    const user = await requireUser();
     const challenges = await prisma.challenge.findMany({
       where: {
         isPublished: true,
@@ -19,7 +19,20 @@ export async function GET(req: Request) {
       },
       orderBy: [{ track: "asc" }, { difficulty: "desc" }],
     });
-    return jsonOk(challenges);
+    if (canAdmin(user.role)) return jsonOk(challenges);
+    // Never leak private evaluation data on the public challenge list
+    return jsonOk(
+      challenges.map(
+        ({
+          hiddenRequirements: _h,
+          referenceSolution: _r,
+          controlledVulns: _c,
+          gradingRubric: _g,
+          adaptiveTrack: _a,
+          ...safe
+        }) => safe,
+      ),
+    );
   });
 }
 

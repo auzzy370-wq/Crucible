@@ -1,8 +1,10 @@
 # CRUCIBLE
 
-**Release 1.4** — **Learn the craft. Hire the proof.**
+**Release 1.4** — **Learn the craft. Hire the proof.** Elite **AI vs Human** competition & benchmarking on the same objectively judged challenges (D1–D10 Research Frontier).
 
-Crucible is both a **learning arena** and an **employer testing floor**. Engineers practice with timed judges and production missions; hiring managers assign that same work to screen candidates. Coding judges in **TypeScript, JavaScript, Python, Go, Rust, and Java** (public + hidden). Résumés claim. **Crucible verifies.**
+Crucible is a **learning arena**, **employer testing floor**, and **human × AI competition platform**. Engineers and models solve identical public statements; hidden suites stay server-side. Coding judges in **TypeScript, JavaScript, Python, Go, Rust, and Java**. Résumés claim. **Crucible verifies.**
+
+Competition surfaces: `/tournaments`, `/leaderboards`, `/ai-vs-human`, `/research-frontier`, `/benchmarks`. Plan: [docs/COMPETITION_PLATFORM_PLAN.md](docs/COMPETITION_PLATFORM_PLAN.md).
 
 The seed loads the **full challenge library as published 60-minute assessments** with demo assignments, workspaces, and tests already placed. See [docs/RELEASE.md](docs/RELEASE.md).
 

@@ -314,6 +314,17 @@ model Challenge {
   integrityScannedAt DateTime?
   /** Suggested difficulty from live solver performance (null until calibrated). */
   calibratedDifficulty Int?
+  /** Expected asymptotic complexity label, e.g. "O(n log n)". */
+  expectedComplexity String?
+  /** Judge resource limits (coding). */
+  timeLimitMs        Int             @default(2000)
+  memoryLimitMb      Int             @default(256)
+  /** Required export / function signature hint for coding problems. */
+  functionSignature  String?
+  /** Research Frontier flag — D10 exceptional challenges. */
+  researchFrontier   Boolean         @default(false)
+  /** Seeded adversarial suite metadata (never includes private fixtures in API). */
+  adversarialMeta    Json?
   isPublished        Boolean         @default(true)
   createdAt          DateTime        @default(now())
   updatedAt          DateTime        @updatedAt
@@ -329,6 +340,8 @@ model Challenge {
   discussions      ProblemDiscussion[]
   integrityEvents  IntegrityEvent[]
   integrityReports ChallengeIntegrityReport[]
+  aiBenchmarkRuns  AiBenchmarkRun[]
+  challengeVersions ChallengeVersion[]
 }
 
 /** Snapshot from Challenge Integrity Engine — gates publish when status=fail. */
@@ -938,9 +951,86 @@ model Contest {
   startsAt    DateTime
   endsAt      DateTime
   isPremium   Boolean  @default(false)
+  /** HUMAN | AI | HYBRID | TEAM */
+  mode        String   @default("HUMAN")
+  /** DRAFT | SCHEDULED | LIVE | COMPLETED | CANCELLED */
+  status      String   @default("SCHEDULED")
+  bracketJson Json?
   createdAt   DateTime @default(now())
   problems    ContestProblem[]
   entries     ContestEntry[]
+}
+
+/** Immutable snapshot of challenge content for versioned judging. */
+model ChallengeVersion {
+  id             String   @id @default(cuid())
+  challengeId    String
+  version        Int
+  contentVersion String
+  title          String
+  description    String
+  difficulty     Int
+  functionSignature String?
+  timeLimitMs    Int
+  memoryLimitMb  Int
+  expectedComplexity String?
+  publicRequirements Json?
+  snapshot       Json?
+  createdAt      DateTime @default(now())
+  challenge      Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+
+  @@unique([challengeId, version])
+  @@index([challengeId])
+}
+
+/** Registered AI model for human-vs-AI benchmarks (never receives hidden tests). */
+model AiModel {
+  id           String   @id @default(cuid())
+  slug         String   @unique
+  displayName  String
+  provider     String
+  modelId      String
+  baseUrl      String?
+  apiKeyEnv    String?
+  enabled      Boolean  @default(true)
+  isOpenSource Boolean  @default(false)
+  notes        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  runs         AiBenchmarkRun[]
+}
+
+/** One AI attempt on a challenge — public statement only; hidden suite judged server-side. */
+model AiBenchmarkRun {
+  id              String   @id @default(cuid())
+  challengeId     String
+  aiModelId       String
+  status          String   @default("QUEUED")
+  /** experimental | verified */
+  resultClass     String   @default("experimental")
+  promptTokens    Int?
+  completionTokens Int?
+  latencyMs       Int?
+  runtimeMs       Int?
+  memoryKb        Int?
+  passedPublic    Int      @default(0)
+  totalPublic     Int      @default(0)
+  passedHidden    Int      @default(0)
+  totalHidden     Int      @default(0)
+  correct         Boolean  @default(false)
+  /** Generated code (admin/auditor only — not public API by default). */
+  solutionCode    String?
+  diagnostics     Json?
+  mocked          Boolean  @default(false)
+  errorMessage    String?
+  createdAt       DateTime @default(now())
+  finishedAt      DateTime?
+  challenge       Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  aiModel         AiModel   @relation(fields: [aiModelId], references: [id], onDelete: Cascade)
+
+  @@index([challengeId, createdAt])
+  @@index([aiModelId, createdAt])
+  @@index([correct, challengeId])
 }
 
 model ContestProblem {

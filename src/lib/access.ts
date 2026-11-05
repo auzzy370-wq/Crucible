@@ -47,6 +47,26 @@ export const PAGE_ROLE_ACCESS: { prefix: string; roles: readonly string[] }[] = 
   { prefix: "/roadmap", roles: CANDIDATE_ROLES },
   { prefix: "/interview", roles: CANDIDATE_ROLES },
   { prefix: "/playgrounds", roles: CANDIDATE_ROLES },
+  {
+    prefix: "/leaderboards",
+    roles: [...CANDIDATE_ROLES, ...STAFF_ROLES],
+  },
+  {
+    prefix: "/tournaments",
+    roles: [...CANDIDATE_ROLES, ...STAFF_ROLES],
+  },
+  {
+    prefix: "/research-frontier",
+    roles: [...CANDIDATE_ROLES, ...STAFF_ROLES],
+  },
+  {
+    prefix: "/ai-vs-human",
+    roles: [...CANDIDATE_ROLES, ...STAFF_ROLES],
+  },
+  {
+    prefix: "/benchmarks",
+    roles: [...CANDIDATE_ROLES, ...STAFF_ROLES],
+  },
 ];
 
 export function canAccessPath(role: string, pathname: string): boolean {
