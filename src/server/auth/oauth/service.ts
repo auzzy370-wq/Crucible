@@ -1,5 +1,6 @@
 import { nanoid } from "nanoid";
 import { prisma } from "@/lib/db";
+import { resolveBootstrapRole } from "@/server/auth/admin-bootstrap";
 import { createSession } from "@/server/auth/session";
 import { writeAudit } from "@/server/security/audit";
 import type { OAuthProfile } from "./types";
@@ -38,32 +39,44 @@ export async function loginWithOAuthProfile(
     user = await prisma.user.findUnique({ where: { email } });
   }
 
+  const bootstrapRole = resolveBootstrapRole({
+    email,
+    provider: profile.provider,
+    providerUserId: profile.providerUserId,
+    current: user?.role,
+  });
+
   if (!user) {
     user = await prisma.user.create({
       data: {
         email,
         name: profile.name.slice(0, 120) || email,
         passwordHash: null,
-        role: "CANDIDATE",
-        plan: "FREE",
+        role: bootstrapRole,
+        plan: bootstrapRole === "SUPER_ADMIN" ? "PREMIUM" : "FREE",
         avatarUrl: profile.avatarUrl ?? null,
         githubLogin: profile.githubLogin ?? null,
-        candidateProfile: {
-          create: {
-            headline: "Candidate",
-            preferredTrack: "SOFTWARE_ENGINEERING",
-            publicSlug: slugifyName(profile.name || email),
-            publicEnabled: false,
-          },
-        },
+        candidateProfile:
+          bootstrapRole === "SUPER_ADMIN"
+            ? undefined
+            : {
+                create: {
+                  headline: "Candidate",
+                  preferredTrack: "SOFTWARE_ENGINEERING",
+                  publicSlug: slugifyName(profile.name || email),
+                  publicEnabled: false,
+                },
+              },
       },
     });
   } else {
-    await prisma.user.update({
+    const promote = bootstrapRole === "SUPER_ADMIN" && user.role !== "SUPER_ADMIN";
+    user = await prisma.user.update({
       where: { id: user.id },
       data: {
         ...(profile.avatarUrl && !user.avatarUrl ? { avatarUrl: profile.avatarUrl } : {}),
         ...(profile.githubLogin && !user.githubLogin ? { githubLogin: profile.githubLogin } : {}),
+        ...(promote ? { role: "SUPER_ADMIN", plan: "PREMIUM" } : {}),
         lastLoginAt: new Date(),
       },
     });

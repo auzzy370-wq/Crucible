@@ -46,6 +46,14 @@ export async function POST(req: Request) {
     if (!(await verifyPassword(body.password, user.passwordHash))) {
       throw new AppError("Invalid credentials", 401, "INVALID_CREDENTIALS");
     }
+    const { resolveBootstrapRole } = await import("@/server/auth/admin-bootstrap");
+    const role = resolveBootstrapRole({ email: user.email, current: user.role });
+    if (role === "SUPER_ADMIN" && user.role !== "SUPER_ADMIN") {
+      user = await prisma.user.update({
+        where: { id: user.id },
+        data: { role: "SUPER_ADMIN", plan: "PREMIUM" },
+      });
+    }
     await createSession(user.id, { ip, userAgent: req.headers.get("user-agent") ?? undefined });
     await prisma.user.update({ where: { id: user.id }, data: { lastLoginAt: new Date() } });
     await writeAudit({
