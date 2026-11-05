@@ -10,29 +10,65 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const track = searchParams.get("track");
     const type = searchParams.get("type");
+    const q = searchParams.get("q")?.trim();
+    const take = Math.min(Math.max(Number(searchParams.get("take") || 80), 1), 200);
     const user = await requireUser();
+
     const challenges = await prisma.challenge.findMany({
       where: {
         isPublished: true,
         ...(track ? { track: track as AssessmentTrack } : {}),
         ...(type ? { type: type as ChallengeType } : {}),
+        ...(q
+          ? {
+              OR: [
+                { title: { contains: q, mode: "insensitive" } },
+                { slug: { contains: q, mode: "insensitive" } },
+                { summary: { contains: q, mode: "insensitive" } },
+              ],
+            }
+          : {}),
       },
-      orderBy: [{ track: "asc" }, { difficulty: "desc" }],
+      orderBy: [{ frequency: "desc" }, { difficulty: "asc" }, { title: "asc" }],
+      take,
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        summary: true,
+        description: canAdmin(user.role),
+        type: true,
+        track: true,
+        difficulty: true,
+        estimatedDays: true,
+        tags: true,
+        companies: true,
+        frequency: true,
+        avgMinutes: true,
+        isPremium: true,
+        languages: true,
+        publicRequirements: true,
+        hints: true,
+        contentVersion: true,
+        integrityStatus: true,
+        calibratedDifficulty: true,
+        expectedComplexity: true,
+        timeLimitMs: true,
+        memoryLimitMb: true,
+        functionSignature: true,
+        researchFrontier: true,
+        adversarialMeta: true,
+        createdAt: true,
+        ...(canAdmin(user.role)
+          ? {
+              hiddenRequirements: true,
+              referenceSolution: true,
+              gradingRubric: true,
+            }
+          : {}),
+      },
     });
-    if (canAdmin(user.role)) return jsonOk(challenges);
-    // Never leak private evaluation data on the public challenge list
-    return jsonOk(
-      challenges.map(
-        ({
-          hiddenRequirements: _h,
-          referenceSolution: _r,
-          controlledVulns: _c,
-          gradingRubric: _g,
-          adaptiveTrack: _a,
-          ...safe
-        }) => safe,
-      ),
-    );
+    return jsonOk(challenges);
   });
 }
 

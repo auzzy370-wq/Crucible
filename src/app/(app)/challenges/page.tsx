@@ -4,6 +4,34 @@ import { Problemset } from "@/components/challenges/problemset";
 import { isCodingProblem } from "@/server/challenges/coding-problems";
 import { editorialSlugByChallengeSlug, resolveEditorialSlug } from "@/server/saas/editorials";
 
+/** Cap SSR payload — Vercel serverless OOMs / 500s when shipping 10k+ challenge rows. */
+const CODING_LIMIT = 400;
+const PROJECT_LIMIT = 400;
+
+const listSelect = {
+  id: true,
+  slug: true,
+  title: true,
+  summary: true,
+  type: true,
+  track: true,
+  difficulty: true,
+  tags: true,
+  languages: true,
+  estimatedDays: true,
+  companies: true,
+  frequency: true,
+  avgMinutes: true,
+  isPremium: true,
+  owaspMappings: true,
+  mitreMappings: true,
+  assessments: {
+    where: { status: "PUBLISHED" as const },
+    take: 1,
+    select: { id: true },
+  },
+} as const;
+
 export default async function ChallengesPage({
   searchParams,
 }: {
@@ -11,41 +39,25 @@ export default async function ChallengesPage({
 }) {
   const sp = await searchParams;
   const user = await getSessionUser();
+  const trackFilter = sp.track ? { track: sp.track as never } : {};
 
-  // Lean list payload only — full descriptions load inside the IDE, not the bank.
-  const [challenges, editorialMap] = await Promise.all([
+  const [codingChallenges, projectChallenges, editorialMap] = await Promise.all([
     prisma.challenge.findMany({
-      where: {
-        isPublished: true,
-        ...(sp.track ? { track: sp.track as never } : {}),
-      },
-      select: {
-        id: true,
-        slug: true,
-        title: true,
-        summary: true,
-        type: true,
-        track: true,
-        difficulty: true,
-        tags: true,
-        languages: true,
-        estimatedDays: true,
-        companies: true,
-        frequency: true,
-        avgMinutes: true,
-        isPremium: true,
-        owaspMappings: true,
-        mitreMappings: true,
-        assessments: {
-          where: { status: "PUBLISHED" },
-          take: 1,
-          select: { id: true },
-        },
-      },
-      orderBy: [{ difficulty: "asc" }, { title: "asc" }],
+      where: { isPublished: true, type: "CODING_PROBLEM", ...trackFilter },
+      select: listSelect,
+      orderBy: [{ frequency: "desc" }, { difficulty: "asc" }, { title: "asc" }],
+      take: CODING_LIMIT,
+    }),
+    prisma.challenge.findMany({
+      where: { isPublished: true, type: { not: "CODING_PROBLEM" }, ...trackFilter },
+      select: listSelect,
+      orderBy: [{ frequency: "desc" }, { difficulty: "asc" }, { title: "asc" }],
+      take: PROJECT_LIMIT,
     }),
     editorialSlugByChallengeSlug(),
   ]);
+
+  const challenges = [...codingChallenges, ...projectChallenges];
 
   const workspaceByAssessment = new Map<string, string>();
   if (user) {
