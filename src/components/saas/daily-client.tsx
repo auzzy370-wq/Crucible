@@ -84,8 +84,8 @@ export function DailyClient(props: { daily: DailyPayload }) {
               {diffLabel(c.difficulty)}
             </Badge>
             {props.daily.completed && <Badge variant="emerald">Completed today</Badge>}
-            {(c.companies ?? []).slice(0, 3).map((co) => (
-              <Badge key={co} variant="cyan">
+            {[...new Set(c.companies ?? [])].slice(0, 3).map((co) => (
+              <Badge key={`co-${co}`} variant="cyan">
                 {co}
               </Badge>
             ))}

@@ -383,9 +383,9 @@ export function Problemset(props: {
                   </div>
                   <div className="mt-3 flex flex-wrap gap-1.5">
                     {p.isPremium && <Badge variant="amber">Premium</Badge>}
-                    {(p.companies ?? []).slice(0, 3).map((c) => (
+                    {[...new Set(p.companies ?? [])].slice(0, 3).map((c) => (
                       <span
-                        key={c}
+                        key={`${p.id}-co-${c}`}
                         className="rounded border border-slate-800 px-1.5 py-0.5 font-mono text-[10px] text-slate-400"
                       >
                         {c}
@@ -499,9 +499,9 @@ export function Problemset(props: {
                       </td>
                       <td className="px-4 py-3 hidden lg:table-cell">
                         <div className="flex flex-wrap gap-1">
-                          {(p.companies ?? []).slice(0, 3).map((c) => (
+                          {[...new Set(p.companies ?? [])].slice(0, 3).map((c) => (
                             <span
-                              key={c}
+                              key={`${p.id}-co-${c}`}
                               className="rounded border border-slate-800 px-1.5 py-0.5 font-mono text-[10px] text-slate-400"
                             >
                               {c}
