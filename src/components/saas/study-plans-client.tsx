@@ -15,6 +15,7 @@ type PlanItem = {
   difficulty: number;
   avgMinutes: number | null;
   done: boolean;
+  href?: string;
 };
 
 type Plan = {
@@ -30,6 +31,8 @@ type Plan = {
   totalCount: number;
   percent: number;
   items: PlanItem[];
+  itemKind?: "lesson" | "challenge";
+  track?: string;
 };
 
 function diffLabel(d: number) {
@@ -93,7 +96,8 @@ export function StudyPlansClient(props: { plans: Plan[]; premium: boolean }) {
           <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">STUDY PLANS</p>
           <h1 className="mt-2 text-2xl font-semibold sm:text-3xl">Paths with progress</h1>
           <p className="mt-2 max-w-2xl text-slate-400">
-            Role- and company-shaped tracks. Mark problems done as you grind — Premium unlocks exclusive packs.
+            Interview Craft lessons, company packs, and role sprints. Mark items done as you grind — Premium unlocks
+            exclusive packs.
           </p>
         </div>
         {!props.premium && (
@@ -108,6 +112,9 @@ export function StudyPlansClient(props: { plans: Plan[]; premium: boolean }) {
           <Card key={plan.slug} className={plan.premium ? "border-amber-500/20" : undefined}>
             <CardHeader>
               <div className="flex flex-wrap gap-2">
+                {plan.track === "ai" && <Badge variant="violet">AI</Badge>}
+                {plan.track === "interview" && plan.itemKind === "lesson" && <Badge variant="cyan">Interview</Badge>}
+                {plan.track === "security" && <Badge variant="rose">Security</Badge>}
                 {plan.company && <Badge variant="cyan">{plan.company}</Badge>}
                 <Badge>{plan.role}</Badge>
                 <Badge variant="amber">{plan.days}d</Badge>
@@ -125,18 +132,47 @@ export function StudyPlansClient(props: { plans: Plan[]; premium: boolean }) {
                   <span className="font-mono">{plan.percent}%</span>
                 </div>
                 <div className="h-2 overflow-hidden rounded-full bg-slate-800">
-                  <div className="h-full rounded-full bg-cyan-400 transition-all" style={{ width: `${plan.percent}%` }} />
+                  <div
+                    className={`h-full rounded-full transition-all ${
+                      plan.track === "ai" ? "bg-violet-400" : plan.track === "security" ? "bg-rose-400" : "bg-cyan-400"
+                    }`}
+                    style={{ width: `${plan.percent}%` }}
+                  />
                 </div>
               </div>
               <div className="flex flex-wrap gap-2">
                 {!plan.enrolled ? (
                   <Button disabled={busy === plan.slug} onClick={() => enroll(plan.slug, plan.premium)}>
-                    {busy === plan.slug ? "Enrolling…" : "Start plan"}
+                    {busy === plan.slug
+                      ? "Enrolling…"
+                      : plan.slug === "ai-craft"
+                        ? "Start AI Craft"
+                        : plan.slug === "interview-craft"
+                          ? "Start Interview Craft"
+                          : "Start plan"}
                   </Button>
                 ) : (
-                  <Button variant="secondary" onClick={() => setOpen(open === plan.slug ? null : plan.slug)}>
-                    {open === plan.slug ? "Hide problems" : "Show problems"}
-                  </Button>
+                  <>
+                    <Button variant="secondary" onClick={() => setOpen(open === plan.slug ? null : plan.slug)}>
+                      {open === plan.slug
+                        ? plan.itemKind === "lesson"
+                          ? "Hide lessons"
+                          : "Hide problems"
+                        : plan.itemKind === "lesson"
+                          ? "Show lessons"
+                          : "Show problems"}
+                    </Button>
+                    {plan.slug === "ai-craft" && (
+                      <Link href="/learn/ai">
+                        <Button variant="ghost">Open path →</Button>
+                      </Link>
+                    )}
+                    {plan.slug === "interview-craft" && (
+                      <Link href="/learn/interview">
+                        <Button variant="ghost">Open path →</Button>
+                      </Link>
+                    )}
+                  </>
                 )}
               </div>
               {plan.enrolled && open === plan.slug && (
@@ -151,7 +187,8 @@ export function StudyPlansClient(props: { plans: Plan[]; premium: boolean }) {
                           {idx + 1}. {item.title}
                         </div>
                         <div className="font-mono text-[11px] text-slate-500">
-                          {diffLabel(item.difficulty)} · {item.avgMinutes ?? 30}m
+                          {plan.itemKind === "lesson" ? "Lesson" : diffLabel(item.difficulty)} ·{" "}
+                          {item.avgMinutes ?? 30}m
                         </div>
                       </div>
                       <div className="flex shrink-0 items-center gap-2">
@@ -167,7 +204,10 @@ export function StudyPlansClient(props: { plans: Plan[]; premium: boolean }) {
                         >
                           {item.done ? "Done" : "Mark done"}
                         </button>
-                        <Link href="/challenges" className="text-xs text-cyan-300 hover:underline">
+                        <Link
+                          href={item.href ?? "/challenges"}
+                          className="text-xs text-cyan-300 hover:underline"
+                        >
                           Open
                         </Link>
                       </div>

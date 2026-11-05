@@ -55,7 +55,10 @@ const NAV_GROUPS: NavGroup[] = [
     title: "Learn",
     roles: ["CANDIDATE", "TEAM_MEMBER"],
     items: [
-      { href: "/dashboard", label: "Home", icon: LayoutDashboard, hint: "Your next lesson" },
+      { href: "/learn", label: "Learning hub", icon: BookOpen, hint: "Interview + AI Craft" },
+      { href: "/learn/interview", label: "Interview Craft", icon: Timer, hint: "Coding · design · behavioral" },
+      { href: "/learn/ai", label: "AI Craft", icon: BrainCircuit, hint: "Prompt → ship AI" },
+      { href: "/dashboard", label: "Home", icon: LayoutDashboard, hint: "Your loop" },
       { href: "/daily", label: "Daily", icon: CalendarDays, hint: "One timed session today" },
       { href: "/challenges", label: "Problem bank", icon: Boxes, hint: "Browse & practice" },
       { href: "/workspace", label: "Open workspaces", icon: Terminal, hint: "Continue where you left off" },

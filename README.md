@@ -8,6 +8,17 @@ Competition surfaces: `/tournaments`, `/leaderboards`, `/ai-vs-human`, `/researc
 
 The seed loads the **full challenge library as published 60-minute assessments** with demo assignments, workspaces, and tests already placed. See [docs/RELEASE.md](docs/RELEASE.md).
 
+## Learning
+
+| Path | Route | What you get |
+|------|-------|----------------|
+| **Learning hub** | `/learn` | Next lesson + adaptive practice |
+| **Interview Craft** | `/learn/interview` | Loop mechanics, live-coding framework, DSA patterns, system design, behavioral STAR |
+| **AI Craft** | `/learn/ai` | Prompting, APIs, tools, RAG, agents, evals, safety |
+| **Study plans** | `/study-plans` | Company packs (Meta, Google, Amazon, Microsoft, Stripe…), role sprints, security |
+| **Company mocks** | `/interview` | Timed evidence sessions |
+| **Roadmap** | `/roadmap` | Skill tree + next problems |
+
 ## Tracks
 
 Each track ships **≥250 project missions** plus a shared **4,000-question coding bank** scaling **Easy → Impossible**, with post-test **knowledge pinpoint** (exactly which skills were proven vs gaps).

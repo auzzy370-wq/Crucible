@@ -14,39 +14,59 @@ export default async function DashboardPage() {
   const isStaff = ["SUPER_ADMIN", "HIRING_MANAGER", "TECHNICAL_REVIEWER"].includes(user.role);
 
   if (!isStaff) {
-    const [assignments, streak, enrollments, profile, daily] = await Promise.all([
-      prisma.assessmentAssignment.findMany({
-        where: { candidateId: user.id },
-        include: {
-          assessment: {
-            include: {
-              challenge: {
-                select: {
-                  id: true,
-                  title: true,
-                  summary: true,
-                  type: true,
-                  track: true,
-                  difficulty: true,
-                  tags: true,
+    const { AI_CRAFT_PLAN_SLUG, AI_LESSONS, nextAiLesson } = await import("@/server/learning/ai-curriculum");
+    const {
+      INTERVIEW_CRAFT_PLAN_SLUG,
+      INTERVIEW_LESSONS,
+      nextInterviewLesson,
+    } = await import("@/server/learning/interview-curriculum");
+    const { buildLearnerRoadmap } = await import("@/server/learning/roadmap");
+    const [assignments, streak, enrollments, profile, daily, aiEnrollment, ivEnrollment, roadmap] =
+      await Promise.all([
+        prisma.assessmentAssignment.findMany({
+          where: { candidateId: user.id },
+          include: {
+            assessment: {
+              include: {
+                challenge: {
+                  select: {
+                    id: true,
+                    title: true,
+                    summary: true,
+                    type: true,
+                    track: true,
+                    difficulty: true,
+                    tags: true,
+                  },
                 },
               },
             },
+            scoreReport: true,
+            workspace: { select: { id: true } },
           },
-          scoreReport: true,
-          workspace: { select: { id: true } },
-        },
-        orderBy: { createdAt: "desc" },
-        take: 40,
-      }),
-      prisma.userStreak.findUnique({ where: { userId: user.id } }),
-      prisma.studyPlanEnrollment.count({ where: { userId: user.id } }),
-      prisma.candidateProfile.findUnique({ where: { userId: user.id } }),
-      prisma.dailyChallenge.findFirst({
-        orderBy: { dateKey: "desc" },
-        include: { challenge: true },
-      }),
-    ]);
+          orderBy: { createdAt: "desc" },
+          take: 40,
+        }),
+        prisma.userStreak.findUnique({ where: { userId: user.id } }),
+        prisma.studyPlanEnrollment.count({ where: { userId: user.id } }),
+        prisma.candidateProfile.findUnique({ where: { userId: user.id } }),
+        prisma.dailyChallenge.findFirst({
+          orderBy: { dateKey: "desc" },
+          include: { challenge: true },
+        }),
+        prisma.studyPlanEnrollment.findUnique({
+          where: { userId_planSlug: { userId: user.id, planSlug: AI_CRAFT_PLAN_SLUG } },
+        }),
+        prisma.studyPlanEnrollment.findUnique({
+          where: { userId_planSlug: { userId: user.id, planSlug: INTERVIEW_CRAFT_PLAN_SLUG } },
+        }),
+        buildLearnerRoadmap(user.id).catch(() => null),
+      ]);
+    const aiNext = nextAiLesson(aiEnrollment?.completedSlugs ?? []);
+    const aiPercent = Math.round(((aiEnrollment?.completedSlugs.length ?? 0) / AI_LESSONS.length) * 100);
+    const ivNext = nextInterviewLesson(ivEnrollment?.completedSlugs ?? []);
+    const ivPercent = Math.round(((ivEnrollment?.completedSlugs.length ?? 0) / INTERVIEW_LESSONS.length) * 100);
+    const nextProblem = roadmap?.nextProblems?.[0] ?? null;
 
     const codingOpen =
       assignments.find(
@@ -70,6 +90,81 @@ export default async function DashboardPage() {
             Practice the same timed work employers use to test candidates — then publish verified proof.
           </p>
         </header>
+
+        <section className="grid gap-4 lg:grid-cols-3">
+          <div className="rounded-2xl border border-cyan-500/25 bg-cyan-500/5 p-5">
+            <div className="text-xs font-medium uppercase tracking-wider text-cyan-200/80">Interview Craft</div>
+            <h2 className="mt-2 text-lg font-semibold text-slate-100">
+              {ivNext ? ivNext.title : ivPercent ? "Interview path complete" : "Prepare for the loop"}
+            </h2>
+            <p className="mt-1 text-sm text-slate-400">
+              {ivNext
+                ? `${ivNext.summary} · ${ivNext.minutes} min · ${ivPercent}% done`
+                : "Coding, design, behavioral, company packs."}
+            </p>
+            <div className="mt-3 flex flex-wrap gap-3 text-sm">
+              <Link
+                href={ivNext ? `/learn/interview/${ivNext.slug}` : "/learn/interview"}
+                className="text-cyan-200 hover:underline"
+              >
+                {ivNext ? "Continue lesson →" : "Start Interview Craft →"}
+              </Link>
+              <Link href="/study-plans" className="text-slate-400 hover:underline">
+                Study plans →
+              </Link>
+            </div>
+          </div>
+          <div className="rounded-2xl border border-violet-500/25 bg-violet-500/5 p-5">
+            <div className="text-xs font-medium uppercase tracking-wider text-violet-200/80">AI Craft</div>
+            <h2 className="mt-2 text-lg font-semibold text-slate-100">
+              {aiNext ? aiNext.title : aiPercent ? "AI path complete" : "Learn AI — prompt to production"}
+            </h2>
+            <p className="mt-1 text-sm text-slate-400">
+              {aiNext
+                ? `${aiNext.summary} · ${aiNext.minutes} min · ${aiPercent}% done`
+                : "Prompting, APIs, RAG, agents, evals, safety."}
+            </p>
+            <div className="mt-3 flex flex-wrap gap-3 text-sm">
+              <Link
+                href={aiNext ? `/learn/ai/${aiNext.slug}` : "/learn/ai"}
+                className="text-violet-200 hover:underline"
+              >
+                {aiNext ? "Continue lesson →" : "Start AI Craft →"}
+              </Link>
+              <Link href="/learn" className="text-slate-400 hover:underline">
+                Learning hub →
+              </Link>
+            </div>
+          </div>
+          <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-5">
+            <div className="text-xs font-medium uppercase tracking-wider text-slate-400">Next problem</div>
+            <h2 className="mt-2 text-lg font-semibold text-slate-100">
+              {nextProblem?.title ?? daily?.challenge?.title ?? "Pick up a practice set"}
+            </h2>
+            <p className="mt-1 text-sm text-slate-400">
+              {nextProblem
+                ? `Adaptive · D${nextProblem.difficulty} · streak ${streak?.currentStreak ?? 0}`
+                : `Daily or bank · streak ${streak?.currentStreak ?? 0}`}
+            </p>
+            <div className="mt-3 flex flex-wrap gap-3 text-sm">
+              {nextProblem ? (
+                <Link
+                  href={`/challenges?q=${encodeURIComponent(nextProblem.slug)}`}
+                  className="text-cyan-300 hover:underline"
+                >
+                  Open in bank →
+                </Link>
+              ) : (
+                <Link href="/daily" className="text-cyan-300 hover:underline">
+                  Open daily →
+                </Link>
+              )}
+              <Link href="/roadmap" className="text-slate-400 hover:underline">
+                Roadmap →
+              </Link>
+            </div>
+          </div>
+        </section>
 
         <section className="rounded-2xl border border-cyan-500/20 bg-cyan-500/5 p-5">
           <div className="text-xs font-medium uppercase tracking-wider text-cyan-200/80">Learning loop</div>

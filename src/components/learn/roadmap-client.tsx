@@ -11,7 +11,14 @@ type Roadmap = {
   recurringGaps: string[];
   targetDifficulty: number;
   nextProblems: { id: string; slug: string; title: string; difficulty: number; tags: string[] }[];
-  skillTree: { id: string; label: string; prereq: string[]; mastery: number }[];
+  skillTree: {
+    id: string;
+    label: string;
+    prereq: string[];
+    mastery: number;
+    total?: number;
+    href?: string;
+  }[];
 };
 
 export function RoadmapClient() {
@@ -71,8 +78,16 @@ export function RoadmapClient() {
             {data.skillTree.map((n) => (
               <li key={n.id} className="rounded-lg border border-slate-800 px-3 py-2">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-slate-200">{n.label}</span>
-                  <Badge variant="cyan">×{n.mastery}</Badge>
+                  {n.href ? (
+                    <Link href={n.href} className="text-slate-200 hover:text-cyan-200">
+                      {n.label}
+                    </Link>
+                  ) : (
+                    <span className="text-slate-200">{n.label}</span>
+                  )}
+                  <Badge variant="cyan">
+                    {n.total != null ? `${n.mastery}/${n.total}` : `×${n.mastery}`}
+                  </Badge>
                 </div>
                 {n.prereq.length > 0 && (
                   <div className="mt-1 font-mono text-[10px] text-slate-500">needs: {n.prereq.join(" → ")}</div>
@@ -133,8 +148,11 @@ export function RoadmapClient() {
                   {difficultyBand(p.difficulty)} · {p.tags.filter((t) => t !== "coding").slice(0, 4).join(", ")}
                 </div>
               </div>
-              <Link href={`/challenges`} className="text-sm text-cyan-300 hover:underline">
-                Practice bank →
+              <Link
+                href={`/challenges?q=${encodeURIComponent(p.slug)}`}
+                className="text-sm text-cyan-300 hover:underline"
+              >
+                Open →
               </Link>
             </li>
           ))}
