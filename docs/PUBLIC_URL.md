@@ -1,24 +1,25 @@
 # Public site URL (canonical)
 
-**Use this URL — do not mint new Vercel links until the anonymous deploy is claimed.**
+**Use this URL — Vercel anonymous deploys are expired until claimed.**
 
-## Site (live tunnel → local fixed build)
+## Site (live tunnel → fixed local build)
 
-**https://single-photography-permissions-rouge.trycloudflare.com**
+**https://recently-colours-cathedral-definition.trycloudflare.com**
 
-- AI vs Human: https://single-photography-permissions-rouge.trycloudflare.com/ai-vs-human
+- AI vs Human: https://recently-colours-cathedral-definition.trycloudflare.com/ai-vs-human
 - Demo login: `candidate@gauntlet.local` / `Gauntlet!Cand1`
 
-The previous anonymous Vercel hostname (`speedy-spinel-q0v72i0.tmp.now`) **cannot be redeployed** until someone claims it (session expired). That deploy is missing the AI judge fix.
+On AI vs Human, leave **Two Sum** + **Groq GPT-OSS 20B** selected and hit Submit — you should see **Verified pass** (public 3/3, hidden 2/2).
+
+The old `*.tmp.now` Vercel link is stale (missing the real AI judge). Do not use it.
 
 ## Claim Vercel (permanent)
 
 https://vercel.com/claim-deployment?code=0e18a47b-edec-4a2c-8e01-4a46439e9c19
 
-After claiming, redeploy from this repo, disable Deployment Protection if needed, then replace this file with the stable `*.vercel.app` URL.
+After claiming, redeploy from this repo and replace this file with the stable `*.vercel.app` URL.
 
 ## Agent rules
 
-1. Prefer keeping this tunnel URL until Vercel is claimed.
-2. Do not mint extra Cloudflare tunnels unless this one dies.
-3. AI vs Human must only offer judgable `lc-*` challenges; Two Sum is the default smoke test.
+1. Keep this tunnel until Vercel is claimed; do not mint extras unless it dies.
+2. AI vs Human only lists judgable `lc-*` challenges; Two Sum is first.
