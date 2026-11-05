@@ -326,17 +326,22 @@ export function AppShell({
         <Link href="/dashboard" className="min-w-0">
           {brand}
         </Link>
-        <Button
-          type="button"
-          variant="secondary"
-          size="icon"
-          className="min-h-11 min-w-11"
-          aria-label={open ? "Close menu" : "Open menu"}
-          aria-expanded={open}
-          onClick={() => setOpen((v) => !v)}
-        >
-          {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </Button>
+        {/* Menu lives in the bottom tab "More" when tabs are shown; only keep top control in workspace (no bottom bar). */}
+        {inWorkspaceSession ? (
+          <Button
+            type="button"
+            variant="secondary"
+            size="icon"
+            className="min-h-11 min-w-11"
+            aria-label={open ? "Close menu" : "Open menu"}
+            aria-expanded={open}
+            onClick={() => setOpen((v) => !v)}
+          >
+            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </Button>
+        ) : (
+          <div className="min-h-11 min-w-11" aria-hidden />
+        )}
       </header>
 
       <div
