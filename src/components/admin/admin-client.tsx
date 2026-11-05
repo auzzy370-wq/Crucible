@@ -604,6 +604,7 @@ export function AdminClient() {
                 </Link>
               </div>
               <div className="space-y-2">
+                {!library && <p className="text-slate-500">Loading challenge library…</p>}
                 {(library?.challenges ?? []).map((c: any) => (
                   <div key={c.id} className="rounded-xl border border-slate-800 p-4 text-sm">
                     <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
@@ -613,9 +614,11 @@ export function AdminClient() {
                           {c.slug} · {c.type} · {c.track} · {c._count.assessments} assessments
                         </div>
                         <div className="mt-1 flex flex-wrap gap-1">
-                          {c.tags.slice(0, 4).map((t: string) => (
+                          {(c.tags ?? []).slice(0, 4).map((t: string) => (
                             <Badge key={t}>{t}</Badge>
                           ))}
+                          {c.isPublished ? <Badge variant="emerald">published</Badge> : <Badge variant="amber">draft</Badge>}
+                          {c.isPremium && <Badge variant="amber">premium</Badge>}
                         </div>
                       </div>
                       <div className="flex flex-wrap gap-2">
@@ -651,7 +654,7 @@ export function AdminClient() {
                     </div>
                   </div>
                 ))}
-                {!(library?.challenges ?? []).length && <p className="text-slate-500">No challenges.</p>}
+                {library && !(library.challenges ?? []).length && <p className="text-slate-500">No challenges.</p>}
               </div>
 
               <div className="border-t border-slate-800 pt-4">
