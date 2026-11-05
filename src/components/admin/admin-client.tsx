@@ -17,6 +17,7 @@ type Tab =
   | "users"
   | "assignments"
   | "library"
+  | "integrity"
   | "jobs"
   | "ai"
   | "audit"
@@ -48,6 +49,8 @@ export function AdminClient() {
   const [library, setLibrary] = useState<any>(null);
   const [libQ, setLibQ] = useState("");
   const [libPublished, setLibPublished] = useState("All");
+  const [integrity, setIntegrity] = useState<any>(null);
+  const [integrityDetail, setIntegrityDetail] = useState<any>(null);
   const [assignments, setAssignments] = useState<any>(null);
   const [assignQ, setAssignQ] = useState("");
   const [assignStatus, setAssignStatus] = useState("All");
@@ -146,10 +149,65 @@ export function AdminClient() {
     if (tab === "ai") void loadProviders();
     if (tab === "overview") void loadOverview();
     if (tab === "library") void loadLibrary();
+    if (tab === "integrity") void loadIntegrity();
     if (tab === "assignments") void loadAssignments();
     if (tab === "analytics") void loadAnalytics();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tab]);
+
+  async function loadIntegrity() {
+    try {
+      const res = await fetch("/api/admin/challenge-integrity");
+      const json = await res.json();
+      if (!json.ok) throw new Error(json.error?.message || "Failed");
+      setIntegrity(json.data);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Integrity load failed");
+    }
+  }
+
+  async function scanIntegrityLibrary() {
+    setBusy(true);
+    try {
+      const res = await fetch("/api/admin/challenge-integrity", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ action: "scan_library", take: 120, onlyPublished: false }),
+      });
+      const json = await res.json();
+      if (!json.ok) throw new Error(json.error?.message || "Scan failed");
+      toast.success(
+        `Scanned ${json.data.summary.scanned}: ${json.data.summary.pass} pass · ${json.data.summary.warn} warn · ${json.data.summary.fail} fail`,
+      );
+      await loadIntegrity();
+      await loadLibrary();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Scan failed");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function scanOneChallenge(challengeId: string) {
+    setBusy(true);
+    try {
+      const res = await fetch("/api/admin/challenge-integrity", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ action: "scan", challengeId }),
+      });
+      const json = await res.json();
+      if (!json.ok) throw new Error(json.error?.message || "Scan failed");
+      setIntegrityDetail(json.data);
+      toast.message(`Integrity ${json.data.status} · ${json.data.findings.length} findings`);
+      await loadIntegrity();
+      await loadLibrary();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Scan failed");
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function patchUser(userId: string, patch: Record<string, unknown>) {
     setBusy(true);
@@ -272,6 +330,7 @@ export function AdminClient() {
     { id: "users", label: "Users" },
     { id: "assignments", label: "Assignments" },
     { id: "library", label: "Library" },
+    { id: "integrity", label: "Integrity" },
     { id: "jobs", label: "Execution" },
     { id: "ai", label: "AI providers" },
     { id: "audit", label: "Audit log" },
@@ -620,10 +679,12 @@ export function AdminClient() {
           <Card>
             <CardHeader>
               <CardTitle>Challenge library</CardTitle>
-              <CardDescription>Publish, unpublish, premium flag, and difficulty.</CardDescription>
+              <CardDescription>
+                Publish is gated by the Challenge Integrity Engine — errors must clear (or force) before release.
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex flex-col gap-2 sm:flex-row">
+              <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
                 <Input
                   placeholder="Search title or slug…"
                   value={libQ}
@@ -641,6 +702,9 @@ export function AdminClient() {
                 </select>
                 <Button variant="secondary" onClick={() => void loadLibrary()}>
                   Search
+                </Button>
+                <Button variant="outline" disabled={busy} onClick={() => void scanIntegrityLibrary()}>
+                  Scan integrity
                 </Button>
                 <Link href="/challenges" className="self-center text-sm text-cyan-300 hover:underline">
                   Open bank →
@@ -662,9 +726,35 @@ export function AdminClient() {
                           ))}
                           {c.isPublished ? <Badge variant="emerald">published</Badge> : <Badge variant="amber">draft</Badge>}
                           {c.isPremium && <Badge variant="amber">premium</Badge>}
+                          {c.integrityStatus && c.integrityStatus !== "unknown" && (
+                            <Badge
+                              variant={
+                                c.integrityStatus === "pass"
+                                  ? "emerald"
+                                  : c.integrityStatus === "fail"
+                                    ? "rose"
+                                    : "amber"
+                              }
+                            >
+                              integrity:{c.integrityStatus}
+                            </Badge>
+                          )}
+                          {c.calibratedDifficulty != null && (
+                            <Badge variant="cyan">
+                              labeled {c.difficulty} · cal {c.calibratedDifficulty}
+                            </Badge>
+                          )}
                         </div>
                       </div>
                       <div className="flex flex-wrap gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={busy}
+                          onClick={() => void scanOneChallenge(c.id)}
+                        >
+                          Scan
+                        </Button>
                         <Button
                           size="sm"
                           variant="secondary"
@@ -687,7 +777,7 @@ export function AdminClient() {
                           disabled={busy}
                           onChange={(e) => void patchChallenge(c.id, { difficulty: Number(e.target.value) })}
                         >
-                          {[1, 2, 3, 4, 5].map((d) => (
+                          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((d) => (
                             <option key={d} value={d}>
                               Diff {d}
                             </option>
@@ -699,6 +789,57 @@ export function AdminClient() {
                 ))}
                 {library && !(library.challenges ?? []).length && <p className="text-slate-500">No challenges.</p>}
               </div>
+
+              {integrityDetail && (
+                <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-4 text-sm">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="font-medium text-slate-100">
+                      Last scan · {integrityDetail.slug} ·{" "}
+                      <span
+                        className={cn(
+                          integrityDetail.status === "pass"
+                            ? "text-emerald-300"
+                            : integrityDetail.status === "fail"
+                              ? "text-rose-300"
+                              : "text-amber-200",
+                        )}
+                      >
+                        {integrityDetail.status}
+                      </span>
+                    </div>
+                    <Button size="sm" variant="ghost" onClick={() => setIntegrityDetail(null)}>
+                      Dismiss
+                    </Button>
+                  </div>
+                  <p className="mt-1 font-mono text-[11px] text-slate-500">
+                    version {integrityDetail.contentVersion}
+                    {integrityDetail.liveAcceptancePct != null
+                      ? ` · live acc ${integrityDetail.liveAcceptancePct}%`
+                      : ""}
+                    {integrityDetail.avgRuntimeMs != null ? ` · avg ${integrityDetail.avgRuntimeMs}ms` : ""}
+                  </p>
+                  <ul className="mt-3 max-h-48 space-y-1 overflow-y-auto">
+                    {(integrityDetail.findings ?? []).map((f: any, i: number) => (
+                      <li
+                        key={`${f.code}-${i}`}
+                        className={cn(
+                          "rounded border px-2 py-1.5 font-mono text-[11px]",
+                          f.severity === "error"
+                            ? "border-rose-500/30 text-rose-100"
+                            : f.severity === "warning"
+                              ? "border-amber-500/30 text-amber-50"
+                              : "border-slate-800 text-slate-400",
+                        )}
+                      >
+                        [{f.severity}] {f.code}: {f.message}
+                      </li>
+                    ))}
+                    {!(integrityDetail.findings ?? []).length && (
+                      <li className="text-slate-500">No findings — publishable.</li>
+                    )}
+                  </ul>
+                </div>
+              )}
 
               <div className="border-t border-slate-800 pt-4">
                 <h3 className="mb-3 text-sm font-medium text-slate-200">Recent assessments</h3>
@@ -719,6 +860,91 @@ export function AdminClient() {
                   ))}
                 </div>
               </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {tab === "integrity" && (
+        <div className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Challenge Integrity Engine</CardTitle>
+              <CardDescription>
+                Detects mismatched statements/tests, bad reference solutions, duplicate or contradictory cases,
+                unrealistic difficulty, missing edges, hidden-test leakage, and nondeterministic harnesses. Publish
+                stays blocked while status is fail.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex flex-wrap gap-2">
+                <Button disabled={busy} onClick={() => void scanIntegrityLibrary()}>
+                  Scan library (120)
+                </Button>
+                <Button variant="secondary" disabled={busy} onClick={() => void loadIntegrity()}>
+                  Refresh
+                </Button>
+              </div>
+              {integrity && (
+                <div className="grid gap-3 sm:grid-cols-4">
+                  {["pass", "warn", "fail", "unknown"].map((k) => (
+                    <div key={k} className="rounded-xl border border-slate-800 px-4 py-3">
+                      <div className="text-[10px] uppercase tracking-wider text-slate-500">{k}</div>
+                      <div className="font-mono text-xl text-slate-100">{integrity.counts?.[k] ?? 0}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <div>
+                <h3 className="mb-2 text-sm font-medium text-slate-200">Needs attention</h3>
+                <div className="space-y-2">
+                  {!integrity && <p className="text-slate-500">Loading…</p>}
+                  {(integrity?.worst ?? []).map((c: any) => (
+                    <div
+                      key={c.id}
+                      className="flex flex-col gap-2 rounded-lg border border-slate-800 px-3 py-2 text-sm sm:flex-row sm:items-center sm:justify-between"
+                    >
+                      <div className="min-w-0">
+                        <div className="font-medium text-slate-100">{c.title}</div>
+                        <div className="font-mono text-[11px] text-slate-500">
+                          {c.slug} · labeled {c.difficulty}
+                          {c.calibratedDifficulty != null ? ` · cal ${c.calibratedDifficulty}` : ""}
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        <Badge
+                          variant={
+                            c.integrityStatus === "fail" ? "rose" : c.integrityStatus === "warn" ? "amber" : "cyan"
+                          }
+                        >
+                          {c.integrityStatus}
+                        </Badge>
+                        {c.isPublished && <Badge variant="emerald">published</Badge>}
+                        <Button size="sm" variant="outline" disabled={busy} onClick={() => void scanOneChallenge(c.id)}>
+                          Re-scan
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                  {integrity && !(integrity.worst ?? []).length && (
+                    <p className="text-slate-500">No fail/warn challenges yet — run a library scan.</p>
+                  )}
+                </div>
+              </div>
+              {integrityDetail && (
+                <div className="rounded-xl border border-cyan-500/20 bg-cyan-500/5 p-4 text-sm">
+                  <div className="font-medium">
+                    {integrityDetail.slug} · {integrityDetail.status}
+                  </div>
+                  <ul className="mt-2 max-h-56 space-y-1 overflow-y-auto font-mono text-[11px]">
+                    {(integrityDetail.findings ?? []).map((f: any, i: number) => (
+                      <li key={`${f.code}-${i}`}>
+                        [{f.severity}] {f.code}: {f.message}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>

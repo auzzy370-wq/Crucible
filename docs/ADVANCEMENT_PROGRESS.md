@@ -6,6 +6,7 @@
 
 | Area | What shipped |
 |------|----------------|
+| Challenge Integrity Engine | Detectors + publish gate + admin Integrity tab + CLI; sector-logic harness binding so `q-*-logic-*` uses real `solve()` judges |
 | Audit | `docs/ADVANCEMENT_AUDIT.md` inventory + LeetCode parity matrix + phased plan |
 | Bookmarks | `ProblemBookmark` + `/api/bookmarks` + problemset ★ + IDE bookmark |
 | Live acceptance | `/api/practice/acceptance` (≥3 hidden submits) + problemset Acc live/est. |

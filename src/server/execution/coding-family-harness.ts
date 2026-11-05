@@ -566,6 +566,48 @@ process.exit(results.every((r) => r.pass) ? 0 : 1);
     return 0.0
 `,
   },
+  /**
+   * Fallback judge for sector `*-logic` bank items that do not yet have a dedicated harness.
+   * Keeps challengeId → tests bound to a real solve() coding lane (never the SaaS mission pack).
+   */
+  "sector-logic": {
+    solutionStub: `/** Sum of unique integers in nums (sector logic bank). */
+export function solve(nums: number[]): number {
+  void nums;
+  return 0;
+}
+`,
+    publicTests: `import { solve } from "../src/solution.ts";
+export async function runPublicTests() {
+  return [
+    { name: "example_1", pass: solve([1, 2, 2, 3]) === 6 },
+    { name: "example_2", pass: solve([5, 5, 5]) === 5 },
+    { name: "empty", pass: solve([]) === 0 },
+    { name: "negatives", pass: solve([-2, -2, 3]) === 1 },
+  ];
+}
+`,
+    hiddenRunner: `import { solve } from "../src/solution.ts";
+const big = Array.from({ length: 5000 }, (_, i) => i % 250);
+const results = [
+  { name: "large_unique", pass: solve(big) === (249 * 250) / 2, hidden: true },
+  { name: "single", pass: solve([42]) === 42, hidden: true },
+  { name: "zeros", pass: solve([0, 0, 1]) === 1, hidden: true },
+];
+console.log(JSON.stringify({ results }));
+process.exit(results.every((r) => r.pass) ? 0 : 1);
+`,
+    hiddenHints: [
+      { id: "large_unique", description: "n≈5k with duplicates" },
+      { id: "single", description: "Single element" },
+      { id: "zeros", description: "Zeros with positives" },
+    ],
+    pythonStub: `from typing import List
+
+def solve(nums: List[int]) -> int:
+    return 0
+`,
+  },
   "bit-family": {
     solutionStub: `/** Number of 1-bits in n (n >= 0). */
 export function solve(n: number): number {
@@ -604,7 +646,15 @@ export function familyKeyFromSlug(slug: string): string | null {
   if (!slug.startsWith("q-")) return null;
   const rest = slug.slice(2);
   const known = Object.keys(FAMILIES).sort((a, b) => b.length - a.length);
-  return known.find((k) => rest === k || rest.startsWith(`${k}-`)) ?? null;
+  const exact = known.find((k) => rest === k || rest.startsWith(`${k}-`));
+  if (exact) return exact;
+  // Sector bank keys like edtech-logic-107 — bind to sector-logic fallback harness
+  if (/-logic-\d+$/.test(rest) || rest.endsWith("-logic") || /logic-\d+$/.test(rest)) {
+    return "sector-logic";
+  }
+  // Any other unbound q-* coding bank item still gets a real solve() judge
+  if (/^.+-\d+$/.test(rest)) return "sector-logic";
+  return null;
 }
 
 export function familyHarnessForSlug(slug: string): FamilyHarness | null {

@@ -307,6 +307,13 @@ model Challenge {
   languages          String[]        @default(["typescript", "python", "go"])
   /** Progressive unlock hints (string[]). Null → synthesized from requirements at read time. */
   hints              Json?
+  /** Content fingerprint — statement + requirements + harness binding. Bumps when challenge content changes. */
+  contentVersion     String?
+  /** unknown | pass | warn | fail — last Challenge Integrity Engine result. */
+  integrityStatus    String          @default("unknown")
+  integrityScannedAt DateTime?
+  /** Suggested difficulty from live solver performance (null until calibrated). */
+  calibratedDifficulty Int?
   isPublished        Boolean         @default(true)
   createdAt          DateTime        @default(now())
   updatedAt          DateTime        @updatedAt
@@ -321,6 +328,29 @@ model Challenge {
   bookmarks        ProblemBookmark[]
   discussions      ProblemDiscussion[]
   integrityEvents  IntegrityEvent[]
+  integrityReports ChallengeIntegrityReport[]
+}
+
+/** Snapshot from Challenge Integrity Engine — gates publish when status=fail. */
+model ChallengeIntegrityReport {
+  id                   String   @id @default(cuid())
+  challengeId          String
+  contentVersion       String
+  status               String
+  findingCount         Int      @default(0)
+  errorCount           Int      @default(0)
+  warningCount         Int      @default(0)
+  findings             Json
+  calibratedDifficulty Int?
+  liveAcceptancePct    Float?
+  avgRuntimeMs         Float?
+  sampleSubmissions    Int      @default(0)
+  scannedAt            DateTime @default(now())
+
+  challenge Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+
+  @@index([challengeId, scannedAt])
+  @@index([status, scannedAt])
 }
 
 /** LeetCode-style problem bookmarks (favorites). */

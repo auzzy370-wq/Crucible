@@ -38,6 +38,10 @@ export async function GET(req: Request) {
             type: true,
             track: true,
             difficulty: true,
+            calibratedDifficulty: true,
+            integrityStatus: true,
+            integrityScannedAt: true,
+            contentVersion: true,
             isPublished: true,
             isPremium: true,
             frequency: true,
@@ -87,13 +91,30 @@ const patchSchema = z.object({
   challengeId: z.string(),
   isPublished: z.boolean().optional(),
   isPremium: z.boolean().optional(),
-  difficulty: z.number().int().min(1).max(5).optional(),
+  difficulty: z.number().int().min(1).max(10).optional(),
+  /** Skip integrity gate when publishing (logged). */
+  force: z.boolean().optional(),
 });
 
 export async function PATCH(req: Request) {
   return withHandler(async () => {
     const admin = await requireUser(["SUPER_ADMIN"]);
     const body = patchSchema.parse(await req.json());
+
+    // Publish only after Challenge Integrity Engine passes (unless force).
+    if (body.isPublished === true) {
+      const { assertPublishable } = await import("@/server/integrity/challenge-engine");
+      const gate = await assertPublishable(body.challengeId, { force: body.force });
+      if (!gate.allowed) {
+        const { AppError } = await import("@/lib/errors");
+        throw new AppError(
+          `Publish blocked by Challenge Integrity Engine (${gate.result.findings.filter((f) => f.severity === "error").length} errors). Scan results saved — fix or force.`,
+          409,
+          "INTEGRITY_BLOCK",
+        );
+      }
+    }
+
     const updated = await prisma.challenge.update({
       where: { id: body.challengeId },
       data: {
@@ -108,6 +129,9 @@ export async function PATCH(req: Request) {
         isPublished: true,
         isPremium: true,
         difficulty: true,
+        integrityStatus: true,
+        calibratedDifficulty: true,
+        contentVersion: true,
       },
     });
     await writeAudit({
@@ -119,6 +143,7 @@ export async function PATCH(req: Request) {
         isPublished: body.isPublished,
         isPremium: body.isPremium,
         difficulty: body.difficulty,
+        force: body.force,
       },
     });
     return jsonOk(updated);

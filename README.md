@@ -137,6 +137,7 @@ More detail: [docs/VERCEL.md](docs/VERCEL.md).
 - **Assessment integrity** — advisory similarity / fingerprint signals on submit (`IntegrityEvent`); humans review — never auto-fail
 - **Advanced missions** — payments ledger, cache-stampede incident, OAuth BFF, data pipeline, k8s rollout, RAG eval, outbox, N+1 kill
 - Advancement audit + backlog: [docs/ADVANCEMENT_AUDIT.md](docs/ADVANCEMENT_AUDIT.md) · [docs/ADVANCEMENT_PROGRESS.md](docs/ADVANCEMENT_PROGRESS.md)
+- **Challenge Integrity Engine** — admin Integrity tab + publish gate; detects harness/ID mismatches, bad references, duplicate/contradictory tests, unrealistic difficulty, missing edges, hidden leakage, nondeterminism. Docs: [docs/CHALLENGE_INTEGRITY.md](docs/CHALLENGE_INTEGRITY.md) · CLI: `npx tsx scripts/challenge-integrity.ts`
 
 ## Core workflow
 
