@@ -65,11 +65,20 @@ export function AiVsHumanClient() {
   }
 
   const [staleHost, setStaleHost] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [sweeping, setSweeping] = useState(false);
 
   useEffect(() => {
     void (async () => {
       void loadModels();
       void loadRuns();
+      try {
+        const me = await fetch("/api/settings");
+        const meJson = await me.json().catch(() => null);
+        setIsAdmin(meJson?.data?.account?.role === "SUPER_ADMIN");
+      } catch {
+        /* ignore */
+      }
       try {
         const res = await fetch("/api/competition/bench-challenges");
         if (res.status === 404) {
@@ -89,6 +98,25 @@ export function AiVsHumanClient() {
       }
     })();
   }, []);
+
+  async function runSweep() {
+    setSweeping(true);
+    try {
+      const res = await fetch("/api/competition/benchmark/sweep", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ aiModelId: modelId || undefined, limit: 40 }),
+      });
+      const json = await res.json();
+      if (!json.ok) throw new Error(json.error?.message || "Sweep failed");
+      toast.success(json.data.summary);
+      await loadRuns();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Sweep failed");
+    } finally {
+      setSweeping(false);
+    }
+  }
 
   async function runBench() {
     if (!challengeId || !modelId) return toast.error("Pick a challenge and model");
@@ -205,7 +233,16 @@ export function AiVsHumanClient() {
           <Button disabled={busy || !challengeId || !modelId} onClick={() => void runBench()}>
             {busy ? "Running judge…" : "Submit challenge to model"}
           </Button>
-          <span className="text-xs text-slate-500">Starts with Two Sum — easiest verified smoke test.</span>
+          {isAdmin && (
+            <Button variant="secondary" disabled={sweeping} onClick={() => void runSweep()}>
+              {sweeping ? "Sweeping assessments…" : "Auto-run all assessments"}
+            </Button>
+          )}
+          <span className="text-xs text-slate-500">
+            {isAdmin
+              ? "Admin sweep posts scores for every judgable assessment to the leaderboard."
+              : "Starts with Two Sum — easiest verified smoke test."}
+          </span>
         </div>
       </section>
 

@@ -10,38 +10,19 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
-const LEARN_DEMOS = [
-  { label: "Learner", email: "candidate@gauntlet.local", password: "Gauntlet!Cand1" },
-  { label: "Premium", email: "premium@gauntlet.local", password: "Gauntlet!Cand1" },
-  { label: "Cyber", email: "cyber@gauntlet.local", password: "Gauntlet!Cand1" },
-  { label: "Teammate", email: "teammate@gauntlet.local", password: "Gauntlet!Cand1" },
-] as const;
-
-const HIRE_DEMOS = [
-  { label: "Hiring mgr", email: "hiring@gauntlet.local", password: "Gauntlet!Admin1" },
-  { label: "Reviewer", email: "reviewer@gauntlet.local", password: "Gauntlet!Admin1" },
-  { label: "Admin", email: "admin@gauntlet.local", password: "Gauntlet!Admin1" },
-] as const;
-
 function LoginForm() {
   const router = useRouter();
   const params = useSearchParams();
   const hireIntent = params.get("intent") === "hire";
   const [mode, setMode] = useState<"learn" | "hire">(hireIntent ? "hire" : "learn");
-  const [email, setEmail] = useState(
-    hireIntent ? "hiring@gauntlet.local" : "candidate@gauntlet.local",
-  );
-  const [password, setPassword] = useState(hireIntent ? "Gauntlet!Admin1" : "Gauntlet!Cand1");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [dbOk, setDbOk] = useState<boolean | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     setMode(hireIntent ? "hire" : "learn");
-    if (hireIntent) {
-      setEmail("hiring@gauntlet.local");
-      setPassword("Gauntlet!Admin1");
-    }
   }, [hireIntent]);
 
   useEffect(() => {
@@ -59,12 +40,6 @@ function LoginForm() {
       }
     })();
   }, []);
-
-  function pickDemo(account: { email: string; password: string }) {
-    setEmail(account.email);
-    setPassword(account.password);
-    setError(null);
-  }
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -106,8 +81,6 @@ function LoginForm() {
     }
   }
 
-  const demos = mode === "hire" ? HIRE_DEMOS : LEARN_DEMOS;
-
   return (
     <Card className="animate-rise relative w-full max-w-md border-cyan-400/20 bg-[#070b12]/90 backdrop-blur-sm">
       <CardHeader>
@@ -134,10 +107,7 @@ function LoginForm() {
               "min-h-10 rounded-md text-sm transition",
               mode === "learn" ? "bg-cyan-500/15 text-cyan-100" : "text-slate-400 hover:text-slate-200",
             )}
-            onClick={() => {
-              setMode("learn");
-              pickDemo(LEARN_DEMOS[0]);
-            }}
+            onClick={() => setMode("learn")}
           >
             I want to learn
           </button>
@@ -147,10 +117,7 @@ function LoginForm() {
               "min-h-10 rounded-md text-sm transition",
               mode === "hire" ? "bg-amber-500/15 text-amber-100" : "text-slate-400 hover:text-slate-200",
             )}
-            onClick={() => {
-              setMode("hire");
-              pickDemo(HIRE_DEMOS[0]);
-            }}
+            onClick={() => setMode("hire")}
           >
             I want to hire
           </button>
@@ -165,43 +132,21 @@ function LoginForm() {
               </Link>
             </div>
             <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2.5 text-xs text-amber-100">
-              Anyone can register a learner account. AI vs Human is available to every signed-in candidate — use{" "}
-              <span className="font-medium">Two Sum</span> + Groq for a verified smoke test.
+              Every signed-in learner can use AI vs Human. Admins can auto-run all assessments and post scores from
+              Admin.
             </div>
           </div>
         )}
         {mode === "hire" && (
           <div className="mb-4 rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2.5 text-sm text-slate-300">
-            Employer demos explore assigning, reviewing, and analytics. Production hiring teams use seeded or invited
-            staff accounts.
+            Hiring workspaces use invited staff accounts. Register a learner account first if you are exploring the
+            product.
           </div>
         )}
 
-        <div className="mb-4 rounded-lg border border-slate-800 bg-slate-950/80 p-3">
-          <div className="mb-2 font-mono text-[10px] uppercase tracking-wider text-slate-500">
-            {mode === "hire" ? "Hiring demos — click to fill" : "Learner demos — click to fill"}
-          </div>
-          <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
-            {demos.map((account) => (
-              <button
-                key={account.email}
-                type="button"
-                className="min-h-10 rounded-md border border-slate-700 bg-slate-900 px-2.5 py-2 font-mono text-xs text-slate-200 transition hover:border-cyan-500/50 hover:text-cyan-100"
-                onClick={() => pickDemo(account)}
-              >
-                {account.label}
-              </button>
-            ))}
-          </div>
-          <div className="mt-2 break-all font-mono text-[11px] text-slate-400">
-            {email} / {password}
-          </div>
-        </div>
-
         {dbOk === false && (
           <div className="mb-4 rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-100">
-            Database is not connected on this deploy. Add a Neon <span className="font-mono">DATABASE_URL</span> in
-            Vercel, redeploy, then run <span className="font-mono">/api/setup</span> once.
+            Database is not connected on this deploy yet. Publish with Postgres enabled, then register a new account.
           </div>
         )}
         {error && (

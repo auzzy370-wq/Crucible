@@ -1,4 +1,5 @@
 import bcrypt from "bcryptjs";
+import { randomBytes } from "crypto";
 import { prisma } from "@/lib/db";
 import { CHALLENGE_CATALOG, SEED_WORKSPACE_CATALOG, isExpandedLibrarySlug } from "@/server/challenges/catalog";
 import {
@@ -13,19 +14,34 @@ import {
 import { createWorkspaceForAssignment, refreshWorkspaceStarters } from "@/server/execution/workspace";
 import { createTeam } from "@/server/teams/service";
 
-export async function seedDatabase() {
+export async function seedDatabase(opts?: { includeDemoAccounts?: boolean }) {
   console.log("Seeding CRUCIBLE…");
 
-  // Cost 8 — bcryptjs at 12 often exceeds Vercel serverless login budgets.
-  const passwordHash = await bcrypt.hash("Gauntlet!Admin1", 8);
-  const candidateHash = await bcrypt.hash("Gauntlet!Cand1", 8);
+  const includeDemo =
+    opts?.includeDemoAccounts === true ||
+    (opts?.includeDemoAccounts !== false && process.env.ALLOW_DEMO_ACCOUNTS === "true");
+  const demoAdminPassword = process.env.DEMO_ADMIN_PASSWORD;
+  const demoCandidatePassword = process.env.DEMO_CANDIDATE_PASSWORD;
+  const canCreateDemos = includeDemo && Boolean(demoAdminPassword && demoCandidatePassword);
 
+  // Never ship fixed passwords. Demo accounts only when env passwords are provided.
+  // Cost 8 — bcryptjs at 12 often exceeds Vercel serverless login budgets.
+  const passwordHash = canCreateDemos
+    ? await bcrypt.hash(demoAdminPassword!, 8)
+    : await bcrypt.hash(randomBytes(32).toString("hex"), 8);
+  const candidateHash = canCreateDemos
+    ? await bcrypt.hash(demoCandidatePassword!, 8)
+    : await bcrypt.hash(randomBytes(32).toString("hex"), 8);
+  const staffPasswordUpdate = canCreateDemos ? { passwordHash } : {};
+  const candidatePasswordUpdate = canCreateDemos ? { passwordHash: candidateHash, plan: "FREE" as const } : {};
+
+  const adminEmail = canCreateDemos ? "admin@gauntlet.local" : "system@crucible.internal";
   const admin = await prisma.user.upsert({
-    where: { email: "admin@gauntlet.local" },
-    update: { passwordHash },
+    where: { email: adminEmail },
+    update: staffPasswordUpdate,
     create: {
-      email: "admin@gauntlet.local",
-      name: "Super Admin",
+      email: adminEmail,
+      name: canCreateDemos ? "Super Admin" : "System",
       role: "SUPER_ADMIN",
       passwordHash,
     },
@@ -33,7 +49,7 @@ export async function seedDatabase() {
 
   const hiring = await prisma.user.upsert({
     where: { email: "hiring@gauntlet.local" },
-    update: { passwordHash },
+    update: staffPasswordUpdate,
     create: {
       email: "hiring@gauntlet.local",
       name: "Harper Manager",
@@ -44,7 +60,7 @@ export async function seedDatabase() {
 
   const reviewer = await prisma.user.upsert({
     where: { email: "reviewer@gauntlet.local" },
-    update: { passwordHash },
+    update: staffPasswordUpdate,
     create: {
       email: "reviewer@gauntlet.local",
       name: "Riley Reviewer",
@@ -55,7 +71,7 @@ export async function seedDatabase() {
 
   const candidate = await prisma.user.upsert({
     where: { email: "candidate@gauntlet.local" },
-    update: { passwordHash: candidateHash, plan: "FREE" },
+    update: candidatePasswordUpdate,
     create: {
       email: "candidate@gauntlet.local",
       name: "Casey Candidate",
@@ -87,11 +103,13 @@ export async function seedDatabase() {
 
   const premiumCandidate = await prisma.user.upsert({
     where: { email: "premium@gauntlet.local" },
-    update: {
-      passwordHash: candidateHash,
-      plan: "PREMIUM",
-      planExpiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
-    },
+    update: canCreateDemos
+      ? {
+          passwordHash: candidateHash,
+          plan: "PREMIUM",
+          planExpiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+        }
+      : {},
     create: {
       email: "premium@gauntlet.local",
       name: "Parker Premium",
@@ -112,7 +130,7 @@ export async function seedDatabase() {
 
   const cyberCandidate = await prisma.user.upsert({
     where: { email: "cyber@gauntlet.local" },
-    update: { passwordHash: candidateHash },
+    update: canCreateDemos ? { passwordHash: candidateHash } : {},
     create: {
       email: "cyber@gauntlet.local",
       name: "Sam Security",
@@ -134,7 +152,7 @@ export async function seedDatabase() {
 
   const teammate = await prisma.user.upsert({
     where: { email: "teammate@gauntlet.local" },
-    update: { passwordHash: candidateHash },
+    update: canCreateDemos ? { passwordHash: candidateHash } : {},
     create: {
       email: "teammate@gauntlet.local",
       name: "Taylor Teammate",
@@ -1090,8 +1108,7 @@ export async function seedDatabase() {
     premiumCandidate: premiumCandidate.email,
     cyberCandidate: cyberCandidate.email,
     teammate: teammate.email,
-    passwordAdmin: "Gauntlet!Admin1",
-    passwordCandidate: "Gauntlet!Cand1",
+    demoAccountsEnabled: canCreateDemos,
     policies: [
       engPolicy.name,
       cyberPolicy.name,

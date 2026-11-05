@@ -8,6 +8,9 @@ import { Button } from "@/components/ui/button";
 export function AdminCompetitionPanel() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [sweeping, setSweeping] = useState(false);
+  const [scoring, setScoring] = useState(false);
+  const [lastSweep, setLastSweep] = useState<string | null>(null);
 
   async function load() {
     setLoading(true);
@@ -20,6 +23,45 @@ export function AdminCompetitionPanel() {
       toast.error(e instanceof Error ? e.message : "Failed");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function runAiSweep() {
+    setSweeping(true);
+    try {
+      const res = await fetch("/api/competition/benchmark/sweep", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ limit: 40 }),
+      });
+      const json = await res.json();
+      if (!json.ok) throw new Error(json.error?.message || "Sweep failed");
+      setLastSweep(json.data.summary);
+      toast.success(json.data.summary);
+      await load();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Sweep failed");
+    } finally {
+      setSweeping(false);
+    }
+  }
+
+  async function runAutoScore() {
+    setScoring(true);
+    try {
+      const res = await fetch("/api/admin/assignments/auto-score", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ limit: 50 }),
+      });
+      const json = await res.json();
+      if (!json.ok) throw new Error(json.error?.message || "Auto-score failed");
+      toast.success(json.data.summary);
+      await load();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Auto-score failed");
+    } finally {
+      setScoring(false);
     }
   }
 
@@ -37,10 +79,19 @@ export function AdminCompetitionPanel() {
           <h2 className="font-medium text-slate-100">Competition analytics</h2>
           <p className="text-xs text-slate-500">Last {data.windowDays} days · live counts only</p>
         </div>
-        <Button size="sm" variant="secondary" onClick={() => void load()}>
-          Refresh
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button size="sm" variant="secondary" disabled={sweeping} onClick={() => void runAiSweep()}>
+            {sweeping ? "Running AI sweep…" : "Auto-run all assessments"}
+          </Button>
+          <Button size="sm" variant="secondary" disabled={scoring} onClick={() => void runAutoScore()}>
+            {scoring ? "Posting scores…" : "Post assignment scores"}
+          </Button>
+          <Button size="sm" variant="secondary" onClick={() => void load()}>
+            Refresh
+          </Button>
+        </div>
       </div>
+      {lastSweep && <p className="text-xs text-emerald-300/90">{lastSweep}</p>}
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {[

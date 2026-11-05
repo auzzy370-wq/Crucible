@@ -15,8 +15,12 @@ export async function POST(req: Request) {
     const body = schema.parse(await req.json().catch(() => ({ interval: "yearly" })));
     const base = appBaseUrl();
 
-    // Mock path when Stripe is not configured
+    // Mock premium only when explicitly enabled for local demos — never in published apps.
     if (!stripeEnabled()) {
+      if (process.env.ALLOW_MOCK_BILLING !== "true") {
+        const { AppError } = await import("@/lib/errors");
+        throw new AppError("Billing is not configured", 503, "BILLING_DISABLED");
+      }
       const updated = await prisma.user.update({
         where: { id: user.id },
         data: {

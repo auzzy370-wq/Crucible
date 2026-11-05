@@ -9,7 +9,7 @@ await page.goto('http://localhost:3847/login', { waitUntil: 'domcontentloaded' }
 await page.waitForSelector('#email', { timeout: 15000 });
 await page.screenshot({ path: path.join(out, 'login.png'), fullPage: true });
 await page.locator('#email').fill('admin@gauntlet.local');
-await page.locator('#password').fill('Gauntlet!Admin1');
+await page.locator('#password').fill(process.env.DEMO_ADMIN_PASSWORD || "");
 await page.getByRole('button', { name: /enter platform/i }).click();
 await page.waitForURL('**/dashboard**', { timeout: 20000 });
 await page.waitForTimeout(1000);

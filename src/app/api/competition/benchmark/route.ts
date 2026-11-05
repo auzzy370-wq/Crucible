@@ -69,9 +69,10 @@ export async function POST(req: Request) {
       where: { id: body.challengeId },
       select: { slug: true },
     });
-    if (!challenge?.slug.startsWith("lc-")) {
+    const { canJudgeAiSlug } = await import("@/server/competition/ai-local-judge");
+    if (!challenge || !canJudgeAiSlug(challenge.slug)) {
       throw new AppError(
-        "Pick a curated lc-* challenge (Two Sum is first). Bank variants are not supported on AI vs Human.",
+        "This challenge has no local coding harness. Pick a curated coding assessment (Two Sum works).",
         400,
         "NO_HARNESS",
       );

@@ -1,44 +1,26 @@
-import { z } from "zod";
-import { prisma } from "@/lib/db";
 import { jsonOk, withHandler } from "@/server/auth/api";
 import { requireUser } from "@/server/auth/session";
-import { writeAudit } from "@/server/security/audit";
-import { planDays } from "@/server/saas/stripe";
+import { AppError } from "@/lib/errors";
+import { prisma } from "@/lib/db";
 
-const schema = z.object({
-  interval: z.enum(["monthly", "yearly"]).default("monthly"),
-});
-
-/** @deprecated Prefer /api/billing/checkout — kept for demo one-click mock upgrades. */
-export async function POST(req: Request) {
+/** Mock one-click upgrades are disabled. Use Stripe checkout. */
+export async function POST() {
   return withHandler(async () => {
-    const user = await requireUser();
-    const body = schema.parse(await req.json().catch(() => ({ interval: "monthly" })));
-    const updated = await prisma.user.update({
-      where: { id: user.id },
-      data: {
-        plan: "PREMIUM",
-        planExpiresAt: new Date(Date.now() + planDays(body.interval) * 24 * 60 * 60 * 1000),
-      },
-      select: { id: true, email: true, plan: true, planExpiresAt: true },
-    });
-    await writeAudit({
-      actorId: user.id,
-      action: "billing.upgrade",
-      entityType: "User",
-      entityId: user.id,
-      metadata: { interval: body.interval, mock: true },
-    });
-    return jsonOk({
-      ...updated,
-      message: "Premium activated (demo). Use /api/billing/checkout for Stripe.",
-    });
+    await requireUser();
+    throw new AppError(
+      "Use /api/billing/checkout with Stripe configured. Demo upgrades are disabled.",
+      410,
+      "MOCK_UPGRADE_DISABLED",
+    );
   });
 }
 
 export async function DELETE() {
   return withHandler(async () => {
     const user = await requireUser();
+    if (process.env.ALLOW_MOCK_BILLING !== "true") {
+      throw new AppError("Billing changes require Stripe portal", 503, "BILLING_DISABLED");
+    }
     const updated = await prisma.user.update({
       where: { id: user.id },
       data: { plan: "FREE", planExpiresAt: null },

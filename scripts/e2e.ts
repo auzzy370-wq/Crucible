@@ -46,10 +46,10 @@ async function login(email: string, password: string) {
 async function main() {
   console.log("E2E against", BASE);
 
-  const admin = await login("admin@gauntlet.local", "Gauntlet!Admin1");
+  const admin = await login("admin@gauntlet.local", process.env.DEMO_ADMIN_PASSWORD || "");
   console.log("✓ admin login");
 
-  const hiring = await login("hiring@gauntlet.local", "Gauntlet!Admin1");
+  const hiring = await login("hiring@gauntlet.local", process.env.DEMO_ADMIN_PASSWORD || "");
   console.log("✓ hiring manager login");
 
   const { json: assessments } = await api(hiring.jar, "/api/assessments");
@@ -68,7 +68,7 @@ async function main() {
   if (!assignment.ok) throw new Error(`assign failed: ${JSON.stringify(assignment)}`);
   console.log("✓ assignment + workspace", assignment.data.id);
 
-  const cand = await login("cyber@gauntlet.local", "Gauntlet!Cand1");
+  const cand = await login("cyber@gauntlet.local", process.env.DEMO_CANDIDATE_PASSWORD || "");
   const workspaceId = assignment.data.workspace.id;
 
   await api(cand.jar, `/api/assignments/${assignment.data.id}`, {
@@ -137,7 +137,7 @@ async function main() {
   });
   console.log("✓ incident recovery");
 
-  const reviewer = await login("reviewer@gauntlet.local", "Gauntlet!Admin1");
+  const reviewer = await login("reviewer@gauntlet.local", process.env.DEMO_ADMIN_PASSWORD || "");
   const { json: review } = await api(reviewer.jar, "/api/reviews", {
     method: "POST",
     body: JSON.stringify({

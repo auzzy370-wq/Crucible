@@ -13,10 +13,9 @@ export async function GET() {
       where: {
         isPublished: true,
         type: "CODING_PROBLEM",
-        slug: { startsWith: "lc-" },
       },
       orderBy: [{ frequency: "desc" }, { difficulty: "asc" }],
-      take: 40,
+      take: 120,
       select: {
         id: true,
         slug: true,
@@ -27,7 +26,7 @@ export async function GET() {
         frequency: true,
       },
     });
-    const ready = curated.filter((c) => canJudgeAiSlug(c.slug));
+    const ready = curated.filter((c) => canJudgeAiSlug(c.slug)).slice(0, 60);
     // Prefer Two Sum first — clearest smoke test for the bench UI
     ready.sort((a, b) => {
       if (a.slug === "lc-two-sum") return -1;

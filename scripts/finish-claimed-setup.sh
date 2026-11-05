@@ -55,7 +55,7 @@ fi
 echo
 echo "DONE"
 echo "  App:   ${PROD_URL:-check Vercel dashboard}"
-echo "  Login: admin@gauntlet.local / Gauntlet!Admin1"
+echo "  Login: register at /register (set DEMO_* env for local demos)"
 echo "  SETUP_SECRET saved for this shell: $SETUP_SECRET"
 echo "  If users missing: curl -X POST \"\$APP/api/setup\" -H 'content-type: application/json' -d '{\"secret\":\"$SETUP_SECRET\",\"seed\":true}'"
 echo

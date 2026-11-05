@@ -12,15 +12,14 @@ export async function POST(req: NextRequest) {
   const stripe = getStripe()!;
   const sig = req.headers.get("stripe-signature");
   const secret = process.env.STRIPE_WEBHOOK_SECRET;
+  if (!secret || !sig) {
+    return Response.json({ ok: false, error: "Webhook signature required" }, { status: 400 });
+  }
   const raw = await req.text();
 
   let event;
   try {
-    if (secret && sig) {
-      event = stripe.webhooks.constructEvent(raw, sig, secret);
-    } else {
-      event = JSON.parse(raw);
-    }
+    event = stripe.webhooks.constructEvent(raw, sig, secret);
   } catch (err) {
     return Response.json(
       { ok: false, error: err instanceof Error ? err.message : "Invalid webhook" },

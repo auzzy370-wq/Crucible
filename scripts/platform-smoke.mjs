@@ -68,13 +68,13 @@ async function main() {
 
   // Demo accounts
   const accounts = [
-    ["admin@gauntlet.local", "Gauntlet!Admin1"],
-    ["hiring@gauntlet.local", "Gauntlet!Admin1"],
-    ["reviewer@gauntlet.local", "Gauntlet!Admin1"],
-    ["candidate@gauntlet.local", "Gauntlet!Cand1"],
-    ["premium@gauntlet.local", "Gauntlet!Cand1"],
-    ["cyber@gauntlet.local", "Gauntlet!Cand1"],
-    ["teammate@gauntlet.local", "Gauntlet!Cand1"],
+    ["admin@gauntlet.local", process.env.DEMO_ADMIN_PASSWORD || ""],
+    ["hiring@gauntlet.local", process.env.DEMO_ADMIN_PASSWORD || ""],
+    ["reviewer@gauntlet.local", process.env.DEMO_ADMIN_PASSWORD || ""],
+    ["candidate@gauntlet.local", process.env.DEMO_CANDIDATE_PASSWORD || ""],
+    ["premium@gauntlet.local", process.env.DEMO_CANDIDATE_PASSWORD || ""],
+    ["cyber@gauntlet.local", process.env.DEMO_CANDIDATE_PASSWORD || ""],
+    ["teammate@gauntlet.local", process.env.DEMO_CANDIDATE_PASSWORD || ""],
   ];
   const sessions = {};
   for (const [email, pw] of accounts) {

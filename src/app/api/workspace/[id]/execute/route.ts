@@ -1,14 +1,18 @@
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { jsonOk, withHandler } from "@/server/auth/api";
-import { requireUser, canReview, isPremium } from "@/server/auth/session";
+import { requireUser, canAdmin, canReview, isPremium } from "@/server/auth/session";
 import { enqueueExecution } from "@/server/execution/runner";
 import { AppError } from "@/lib/errors";
 import { diagnoseJobResult } from "@/server/competition/diagnostics";
 
+/** Candidate-safe job types — commands are always server-authored (never client-supplied). */
+const CANDIDATE_TYPES = ["test", "hidden_test", "deploy_check", "benchmark"] as const;
+/** Privileged diagnostics — SUPER_ADMIN only; still no arbitrary shell. */
+const ADMIN_TYPES = ["debug"] as const;
+
 const schema = z.object({
-  type: z.enum(["test", "hidden_test", "deploy_check", "benchmark", "shell", "debug"]),
-  command: z.string().optional(),
+  type: z.enum([...CANDIDATE_TYPES, ...ADMIN_TYPES]),
   customCases: z
     .array(
       z.object({
@@ -93,12 +97,14 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
       }
     }
     const body = schema.parse(await req.json());
+    if ((ADMIN_TYPES as readonly string[]).includes(body.type) && !canAdmin(user.role)) {
+      throw new AppError("Only admins can run diagnostic jobs", 403, "FORBIDDEN");
+    }
     // Lightning Judge: Premium gets priority 10 (≈10× ahead of free FIFO during peak)
     const priority = isPremium(user) ? 10 : 0;
     const job = await enqueueExecution({
       workspaceId: id,
       type: body.type,
-      command: body.command,
       priority,
       customCases: body.customCases,
     });

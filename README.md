@@ -112,17 +112,11 @@ Compose runs Postgres, Redis, MinIO, web, and worker. **Do not** treat Docker-so
 
 More detail: [docs/VERCEL.md](docs/VERCEL.md).
 
-## Seed accounts
+## Accounts
 
-| Email | Password | Role |
-|-------|----------|------|
-| admin@gauntlet.local | Gauntlet!Admin1 | Super Admin |
-| hiring@gauntlet.local | Gauntlet!Admin1 | Hiring Manager |
-| reviewer@gauntlet.local | Gauntlet!Admin1 | Technical Reviewer |
-| candidate@gauntlet.local | Gauntlet!Cand1 | Candidate (secure full-stack) |
-| cyber@gauntlet.local | Gauntlet!Cand1 | Candidate (cybersecurity) |
-| teammate@gauntlet.local | Gauntlet!Cand1 | Team member |
-| premium@gauntlet.local | Gauntlet!Cand1 | Candidate (Premium SaaS plan) |
+Register a learner at `/register`. Demo staff/candidate accounts are **optional** and only created when you set `ALLOW_DEMO_ACCOUNTS=true` plus `DEMO_ADMIN_PASSWORD` and `DEMO_CANDIDATE_PASSWORD` in your local environment — never commit those values.
+
+Admins can **Auto-run all assessments** and **Post assignment scores** from the Admin competition panel.
 
 ## SaaS prep features
 

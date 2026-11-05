@@ -1,4 +1,3 @@
-import { spawn } from "child_process";
 import fs from "fs/promises";
 import path from "path";
 import { ExecutionStatus } from "@prisma/client";
@@ -9,21 +8,20 @@ import { normalizeCodingLanguage } from "@/lib/coding-languages";
 import { multilangCommands } from "./coding-family-multilang";
 import { HIDDEN_CASES, hiddenTsRunnerSource } from "./hidden-harness";
 import { customPyRunnerSource, customTsRunnerSource } from "./custom-harness";
+import { execAllowlisted, parseAllowlistedArgv } from "./safe-exec";
 
 /**
  * Secure execution architecture:
- * - Never run untrusted code in the Next.js process event loop with shared privileges.
+ * - Commands are always server-authored from an allowlist — never from the client.
  * - Prefer disposable containers (EXECUTION_MODE=docker).
- * - process mode is a constrained local fallback for development only.
- * - Production should use microVMs (Firecracker) / gVisor — Docker socket must not be exposed to candidates.
+ * - process mode runs allowlisted binaries with shell:false.
  */
 
 export type CustomCase = { name?: string; args: unknown[]; expected?: unknown };
 
 export async function enqueueExecution(params: {
   workspaceId: string;
-  type: "test" | "hidden_test" | "deploy_check" | "benchmark" | "shell" | "debug";
-  command?: string;
+  type: "test" | "hidden_test" | "deploy_check" | "benchmark" | "debug";
   timeoutSec?: number;
   /** Lightning Judge — Premium callers pass higher priority (processed first). */
   priority?: number;
@@ -41,17 +39,29 @@ export async function enqueueExecution(params: {
     (priority >= 10 ? 60 : 120);
 
   const lang = normalizeCodingLanguage(workspace.language);
-  let command = params.command ?? defaultCommand(params.type, lang);
+  let command = defaultCommand(params.type, lang);
 
-  // Prefer workspace-authored commands.json when present (multilang bank)
-  try {
-    const cmdPath = path.join(workspace.rootPath, "tests", "commands.json");
-    const raw = await fs.readFile(cmdPath, "utf8");
-    const cmds = JSON.parse(raw) as { public?: string; hidden?: string };
-    if (params.type === "test" && cmds.public) command = cmds.public;
-    if (params.type === "hidden_test" && cmds.hidden) command = cmds.hidden;
-  } catch {
-    /* no commands.json */
+  // Built-in harnesses for non-coding job types (never client-authored)
+  const builtin = await ensureBuiltinHarness(workspace.rootPath, params.type);
+  if (builtin) command = builtin;
+
+  // Prefer workspace-authored commands.json when present — still must pass allowlist at exec time
+  if (params.type === "test" || params.type === "hidden_test") {
+    try {
+      const cmdPath = path.join(workspace.rootPath, "tests", "commands.json");
+      const raw = await fs.readFile(cmdPath, "utf8");
+      const cmds = JSON.parse(raw) as { public?: string; hidden?: string };
+      if (params.type === "test" && cmds.public) {
+        parseAllowlistedArgv(cmds.public);
+        command = cmds.public;
+      }
+      if (params.type === "hidden_test" && cmds.hidden) {
+        parseAllowlistedArgv(cmds.hidden);
+        command = cmds.hidden;
+      }
+    } catch {
+      /* no commands.json or rejected — keep server default */
+    }
   }
 
   // Coding hidden_test: materialize a real harness when we have one (TS curated)
@@ -80,7 +90,7 @@ export async function enqueueExecution(params: {
     }
   }
 
-  if (!params.command && !params.customCases?.length) {
+  if (!params.customCases?.length) {
     const multi = multilangCommands(lang);
     if (params.type === "test") {
       if (lang === "python") {
@@ -161,6 +171,9 @@ export async function enqueueExecution(params: {
     }
   }
 
+  // Final gate — refuse anything that is not an allowlisted argv form
+  parseAllowlistedArgv(command);
+
   const job = await prisma.executionJob.create({
     data: {
       workspaceId: params.workspaceId,
@@ -177,6 +190,7 @@ export async function enqueueExecution(params: {
         untrusted: true,
         mode: process.env.EXECUTION_MODE ?? "process",
         lightning: priority >= 10,
+        allowlisted: true,
       },
     },
   });
@@ -189,12 +203,36 @@ export async function enqueueExecution(params: {
   return job;
 }
 
+async function ensureBuiltinHarness(rootPath: string, type: string): Promise<string | null> {
+  const testsDir = path.join(rootPath, "tests");
+  await fs.mkdir(testsDir, { recursive: true });
+  if (type === "deploy_check") {
+    const file = path.join(testsDir, "_deploy_check.js");
+    await fs.writeFile(
+      file,
+      `console.log(JSON.stringify({ok:true,checks:["dockerfile_present","health_export"]}));\n`,
+      "utf8",
+    );
+    return "node tests/_deploy_check.js";
+  }
+  if (type === "benchmark") {
+    const file = path.join(testsDir, "_benchmark.js");
+    await fs.writeFile(file, `console.log(JSON.stringify({p95_ms:42,throughput:100}));\n`, "utf8");
+    return "node tests/_benchmark.js";
+  }
+  if (type === "debug") {
+    const file = path.join(testsDir, "_debug.js");
+    await fs.writeFile(
+      file,
+      `console.log(JSON.stringify({frames:[{fn:"solution",line:1,locals:{}}],status:"paused"}));\n`,
+      "utf8",
+    );
+    return "node tests/_debug.js";
+  }
+  return null;
+}
+
 function defaultCommand(type: string, language: string) {
-  if (type === "deploy_check")
-    return "node -e \"console.log(JSON.stringify({ok:true,checks:['dockerfile_present','health_export']}))\"";
-  if (type === "benchmark") return "node -e \"console.log(JSON.stringify({p95_ms:42,throughput:100}))\"";
-  if (type === "debug")
-    return "node -e \"console.log(JSON.stringify({frames:[{fn:'solution',line:1,locals:{}}],status:'paused'}))\"";
   const lang = normalizeCodingLanguage(language);
   if (type === "hidden_test") return multilangCommands(lang).hidden;
   if (type === "test") return multilangCommands(lang).public;
@@ -295,7 +333,7 @@ async function runInProcessSandbox(job: {
     CARGO_TARGET_DIR: "/tmp/crucible-target",
     RUSTUP_HOME: process.env.RUSTUP_HOME,
   };
-  return execCommand(job.command, job.workspace.rootPath, cleanEnv, job.timeoutSec);
+  return execAllowlisted(job.command, job.workspace.rootPath, cleanEnv, job.timeoutSec);
 }
 
 async function runInDocker(job: {
@@ -319,59 +357,57 @@ async function runInDocker(job: {
             : "node:20-alpine";
 
   const network = job.networkMode === "none" ? "none" : "bridge";
-  const dockerCmd = [
-    "docker",
-    "run",
-    "--rm",
-    "--network",
-    network,
-    "--cpus",
-    job.cpuLimit,
-    "--memory",
-    job.memoryLimit,
-    "--pids-limit",
-    "256",
-    "--read-only",
-    "--tmpfs",
-    "/tmp:rw,noexec,nosuid,size=64m",
-    "--security-opt",
-    "no-new-privileges",
-    "--cap-drop",
-    "ALL",
-    "-v",
-    `${job.workspace.rootPath}:/workspace:ro`,
-    "-w",
-    "/workspace",
-    image,
-    "sh",
-    "-c",
-    job.command,
-  ];
-  return execCommand(dockerCmd.join(" "), process.cwd(), { PATH: process.env.PATH }, job.timeoutSec);
-}
-
-function execCommand(
-  command: string,
-  cwd: string,
-  env: Record<string, string | undefined>,
-  timeoutSec: number,
-): Promise<{ stdout: string; stderr: string; exitCode: number; timedOut: boolean }> {
-  return new Promise((resolve) => {
-    const child = spawn("bash", ["-lc", command], {
-      cwd,
-      env: env as NodeJS.ProcessEnv,
-      stdio: ["ignore", "pipe", "pipe"],
-    });
+  const inner = parseAllowlistedArgv(job.command);
+  const { spawn } = await import("child_process");
+  return new Promise<{ stdout: string; stderr: string; exitCode: number; timedOut: boolean }>((resolve) => {
+    const child = spawn(
+      "docker",
+      [
+        "run",
+        "--rm",
+        "--network",
+        network,
+        "--cpus",
+        job.cpuLimit,
+        "--memory",
+        job.memoryLimit,
+        "--pids-limit",
+        "256",
+        "--read-only",
+        "--tmpfs",
+        "/tmp:rw,noexec,nosuid,size=64m",
+        "--security-opt",
+        "no-new-privileges",
+        "--cap-drop",
+        "ALL",
+        "-v",
+        `${job.workspace.rootPath}:/workspace:ro`,
+        "-w",
+        "/workspace",
+        image,
+        ...inner,
+      ],
+      {
+        cwd: process.cwd(),
+        env: { ...process.env, PATH: process.env.PATH },
+        stdio: ["ignore", "pipe", "pipe"] as const,
+        shell: false,
+      },
+    );
     let stdout = "";
     let stderr = "";
     let timedOut = false;
     const timer = setTimeout(() => {
       timedOut = true;
       child.kill("SIGKILL");
-    }, timeoutSec * 1000);
-    child.stdout.on("data", (d) => (stdout += d.toString()));
-    child.stderr.on("data", (d) => (stderr += d.toString()));
-    child.on("close", (code) => {
+    }, job.timeoutSec * 1000);
+    child.stdout?.on("data", (d: Buffer) => (stdout += d.toString()));
+    child.stderr?.on("data", (d: Buffer) => (stderr += d.toString()));
+    child.on("error", (err: Error) => {
+      clearTimeout(timer);
+      resolve({ stdout, stderr: stderr || err.message, exitCode: 1, timedOut });
+    });
+    child.on("close", (code: number | null) => {
       clearTimeout(timer);
       resolve({ stdout, stderr, exitCode: code ?? 1, timedOut });
     });

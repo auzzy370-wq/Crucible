@@ -15,7 +15,7 @@ export async function ensurePlatformSeeded() {
     seeding = (async () => {
       logger.warn("Empty database detected — running bootstrap seed");
       const { seedDatabase } = await import("@/server/bootstrap-seed");
-      await seedDatabase();
+      await seedDatabase({ includeDemoAccounts: false });
       const { ensureDefaultAiModels } = await import("@/server/competition/ai-benchmark");
       await ensureDefaultAiModels();
     })().finally(() => {
