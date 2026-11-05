@@ -66,8 +66,8 @@ export function InterviewClient(props: { premium: boolean; sims: Sim[] }) {
           </p>
         </div>
         {!props.premium && (
-          <Link href="/pricing">
-            <Button>Unlock with Premium</Button>
+          <Link href="/pricing" className="w-full sm:w-auto">
+            <Button className="w-full sm:w-auto">Unlock with Premium</Button>
           </Link>
         )}
       </header>
@@ -82,13 +82,13 @@ export function InterviewClient(props: { premium: boolean; sims: Sim[] }) {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex flex-wrap gap-2">
+          <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 scrollbar-none">
             {COMPANIES.map((c) => (
               <button
                 key={c}
                 type="button"
                 onClick={() => setCompany(c)}
-                className={`rounded-md border px-2.5 py-1.5 text-xs ${
+                className={`shrink-0 rounded-md border px-3 py-2 text-xs ${
                   company === c
                     ? "border-cyan-400/40 bg-cyan-500/10 text-cyan-100"
                     : "border-slate-800 text-slate-400 hover:bg-slate-900"
@@ -102,7 +102,7 @@ export function InterviewClient(props: { premium: boolean; sims: Sim[] }) {
             <Input value={company} onChange={(e) => setCompany(e.target.value)} placeholder="Company" />
             <Input value={role} onChange={(e) => setRole(e.target.value)} placeholder="Role" />
           </div>
-          <Button disabled={busy} onClick={start}>
+          <Button className="w-full sm:w-auto" disabled={busy} onClick={start}>
             {busy ? "Provisioning…" : `Start ${company} simulation`}
           </Button>
         </CardContent>

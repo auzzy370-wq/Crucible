@@ -127,7 +127,7 @@ export function PlaygroundsClient(props: {
                       <li key={p.id}>
                         <button
                           type="button"
-                          className={`w-full rounded-md px-2 py-1.5 text-left text-sm ${
+                          className={`min-h-11 w-full rounded-md px-2 py-2 text-left text-sm ${
                             active?.id === p.id ? "bg-cyan-500/10 text-cyan-100" : "text-slate-400 hover:bg-slate-900"
                           }`}
                           onClick={() => {

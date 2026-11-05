@@ -28,55 +28,55 @@ export function LandingPage(props: {
 
       {/* Full-bleed first viewport — one composition */}
       <div className="relative z-10 flex min-h-[100svh] flex-col">
-        <header className="mx-auto flex w-full max-w-[1400px] items-center justify-between px-6 py-6 sm:px-10 lg:px-14">
-          <div className="landing-anim-brand flex items-baseline gap-3">
-            <span className="font-serif-display text-2xl tracking-tight text-[var(--landing-ink)] sm:text-3xl">
+        <header className="mx-auto flex w-full max-w-[1400px] items-center justify-between gap-3 px-4 py-4 safe-top sm:px-10 sm:py-6 lg:px-14">
+          <div className="landing-anim-brand flex min-w-0 items-baseline gap-2 sm:gap-3">
+            <span className="font-serif-display text-xl tracking-tight text-[var(--landing-ink)] sm:text-3xl">
               Crucible
             </span>
-            <span className="hidden font-mono text-[10px] uppercase tracking-[0.28em] text-[var(--landing-teal)] sm:inline">
+            <span className="truncate font-mono text-[9px] uppercase tracking-[0.22em] text-[var(--landing-teal)] sm:text-[10px] sm:tracking-[0.28em]">
               Prove the craft
             </span>
           </div>
-          <div className="landing-anim-brand flex items-center gap-5" style={{ animationDelay: "0.05s" }}>
+          <div className="landing-anim-brand flex shrink-0 items-center gap-3 sm:gap-5" style={{ animationDelay: "0.05s" }}>
             <Link
               href="/login"
-              className="text-sm text-[var(--landing-mute)] transition hover:text-[var(--landing-ink)]"
+              className="inline-flex min-h-10 items-center px-1 text-sm text-[var(--landing-mute)] transition hover:text-[var(--landing-ink)]"
             >
               Sign in
             </Link>
             <Link
               href="/register"
-              className="text-sm font-medium text-[var(--landing-teal)] transition hover:text-white"
+              className="inline-flex min-h-10 items-center rounded-md border border-cyan-400/30 px-3 text-sm font-medium text-[var(--landing-teal)] transition hover:border-cyan-300/50 hover:text-white sm:border-0 sm:px-0"
             >
               Start free
             </Link>
           </div>
         </header>
 
-        <main className="relative mx-auto grid w-full max-w-[1400px] flex-1 items-center gap-10 px-6 pb-16 pt-4 sm:px-10 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:gap-8 lg:px-14 lg:pb-20 lg:pt-0">
-          <section className="relative z-10 max-w-xl">
-            <p className="landing-anim-brand font-mono text-[11px] uppercase tracking-[0.42em] text-[var(--landing-teal)]">
+        <main className="relative mx-auto grid w-full max-w-[1400px] min-w-0 flex-1 items-center gap-8 px-4 pb-12 pt-2 sm:gap-10 sm:px-10 sm:pb-16 sm:pt-4 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:gap-8 lg:px-14 lg:pb-20 lg:pt-0">
+          <section className="relative z-10 w-full min-w-0 max-w-xl">
+            <p className="landing-anim-brand font-mono text-[11px] uppercase tracking-[0.28em] text-[var(--landing-teal)] sm:tracking-[0.42em]">
               Crucible
             </p>
-            <h1 className="landing-anim-copy mt-5 font-serif-display text-[clamp(2.75rem,7vw,5.25rem)] leading-[0.95] tracking-[-0.02em] text-[var(--landing-ink)]">
+            <h1 className="landing-anim-copy mt-4 break-words font-serif-display text-[clamp(2.35rem,9vw,5.25rem)] leading-[0.95] tracking-[-0.02em] text-[var(--landing-ink)] sm:mt-5">
               Evidence
               <br />
               <em className="text-[var(--landing-teal)]">over puzzles.</em>
             </h1>
-            <p className="landing-anim-copy mt-6 max-w-md text-base leading-relaxed text-[var(--landing-mute)] sm:text-lg">
+            <p className="landing-anim-copy mt-5 max-w-md text-[15px] leading-relaxed text-[var(--landing-mute)] sm:mt-6 sm:text-lg">
               Timed engineering and cybersecurity assessments that verify what résumés claim — then let employers trust
               the scorecard.
             </p>
-            <div className="landing-anim-cta mt-9 flex flex-wrap items-center gap-4">
+            <div className="landing-anim-cta mt-7 flex w-full flex-col gap-3 sm:mt-9 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
               <Link
                 href="/register"
-                className="inline-flex min-h-12 items-center rounded-md bg-cyan-400 px-6 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300"
+                className="inline-flex min-h-12 w-full items-center justify-center rounded-md bg-cyan-400 px-6 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300 sm:w-auto"
               >
                 Enter the crucible
               </Link>
               <Link
                 href="/login"
-                className="inline-flex min-h-12 items-center rounded-md border border-slate-700 px-5 text-sm text-slate-100 transition hover:border-slate-500"
+                className="inline-flex min-h-12 w-full items-center justify-center rounded-md border border-slate-700 px-5 text-sm text-slate-100 transition hover:border-slate-500 sm:w-auto"
               >
                 View demo accounts
               </Link>
@@ -84,19 +84,19 @@ export function LandingPage(props: {
           </section>
 
           {/* Dominant IDE visual plane — not a card collage */}
-          <section className="landing-anim-ide relative lg:justify-self-stretch">
+          <section className="landing-anim-ide relative min-w-0 w-full lg:justify-self-stretch">
             <div className="pointer-events-none absolute -inset-8 -z-10 bg-[radial-gradient(ellipse_at_center,rgba(34,211,238,0.12),transparent_65%)]" />
             <div className="landing-ide-sheen relative overflow-hidden rounded-xl border border-cyan-400/20 bg-[#070b12]/95 shadow-[0_40px_120px_-40px_rgba(0,0,0,0.85)] backdrop-blur-sm">
-              <div className="flex items-center gap-2 border-b border-slate-800/80 px-4 py-3">
-                <span className="h-2.5 w-2.5 rounded-full bg-slate-600" />
-                <span className="h-2.5 w-2.5 rounded-full bg-slate-600" />
-                <span className="h-2.5 w-2.5 rounded-full bg-slate-600" />
-                <span className="ml-3 font-mono text-[10px] uppercase tracking-[0.22em] text-slate-500">
+              <div className="flex min-w-0 items-center gap-2 border-b border-slate-800/80 px-4 py-3">
+                <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-slate-600" />
+                <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-slate-600" />
+                <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-slate-600" />
+                <span className="ml-2 truncate font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500 sm:ml-3 sm:tracking-[0.22em]">
                   workspace · evidence session
                 </span>
-                <span className="ml-auto font-mono text-[11px] text-amber-300/90">41:12</span>
+                <span className="ml-auto shrink-0 font-mono text-[11px] text-amber-300/90">41:12</span>
               </div>
-              <div className="grid sm:grid-cols-[0.9fr_1.15fr]">
+              <div className="grid min-w-0 sm:grid-cols-[0.9fr_1.15fr]">
                 <aside className="hidden border-r border-white/[0.06] p-4 sm:block">
                   <div className="font-mono text-[10px] uppercase tracking-wider text-white/30">Problem</div>
                   <p className="mt-3 text-sm leading-relaxed text-white/70">
@@ -108,12 +108,12 @@ export function LandingPage(props: {
                     <div>Dockerfile</div>
                   </div>
                 </aside>
-                <div className="min-h-[280px] p-4 sm:min-h-[360px]">
-                  <div className="mb-3 flex items-center justify-between font-mono text-[10px] uppercase tracking-wider text-white/30">
-                    <span>src/invoices/query.ts</span>
-                    <span>typescript</span>
+                <div className="min-h-[280px] min-w-0 p-4 sm:min-h-[360px]">
+                  <div className="mb-3 flex items-center justify-between gap-2 font-mono text-[10px] uppercase tracking-wider text-white/30">
+                    <span className="truncate">src/invoices/query.ts</span>
+                    <span className="shrink-0">typescript</span>
                   </div>
-                  <pre className="overflow-x-auto font-mono text-[12px] leading-[1.65] text-[#c8d6e5] sm:text-[13px]">
+                  <pre className="max-w-full overflow-x-auto font-mono text-[12px] leading-[1.65] text-[#c8d6e5] sm:text-[13px]">
                     <span className="text-white/30">01</span>
                     {"  "}
                     <span className="text-sky-300/90">export async function</span>
@@ -142,7 +142,7 @@ export function LandingPage(props: {
                     {"  "}
                     <span className="landing-cursor-blink text-[var(--landing-teal)]">await deployCheck();</span>
                   </pre>
-                  <div className="mt-6 grid grid-cols-2 gap-2 font-mono text-[11px]">
+                  <div className="mt-6 grid grid-cols-1 gap-2 font-mono text-[11px] sm:grid-cols-2">
                     <div className="border border-emerald-500/20 bg-emerald-500/5 px-3 py-2.5 text-emerald-200">
                       public · 3/3 Accepted
                     </div>

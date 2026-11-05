@@ -164,9 +164,18 @@ export function AppShell({
     </div>
   );
 
+  const mobileTabs = [
+    { href: "/dashboard", label: "Home", icon: LayoutDashboard },
+    { href: "/daily", label: "Daily", icon: CalendarDays },
+    { href: "/challenges", label: "Evidence", icon: Boxes },
+    { href: "/workspace", label: "IDE", icon: Terminal },
+  ] as const;
+
+  const inWorkspaceSession = /^\/workspace\/[^/]+/.test(pathname);
+
   return (
     <div className="min-h-screen lg:grid lg:grid-cols-[260px_1fr]">
-      <header className="sticky top-0 z-40 flex items-center justify-between gap-3 border-b border-slate-800/80 bg-slate-950/95 px-4 py-3 backdrop-blur lg:hidden safe-top">
+      <header className="sticky top-0 z-40 flex items-center justify-between gap-3 border-b border-slate-800/80 bg-slate-950/95 px-3 py-3 backdrop-blur sm:px-4 lg:hidden safe-top">
         <Link href="/dashboard" className="min-w-0">
           {brand}
         </Link>
@@ -174,6 +183,7 @@ export function AppShell({
           type="button"
           variant="secondary"
           size="icon"
+          className="min-h-11 min-w-11"
           aria-label={open ? "Close menu" : "Open menu"}
           aria-expanded={open}
           onClick={() => setOpen((v) => !v)}
@@ -247,10 +257,51 @@ export function AppShell({
 
       <main className="relative min-h-[calc(100vh-3.75rem)] min-w-0 lg:min-h-screen">
         <div className="pointer-events-none absolute inset-0 grid-overlay opacity-40" />
-        <div className="relative mx-auto max-w-7xl px-4 py-5 sm:px-6 sm:py-6 lg:px-8 safe-bottom">
+        <div
+          className={cn(
+            "relative mx-auto max-w-7xl px-3 py-4 sm:px-6 sm:py-6 lg:px-8 lg:pb-6",
+            !inWorkspaceSession && "mobile-bottom-pad",
+          )}
+        >
           {children}
         </div>
       </main>
+
+      {!inWorkspaceSession && (
+        <nav
+          className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-800/90 bg-slate-950/95 backdrop-blur lg:hidden safe-bottom"
+          aria-label="Primary"
+        >
+          <div className="mx-auto grid max-w-lg grid-cols-5 gap-0.5 px-1 py-1.5">
+            {mobileTabs.map((tab) => {
+              const Icon = tab.icon;
+              const active = pathname === tab.href || pathname.startsWith(tab.href + "/");
+              return (
+                <Link
+                  key={tab.href}
+                  href={tab.href}
+                  className={cn(
+                    "flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-lg px-1 text-[10px] font-medium",
+                    active ? "bg-cyan-500/10 text-cyan-200" : "text-slate-500 hover:text-slate-200",
+                  )}
+                >
+                  <Icon className="h-4 w-4" />
+                  {tab.label}
+                </Link>
+              );
+            })}
+            <button
+              type="button"
+              onClick={() => setOpen(true)}
+              className="flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-lg px-1 text-[10px] font-medium text-slate-500 hover:text-slate-200"
+            >
+              <Menu className="h-4 w-4" />
+              More
+            </button>
+          </div>
+        </nav>
+      )}
+
       <Link href="/assessments" className="sr-only">
         <GitBranch />
       </Link>

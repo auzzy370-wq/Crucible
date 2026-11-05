@@ -51,21 +51,19 @@ export function ContestClient() {
       <section className="space-y-2">
         <h2 className="text-sm font-semibold text-slate-200">Heat set</h2>
         {contest.problems?.map((p: any) => (
-          <div
-            key={p.id}
-            className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-800 px-4 py-3"
-          >
-            <div>
-              <div className="font-medium">
-                {p.ordinal}. {p.challenge.title}
-              </div>
-              <div className="text-xs text-slate-500">{p.points} pts</div>
+          <div key={p.id} className="rounded-xl border border-slate-800 px-4 py-3">
+            <div className="font-medium">
+              {p.ordinal}. {p.challenge.title}
             </div>
-            <div className="flex gap-2">
-              <Link href="/challenges" className="text-sm text-cyan-300 hover:underline">
+            <div className="mt-0.5 text-xs text-slate-500">{p.points} pts</div>
+            <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center">
+              <Link
+                href="/challenges"
+                className="inline-flex min-h-11 items-center justify-center rounded-md border border-slate-700 px-3 text-sm text-cyan-300 sm:min-h-0 sm:justify-start sm:border-0 sm:px-0"
+              >
                 Open evidence bank →
               </Link>
-              <Button size="sm" variant="secondary" onClick={() => checkIn(p.points)}>
+              <Button className="w-full sm:w-auto" size="sm" variant="secondary" onClick={() => checkIn(p.points)}>
                 Mark solved
               </Button>
             </div>
@@ -75,8 +73,30 @@ export function ContestClient() {
 
       <section className="space-y-2">
         <h2 className="text-sm font-semibold text-slate-200">Leaderboard</h2>
-        <div className="overflow-hidden rounded-xl border border-slate-800">
-          <table className="w-full text-left text-sm">
+        <div className="space-y-2 sm:hidden">
+          {(contest.entries ?? []).map((e: any, i: number) => (
+            <div
+              key={e.id}
+              className="flex items-center justify-between gap-3 rounded-xl border border-slate-800 px-4 py-3"
+            >
+              <div className="min-w-0">
+                <div className="font-mono text-[10px] text-slate-600">#{i + 1}</div>
+                <div className="truncate text-sm font-medium text-slate-100">{e.user?.name}</div>
+              </div>
+              <div className="shrink-0 text-right font-mono text-sm">
+                <div className="text-cyan-200">{e.score}</div>
+                <div className="text-[11px] text-slate-500">{e.solvedCount} solved</div>
+              </div>
+            </div>
+          ))}
+          {!(contest.entries ?? []).length && (
+            <p className="rounded-xl border border-slate-800 px-4 py-8 text-center text-slate-500">
+              Be the first on the board.
+            </p>
+          )}
+        </div>
+        <div className="hidden overflow-x-auto rounded-xl border border-slate-800 sm:block">
+          <table className="w-full min-w-[420px] text-left text-sm">
             <thead className="border-b border-slate-800 text-xs uppercase tracking-wider text-slate-500">
               <tr>
                 <th className="px-4 py-3">#</th>

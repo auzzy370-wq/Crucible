@@ -137,7 +137,7 @@ export default function RegisterPage() {
               <Label htmlFor="track">Preferred track</Label>
               <select
                 id="track"
-                className="flex h-10 w-full rounded-md border border-slate-700 bg-slate-950 px-3 text-sm text-slate-100"
+                className="flex h-11 w-full rounded-md border border-slate-700 bg-slate-950 px-3 text-base text-slate-100 sm:text-sm"
                 value={form.track}
                 onChange={(e) => setForm((f) => ({ ...f, track: e.target.value }))}
               >

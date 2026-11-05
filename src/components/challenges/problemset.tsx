@@ -138,12 +138,12 @@ export function Problemset(props: {
             {ACCEPTANCE_METHODOLOGY.detail}
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
           <button
             type="button"
             onClick={() => setMode("problemset")}
             className={cn(
-              "rounded-lg border px-3 py-2 text-sm",
+              "min-h-11 rounded-lg border px-3 py-2 text-sm",
               mode === "problemset"
                 ? "border-cyan-400/40 bg-cyan-500/10 text-cyan-100"
                 : "border-slate-700 text-slate-400 hover:bg-slate-900",
@@ -155,15 +155,18 @@ export function Problemset(props: {
             type="button"
             onClick={() => setMode("projects")}
             className={cn(
-              "rounded-lg border px-3 py-2 text-sm",
+              "min-h-11 rounded-lg border px-3 py-2 text-sm",
               mode === "projects"
                 ? "border-cyan-400/40 bg-cyan-500/10 text-cyan-100"
                 : "border-slate-700 text-slate-400 hover:bg-slate-900",
             )}
           >
-            Production missions ({props.projects.length})
+            Missions ({props.projects.length})
           </button>
-          <Link href="/pricing" className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-100">
+          <Link
+            href="/pricing"
+            className="col-span-2 inline-flex min-h-11 items-center justify-center rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-100 sm:col-span-1"
+          >
             Premium
           </Link>
         </div>
@@ -171,21 +174,21 @@ export function Problemset(props: {
 
       {mode === "problemset" ? (
         <>
-          <div className="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-center">
+          <div className="flex flex-col gap-3">
             <Input
               placeholder="Search title, company, tag…"
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              className="sm:max-w-sm"
+              className="w-full md:max-w-sm"
             />
-            <div className="flex flex-wrap gap-2">
+            <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 scrollbar-none">
               {(["All", "Easy", "Medium", "Hard", "Expert", "Impossible"] as const).map((d) => (
                 <button
                   key={d}
                   type="button"
                   onClick={() => setDiff(d)}
                   className={cn(
-                    "rounded-md border px-2.5 py-1.5 text-xs font-medium",
+                    "shrink-0 rounded-md border px-2.5 py-2 text-xs font-medium",
                     diff === d ? "border-slate-500 bg-slate-800 text-slate-100" : "border-slate-800 text-slate-500",
                   )}
                 >
@@ -194,66 +197,144 @@ export function Problemset(props: {
                 </button>
               ))}
             </div>
-            <select
-              className="h-10 rounded-md border border-slate-700 bg-slate-950 px-3 text-sm text-slate-200"
-              value={company}
-              onChange={(e) => setCompany(e.target.value)}
-            >
-              {companies.map((c) => (
-                <option key={c} value={c}>
-                  {c === "All" ? "All companies" : c}
-                </option>
-              ))}
-            </select>
-            <select
-              className="h-10 rounded-md border border-slate-700 bg-slate-950 px-3 text-sm text-slate-200"
-              value={tag}
-              onChange={(e) => setTag(e.target.value)}
-            >
-              {allTags.map((t) => (
-                <option key={t} value={t}>
-                  {t === "All" ? "All tags" : t}
-                </option>
-              ))}
-            </select>
-            <select
-              className="h-10 rounded-md border border-slate-700 bg-slate-950 px-3 text-sm text-slate-200"
-              value={sort}
-              onChange={(e) => setSort(e.target.value as typeof sort)}
-            >
-              <option value="frequency">Sort: frequency</option>
-              <option value="time">Sort: time</option>
-              <option value="title">Sort: title</option>
-            </select>
-            <select
-              className="h-10 rounded-md border border-cyan-500/30 bg-slate-950 px-3 text-sm text-cyan-100"
-              value={lang}
-              onChange={(e) => setLang(e.target.value as CodingLanguage)}
-              title="Language for Solve"
-            >
-              {CODING_LANGUAGES.map((l) => (
-                <option key={l} value={l}>
-                  {CODING_LANGUAGE_LABELS[l]}
-                </option>
-              ))}
-            </select>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+              <select
+                className="h-11 w-full rounded-md border border-slate-700 bg-slate-950 px-3 text-sm text-slate-200"
+                value={company}
+                onChange={(e) => setCompany(e.target.value)}
+              >
+                {companies.map((c) => (
+                  <option key={c} value={c}>
+                    {c === "All" ? "All companies" : c}
+                  </option>
+                ))}
+              </select>
+              <select
+                className="h-11 w-full rounded-md border border-slate-700 bg-slate-950 px-3 text-sm text-slate-200"
+                value={tag}
+                onChange={(e) => setTag(e.target.value)}
+              >
+                {allTags.map((t) => (
+                  <option key={t} value={t}>
+                    {t === "All" ? "All tags" : t}
+                  </option>
+                ))}
+              </select>
+              <select
+                className="h-11 w-full rounded-md border border-slate-700 bg-slate-950 px-3 text-sm text-slate-200"
+                value={sort}
+                onChange={(e) => setSort(e.target.value as typeof sort)}
+              >
+                <option value="frequency">Sort: frequency</option>
+                <option value="time">Sort: time</option>
+                <option value="title">Sort: title</option>
+              </select>
+              <select
+                className="h-11 w-full rounded-md border border-cyan-500/30 bg-slate-950 px-3 text-sm text-cyan-100"
+                value={lang}
+                onChange={(e) => setLang(e.target.value as CodingLanguage)}
+                title="Language for Solve"
+              >
+                {CODING_LANGUAGES.map((l) => (
+                  <option key={l} value={l}>
+                    {CODING_LANGUAGE_LABELS[l]}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
-          <div className="overflow-hidden rounded-xl border border-slate-800">
-            <table className="w-full text-left text-sm">
+          {/* Mobile card list */}
+          <div className="space-y-3 md:hidden">
+            {filtered.map((p, i) => {
+              const L = label(p.difficulty);
+              const locked = Boolean(p.isPremium) && !props.premium;
+              const acc = illustrativeAcceptance(p.difficulty, p.slug);
+              return (
+                <article key={p.id} className="rounded-xl border border-slate-800 bg-slate-950/70 p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="font-mono text-[10px] text-slate-600">#{i + 1}</div>
+                      <h2 className="mt-0.5 text-base font-medium leading-snug text-slate-100">{p.title}</h2>
+                      <p className="mt-1 line-clamp-2 text-xs text-slate-500">{p.summary}</p>
+                    </div>
+                    <span className={cn("shrink-0 text-sm font-medium", diffClass(L))}>{L}</span>
+                  </div>
+                  <div className="mt-3 flex flex-wrap gap-1.5">
+                    {p.isPremium && <Badge variant="amber">Premium</Badge>}
+                    {(p.companies ?? []).slice(0, 3).map((c) => (
+                      <span
+                        key={c}
+                        className="rounded border border-slate-800 px-1.5 py-0.5 font-mono text-[10px] text-slate-400"
+                      >
+                        {c}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[11px] text-slate-500">
+                    <span>
+                      Freq {p.frequency ?? 0}%
+                      <span className="text-slate-600"> {FREQUENCY_METHODOLOGY.short}</span>
+                    </span>
+                    <span>
+                      Acc {acc}%
+                      <span className="text-slate-600"> {ACCEPTANCE_METHODOLOGY.short}</span>
+                    </span>
+                    <span>{p.avgMinutes ?? 60}m</span>
+                    {p.editorialSlug && (
+                      <Link
+                        href={`/editorials?slug=${encodeURIComponent(p.editorialSlug)}`}
+                        className="text-cyan-400/80 hover:underline"
+                      >
+                        Editorial
+                      </Link>
+                    )}
+                  </div>
+                  <div className="mt-3">
+                    {locked ? (
+                      <Link
+                        className="inline-flex min-h-11 w-full items-center justify-center rounded-md border border-amber-500/30 bg-amber-500/10 text-sm text-amber-100"
+                        href="/pricing"
+                      >
+                        Unlock Premium →
+                      </Link>
+                    ) : (
+                      <button
+                        type="button"
+                        disabled={starting === p.id}
+                        onClick={() => void startProblem(p)}
+                        className="inline-flex min-h-11 w-full items-center justify-center rounded-md border border-cyan-400/30 bg-cyan-500/10 text-sm text-cyan-100 disabled:opacity-50"
+                      >
+                        {starting === p.id ? "Opening…" : `Solve · ${CODING_LANGUAGE_LABELS[lang]}`}
+                      </button>
+                    )}
+                  </div>
+                </article>
+              );
+            })}
+            {!filtered.length && (
+              <p className="rounded-xl border border-slate-800 px-4 py-10 text-center text-slate-500">
+                No problems match your filters.
+              </p>
+            )}
+          </div>
+
+          {/* Desktop table */}
+          <div className="hidden overflow-x-auto rounded-xl border border-slate-800 md:block">
+            <table className="w-full min-w-[720px] text-left text-sm">
               <thead className="border-b border-slate-800 bg-slate-950/80 text-xs uppercase tracking-wider text-slate-500">
                 <tr>
                   <th className="px-4 py-3 w-14">#</th>
                   <th className="px-4 py-3">Title</th>
                   <th className="px-4 py-3 hidden lg:table-cell">Companies</th>
                   <th className="px-4 py-3">Difficulty</th>
-                  <th className="px-4 py-3 hidden md:table-cell" title={FREQUENCY_METHODOLOGY.detail}>
+                  <th className="px-4 py-3" title={FREQUENCY_METHODOLOGY.detail}>
                     Freq*
                   </th>
-                  <th className="px-4 py-3 hidden md:table-cell" title={ACCEPTANCE_METHODOLOGY.detail}>
+                  <th className="px-4 py-3" title={ACCEPTANCE_METHODOLOGY.detail}>
                     Acc*
                   </th>
-                  <th className="px-4 py-3 hidden sm:table-cell">Time</th>
+                  <th className="px-4 py-3">Time</th>
                   <th className="px-4 py-3">Open</th>
                 </tr>
               </thead>
@@ -293,23 +374,15 @@ export function Problemset(props: {
                         </div>
                       </td>
                       <td className={cn("px-4 py-3 font-medium", diffClass(L))}>{L}</td>
-                      <td
-                        className="px-4 py-3 hidden font-mono text-xs text-slate-400 md:table-cell"
-                        title={FREQUENCY_METHODOLOGY.detail}
-                      >
+                      <td className="px-4 py-3 font-mono text-xs text-slate-400" title={FREQUENCY_METHODOLOGY.detail}>
                         {p.frequency ?? 0}%
                         <span className="ml-1 text-[10px] text-slate-600">{FREQUENCY_METHODOLOGY.short}</span>
                       </td>
-                      <td
-                        className="px-4 py-3 hidden font-mono text-xs text-slate-400 md:table-cell"
-                        title={ACCEPTANCE_METHODOLOGY.detail}
-                      >
+                      <td className="px-4 py-3 font-mono text-xs text-slate-400" title={ACCEPTANCE_METHODOLOGY.detail}>
                         {acc}%
                         <span className="ml-1 text-[10px] text-slate-600">{ACCEPTANCE_METHODOLOGY.short}</span>
                       </td>
-                      <td className="px-4 py-3 hidden font-mono text-xs text-slate-400 sm:table-cell">
-                        {p.avgMinutes ?? 60}m
-                      </td>
+                      <td className="px-4 py-3 font-mono text-xs text-slate-400">{p.avgMinutes ?? 60}m</td>
                       <td className="px-4 py-3">
                         {locked ? (
                           <Link className="text-amber-300 hover:underline" href="/pricing">

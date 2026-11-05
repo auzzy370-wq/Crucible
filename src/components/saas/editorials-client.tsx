@@ -53,7 +53,7 @@ export function EditorialsClient() {
               <button
                 type="button"
                 onClick={() => open(r.slug)}
-                className="w-full rounded-xl border border-slate-800 px-4 py-3 text-left hover:bg-slate-900/60"
+                className="min-h-14 w-full rounded-xl border border-slate-800 px-4 py-3 text-left hover:bg-slate-900/60"
               >
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="font-medium">{r.title}</span>

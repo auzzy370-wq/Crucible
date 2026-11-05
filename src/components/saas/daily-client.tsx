@@ -106,9 +106,9 @@ export function DailyClient(props: { daily: DailyPayload }) {
               ))}
           </div>
           <p className="text-sm text-slate-400">Suggested time · {c.avgMinutes ?? 30} minutes</p>
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
             <select
-              className="h-10 rounded-md border border-cyan-500/30 bg-slate-950 px-3 text-sm text-cyan-100"
+              className="h-11 w-full rounded-md border border-cyan-500/30 bg-slate-950 px-3 text-sm text-cyan-100 sm:w-auto sm:min-w-[10rem]"
               value={lang}
               onChange={(e) => setLang(e.target.value as CodingLanguage)}
             >
@@ -118,7 +118,7 @@ export function DailyClient(props: { daily: DailyPayload }) {
                 </option>
               ))}
             </select>
-            <Button disabled={busy} onClick={start}>
+            <Button className="w-full sm:w-auto" disabled={busy} onClick={start}>
               {busy ? "Opening…" : props.daily.completed ? "Open again" : "Start daily"}
             </Button>
           </div>

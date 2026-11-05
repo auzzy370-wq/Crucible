@@ -115,12 +115,12 @@ export default function LoginPage() {
             <div className="mb-2 font-mono text-[10px] uppercase tracking-wider text-slate-500">
               Demo accounts — click to fill
             </div>
-            <div className="flex flex-wrap gap-2">
+            <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
               {DEMO_ACCOUNTS.map((account) => (
                 <button
                   key={account.email}
                   type="button"
-                  className="rounded-md border border-slate-700 bg-slate-900 px-2.5 py-1.5 font-mono text-xs text-slate-200 transition hover:border-cyan-500/50 hover:text-cyan-100"
+                  className="min-h-10 rounded-md border border-slate-700 bg-slate-900 px-2.5 py-2 font-mono text-xs text-slate-200 transition hover:border-cyan-500/50 hover:text-cyan-100"
                   onClick={() => {
                     setEmail(account.email);
                     setPassword(account.password);
