@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { getSessionUser, canReview, isPremium } from "@/server/auth/session";
 import { WorkspaceIde } from "@/components/workspace/ide";
@@ -6,6 +6,7 @@ import { isCodingProblem } from "@/server/challenges/coding-problems";
 
 export default async function WorkspacePage({ params }: { params: Promise<{ id: string }> }) {
   const user = await getSessionUser();
+  if (!user) redirect("/login");
   const { id } = await params;
   const workspace = await prisma.workspace.findUnique({
     where: { id },
@@ -20,11 +21,11 @@ export default async function WorkspacePage({ params }: { params: Promise<{ id: 
   const pairGuest = await prisma.pairSession.findFirst({
     where: {
       workspaceId: workspace.id,
-      guestId: user!.id,
+      guestId: user.id,
       status: { in: ["WAITING", "LIVE"] },
     },
   });
-  if (workspace.assignment.candidateId !== user!.id && !canReview(user!.role) && !pairGuest) {
+  if (workspace.assignment.candidateId !== user.id && !canReview(user.role) && !pairGuest) {
     notFound();
   }
 

@@ -1,11 +1,13 @@
+import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { getSessionUser, isPremium } from "@/server/auth/session";
 import { PlaygroundsClient } from "@/components/saas/playgrounds-client";
 
 export default async function PlaygroundsPage() {
   const user = await getSessionUser();
+  if (!user) redirect("/login");
   const playgrounds = await prisma.playground.findMany({
-    where: { userId: user!.id },
+    where: { userId: user.id },
     orderBy: [{ folder: "asc" }, { updatedAt: "desc" }],
   });
 

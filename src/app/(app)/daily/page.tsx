@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { ensureDailyChallenge } from "@/server/saas/daily";
 import { getSessionUser } from "@/server/auth/session";
 import { prisma } from "@/lib/db";
@@ -5,11 +6,12 @@ import { DailyClient } from "@/components/saas/daily-client";
 
 export default async function DailyPage() {
   const user = await getSessionUser();
+  if (!user) redirect("/login");
   const daily = await ensureDailyChallenge();
   const completion = await prisma.dailyChallengeCompletion.findUnique({
-    where: { userId_dailyChallengeId: { userId: user!.id, dailyChallengeId: daily.id } },
+    where: { userId_dailyChallengeId: { userId: user.id, dailyChallengeId: daily.id } },
   });
-  const streak = await prisma.userStreak.findUnique({ where: { userId: user!.id } });
+  const streak = await prisma.userStreak.findUnique({ where: { userId: user.id } });
 
   return (
     <DailyClient

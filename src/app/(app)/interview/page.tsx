@@ -1,11 +1,13 @@
+import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { getSessionUser, isPremium } from "@/server/auth/session";
 import { InterviewClient } from "@/components/saas/interview-client";
 
 export default async function InterviewPage() {
   const user = await getSessionUser();
+  if (!user) redirect("/login");
   const sims = await prisma.interviewSimulation.findMany({
-    where: { userId: user!.id },
+    where: { userId: user.id },
     include: { challenge: { select: { title: true, slug: true, difficulty: true } } },
     orderBy: { createdAt: "desc" },
     take: 40,

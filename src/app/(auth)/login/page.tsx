@@ -104,6 +104,13 @@ export default function LoginPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          <div className="mb-4 rounded-lg border border-cyan-500/20 bg-cyan-500/5 px-3 py-2.5 text-sm text-slate-300">
+            Real accounts:{" "}
+            <Link className="font-medium text-cyan-300 hover:underline" href="/register">
+              create one free →
+            </Link>
+            <span className="text-slate-500"> · demos below stay for exploration</span>
+          </div>
           <div className="mb-4 rounded-lg border border-slate-800 bg-slate-950/80 p-3">
             <div className="mb-2 font-mono text-[10px] uppercase tracking-wider text-slate-500">
               Demo accounts — click to fill

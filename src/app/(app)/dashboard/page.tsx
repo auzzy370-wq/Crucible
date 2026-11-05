@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { getSessionUser } from "@/server/auth/session";
 import { platformAnalytics } from "@/server/analytics/service";
 import { prisma } from "@/lib/db";
@@ -9,18 +10,19 @@ import { SessionTimer } from "@/components/assessment/session-timer";
 
 export default async function DashboardPage() {
   const user = await getSessionUser();
-  const isStaff = user && ["SUPER_ADMIN", "HIRING_MANAGER", "TECHNICAL_REVIEWER"].includes(user.role);
+  if (!user) redirect("/login");
+  const isStaff = ["SUPER_ADMIN", "HIRING_MANAGER", "TECHNICAL_REVIEWER"].includes(user.role);
 
   if (!isStaff) {
     const [assignments, streak, enrollments, profile, daily] = await Promise.all([
       prisma.assessmentAssignment.findMany({
-        where: { candidateId: user!.id },
+        where: { candidateId: user.id },
         include: { assessment: { include: { challenge: true } }, scoreReport: true, workspace: true },
         orderBy: { createdAt: "desc" },
       }),
-      prisma.userStreak.findUnique({ where: { userId: user!.id } }),
-      prisma.studyPlanEnrollment.count({ where: { userId: user!.id } }),
-      prisma.candidateProfile.findUnique({ where: { userId: user!.id } }),
+      prisma.userStreak.findUnique({ where: { userId: user.id } }),
+      prisma.studyPlanEnrollment.count({ where: { userId: user.id } }),
+      prisma.candidateProfile.findUnique({ where: { userId: user.id } }),
       prisma.dailyChallenge.findFirst({
         orderBy: { dateKey: "desc" },
         include: { challenge: true },

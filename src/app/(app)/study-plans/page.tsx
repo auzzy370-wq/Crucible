@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { getSessionUser, isPremium } from "@/server/auth/session";
 import { StudyPlansClient } from "@/components/saas/study-plans-client";
 import { prisma } from "@/lib/db";
@@ -5,7 +6,8 @@ import { STUDY_PLANS } from "@/server/saas/study-plans";
 
 export default async function StudyPlansPage() {
   const user = await getSessionUser();
-  const enrollments = await prisma.studyPlanEnrollment.findMany({ where: { userId: user!.id } });
+  if (!user) redirect("/login");
+  const enrollments = await prisma.studyPlanEnrollment.findMany({ where: { userId: user.id } });
   const bySlug = new Map(enrollments.map((e) => [e.planSlug, e]));
   const challenges = await prisma.challenge.findMany({
     where: { slug: { in: STUDY_PLANS.flatMap((p) => p.challengeSlugs) } },
