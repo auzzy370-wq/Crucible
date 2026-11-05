@@ -157,11 +157,17 @@ function LoginForm() {
         </div>
 
         {mode === "learn" && (
-          <div className="mb-4 rounded-lg border border-cyan-500/20 bg-cyan-500/5 px-3 py-2.5 text-sm text-slate-300">
-            New here?{" "}
-            <Link className="font-medium text-cyan-300 hover:underline" href="/register">
-              Create a free learner account →
-            </Link>
+          <div className="mb-4 space-y-2">
+            <div className="rounded-lg border border-cyan-500/20 bg-cyan-500/5 px-3 py-2.5 text-sm text-slate-300">
+              New here?{" "}
+              <Link className="font-medium text-cyan-300 hover:underline" href="/register">
+                Create a free learner account →
+              </Link>
+            </div>
+            <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2.5 text-xs text-amber-100">
+              AI vs Human works on this build. Avoid expired <span className="font-mono">*.tmp.now</span> links — they
+              still run the old broken judge.
+            </div>
           </div>
         )}
         {mode === "hire" && (

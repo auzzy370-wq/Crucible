@@ -168,7 +168,7 @@ Rules:
     return publicAiRunView(updated);
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    await prisma.aiBenchmarkRun.update({
+    const updated = await prisma.aiBenchmarkRun.update({
       where: { id: run.id },
       data: {
         status: "FAILED",
@@ -176,13 +176,31 @@ Rules:
         errorMessage: message.slice(0, 2000),
         diagnostics: {
           category: "infrastructure_error",
-          publicSummary: "Benchmark infrastructure error — not counted as model incapability.",
+          publicSummary: humanizeProviderError(message),
+          safeDetail: message.slice(0, 240),
         } satisfies BenchDiagnostics,
         finishedAt: new Date(),
       },
+      include: {
+        aiModel: { select: { slug: true, displayName: true, provider: true } },
+        challenge: { select: { slug: true, title: true, difficulty: true } },
+      },
     });
-    throw err;
+    // Return a structured failed run instead of throwing — frontend shows the card, not a toast crash.
+    return publicAiRunView({ ...updated, correct: false, mocked: true });
   }
+}
+
+function humanizeProviderError(message: string): string {
+  if (/429/.test(message)) return "Provider rate-limited (429). Wait a moment and retry with Groq GPT-OSS 20B.";
+  if (/Unexpected end of JSON|non-whitespace character after JSON/i.test(message)) {
+    return "Model returned invalid JSON. Retry with Groq GPT-OSS 20B on Two Sum.";
+  }
+  if (/NO_HARNESS|no local coding harness/i.test(message)) {
+    return "That challenge is not judgable here. Pick Two Sum (or another lc-* problem).";
+  }
+  if (/EMPTY_CODE/i.test(message)) return "Model returned empty code. Retry with Groq GPT-OSS 20B.";
+  return "Provider/infrastructure issue — not counted as the model being incapable.";
 }
 
 function solutionStubForPrompt(slug: string): string | null {
@@ -264,7 +282,8 @@ export async function ensureDefaultAiModels() {
       baseUrl: "https://api.groq.com/openai/v1",
       apiKeyEnv: "GROQ_API_KEY",
       isOpenSource: true,
-      notes: "Stronger Groq free-tier coding model when rate limits allow.",
+      notes: "Optional Groq alternate — disabled by default until model id is stable.",
+      enabled: false,
     },
     {
       slug: "openrouter-north-mini-code-free",
@@ -274,7 +293,8 @@ export async function ensureDefaultAiModels() {
       baseUrl: "https://openrouter.ai/api/v1",
       apiKeyEnv: "OPENROUTER_API_KEY",
       isOpenSource: true,
-      notes: "OpenRouter free coding-oriented model.",
+      notes: "Often rate-limits / bad JSON — disabled by default.",
+      enabled: false,
     },
     {
       slug: "openrouter-gemma-4-31b-free",
@@ -284,7 +304,8 @@ export async function ensureDefaultAiModels() {
       baseUrl: "https://openrouter.ai/api/v1",
       apiKeyEnv: "OPENROUTER_API_KEY",
       isOpenSource: true,
-      notes: "OpenRouter :free Gemma — rate-limited fallback.",
+      notes: "Frequent 429 on free tier — disabled by default.",
+      enabled: false,
     },
     {
       slug: "openai-gpt-4o-mini",
@@ -293,8 +314,8 @@ export async function ensureDefaultAiModels() {
       modelId: "gpt-4o-mini",
       baseUrl: "https://api.openai.com/v1",
       apiKeyEnv: "OPENAI_API_KEY",
-      notes: "Paid OpenAI — optional. Prefer Groq/OpenRouter for free benches.",
-      enabled: true,
+      notes: "Paid OpenAI — optional.",
+      enabled: false,
     },
   ];
 
@@ -318,13 +339,14 @@ export async function ensureDefaultAiModels() {
         baseUrl: d.baseUrl,
         apiKeyEnv: d.apiKeyEnv,
         isOpenSource: Boolean(d.isOpenSource),
-        enabled: d.enabled ?? true,
+        // Keep intentional disables sticky unless this slug is the primary Groq model
+        ...(d.slug === "groq-gpt-oss-20b" ? { enabled: true } : { enabled: d.enabled ?? false }),
         notes: d.notes,
       },
     });
   }
 
-  // Disable legacy / retired model slots
+  // Disable legacy / flaky model slots
   await prisma.aiModel.updateMany({
     where: {
       slug: {
@@ -334,8 +356,12 @@ export async function ensureDefaultAiModels() {
           "opensource-local",
           "groq-llama-3.1-8b",
           "groq-llama-3.3-70b",
+          "groq-qwen3-27b",
           "openrouter-llama-3.2-3b-free",
           "openrouter-gemma-2-9b-free",
+          "openrouter-gemma-4-31b-free",
+          "openrouter-north-mini-code-free",
+          "openai-gpt-4o-mini",
         ],
       },
     },

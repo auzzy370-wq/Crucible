@@ -65,23 +65,35 @@ export async function POST(req: Request) {
   return withHandler(async () => {
     const user = await requireUser();
     const body = postSchema.parse(await req.json());
-    try {
-      const result = await runAiBenchmark({
+    const challenge = await prisma.challenge.findUnique({
+      where: { id: body.challengeId },
+      select: { slug: true },
+    });
+    if (!challenge?.slug.startsWith("lc-")) {
+      throw new AppError(
+        "Pick a curated lc-* challenge (Two Sum is first). Bank variants are not supported on AI vs Human.",
+        400,
+        "NO_HARNESS",
+      );
+    }
+    const result = await runAiBenchmark({
+      challengeId: body.challengeId,
+      aiModelId: body.aiModelId,
+      actorId: user.id,
+    });
+    await writeAudit({
+      actorId: user.id,
+      action: "competition.ai_benchmark",
+      entityType: "AiBenchmarkRun",
+      entityId: result.id,
+      metadata: {
         challengeId: body.challengeId,
         aiModelId: body.aiModelId,
-        actorId: user.id,
-      });
-      await writeAudit({
-        actorId: user.id,
-        action: "competition.ai_benchmark",
-        entityType: "AiBenchmarkRun",
-        entityId: result.id,
-        metadata: { challengeId: body.challengeId, aiModelId: body.aiModelId, mocked: result.mocked },
-      });
-      return jsonOk(result, { status: 201 });
-    } catch (e) {
-      if (e instanceof AppError) throw e;
-      throw new AppError(e instanceof Error ? e.message : "Benchmark failed", 500, "BENCH_FAILED");
-    }
+        mocked: result.mocked,
+        correct: result.correct,
+        status: result.status,
+      },
+    });
+    return jsonOk(result, { status: 201 });
   });
 }

@@ -15,6 +15,7 @@ type Challenge = {
 
 type AiRun = {
   id: string;
+  status?: string;
   correct: boolean;
   mocked: boolean;
   passedPublic: number;
@@ -75,7 +76,11 @@ export function AiVsHumanClient() {
     }
   }
 
+  const [staleHost, setStaleHost] = useState(false);
+
   useEffect(() => {
+    const host = window.location.hostname;
+    setStaleHost(/tmp\.now$|vercel\.app$/i.test(host) && !host.includes("localhost"));
     void loadModels();
     void loadChallenges();
     void loadRuns();
@@ -95,14 +100,14 @@ export function AiVsHumanClient() {
       if (!json.ok) throw new Error(json.error?.message || "Benchmark failed");
       const data = json.data as AiRun;
       setLastResult(data);
-      if (data.mocked) {
-        toast.message("Experimental mock — API key missing or provider failed over");
-      } else if (data.correct) {
+      if (data.correct) {
         toast.success("Verified pass — public + hidden harnesses green");
+      } else if (data.status === "FAILED" || data.diagnostics?.category === "infrastructure_error") {
+        toast.message(data.diagnostics?.publicSummary || "Provider issue — try Groq on Two Sum");
       } else {
-        toast.error(
+        toast.message(
           data.diagnostics?.publicSummary ||
-            `Failed public ${data.passedPublic}/${data.totalPublic}, hidden ${data.passedHidden}/${data.totalHidden}`,
+            `Not cleared — public ${data.passedPublic}/${data.totalPublic}, hidden ${data.passedHidden}/${data.totalHidden}`,
         );
       }
       await loadRuns(challengeId);
@@ -125,6 +130,21 @@ export function AiVsHumanClient() {
           humans run on the model&apos;s code.
         </p>
       </header>
+
+      {staleHost && (
+        <div className="rounded-xl border border-rose-500/40 bg-rose-500/10 px-4 py-3 text-sm text-rose-50">
+          <div className="font-medium">This host is an old deploy</div>
+          <p className="mt-1 text-xs text-rose-100/90">
+            AI judging is broken here. Open the live tunnel instead:{" "}
+            <a
+              className="underline"
+              href="https://recently-colours-cathedral-definition.trycloudflare.com/ai-vs-human"
+            >
+              recently-colours-cathedral-definition.trycloudflare.com/ai-vs-human
+            </a>
+          </p>
+        </div>
+      )}
 
       {providerStatus && (
         <div
