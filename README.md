@@ -8,19 +8,46 @@ The seed loads the **full challenge library as published 60-minute assessments**
 
 ## Tracks
 
-Each track ships **≥250 project missions** plus a **4,000-question coding bank** scaling **Easy → Impossible**, with post-test **knowledge pinpoint** (exactly which skills were proven vs gaps).
+Each track ships **≥250 project missions** plus a shared **4,000-question coding bank** scaling **Easy → Impossible**, with post-test **knowledge pinpoint** (exactly which skills were proven vs gaps).
 
+### Core
 | Track | Focus |
 |-------|--------|
-| Software Engineering | SaaS, APIs, frontend, realtime, distributed systems, performance, architecture, ecommerce, AI SaaS |
-| Cybersecurity | AppSec, cloud security, threat modeling, SOC/IR, secure code review, cryptography, zero trust, detection, IAM, vuln triage, purple team, supply chain |
+| Software Engineering | SaaS, APIs, frontend, realtime, distributed systems, performance, architecture |
+| Cybersecurity | AppSec, threat modeling, SOC/IR, crypto, zero trust, detection, IAM, vuln triage |
 | Secure Full-Stack | Product delivery with elevated security bar |
-| Platform / SRE | SLOs, on-call, canaries, DR, capacity, synthetics, change-fail |
-| Data / ML Engineering | ETL, CDC, feature stores, model registry, batch/online inference, DQ, lineage |
-| Mobile Engineering | Offline sync, push, deep links, attestation, IAP, OTA, mobile perf/a11y |
+| Platform / SRE | SLOs, on-call, canaries, DR, capacity, synthetics |
+| Data / ML Engineering | ETL, CDC, feature stores, model registry, DQ, lineage |
+| Mobile Engineering | Offline sync, push, deep links, attestation, IAP, OTA |
 | Privacy Engineering | Consent, DSAR, retention, DP, purpose limitation, transfers, DPIA |
 
-**Other sectors you could add next:** FinTech / payments risk, Game backend / multiplayer, Embedded / IoT security, Developer tooling / IDE plugins, Healthcare HITRUST-style workflows, Growth / experimentation eng.
+### Industry
+| Track | Focus |
+|-------|--------|
+| FinTech / Payments | Ledgers, idempotent charges, fraud, wallets, settlement, KYC |
+| Healthcare / HITRUST | PHI vaults, FHIR-lite, e-prescribe, BAAs, telehealth tokens |
+| Game Backend | Matchmaking, authoritative sim, anti-cheat, economy, replays |
+| Embedded / IoT | Signed OTA, attestation, fleet config, MQTT ACL, power budgets |
+| EdTech | LMS roster, autograde sandboxes, FERPA export, quiz banks |
+| Logistics / Supply Chain | Routing, ASN, POD, cold chain, dock scheduling |
+| Climate / Energy Tech | Grid telemetry, carbon ledger, demand response, MRV packs |
+| RegTech / LegalTech | Policy-as-code, SAR workflow, legal hold, trade surveillance |
+
+### Platform & systems
+| Track | Focus |
+|-------|--------|
+| Developer Tooling | LSP, CI plugins, sandboxes, codegen, test-impact |
+| Design Systems / Frontend Platform | Tokens, a11y kits, visual regression, living docs |
+| Growth / Experimentation | Bucketing, exposures, guardrails, funnels, paywalls |
+| Search / Recommendations | Indexes, ranking features, typeahead, safe search |
+| Support Platform Engineering | Ticket routing, macros, CSAT, KB search, SLA breach |
+| AI / MLOps Product | Model registry, feature store, RAG eval, prompt firewall |
+| Database Engineering | Buffer pool, WAL, MVCC, planners, sharding |
+| Networking / Edge | CDN keys, DNS failover, LB algos, WAF, anycast |
+| Cloud / Infra Security | IAM least-privilege, image gates, K8s hardening, OIDC |
+| QA / Reliability Engineering | Flake quarantine, contracts, chaos gamedays, synthetics |
+| Compilers / Language Tooling | Lexer/parser, typecheck, IR, bytecode VM, formatters |
+| Blockchain / Web3 | Wallet policy, vesting, bridges, indexers, multisig |
 
 Skills on profiles are separated into **claimed**, **portfolio**, **assessment-verified**, and **human-reviewed**. Résumé claims never prove competence.
 

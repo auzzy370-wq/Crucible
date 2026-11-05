@@ -11,18 +11,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { settingsTabsForRole } from "@/lib/access";
+import { trackOptionGroups } from "@/lib/tracks";
 
 type Tab = "account" | "preferences" | "security" | "sessions" | "privacy";
-
-const TRACKS = [
-  { value: "SOFTWARE_ENGINEERING", label: "Software Engineering" },
-  { value: "CYBERSECURITY", label: "Cybersecurity" },
-  { value: "SECURE_FULL_STACK", label: "Secure Full-Stack" },
-  { value: "PLATFORM_SRE", label: "Platform / SRE" },
-  { value: "DATA_ML", label: "Data / ML Engineering" },
-  { value: "MOBILE", label: "Mobile Engineering" },
-  { value: "PRIVACY_ENGINEERING", label: "Privacy Engineering" },
-] as const;
 
 export function SettingsClient({ role }: { role: string }) {
   const allowedTabs = settingsTabsForRole(role as never);
@@ -337,10 +328,14 @@ export function SettingsClient({ role }: { role: string }) {
                     value={track}
                     onChange={(e) => setTrack(e.target.value)}
                   >
-                    {TRACKS.map((t) => (
-                      <option key={t.value} value={t.value}>
-                        {t.label}
-                      </option>
+                    {trackOptionGroups().map((g) => (
+                      <optgroup key={g.group} label={g.group}>
+                        {g.options.map((t) => (
+                          <option key={t.value} value={t.value}>
+                            {t.label}
+                          </option>
+                        ))}
+                      </optgroup>
                     ))}
                   </select>
                 </div>

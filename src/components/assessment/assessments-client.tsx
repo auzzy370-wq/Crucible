@@ -231,7 +231,7 @@ export function AssessmentsClient(props: {
               <Card key={a.id}>
                 <CardHeader>
                   <div className="flex flex-wrap gap-2">
-                    <Badge variant={a.track === "CYBERSECURITY" ? "violet" : "cyan"}>{a.track}</Badge>
+                    <Badge variant={a.track === "CYBERSECURITY" || a.track === "CLOUD_INFRA_SECURITY" ? "violet" : a.track === "SECURE_FULL_STACK" || a.track === "HEALTHCARE" ? "emerald" : "cyan"}>{a.track}</Badge>
                     <Badge>{a.status}</Badge>
                     <Badge variant="emerald">{a.timedMinutes ?? 60}m</Badge>
                     {a.challenge.difficulty != null && <Badge variant="amber">D{a.challenge.difficulty}</Badge>}

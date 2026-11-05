@@ -224,9 +224,9 @@ export default async function DashboardPage() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Badge variant="cyan">Software Engineering</Badge>
-          <Badge variant="violet">Cybersecurity</Badge>
-          <Badge variant="emerald">Secure Full-Stack</Badge>
+          <Badge variant="cyan">27 tracks</Badge>
+          <Badge variant="violet">Industry + systems</Badge>
+          <Badge variant="emerald">Shared judges</Badge>
         </div>
       </header>
 

@@ -98,12 +98,24 @@ export const PRIVACY_WEIGHTS = {
 export type WeightMap = Record<keyof ScoreBreakdown, number>;
 
 export function weightsForTrack(track?: string): WeightMap {
-  if (track === "CYBERSECURITY") return { ...CYBERSECURITY_WEIGHTS };
-  if (track === "SECURE_FULL_STACK") return { ...SECURE_FULL_STACK_WEIGHTS };
-  if (track === "PLATFORM_SRE") return { ...PLATFORM_SRE_WEIGHTS };
-  if (track === "DATA_ML") return { ...DATA_ML_WEIGHTS };
-  if (track === "MOBILE") return { ...MOBILE_WEIGHTS };
+  if (track === "CYBERSECURITY" || track === "CLOUD_INFRA_SECURITY" || track === "BLOCKCHAIN") {
+    return { ...CYBERSECURITY_WEIGHTS };
+  }
+  if (track === "SECURE_FULL_STACK" || track === "HEALTHCARE" || track === "REGTECH") {
+    return { ...SECURE_FULL_STACK_WEIGHTS };
+  }
+  if (track === "PLATFORM_SRE" || track === "NETWORK_EDGE" || track === "QA_RELIABILITY") {
+    return { ...PLATFORM_SRE_WEIGHTS };
+  }
+  if (track === "DATA_ML" || track === "AI_MLOPS" || track === "SEARCH_RECS" || track === "DATABASE_ENGINEERING") {
+    return { ...DATA_ML_WEIGHTS };
+  }
+  if (track === "MOBILE" || track === "DESIGN_SYSTEMS" || track === "EMBEDDED_IOT") {
+    return { ...MOBILE_WEIGHTS };
+  }
   if (track === "PRIVACY_ENGINEERING") return { ...PRIVACY_WEIGHTS };
+  // FINTECH, GAME_BACKEND, DEVTOOLS, GROWTH, EDTECH, LOGISTICS, CLIMATE_ENERGY,
+  // SUPPORT_ENG, COMPILER_TOOLING → balanced engineering defaults
   return { ...DEFAULT_WEIGHTS };
 }
 

@@ -1,6 +1,7 @@
 import type { AssessmentTrack, ChallengeType } from "@prisma/client";
 import type { ChallengeSeed } from "./catalog";
 import { DIFFICULTY_BLURBS, difficultyBand, difficultyFromIndex } from "./difficulty";
+import { SECTOR_PLANS } from "./catalog-sectors";
 
 type Topic = {
   key: string;
@@ -279,6 +280,7 @@ export function buildExpandedCatalog(existing: ChallengeSeed[], perTrack = 100):
     { track: "DATA_ML", topics: DATA_TOPICS },
     { track: "MOBILE", topics: MOBILE_TOPICS },
     { track: "PRIVACY_ENGINEERING", topics: PRIVACY_TOPICS },
+    ...SECTOR_PLANS.map((p) => ({ track: p.track, topics: p.topics as Topic[] })),
   ];
 
   const generated: ChallengeSeed[] = [];

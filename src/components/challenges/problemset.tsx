@@ -11,6 +11,7 @@ import { FREQUENCY_METHODOLOGY } from "@/lib/frequency";
 import { ACCEPTANCE_METHODOLOGY, illustrativeAcceptance } from "@/lib/acceptance";
 import { difficultyBand, type DifficultyBand } from "@/lib/difficulty";
 import { CODING_LANGUAGES, CODING_LANGUAGE_LABELS, type CodingLanguage } from "@/lib/coding-languages";
+import { trackBadgeVariant, trackLabel } from "@/lib/tracks";
 
 export type ProblemRow = {
   id: string;
@@ -453,16 +454,17 @@ export function Problemset(props: {
                 key={c.id}
                 className={cn(
                   "rounded-xl border border-slate-800 bg-slate-950/60 p-5",
-                  c.track === "CYBERSECURITY" && "border-violet-500/20",
+                  (c.track === "CYBERSECURITY" || c.track === "CLOUD_INFRA_SECURITY") &&
+                    "border-violet-500/20",
                 )}
               >
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge
                     variant={
-                      c.track === "CYBERSECURITY" ? "violet" : c.track === "SECURE_FULL_STACK" ? "emerald" : "cyan"
+                      trackBadgeVariant(c.track)
                     }
                   >
-                    {c.track.replaceAll("_", " ")}
+                    {trackLabel(c.track)}
                   </Badge>
                   <Badge>{c.type}</Badge>
                   <Badge variant="amber">L{c.difficulty}</Badge>
