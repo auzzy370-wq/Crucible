@@ -35,7 +35,7 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
 
     const body = schema.parse(await req.json());
     // Also scrape latest job stdout if client sent empty
-    let cases: CaseResult[] = body.results;
+    const cases: CaseResult[] = body.results;
     if (!cases.length) {
       const jobs = await prisma.executionJob.findMany({
         where: { workspaceId: id, type: { in: ["test", "hidden_test"] } },
