@@ -12,64 +12,70 @@ export async function GET(req: Request) {
     const published = url.searchParams.get("published");
     const take = Math.min(Number(url.searchParams.get("take") || 60), 200);
 
-    const [challenges, assessments, teams, incidents] = await Promise.all([
-      prisma.challenge.findMany({
-        where: {
-          ...(published === "true" ? { isPublished: true } : {}),
-          ...(published === "false" ? { isPublished: false } : {}),
-          ...(q
-            ? {
-                OR: [
-                  { title: { contains: q, mode: "insensitive" } },
-                  { slug: { contains: q, mode: "insensitive" } },
-                  { summary: { contains: q, mode: "insensitive" } },
-                ],
-              }
-            : {}),
-        },
-        orderBy: [{ isPublished: "desc" }, { frequency: "desc" }, { title: "asc" }],
-        take,
-        select: {
-          id: true,
-          slug: true,
-          title: true,
-          type: true,
-          track: true,
-          difficulty: true,
-          isPublished: true,
-          isPremium: true,
-          frequency: true,
-          avgMinutes: true,
-          tags: true,
-          _count: { select: { assessments: true } },
-        },
-      }),
-      prisma.assessment.findMany({
-        orderBy: { createdAt: "desc" },
-        take: 40,
-        select: {
-          id: true,
-          title: true,
-          status: true,
-          track: true,
-          timedMinutes: true,
-          createdAt: true,
-          challenge: { select: { slug: true, title: true, type: true } },
-          _count: { select: { assignments: true } },
-        },
-      }),
-      prisma.engineeringTeam.count(),
-      prisma.incidentScenario.count(),
-    ]);
+    const where = {
+      ...(published === "true" ? { isPublished: true } : {}),
+      ...(published === "false" ? { isPublished: false } : {}),
+      ...(q
+        ? {
+            OR: [
+              { title: { contains: q, mode: "insensitive" as const } },
+              { slug: { contains: q, mode: "insensitive" as const } },
+            ],
+          }
+        : {}),
+    };
+
+    const [challenges, assessments, challengeTotal, publishedCount, premiumCount, assessmentTotal, teams, incidents] =
+      await Promise.all([
+        prisma.challenge.findMany({
+          where,
+          orderBy: [{ updatedAt: "desc" }],
+          take,
+          select: {
+            id: true,
+            slug: true,
+            title: true,
+            type: true,
+            track: true,
+            difficulty: true,
+            isPublished: true,
+            isPremium: true,
+            frequency: true,
+            avgMinutes: true,
+            tags: true,
+            _count: { select: { assessments: true } },
+          },
+        }),
+        prisma.assessment.findMany({
+          orderBy: { createdAt: "desc" },
+          take: 20,
+          select: {
+            id: true,
+            title: true,
+            status: true,
+            track: true,
+            timedMinutes: true,
+            createdAt: true,
+            challenge: { select: { slug: true, title: true, type: true } },
+            _count: { select: { assignments: true } },
+          },
+        }),
+        prisma.challenge.count(),
+        prisma.challenge.count({ where: { isPublished: true } }),
+        prisma.challenge.count({ where: { isPremium: true } }),
+        prisma.assessment.count(),
+        prisma.engineeringTeam.count(),
+        prisma.incidentScenario.count(),
+      ]);
 
     return jsonOk({
       challenges,
       assessments,
       counts: {
-        challenges: await prisma.challenge.count(),
-        published: await prisma.challenge.count({ where: { isPublished: true } }),
-        premium: await prisma.challenge.count({ where: { isPremium: true } }),
-        assessments: await prisma.assessment.count(),
+        challenges: challengeTotal,
+        published: publishedCount,
+        premium: premiumCount,
+        assessments: assessmentTotal,
         teams,
         incidents,
       },

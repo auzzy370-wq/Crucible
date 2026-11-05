@@ -90,14 +90,21 @@ export function AdminClient() {
   }
 
   async function loadLibrary() {
-    const params = new URLSearchParams({ take: "80" });
+    const params = new URLSearchParams({ take: "40" });
     if (libQ.trim()) params.set("q", libQ.trim());
     if (libPublished === "Published") params.set("published", "true");
     if (libPublished === "Draft") params.set("published", "false");
-    const res = await fetch(`/api/admin/library?${params}`);
-    const json = await res.json();
-    if (!json.ok) return toast.error(json.error?.message || "Failed");
-    setLibrary(json.data);
+    try {
+      const res = await fetch(`/api/admin/library?${params}`);
+      const json = await res.json();
+      if (!json.ok) {
+        toast.error(json.error?.message || "Failed");
+        return;
+      }
+      setLibrary(json.data);
+    } catch {
+      toast.error("Could not load library");
+    }
   }
 
   async function loadAssignments() {
