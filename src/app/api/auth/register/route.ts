@@ -47,6 +47,9 @@ export async function POST(req: Request) {
       );
     }
 
+    const { ensurePlatformSeeded } = await import("@/server/platform/ensure-seeded");
+    await ensurePlatformSeeded();
+
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) throw new AppError("Email already registered", 409, "EMAIL_TAKEN");
 

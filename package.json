@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev --turbopack -p 3847",
     "dev:worker": "tsx worker/index.ts",
-    "build": "prisma generate && next build",
+    "build": "prisma generate && prisma migrate deploy && next build",
     "postinstall": "prisma generate",
     "start": "next start -p 3847",
     "lint": "next lint",

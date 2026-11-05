@@ -2,11 +2,13 @@ import { prisma } from "@/lib/db";
 import { jsonOk, withHandler } from "@/server/auth/api";
 import { requireUser } from "@/server/auth/session";
 import { canJudgeAiSlug } from "@/server/competition/ai-local-judge";
+import { ensurePlatformSeeded } from "@/server/platform/ensure-seeded";
 
 /** Coding challenges with a real local harness for AI vs Human. */
 export async function GET() {
   return withHandler(async () => {
     await requireUser();
+    await ensurePlatformSeeded();
     const curated = await prisma.challenge.findMany({
       where: {
         isPublished: true,

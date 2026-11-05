@@ -54,18 +54,6 @@ export function AiVsHumanClient() {
     }
   }
 
-  async function loadChallenges() {
-    const res = await fetch("/api/competition/bench-challenges");
-    const json = await res.json();
-    if (!json.ok) {
-      toast.error(json.error?.message || "Could not load bench challenges");
-      return;
-    }
-    const arr = (json.data.challenges ?? []) as Challenge[];
-    setChallenges(arr);
-    if (!challengeId && arr[0]) setChallengeId(arr[0].id);
-  }
-
   async function loadRuns(cid?: string) {
     const q = cid ? `?challengeId=${cid}` : "";
     const res = await fetch(`/api/competition/benchmark${q}`);
@@ -79,11 +67,27 @@ export function AiVsHumanClient() {
   const [staleHost, setStaleHost] = useState(false);
 
   useEffect(() => {
-    const host = window.location.hostname;
-    setStaleHost(/tmp\.now$|vercel\.app$/i.test(host) && !host.includes("localhost"));
-    void loadModels();
-    void loadChallenges();
-    void loadRuns();
+    void (async () => {
+      void loadModels();
+      void loadRuns();
+      try {
+        const res = await fetch("/api/competition/bench-challenges");
+        if (res.status === 404) {
+          setStaleHost(true);
+          return;
+        }
+        const json = await res.json();
+        if (!json.ok) {
+          setStaleHost(true);
+          return;
+        }
+        const arr = (json.data.challenges ?? []) as Challenge[];
+        setChallenges(arr);
+        if (!challengeId && arr[0]) setChallengeId(arr[0].id);
+      } catch {
+        setStaleHost(true);
+      }
+    })();
   }, []);
 
   async function runBench() {
@@ -133,15 +137,10 @@ export function AiVsHumanClient() {
 
       {staleHost && (
         <div className="rounded-xl border border-rose-500/40 bg-rose-500/10 px-4 py-3 text-sm text-rose-50">
-          <div className="font-medium">This host is an old deploy</div>
+          <div className="font-medium">This deploy is missing the AI judge update</div>
           <p className="mt-1 text-xs text-rose-100/90">
-            AI judging is broken here. Open the live tunnel instead:{" "}
-            <a
-              className="underline"
-              href="https://recently-colours-cathedral-definition.trycloudflare.com/ai-vs-human"
-            >
-              recently-colours-cathedral-definition.trycloudflare.com/ai-vs-human
-            </a>
+            Refresh after the latest publish, or open Crucible from the Cursor Publish pill so every signed-in learner
+            gets the same fixed AI vs Human bench.
           </p>
         </div>
       )}

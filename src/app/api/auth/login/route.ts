@@ -22,10 +22,13 @@ export async function POST(req: Request) {
     const body = schema.parse(await req.json());
     let user;
     try {
+      const { ensurePlatformSeeded } = await import("@/server/platform/ensure-seeded");
+      await ensurePlatformSeeded();
       user = await prisma.user.findUnique({ where: { email: body.email.toLowerCase() } });
-    } catch {
+    } catch (e) {
+      if (e instanceof AppError) throw e;
       throw new AppError(
-        "Database is not connected. On Vercel, set DATABASE_URL (Neon), redeploy, then POST /api/setup to seed.",
+        "Database is not connected yet. Publish with a Postgres database, then refresh and try again.",
         503,
         "DATABASE_UNAVAILABLE",
       );

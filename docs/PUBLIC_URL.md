@@ -1,25 +1,19 @@
-# Public site URL (canonical)
+# Public site URL
 
-**Use this URL — Vercel anonymous deploys are expired until claimed.**
+Prefer the **Cursor Publish** app URL once confirmed (works for every registered learner).
 
-## Site (live tunnel → fixed local build)
+Until then, the agent tunnel may be used for demos:
 
 **https://recently-colours-cathedral-definition.trycloudflare.com**
 
-- AI vs Human: https://recently-colours-cathedral-definition.trycloudflare.com/ai-vs-human
-- Demo login: `candidate@gauntlet.local` / `Gauntlet!Cand1`
+- AI vs Human: `/ai-vs-human`
+- Register any email (not `@gauntlet.local`) or use demo `candidate@gauntlet.local` / `Gauntlet!Cand1`
+- Smoke test: **Two Sum** + **Groq GPT-OSS 20B** → Verified pass
 
-On AI vs Human, leave **Two Sum** + **Groq GPT-OSS 20B** selected and hit Submit — you should see **Verified pass** (public 3/3, hidden 2/2).
-
-The old `*.tmp.now` Vercel link is stale (missing the real AI judge). Do not use it.
-
-## Claim Vercel (permanent)
-
-https://vercel.com/claim-deployment?code=0e18a47b-edec-4a2c-8e01-4a46439e9c19
-
-After claiming, redeploy from this repo and replace this file with the stable `*.vercel.app` URL.
+Do **not** use expired `*.tmp.now` Vercel links — they lack the real AI judge.
 
 ## Agent rules
 
-1. Keep this tunnel until Vercel is claimed; do not mint extras unless it dies.
+1. Prefer Cursor Publish for multi-user access.
 2. AI vs Human only lists judgable `lc-*` challenges; Two Sum is first.
+3. Empty DBs auto-seed on first login/register/bench request.

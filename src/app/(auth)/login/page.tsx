@@ -165,8 +165,8 @@ function LoginForm() {
               </Link>
             </div>
             <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2.5 text-xs text-amber-100">
-              AI vs Human works on this build. Avoid expired <span className="font-mono">*.tmp.now</span> links — they
-              still run the old broken judge.
+              Anyone can register a learner account. AI vs Human is available to every signed-in candidate — use{" "}
+              <span className="font-medium">Two Sum</span> + Groq for a verified smoke test.
             </div>
           </div>
         )}
