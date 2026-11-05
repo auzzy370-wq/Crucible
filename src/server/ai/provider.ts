@@ -133,7 +133,7 @@ export async function completeJson<T>(params: {
     if (start >= 0 && end > start) attempts.push(cleaned.slice(start, end + 1));
     // Competition benches: salvage {"language","code"} even when models append prose
     const codeMatch = cleaned.match(
-      /\{\s*"language"\s*:\s*"([^"\\]*)"\s*,\s*"code"\s*:\s*"((?:\\.|[^"\\])*)"\s*(?:,\s*"explanation"\s*:\s*"((?:\\.|[^"\\])*)")?\s*\}/s,
+      /\{\s*"language"\s*:\s*"([^"\\]*)"\s*,\s*"code"\s*:\s*"((?:\\.|[^"\\])*)"\s*(?:,\s*"explanation"\s*:\s*"((?:\\.|[^"\\])*)")?\s*\}/,
     );
     if (codeMatch) {
       try {
