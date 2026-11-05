@@ -67,6 +67,9 @@ export function AiVsHumanClient() {
   const [staleHost, setStaleHost] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [sweeping, setSweeping] = useState(false);
+  const [sweepProgress, setSweepProgress] = useState<{ done: number; total: number; current?: string } | null>(
+    null,
+  );
 
   useEffect(() => {
     void (async () => {
@@ -101,24 +104,47 @@ export function AiVsHumanClient() {
 
   async function runSweep() {
     setSweeping(true);
+    setSweepProgress({ done: 0, total: 0 });
     try {
-      const res = await fetch("/api/admin/assessments/auto-run", {
+      const listRes = await fetch("/api/admin/assessments/auto-run/targets");
+      const listJson = await listRes.json();
+      if (!listJson.ok) throw new Error(listJson.error?.message || "Could not load targets");
+      const targets = (listJson.data.targets ?? []) as {
+        assignmentId: string;
+        assessmentTitle: string;
+      }[];
+      setSweepProgress({ done: 0, total: targets.length });
+
+      let posted = 0;
+      for (let i = 0; i < targets.length; i++) {
+        const t = targets[i]!;
+        setSweepProgress({ done: i, total: targets.length, current: t.assessmentTitle });
+        const res = await fetch("/api/admin/assessments/auto-run/one", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ assignmentId: t.assignmentId }),
+        });
+        const json = await res.json();
+        if (json.ok && !json.data?.error && json.data?.overall != null) posted += 1;
+        setSweepProgress({ done: i + 1, total: targets.length, current: t.assessmentTitle });
+      }
+
+      // Then AI bench sweep (server) for judgable challenges
+      const aiRes = await fetch("/api/competition/benchmark/sweep", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          aiModelId: modelId || undefined,
-          assignmentLimit: 200,
-          aiLimit: 200,
-        }),
+        body: JSON.stringify({ aiModelId: modelId || undefined, limit: 40 }),
       });
-      const json = await res.json();
-      if (!json.ok) throw new Error(json.error?.message || "Auto-run failed");
-      toast.success(json.data.summary);
+      const aiJson = await aiRes.json();
+      const aiSummary = aiJson.ok ? aiJson.data.summary : "AI sweep skipped";
+      const summary = `Frontend ran ${targets.length} full suites · posted ${posted} scores · ${aiSummary}`;
+      toast.success(summary);
       await loadRuns();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Auto-run failed");
     } finally {
       setSweeping(false);
+      setSweepProgress(null);
     }
   }
 
@@ -239,14 +265,38 @@ export function AiVsHumanClient() {
           </Button>
           {isAdmin && (
             <Button variant="secondary" disabled={sweeping} onClick={() => void runSweep()}>
-              {sweeping ? "Running all & posting scores…" : "Auto-run all & post scores"}
+              {sweeping
+                ? sweepProgress
+                  ? `Running ${sweepProgress.done}/${sweepProgress.total}…`
+                  : "Starting…"
+                : "Auto-run all & post scores"}
             </Button>
           )}
           <span className="text-xs text-slate-500">
             {isAdmin
-              ? "Admin-only: scores every assignment workspace, then AI-benches judgable assessments."
+              ? "Admin-only live runner: public + hidden + deploy per assignment in the browser, then AI bench."
               : "Starts with Two Sum — easiest verified smoke test."}
           </span>
+          {sweepProgress && (
+            <div className="sm:col-span-2 space-y-1">
+              <div className="flex justify-between text-[11px] text-slate-400">
+                <span className="truncate pr-2">
+                  {sweepProgress.current ? `Testing · ${sweepProgress.current}` : "Starting suites…"}
+                </span>
+                <span className="font-mono shrink-0">
+                  {sweepProgress.done}/{sweepProgress.total}
+                </span>
+              </div>
+              <div className="h-2 overflow-hidden rounded-full bg-slate-900">
+                <div
+                  className="h-full rounded-full bg-violet-500/80 transition-all"
+                  style={{
+                    width: `${sweepProgress.total ? Math.round((sweepProgress.done / sweepProgress.total) * 100) : 0}%`,
+                  }}
+                />
+              </div>
+            </div>
+          )}
         </div>
       </section>
 

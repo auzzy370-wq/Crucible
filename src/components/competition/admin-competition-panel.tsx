@@ -1,18 +1,28 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+
+type LiveRow = {
+  assignmentId: string;
+  title: string;
+  email: string;
+  phase: "queued" | "running" | "done" | "error";
+  overall: number | null;
+  tests?: { public: string; hidden: string; deploy: string };
+  error?: string;
+};
 
 export function AdminCompetitionPanel() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [running, setRunning] = useState(false);
+  const [progress, setProgress] = useState({ done: 0, total: 0 });
   const [lastRun, setLastRun] = useState<string | null>(null);
-  const [scorePreview, setScorePreview] = useState<
-    { title: string; email: string; overall: number | null; error?: string }[]
-  >([]);
+  const [liveRows, setLiveRows] = useState<LiveRow[]>([]);
+  const cancelRef = useRef(false);
 
   async function load() {
     setLoading(true);
@@ -28,31 +38,103 @@ export function AdminCompetitionPanel() {
     }
   }
 
+  function patchRow(assignmentId: string, patch: Partial<LiveRow>) {
+    setLiveRows((prev) => prev.map((r) => (r.assignmentId === assignmentId ? { ...r, ...patch } : r)));
+  }
+
   async function runAllAndPostScores() {
+    cancelRef.current = false;
     setRunning(true);
+    setLastRun(null);
     try {
-      const res = await fetch("/api/admin/assessments/auto-run", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ assignmentLimit: 200, aiLimit: 200 }),
-      });
-      const json = await res.json();
-      if (!json.ok) throw new Error(json.error?.message || "Auto-run failed");
-      setLastRun(json.data.summary);
-      const rows = (json.data.assignmentScores?.results ?? []).map((r: any) => ({
-        title: r.assessmentTitle as string,
-        email: r.candidateEmail as string,
-        overall: r.overall as number | null,
-        error: r.error as string | undefined,
-      }));
-      setScorePreview(rows.slice(0, 40));
-      toast.success(json.data.summary);
+      const listRes = await fetch("/api/admin/assessments/auto-run/targets");
+      const listJson = await listRes.json();
+      if (!listJson.ok) throw new Error(listJson.error?.message || "Could not load targets");
+      const targets = (listJson.data.targets ?? []) as {
+        assignmentId: string;
+        assessmentTitle: string;
+        candidateEmail: string;
+      }[];
+
+      if (!targets.length) {
+        toast.message("No assignment workspaces to run");
+        return;
+      }
+
+      setProgress({ done: 0, total: targets.length });
+      setLiveRows(
+        targets.map((t) => ({
+          assignmentId: t.assignmentId,
+          title: t.assessmentTitle,
+          email: t.candidateEmail,
+          phase: "queued",
+          overall: null,
+        })),
+      );
+
+      let posted = 0;
+      let failed = 0;
+
+      for (let i = 0; i < targets.length; i++) {
+        if (cancelRef.current) break;
+        const t = targets[i]!;
+        patchRow(t.assignmentId, { phase: "running" });
+
+        try {
+          const res = await fetch("/api/admin/assessments/auto-run/one", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ assignmentId: t.assignmentId }),
+          });
+          const json = await res.json();
+          if (!json.ok) throw new Error(json.error?.message || "Suite failed");
+          const row = json.data as {
+            overall: number | null;
+            tests: { public: string; hidden: string; deploy: string };
+            error?: string;
+          };
+          if (row.error) {
+            failed += 1;
+            patchRow(t.assignmentId, {
+              phase: "error",
+              overall: row.overall,
+              tests: row.tests,
+              error: row.error,
+            });
+          } else {
+            posted += 1;
+            patchRow(t.assignmentId, {
+              phase: "done",
+              overall: row.overall,
+              tests: row.tests,
+            });
+          }
+        } catch (e) {
+          failed += 1;
+          patchRow(t.assignmentId, {
+            phase: "error",
+            error: e instanceof Error ? e.message : "Failed",
+          });
+        }
+
+        setProgress({ done: i + 1, total: targets.length });
+      }
+
+      const summary = cancelRef.current
+        ? `Stopped early · posted ${posted}/${targets.length}`
+        : `Finished · ran full suites on ${targets.length} · posted ${posted} scores${failed ? ` · ${failed} errors` : ""}`;
+      setLastRun(summary);
+      toast.success(summary);
       await load();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Auto-run failed");
     } finally {
       setRunning(false);
     }
+  }
+
+  function stopRun() {
+    cancelRef.current = true;
   }
 
   useEffect(() => {
@@ -62,40 +144,98 @@ export function AdminCompetitionPanel() {
   if (loading && !data) return <p className="text-slate-500">Loading competition analytics…</p>;
   if (!data) return null;
 
+  const pct = progress.total ? Math.round((progress.done / progress.total) * 100) : 0;
+
   return (
     <section className="space-y-4 rounded-xl border border-slate-800 p-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
           <h2 className="font-medium text-slate-100">Competition analytics</h2>
-          <p className="text-xs text-slate-500">Last {data.windowDays} days · live counts only</p>
+          <p className="text-xs text-slate-500">
+            Live frontend runner · public + hidden + deploy on every assignment, then post scores
+          </p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Button size="sm" disabled={running} onClick={() => void runAllAndPostScores()}>
-            {running ? "Running all assessments…" : "Auto-run all & post scores"}
+            {running ? `Running ${progress.done}/${progress.total}…` : "Auto-run all & post scores"}
           </Button>
-          <Button size="sm" variant="secondary" onClick={() => void load()}>
+          {running && (
+            <Button size="sm" variant="secondary" onClick={stopRun}>
+              Stop
+            </Button>
+          )}
+          <Button size="sm" variant="secondary" disabled={running} onClick={() => void load()}>
             Refresh
           </Button>
         </div>
       </div>
+
+      {running && (
+        <div className="space-y-1">
+          <div className="flex justify-between text-[11px] text-slate-400">
+            <span>
+              Suite progress {progress.done}/{progress.total}
+            </span>
+            <span className="font-mono">{pct}%</span>
+          </div>
+          <div className="h-2 overflow-hidden rounded-full bg-slate-900">
+            <div
+              className="h-full rounded-full bg-cyan-500/80 transition-all duration-300"
+              style={{ width: `${pct}%` }}
+            />
+          </div>
+        </div>
+      )}
+
       {lastRun && <p className="text-xs text-emerald-300/90">{lastRun}</p>}
-      {scorePreview.length > 0 && (
-        <div className="max-h-48 overflow-auto rounded-lg border border-slate-800 text-xs">
+
+      {liveRows.length > 0 && (
+        <div className="max-h-72 overflow-auto rounded-lg border border-slate-800 text-xs">
           <table className="w-full">
             <thead className="sticky top-0 bg-slate-950 text-slate-500">
               <tr>
                 <th className="px-2 py-1 text-left font-normal">Assessment</th>
-                <th className="px-2 py-1 text-left font-normal">Candidate</th>
+                <th className="px-2 py-1 text-left font-normal">Phase</th>
+                <th className="px-2 py-1 text-left font-normal">Tests</th>
                 <th className="px-2 py-1 text-right font-normal">Score</th>
               </tr>
             </thead>
             <tbody>
-              {scorePreview.map((r) => (
-                <tr key={`${r.email}-${r.title}`} className="border-t border-slate-900 text-slate-300">
-                  <td className="px-2 py-1">{r.title}</td>
-                  <td className="px-2 py-1 font-mono text-[10px]">{r.email}</td>
+              {liveRows.map((r) => (
+                <tr
+                  key={r.assignmentId}
+                  className={`border-t border-slate-900 ${
+                    r.phase === "running" ? "bg-cyan-500/5 text-cyan-50" : "text-slate-300"
+                  }`}
+                >
+                  <td className="px-2 py-1">
+                    <div>{r.title}</div>
+                    <div className="font-mono text-[10px] text-slate-500">{r.email}</div>
+                  </td>
+                  <td className="px-2 py-1">
+                    <Badge
+                      variant={
+                        r.phase === "done" ? "emerald" : r.phase === "error" ? "rose" : r.phase === "running" ? "cyan" : undefined
+                      }
+                    >
+                      {r.phase}
+                    </Badge>
+                  </td>
+                  <td className="px-2 py-1 font-mono text-[10px]">
+                    {r.phase === "running"
+                      ? "public → hidden → deploy…"
+                      : r.tests
+                        ? `pub ${r.tests.public} · hid ${r.tests.hidden} · dep ${r.tests.deploy}`
+                        : r.error
+                          ? r.error.slice(0, 48)
+                          : "queued"}
+                  </td>
                   <td className="px-2 py-1 text-right font-mono">
-                    {r.error ? <span className="text-rose-300">err</span> : r.overall ?? "—"}
+                    {r.error && r.phase === "error" ? (
+                      <span className="text-rose-300">err</span>
+                    ) : (
+                      r.overall ?? "—"
+                    )}
                   </td>
                 </tr>
               ))}

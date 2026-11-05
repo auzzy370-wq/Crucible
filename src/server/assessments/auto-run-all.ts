@@ -43,10 +43,13 @@ export async function autoRunAllAssessmentsAndPostScores(opts?: {
 
   const assignmentScores = await autoScoreAllAssignments({
     limit: assignmentLimit,
-    concurrency: 4,
-    reuseRecentRuns: true,
+    concurrency: 3,
   });
   const postedAssignments = assignmentScores.results.filter((r) => r.overall != null && !r.error).length;
+  const suitesRun = assignmentScores.results.reduce(
+    (n, r) => n + (r.tests.public !== "SKIPPED" ? 1 : 0) + (r.tests.hidden !== "SKIPPED" ? 1 : 0) + (r.tests.deploy !== "SKIPPED" ? 1 : 0),
+    0,
+  );
 
   // Prefer AI sweep of assessment-linked judgable challenges; keep AI limit modest for provider quotas
   const aiSweep = await sweepAiAcrossAssessments({
@@ -66,7 +69,8 @@ export async function autoRunAllAssessmentsAndPostScores(opts?: {
     ]);
 
   const summary = [
-    `Posted ${postedAssignments} assignment scorecards`,
+    `Ran ${suitesRun} test jobs across ${assignmentScores.results.length} assignments`,
+    `posted ${postedAssignments} scorecards`,
     `${aiPosted} AI bench runs (${aiCleared} cleared) via ${aiSweep.modelName}`,
     `${scoreReports} total score reports in DB`,
   ].join(" · ");
