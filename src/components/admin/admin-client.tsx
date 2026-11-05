@@ -1,0 +1,907 @@
+"use client";
+
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { cn, formatScore } from "@/lib/utils";
+
+type Tab = "overview" | "users" | "assignments" | "library" | "jobs" | "ai" | "audit" | "system";
+
+const ROLES = ["SUPER_ADMIN", "HIRING_MANAGER", "TECHNICAL_REVIEWER", "CANDIDATE", "TEAM_MEMBER"] as const;
+const PLANS = ["FREE", "PREMIUM"] as const;
+const ASSIGNMENT_STATUSES = [
+  "ASSIGNED",
+  "IN_PROGRESS",
+  "SUBMITTED",
+  "GRADING",
+  "UNDER_REVIEW",
+  "COMPLETED",
+  "FAILED",
+  "EXPIRED",
+] as const;
+
+export function AdminClient() {
+  const [tab, setTab] = useState<Tab>("overview");
+  const [overview, setOverview] = useState<any>(null);
+  const [users, setUsers] = useState<any[]>([]);
+  const [userQ, setUserQ] = useState("");
+  const [userRole, setUserRole] = useState("All");
+  const [jobs, setJobs] = useState<any>(null);
+  const [audits, setAudits] = useState<any[]>([]);
+  const [auditQ, setAuditQ] = useState("");
+  const [providers, setProviders] = useState<any[]>([]);
+  const [library, setLibrary] = useState<any>(null);
+  const [libQ, setLibQ] = useState("");
+  const [libPublished, setLibPublished] = useState("All");
+  const [assignments, setAssignments] = useState<any>(null);
+  const [assignQ, setAssignQ] = useState("");
+  const [assignStatus, setAssignStatus] = useState("All");
+  const [busy, setBusy] = useState(false);
+  const [form, setForm] = useState({
+    name: "Secondary OpenAI-compatible",
+    baseUrl: "https://api.openai.com/v1",
+    model: "gpt-4o-mini",
+    apiKeyEnv: "OPENAI_API_KEY",
+  });
+
+  async function loadOverview() {
+    const res = await fetch("/api/admin/overview");
+    const json = await res.json();
+    if (!json.ok) return toast.error(json.error?.message || "Admin only");
+    setOverview(json.data);
+    setProviders(json.data.providers ?? []);
+  }
+
+  async function loadUsers() {
+    const params = new URLSearchParams({ take: "80" });
+    if (userQ.trim()) params.set("q", userQ.trim());
+    if (userRole !== "All") params.set("role", userRole);
+    const res = await fetch(`/api/admin/users?${params}`);
+    const json = await res.json();
+    if (!json.ok) return toast.error(json.error?.message || "Failed");
+    setUsers(json.data.users);
+  }
+
+  async function loadJobs() {
+    const res = await fetch("/api/admin/jobs");
+    const json = await res.json();
+    if (!json.ok) return toast.error(json.error?.message || "Failed");
+    setJobs(json.data);
+  }
+
+  async function loadAudit() {
+    const params = new URLSearchParams({ take: "100" });
+    if (auditQ.trim()) params.set("q", auditQ.trim());
+    const res = await fetch(`/api/admin/audit?${params}`);
+    const json = await res.json();
+    if (!json.ok) return toast.error(json.error?.message || "Failed");
+    setAudits(json.data.logs);
+  }
+
+  async function loadProviders() {
+    const res = await fetch("/api/admin/ai-providers");
+    const json = await res.json();
+    if (json.ok) setProviders(json.data);
+  }
+
+  async function loadLibrary() {
+    const params = new URLSearchParams({ take: "80" });
+    if (libQ.trim()) params.set("q", libQ.trim());
+    if (libPublished === "Published") params.set("published", "true");
+    if (libPublished === "Draft") params.set("published", "false");
+    const res = await fetch(`/api/admin/library?${params}`);
+    const json = await res.json();
+    if (!json.ok) return toast.error(json.error?.message || "Failed");
+    setLibrary(json.data);
+  }
+
+  async function loadAssignments() {
+    const params = new URLSearchParams({ take: "60" });
+    if (assignQ.trim()) params.set("q", assignQ.trim());
+    if (assignStatus !== "All") params.set("status", assignStatus);
+    const res = await fetch(`/api/admin/assignments?${params}`);
+    const json = await res.json();
+    if (!json.ok) return toast.error(json.error?.message || "Failed");
+    setAssignments(json.data);
+  }
+
+  useEffect(() => {
+    void loadOverview();
+  }, []);
+
+  useEffect(() => {
+    if (tab === "users") void loadUsers();
+    if (tab === "jobs") void loadJobs();
+    if (tab === "audit") void loadAudit();
+    if (tab === "ai") void loadProviders();
+    if (tab === "overview") void loadOverview();
+    if (tab === "library") void loadLibrary();
+    if (tab === "assignments") void loadAssignments();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tab]);
+
+  async function patchUser(userId: string, patch: Record<string, unknown>) {
+    setBusy(true);
+    try {
+      const res = await fetch("/api/admin/users", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ userId, ...patch }),
+      });
+      const json = await res.json();
+      if (!json.ok) throw new Error(json.error?.message || "Update failed");
+      toast.success("User updated");
+      await loadUsers();
+      await loadOverview();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Update failed");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function patchChallenge(challengeId: string, patch: Record<string, unknown>) {
+    setBusy(true);
+    try {
+      const res = await fetch("/api/admin/library", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ challengeId, ...patch }),
+      });
+      const json = await res.json();
+      if (!json.ok) throw new Error(json.error?.message || "Update failed");
+      toast.success("Challenge updated");
+      await loadLibrary();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Update failed");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function patchAssignment(assignmentId: string, patch: Record<string, unknown>) {
+    setBusy(true);
+    try {
+      const res = await fetch("/api/admin/assignments", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ assignmentId, ...patch }),
+      });
+      const json = await res.json();
+      if (!json.ok) throw new Error(json.error?.message || "Update failed");
+      toast.success("Assignment updated");
+      await loadAssignments();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Update failed");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function addProvider() {
+    setBusy(true);
+    try {
+      const res = await fetch("/api/admin/ai-providers", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ ...form, enabled: true }),
+      });
+      const json = await res.json();
+      if (!json.ok) throw new Error(json.error?.message || "Failed");
+      toast.success("Provider added");
+      await loadProviders();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function drainJobs() {
+    setBusy(true);
+    try {
+      const res = await fetch("/api/admin/jobs", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ action: "drain_queued", limit: 25 }),
+      });
+      const json = await res.json();
+      if (!json.ok) throw new Error(json.error?.message || "Failed");
+      toast.success(`Draining ${json.data.drained} queued jobs`);
+      await loadJobs();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function retryJob(jobId: string) {
+    setBusy(true);
+    try {
+      const res = await fetch("/api/admin/jobs", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ action: "retry_job", jobId }),
+      });
+      const json = await res.json();
+      if (!json.ok) throw new Error(json.error?.message || "Failed");
+      toast.success("Job re-queued");
+      await loadJobs();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const tabs: { id: Tab; label: string }[] = [
+    { id: "overview", label: "Overview" },
+    { id: "users", label: "Users" },
+    { id: "assignments", label: "Assignments" },
+    { id: "library", label: "Library" },
+    { id: "jobs", label: "Execution" },
+    { id: "ai", label: "AI providers" },
+    { id: "audit", label: "Audit log" },
+    { id: "system", label: "System" },
+  ];
+
+  const a = overview?.analytics;
+
+  return (
+    <div className="animate-rise space-y-6">
+      <header>
+        <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">SUPER ADMIN</p>
+        <h1 className="mt-2 text-2xl font-semibold sm:text-3xl">Platform control plane</h1>
+        <p className="mt-2 max-w-3xl text-slate-400">
+          Users, assignments, challenge library, execution queue, AI providers, audit trail, and system posture —
+          everything needed to operate Crucible.
+        </p>
+      </header>
+
+      <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 scrollbar-none">
+        {tabs.map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            onClick={() => setTab(t.id)}
+            className={cn(
+              "shrink-0 rounded-md border px-3 py-2 text-sm",
+              tab === t.id
+                ? "border-cyan-400/40 bg-cyan-500/10 text-cyan-100"
+                : "border-slate-800 text-slate-400 hover:bg-slate-900",
+            )}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {tab === "overview" && overview && (
+        <>
+          <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            {[
+              { label: "Candidates", value: a?.totalCandidates },
+              { label: "Open assignments", value: overview.openAssignments },
+              { label: "Workspaces", value: overview.workspaces },
+              { label: "Elite qualified", value: a?.eliteQualified },
+              { label: "Coding problems", value: overview.library.coding },
+              { label: "Project missions", value: overview.library.projects },
+              { label: "Published challenges", value: overview.library.challenges },
+              { label: "Deploy success %", value: a?.deploymentSuccessRate },
+            ].map((t) => (
+              <Card key={t.label}>
+                <CardContent className="pt-5">
+                  <div className="text-xs uppercase tracking-wider text-slate-500">{t.label}</div>
+                  <div className="mt-1 font-mono text-2xl text-slate-50">{t.value ?? "—"}</div>
+                </CardContent>
+              </Card>
+            ))}
+          </section>
+
+          <section className="grid gap-4 lg:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>Users by role</CardTitle>
+              </CardHeader>
+              <CardContent className="grid grid-cols-2 gap-2 text-sm">
+                {Object.entries(overview.usersByRole ?? {}).map(([k, v]) => (
+                  <div key={k} className="flex justify-between rounded-lg border border-slate-800 px-3 py-2">
+                    <span className="text-slate-400">{k}</span>
+                    <span className="font-mono">{String(v)}</span>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Execution queue</CardTitle>
+              </CardHeader>
+              <CardContent className="grid grid-cols-2 gap-2 text-sm">
+                {Object.entries(overview.jobs ?? {}).map(([k, v]) => (
+                  <div key={k} className="flex justify-between rounded-lg border border-slate-800 px-3 py-2">
+                    <span className="text-slate-400">{k}</span>
+                    <span className="font-mono">{String(v)}</span>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </section>
+
+          <section className="grid gap-4 lg:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>Recent users</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {(overview.recentUsers ?? []).map((u: any) => (
+                  <div
+                    key={u.id}
+                    className="flex items-center justify-between gap-2 rounded-lg border border-slate-800 px-3 py-2 text-sm"
+                  >
+                    <div className="min-w-0">
+                      <div className="truncate font-medium">{u.name}</div>
+                      <div className="truncate font-mono text-[11px] text-slate-500">{u.email}</div>
+                    </div>
+                    <div className="flex shrink-0 gap-1">
+                      <Badge>{u.role}</Badge>
+                      <Badge variant={u.plan === "PREMIUM" ? "amber" : "cyan"}>{u.plan}</Badge>
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Latest audit</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {(overview.recentAudits ?? []).map((l: any) => (
+                  <div key={l.id} className="rounded-lg border border-slate-800 px-3 py-2 text-sm">
+                    <div className="font-mono text-xs text-cyan-200">{l.action}</div>
+                    <div className="text-slate-400">
+                      {l.actor?.name ?? "system"} · {l.entityType}
+                      {l.entityId ? ` · ${String(l.entityId).slice(0, 12)}` : ""}
+                    </div>
+                    <div className="font-mono text-[10px] text-slate-600">
+                      {new Date(l.createdAt).toLocaleString()}
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </section>
+
+          <div className="flex flex-wrap gap-3 text-sm">
+            <Link href="/assessments" className="text-cyan-300 hover:underline">
+              Assessments →
+            </Link>
+            <Link href="/reviews" className="text-cyan-300 hover:underline">
+              Review queue →
+            </Link>
+            <Link href="/challenges" className="text-cyan-300 hover:underline">
+              Challenge bank →
+            </Link>
+          </div>
+        </>
+      )}
+
+      {tab === "users" && (
+        <Card>
+          <CardHeader>
+            <CardTitle>User directory</CardTitle>
+            <CardDescription>Change roles and plans. Demoting yourself is blocked.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <Input
+                placeholder="Search name or email…"
+                value={userQ}
+                onChange={(e) => setUserQ(e.target.value)}
+                className="sm:max-w-sm"
+              />
+              <select
+                className="h-11 rounded-md border border-slate-700 bg-slate-950 px-3 text-sm"
+                value={userRole}
+                onChange={(e) => setUserRole(e.target.value)}
+              >
+                <option value="All">All roles</option>
+                {ROLES.map((r) => (
+                  <option key={r} value={r}>
+                    {r}
+                  </option>
+                ))}
+              </select>
+              <Button variant="secondary" onClick={() => void loadUsers()}>
+                Search
+              </Button>
+            </div>
+            <div className="space-y-2">
+              {users.map((u) => (
+                <div key={u.id} className="rounded-xl border border-slate-800 p-4">
+                  <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                    <div className="min-w-0">
+                      <div className="font-medium text-slate-100">{u.name}</div>
+                      <div className="truncate font-mono text-xs text-slate-500">{u.email}</div>
+                      <div className="mt-1 font-mono text-[11px] text-slate-600">
+                        {u._count.assignments} assignments · {u._count.reviews} reviews · {u._count.sessions} sessions
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <select
+                        className="h-10 rounded-md border border-slate-700 bg-slate-950 px-2 text-xs"
+                        value={u.role}
+                        disabled={busy}
+                        onChange={(e) => void patchUser(u.id, { role: e.target.value })}
+                      >
+                        {ROLES.map((r) => (
+                          <option key={r} value={r}>
+                            {r}
+                          </option>
+                        ))}
+                      </select>
+                      <select
+                        className="h-10 rounded-md border border-slate-700 bg-slate-950 px-2 text-xs"
+                        value={u.plan}
+                        disabled={busy}
+                        onChange={(e) => void patchUser(u.id, { plan: e.target.value })}
+                      >
+                        {PLANS.map((p) => (
+                          <option key={p} value={p}>
+                            {p}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {!users.length && <p className="text-slate-500">No users match.</p>}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {tab === "assignments" && (
+        <div className="space-y-4">
+          {assignments && (
+            <div className="flex flex-wrap gap-2">
+              {Object.entries(assignments.byStatus ?? {}).map(([k, v]) => (
+                <Badge key={k} variant="cyan">
+                  {k} {String(v)}
+                </Badge>
+              ))}
+            </div>
+          )}
+          <Card>
+            <CardHeader>
+              <CardTitle>Assignment console</CardTitle>
+              <CardDescription>Override status or due dates when hiring ops need it.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <Input
+                  placeholder="Search candidate or assessment…"
+                  value={assignQ}
+                  onChange={(e) => setAssignQ(e.target.value)}
+                  className="sm:max-w-sm"
+                />
+                <select
+                  className="h-11 rounded-md border border-slate-700 bg-slate-950 px-3 text-sm"
+                  value={assignStatus}
+                  onChange={(e) => setAssignStatus(e.target.value)}
+                >
+                  <option value="All">All statuses</option>
+                  {ASSIGNMENT_STATUSES.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
+                </select>
+                <Button variant="secondary" onClick={() => void loadAssignments()}>
+                  Search
+                </Button>
+              </div>
+              <div className="space-y-2">
+                {(assignments?.assignments ?? []).map((row: any) => (
+                  <div key={row.id} className="rounded-xl border border-slate-800 p-4 text-sm">
+                    <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                      <div className="min-w-0 space-y-1">
+                        <div className="font-medium text-slate-100">{row.assessment.title}</div>
+                        <div className="text-slate-400">
+                          {row.candidate.name} ·{" "}
+                          <span className="font-mono text-xs">{row.candidate.email}</span>
+                        </div>
+                        <div className="font-mono text-[11px] text-slate-600">
+                          {row.assessment.challenge.slug} · level {row.currentLevel}/{row.maxLevelReached} · assigned by{" "}
+                          {row.assignedBy.name}
+                          {row.scoreReport?.overall != null
+                            ? ` · score ${formatScore(row.scoreReport.overall)}`
+                            : ""}
+                        </div>
+                        <div className="flex flex-wrap gap-2 pt-1">
+                          {row.workspace?.id && (
+                            <Link
+                              href={`/workspace/${row.workspace.id}`}
+                              className="text-xs text-cyan-300 hover:underline"
+                            >
+                              Workspace →
+                            </Link>
+                          )}
+                          <Link href={`/scorecards/${row.id}`} className="text-xs text-cyan-300 hover:underline">
+                            Scorecard →
+                          </Link>
+                        </div>
+                      </div>
+                      <select
+                        className="h-10 rounded-md border border-slate-700 bg-slate-950 px-2 text-xs"
+                        value={row.status}
+                        disabled={busy}
+                        onChange={(e) => void patchAssignment(row.id, { status: e.target.value })}
+                      >
+                        {ASSIGNMENT_STATUSES.map((s) => (
+                          <option key={s} value={s}>
+                            {s}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                ))}
+                {!(assignments?.assignments ?? []).length && <p className="text-slate-500">No assignments.</p>}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {tab === "library" && (
+        <div className="space-y-4">
+          {library && (
+            <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-6">
+              {Object.entries(library.counts ?? {}).map(([k, v]) => (
+                <Card key={k}>
+                  <CardContent className="pt-4">
+                    <div className="text-[10px] uppercase tracking-wider text-slate-500">{k}</div>
+                    <div className="font-mono text-xl">{String(v)}</div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+          <Card>
+            <CardHeader>
+              <CardTitle>Challenge library</CardTitle>
+              <CardDescription>Publish, unpublish, premium flag, and difficulty.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <Input
+                  placeholder="Search title or slug…"
+                  value={libQ}
+                  onChange={(e) => setLibQ(e.target.value)}
+                  className="sm:max-w-sm"
+                />
+                <select
+                  className="h-11 rounded-md border border-slate-700 bg-slate-950 px-3 text-sm"
+                  value={libPublished}
+                  onChange={(e) => setLibPublished(e.target.value)}
+                >
+                  <option value="All">All</option>
+                  <option value="Published">Published</option>
+                  <option value="Draft">Draft</option>
+                </select>
+                <Button variant="secondary" onClick={() => void loadLibrary()}>
+                  Search
+                </Button>
+                <Link href="/challenges" className="self-center text-sm text-cyan-300 hover:underline">
+                  Open bank →
+                </Link>
+              </div>
+              <div className="space-y-2">
+                {(library?.challenges ?? []).map((c: any) => (
+                  <div key={c.id} className="rounded-xl border border-slate-800 p-4 text-sm">
+                    <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                      <div className="min-w-0">
+                        <div className="font-medium text-slate-100">{c.title}</div>
+                        <div className="font-mono text-[11px] text-slate-500">
+                          {c.slug} · {c.type} · {c.track} · {c._count.assessments} assessments
+                        </div>
+                        <div className="mt-1 flex flex-wrap gap-1">
+                          {c.tags.slice(0, 4).map((t: string) => (
+                            <Badge key={t}>{t}</Badge>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          disabled={busy}
+                          onClick={() => void patchChallenge(c.id, { isPublished: !c.isPublished })}
+                        >
+                          {c.isPublished ? "Unpublish" : "Publish"}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={busy}
+                          onClick={() => void patchChallenge(c.id, { isPremium: !c.isPremium })}
+                        >
+                          {c.isPremium ? "Make free" : "Make premium"}
+                        </Button>
+                        <select
+                          className="h-9 rounded-md border border-slate-700 bg-slate-950 px-2 text-xs"
+                          value={c.difficulty}
+                          disabled={busy}
+                          onChange={(e) => void patchChallenge(c.id, { difficulty: Number(e.target.value) })}
+                        >
+                          {[1, 2, 3, 4, 5].map((d) => (
+                            <option key={d} value={d}>
+                              Diff {d}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                {!(library?.challenges ?? []).length && <p className="text-slate-500">No challenges.</p>}
+              </div>
+
+              <div className="border-t border-slate-800 pt-4">
+                <h3 className="mb-3 text-sm font-medium text-slate-200">Recent assessments</h3>
+                <div className="space-y-2">
+                  {(library?.assessments ?? []).map((a: any) => (
+                    <div
+                      key={a.id}
+                      className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-slate-800 px-3 py-2 text-sm"
+                    >
+                      <div className="min-w-0">
+                        <div className="truncate font-medium">{a.title}</div>
+                        <div className="font-mono text-[11px] text-slate-500">
+                          {a.challenge.slug} · {a._count.assignments} assignments
+                        </div>
+                      </div>
+                          <Badge variant={a.status === "PUBLISHED" ? "emerald" : "amber"}>{a.status}</Badge>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {tab === "jobs" && jobs && (
+        <div className="space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex flex-wrap gap-2">
+              <Badge variant="cyan">queued {jobs.queued}</Badge>
+              <Badge variant="amber">running {jobs.running}</Badge>
+              <Badge>mode {jobs.executionMode}</Badge>
+            </div>
+            <Button disabled={busy} onClick={() => void drainJobs()}>
+              Drain queued (25)
+            </Button>
+          </div>
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent execution jobs</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {(jobs.recent ?? []).map((j: any) => (
+                <div
+                  key={j.id}
+                  className="flex flex-col gap-2 rounded-lg border border-slate-800 px-3 py-2 text-sm sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap gap-2">
+                      <Badge>{j.type}</Badge>
+                      <Badge
+                        variant={
+                          j.status === "SUCCEEDED"
+                            ? "emerald"
+                            : j.status === "FAILED"
+                              ? "rose"
+                              : j.status === "QUEUED"
+                                ? "amber"
+                                : "cyan"
+                        }
+                      >
+                        {j.status}
+                      </Badge>
+                      {j.priority > 0 && <Badge variant="amber">P{j.priority}</Badge>}
+                    </div>
+                    <div className="mt-1 truncate font-mono text-[11px] text-slate-500">{j.command}</div>
+                    <div className="font-mono text-[10px] text-slate-600">
+                      {new Date(j.createdAt).toLocaleString()}
+                      {j.exitCode != null ? ` · exit ${j.exitCode}` : ""}
+                    </div>
+                  </div>
+                  {(j.status === "FAILED" || j.status === "TIMEOUT") && (
+                    <Button size="sm" variant="secondary" disabled={busy} onClick={() => void retryJob(j.id)}>
+                      Retry
+                    </Button>
+                  )}
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {tab === "ai" && (
+        <div className="grid gap-4 lg:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>Configured providers</CardTitle>
+              <CardDescription>Keys stay in env vars — never stored in the database.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {providers.map((p) => (
+                <div key={p.id} className="rounded-lg border border-slate-800 p-3 text-sm">
+                  <div className="font-medium">{p.name}</div>
+                  <div className="font-mono text-xs text-slate-500">
+                    {p.model} · {p.baseUrl}
+                  </div>
+                  <div className="mt-1 flex flex-wrap gap-2">
+                    {p.isDefault && <Badge variant="cyan">default</Badge>}
+                    <Badge variant={p.enabled ? "emerald" : "amber"}>{p.enabled ? "enabled" : "disabled"}</Badge>
+                    <Badge variant={p.apiKeyConfigured ? "emerald" : "amber"}>
+                      {p.apiKeyConfigured ? `env ${p.apiKeyEnv}` : "mock fallback"}
+                    </Badge>
+                  </div>
+                </div>
+              ))}
+              {!providers.length && <p className="text-slate-500">No providers yet — add one or rely on mock AI.</p>}
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Add provider</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <div className="space-y-2">
+                <Label>Name</Label>
+                <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+              </div>
+              <div className="space-y-2">
+                <Label>Base URL</Label>
+                <Input value={form.baseUrl} onChange={(e) => setForm({ ...form, baseUrl: e.target.value })} />
+              </div>
+              <div className="space-y-2">
+                <Label>Model</Label>
+                <Input value={form.model} onChange={(e) => setForm({ ...form, model: e.target.value })} />
+              </div>
+              <div className="space-y-2">
+                <Label>API key env var name</Label>
+                <Input value={form.apiKeyEnv} onChange={(e) => setForm({ ...form, apiKeyEnv: e.target.value })} />
+              </div>
+              <Button disabled={busy} onClick={() => void addProvider()}>
+                Save provider
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {tab === "audit" && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Audit trail</CardTitle>
+            <CardDescription>Auth, settings, assignments, execution, reviews, and admin actions.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <Input
+                placeholder="Filter action / entity…"
+                value={auditQ}
+                onChange={(e) => setAuditQ(e.target.value)}
+                className="sm:max-w-sm"
+              />
+              <Button variant="secondary" onClick={() => void loadAudit()}>
+                Search
+              </Button>
+            </div>
+            <div className="space-y-2">
+              {audits.map((l) => (
+                <div key={l.id} className="rounded-lg border border-slate-800 px-3 py-2 text-sm">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="font-mono text-cyan-200">{l.action}</span>
+                    <Badge>{l.entityType}</Badge>
+                  </div>
+                  <div className="mt-1 text-slate-400">
+                    {l.actor ? `${l.actor.name} (${l.actor.role})` : "system"}
+                    {l.entityId ? ` · ${l.entityId}` : ""}
+                  </div>
+                  {l.metadata && (
+                    <pre className="mt-1 overflow-x-auto font-mono text-[10px] text-slate-600">
+                      {JSON.stringify(l.metadata)}
+                    </pre>
+                  )}
+                  <div className="font-mono text-[10px] text-slate-600">{new Date(l.createdAt).toLocaleString()}</div>
+                </div>
+              ))}
+              {!audits.length && <p className="text-slate-500">No audit rows.</p>}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {tab === "system" && overview && (
+        <div className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Environment & integrations</CardTitle>
+            </CardHeader>
+            <CardContent className="grid gap-2 sm:grid-cols-2">
+              {Object.entries(overview.system ?? {}).map(([k, v]) => (
+                <div
+                  key={k}
+                  className="flex items-center justify-between rounded-lg border border-slate-800 px-3 py-2 text-sm"
+                >
+                  <span className="font-mono text-xs text-slate-500">{k}</span>
+                  <span className="font-mono text-slate-200">{String(v)}</span>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Security posture</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2 text-sm text-slate-400">
+              <p>
+                Candidate code runs in disposable sandboxes with CPU/memory/timeouts and restricted networking. Docker
+                sockets must not be exposed to candidate workloads. Controlled-vuln labs stay isolated and never target
+                external systems.
+              </p>
+              <p>
+                Session cookies are HTTP-only. Résumé uploads validate PDF magic bytes and size. Audit logs cover auth,
+                settings, assignment, execution, review, and admin mutations. Scores assist humans — they never hire
+                alone.
+              </p>
+              <p>
+                Avg overall score across reports:{" "}
+                <span className="font-mono text-cyan-200">{formatScore(a?.averageScores?.overall ?? 0)}</span>
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Quick ops links</CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-wrap gap-3 text-sm">
+              <Link href="/assessments" className="text-cyan-300 hover:underline">
+                Assessments →
+              </Link>
+              <Link href="/candidates" className="text-cyan-300 hover:underline">
+                Candidates →
+              </Link>
+              <Link href="/reviews" className="text-cyan-300 hover:underline">
+                Reviews →
+              </Link>
+              <Link href="/teams" className="text-cyan-300 hover:underline">
+                Teams →
+              </Link>
+              <Link href="/incidents" className="text-cyan-300 hover:underline">
+                Incidents →
+              </Link>
+              <Link href="/architecture" className="text-cyan-300 hover:underline">
+                Architecture →
+              </Link>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {tab === "overview" && !overview && <p className="text-slate-400">Loading control plane…</p>}
+    </div>
+  );
+}
