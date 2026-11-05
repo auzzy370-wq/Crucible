@@ -187,7 +187,7 @@ export function LandingPage(props: {
             },
             {
               t: "Judge you can trust",
-              d: "Public examples and hidden harnesses. Accepted only when both lanes pass.",
+              d: "Public examples and hidden harnesses across TypeScript, JavaScript, Python, Go, Rust, and Java. Accepted only when both lanes pass.",
             },
             {
               t: "Verified profiles",

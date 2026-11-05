@@ -38,10 +38,11 @@ export function EditorialsClient() {
   return (
     <div className="animate-rise space-y-6">
       <header>
-        <p className="font-mono text-xs tracking-[0.3em] text-amber-300">PREMIUM SOLUTIONS</p>
-        <h1 className="mt-2 text-2xl font-semibold sm:text-3xl">Editorials</h1>
+        <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">PROVE THE CRAFT</p>
+        <h1 className="mt-2 font-serif-display text-2xl sm:text-3xl">Editorials</h1>
         <p className="mt-2 max-w-3xl text-slate-400">
-          Deep-dive solutions after the judge signal is solid. Free editorials cover foundations; Premium unlocks company-grade writeups.
+          Study after the judge — public Accepted and hidden harness green first. Free foundations; Premium unlocks
+          deeper craft writeups.
         </p>
       </header>
 

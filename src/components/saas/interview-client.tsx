@@ -58,11 +58,11 @@ export function InterviewClient(props: { premium: boolean; sims: Sim[] }) {
     <div className="animate-rise space-y-6">
       <header className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">INTERVIEW SIMULATIONS</p>
-          <h1 className="mt-2 text-2xl font-semibold sm:text-3xl">Practice under pressure</h1>
+          <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">PROVE THE CRAFT</p>
+          <h1 className="mt-2 font-serif-display text-2xl sm:text-3xl">Timed company sessions</h1>
           <p className="mt-2 max-w-2xl text-slate-400">
-            Choose a company, get a timed question pulled from real frequency data, and test your skills with Lightning
-            Judge priority when you&apos;re on Premium.
+            Pick a company, open a timed evidence workspace, and run the public + hidden judge — Lightning priority on
+            Premium.
           </p>
         </div>
         {!props.premium && (

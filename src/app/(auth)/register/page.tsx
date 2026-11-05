@@ -41,16 +41,22 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center px-4 py-8 safe-top safe-bottom">
-      <div className="pointer-events-none absolute inset-0 grid-overlay" />
-      <Card className="animate-rise relative w-full max-w-lg border-emerald-500/20">
+    <div className="landing-root relative flex min-h-screen items-center justify-center px-4 py-8 safe-top safe-bottom">
+      <div className="landing-noise pointer-events-none absolute inset-0" aria-hidden />
+      <div className="landing-mesh pointer-events-none absolute inset-0" aria-hidden />
+      <div className="pointer-events-none absolute inset-0 grid-overlay opacity-50" />
+      <Card className="animate-rise relative w-full max-w-lg border-cyan-400/20 bg-[#070b12]/90 backdrop-blur-sm">
         <CardHeader>
-          <div className="mb-2 font-mono text-[10px] tracking-[0.3em] text-emerald-300 sm:text-xs sm:tracking-[0.35em]">
-            CANDIDATE ONBOARDING
+          <div className="mb-1 flex items-baseline gap-3">
+            <span className="font-serif-display text-2xl tracking-tight text-[var(--landing-ink)]">Crucible</span>
+            <span className="font-mono text-[10px] uppercase tracking-[0.28em] text-[var(--landing-teal)]">
+              Enter the crucible
+            </span>
           </div>
-          <CardTitle className="text-xl sm:text-2xl">Create candidate account</CardTitle>
-          <CardDescription>
-            Choose a primary track. You can still be assigned assessments across software engineering and cybersecurity.
+          <CardTitle className="font-serif-display text-xl sm:text-2xl">Start free</CardTitle>
+          <CardDescription className="text-[var(--landing-mute)]">
+            Choose a primary track — software engineering or cybersecurity. Timed sessions, hidden harnesses, and a
+            verified profile when you prove the craft.
           </CardDescription>
         </CardHeader>
         <CardContent>

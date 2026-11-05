@@ -39,8 +39,8 @@ export function ContestClient() {
   return (
     <div className="animate-rise space-y-6">
       <header>
-        <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">CONTEST ARENA</p>
-        <h1 className="mt-2 text-2xl font-semibold sm:text-3xl">{contest.title}</h1>
+        <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">PROVE THE CRAFT</p>
+        <h1 className="mt-2 font-serif-display text-2xl sm:text-3xl">{contest.title}</h1>
         <p className="mt-2 max-w-3xl text-slate-400">{contest.description}</p>
         <div className="mt-3 flex flex-wrap gap-2">
           <Badge variant="cyan">Ends {new Date(contest.endsAt).toLocaleString()}</Badge>
@@ -63,7 +63,7 @@ export function ContestClient() {
             </div>
             <div className="flex gap-2">
               <Link href="/challenges" className="text-sm text-cyan-300 hover:underline">
-                Open problemset →
+                Open evidence bank →
               </Link>
               <Button size="sm" variant="secondary" onClick={() => checkIn(p.points)}>
                 Mark solved

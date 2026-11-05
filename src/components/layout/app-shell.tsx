@@ -44,9 +44,9 @@ const NAV: NavItem[] = [
   { href: "/dashboard", label: "Home", icon: LayoutDashboard },
   { href: "/daily", label: "Daily Challenge", icon: CalendarDays },
   { href: "/weekly", label: "Broken Production", icon: AlertTriangle },
-  { href: "/challenges", label: "Problemset", icon: Boxes },
+  { href: "/challenges", label: "Evidence bank", icon: Boxes },
   { href: "/study-plans", label: "Study Plans", icon: Route },
-  { href: "/interview", label: "Interview Sims", icon: Timer },
+  { href: "/interview", label: "Company sessions", icon: Timer },
   { href: "/playgrounds", label: "Playgrounds", icon: FlaskConical },
   { href: "/contest", label: "Contest Arena", icon: Trophy },
   { href: "/editorials", label: "Editorials", icon: BookOpen },
@@ -212,12 +212,12 @@ export function AppShell({
           </div>
           <div className="px-5 pb-3">
             <Badge variant="cyan" className="mb-2">
-              {isCandidate ? "Candidate prep" : "Elite Qualification"}
+              {isCandidate ? "Prove the craft" : "Elite qualification"}
             </Badge>
             <p className="text-xs leading-relaxed text-slate-400">
               {isCandidate
-                ? "Daily → solve → Submit with hidden harness → share your verified profile."
-                : "Software engineering & cybersecurity tracks. Demonstrated ability over résumé claims."}
+                ? "Evidence over puzzles — timed session, public + hidden judge, verified profile."
+                : "Software engineering & cybersecurity. Evidence only — never résumé claims."}
             </p>
           </div>
           <div className="flex-1 overflow-y-auto overscroll-contain">
@@ -231,12 +231,12 @@ export function AppShell({
         <div className="px-5 py-5">{brand}</div>
         <div className="px-5 pb-4">
           <Badge variant="cyan" className="mb-2">
-            {isCandidate ? "Candidate prep" : "Elite Qualification"}
+            {isCandidate ? "Prove the craft" : "Elite qualification"}
           </Badge>
           <p className="text-xs leading-relaxed text-slate-400">
             {isCandidate
-              ? "Daily → solve → Submit with hidden harness → share your verified profile."
-              : "Software engineering & cybersecurity tracks. Demonstrated ability over résumé claims."}
+              ? "Evidence over puzzles — timed session, public + hidden judge, verified profile."
+              : "Software engineering & cybersecurity. Evidence only — never résumé claims."}
           </p>
         </div>
         <div className="flex-1 overflow-y-auto">

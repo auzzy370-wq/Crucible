@@ -85,17 +85,22 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center px-4 py-8 safe-top safe-bottom">
-      <div className="pointer-events-none absolute inset-0 grid-overlay" />
-      <Card className="animate-rise relative w-full max-w-md border-cyan-500/20">
+    <div className="landing-root relative flex min-h-screen items-center justify-center px-4 py-8 safe-top safe-bottom">
+      <div className="landing-noise pointer-events-none absolute inset-0" aria-hidden />
+      <div className="landing-mesh pointer-events-none absolute inset-0" aria-hidden />
+      <div className="pointer-events-none absolute inset-0 grid-overlay opacity-50" />
+      <Card className="animate-rise relative w-full max-w-md border-cyan-400/20 bg-[#070b12]/90 backdrop-blur-sm">
         <CardHeader>
-          <div className="mb-2 font-mono text-[10px] tracking-[0.3em] text-cyan-300 sm:text-xs sm:tracking-[0.35em]">
-            CRUCIBLE
+          <div className="mb-1 flex items-baseline gap-3">
+            <span className="font-serif-display text-2xl tracking-tight text-[var(--landing-ink)]">Crucible</span>
+            <span className="font-mono text-[10px] uppercase tracking-[0.28em] text-[var(--landing-teal)]">
+              Prove the craft
+            </span>
           </div>
-          <CardTitle className="text-xl sm:text-2xl">Sign in to operations</CardTitle>
-          <CardDescription>
-            Interview coding + elite production assessments. Free problemset, or Premium for company questions, Lightning
-            Judge, simulations, and unlimited playgrounds.
+          <CardTitle className="font-serif-display text-xl sm:text-2xl">Evidence over puzzles</CardTitle>
+          <CardDescription className="text-[var(--landing-mute)]">
+            Timed engineering and cybersecurity assessments. Public + hidden judges. Verified profiles employers can
+            trust — never résumé claims.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -151,7 +156,7 @@ export default function LoginPage() {
               />
             </div>
             <Button className="w-full" disabled={loading || dbOk === false}>
-              {loading ? "Authenticating…" : "Enter platform"}
+              {loading ? "Entering…" : "Enter the crucible"}
             </Button>
           </form>
           <p className="mt-4 text-center text-sm text-slate-400">

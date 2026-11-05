@@ -1,49 +1,47 @@
 export const PREMIUM_FEATURES = [
   {
     id: "company-questions",
-    title: "Company-Specific Interview Questions",
+    title: "Company-tagged evidence sessions",
     blurb:
-      "Practice smarter with real questions from top companies. Sort by role, time, or frequency to focus on what matters most for your prep.",
+      "Prioritize timed sessions by company tags, frequency, and time — craft practice that maps to what teams actually ask.",
   },
   {
     id: "lightning-judge",
     title: "Lightning Judge",
     blurb:
-      "Premium gives you priority judging — up to 10× faster during peak hours — so you can stay ahead in your interview prep.",
+      "Priority public + hidden judging so your evidence loop stays fast when the queue is busy.",
   },
   {
     id: "premium-content",
-    title: "Access to Premium Content",
+    title: "Premium craft content",
     blurb:
-      "Gain exclusive access to our ever-growing collection of premium content, such as questions, Explore cards, and premium solutions.",
+      "Exclusive missions, deeper editorials, and premium harness packs — after the judge signal is solid.",
   },
   {
     id: "autocomplete",
     title: "Autocomplete",
-    blurb:
-      "Get smart code autocompletion based on your language and code — no memorization needed.",
+    blurb: "Language-aware completion in the evidence IDE — speed without hiding ownership of the craft.",
   },
   {
     id: "debugger",
     title: "Debugger",
-    blurb: "Done with print debugging? Set breakpoints and debug interactively in our editor.",
+    blurb: "Breakpoints and interactive debug in the workspace — not just print statements.",
   },
   {
     id: "interview-sims",
-    title: "Interview Simulations",
+    title: "Timed company sessions",
     blurb:
-      "Practice under pressure with mock assessments. Choose a company, get a timed question, and test your skills.",
+      "Company-tagged timed workspaces with the same public + hidden judge bar as assessments.",
   },
   {
     id: "cloud-storage",
     title: "Cloud Storage",
-    blurb:
-      "Code and layouts are instantly saved to the cloud, ensuring you can learn across devices at ease.",
+    blurb: "Code and layouts save to the cloud so evidence sessions continue across devices.",
   },
   {
     id: "unlimited-playgrounds",
     title: "Unlimited Playgrounds",
-    blurb: "No more limits — create unlimited Playgrounds and keep them organized with folders.",
+    blurb: "Create unlimited playgrounds and keep them organized with folders.",
   },
 ] as const;
 

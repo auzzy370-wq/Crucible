@@ -9,7 +9,7 @@ export type FamilyHarness = {
   pythonStub: string;
 };
 
-/** Real judge harnesses for q-{family}-N bank problems (LeetCode-competitive lane). */
+/** Real judge harnesses for q-{family}-N coding evidence sessions. */
 const FAMILIES: Record<string, Omit<FamilyHarness, "family">> = {
   "two-sum-family": {
     solutionStub: `/** Return indices i < j such that nums[i] + nums[j] === target. */

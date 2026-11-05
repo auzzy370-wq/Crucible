@@ -1,6 +1,6 @@
 import type { ChallengeSeed } from "./catalog";
 
-/** LeetCode-style timed coding problems (function stubs + public/hidden tests). */
+/** Timed coding evidence sessions (function stubs + public/hidden tests). */
 export const CODING_PROBLEM_CATALOG: ChallengeSeed[] = [
   {
     slug: "lc-two-sum",

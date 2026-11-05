@@ -56,12 +56,12 @@ export function PricingClient(props: {
   return (
     <div className="animate-rise space-y-8">
       <header className="mx-auto max-w-3xl text-center">
-        <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">CRUCIBLE SAAS</p>
-        <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
-          Interview prep that feels like the real loop
+        <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">PROVE THE CRAFT</p>
+        <h1 className="mt-3 font-serif-display text-3xl tracking-tight sm:text-4xl">
+          Evidence over puzzles
         </h1>
         <p className="mt-3 text-slate-400">
-          Free forever for core problemset practice. Premium unlocks company intel, Lightning Judge, study plans,
+          Free forever for core evidence sessions. Premium unlocks company intel, Lightning Judge, study plans,
           simulations, autocomplete, debugger, and unlimited playgrounds.
         </p>
         {props.premium && (
@@ -77,15 +77,15 @@ export function PricingClient(props: {
         <Card>
           <CardHeader>
             <CardTitle>Free</CardTitle>
-            <CardDescription>Core coding problemset + project assessments</CardDescription>
+            <CardDescription>Coding judges + production missions</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="font-mono text-3xl text-slate-100">$0</div>
             <ul className="space-y-2 text-sm text-slate-400">
-              <li>Public coding problems + daily challenge</li>
-              <li>Free study plans (Meta 75, Google)</li>
+              <li>Public evidence sessions + daily challenge</li>
+              <li>Free study plans</li>
               <li>3 playgrounds</li>
-              <li>Standard judge queue</li>
+              <li>Standard judge queue · six languages</li>
             </ul>
           </CardContent>
         </Card>
@@ -95,7 +95,7 @@ export function PricingClient(props: {
               <CardTitle>Premium</CardTitle>
               <Badge variant="cyan">Most popular</Badge>
             </div>
-            <CardDescription>Everything teams use to prep for FAANG + startups</CardDescription>
+            <CardDescription>Full craft loop — company tags, Lightning Judge, verified depth</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-end gap-3">

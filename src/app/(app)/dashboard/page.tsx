@@ -41,23 +41,23 @@ export default async function DashboardPage() {
     return (
       <div className="animate-rise space-y-6">
         <header>
-          <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">CANDIDATE PORTAL</p>
-          <h1 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">
-            {firstRunDone ? "Your Crucible" : "Start here"}
+          <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">PROVE THE CRAFT</p>
+          <h1 className="mt-2 font-serif-display text-2xl tracking-tight sm:text-3xl">
+            {firstRunDone ? "Your Crucible" : "Evidence over puzzles"}
           </h1>
           <p className="mt-2 max-w-2xl text-slate-400">
-            One loop: Daily challenge → solve in the IDE → Submit (public + hidden) → share your verified profile.
+            Timed evidence sessions → public + hidden judge → verified profile employers can trust.
           </p>
         </header>
 
         <section className="rounded-2xl border border-cyan-500/20 bg-cyan-500/5 p-5">
-          <div className="text-xs font-medium uppercase tracking-wider text-cyan-200/80">First-run path</div>
+          <div className="text-xs font-medium uppercase tracking-wider text-cyan-200/80">Enter the crucible</div>
           <ol className="mt-4 grid gap-3 md:grid-cols-3">
             <li className="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
               <div className="font-mono text-xs text-slate-500">1</div>
-              <div className="mt-1 font-medium text-slate-100">Daily challenge</div>
+              <div className="mt-1 font-medium text-slate-100">Daily evidence</div>
               <p className="mt-1 text-sm text-slate-400">
-                {daily?.challenge?.title ?? "Today’s problem"} · streak {streak?.currentStreak ?? 0}
+                {daily?.challenge?.title ?? "Today’s session"} · streak {streak?.currentStreak ?? 0}
               </p>
               <Link href="/daily" className="mt-3 inline-block text-sm text-cyan-300 hover:underline">
                 Open daily →
@@ -65,22 +65,22 @@ export default async function DashboardPage() {
             </li>
             <li className="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
               <div className="font-mono text-xs text-slate-500">2</div>
-              <div className="mt-1 font-medium text-slate-100">Solve + Submit</div>
+              <div className="mt-1 font-medium text-slate-100">Judge you can trust</div>
               <p className="mt-1 text-sm text-slate-400">
-                Run public tests, then Submit for the hidden harness.
+                Public Accepted first — then survive the hidden harness.
               </p>
               <Link
                 href={codingOpen?.workspace ? `/workspace/${codingOpen.workspace.id}` : "/challenges"}
                 className="mt-3 inline-block text-sm text-cyan-300 hover:underline"
               >
-                {codingOpen?.workspace ? "Continue workspace →" : "Open problemset →"}
+                {codingOpen?.workspace ? "Continue workspace →" : "Open evidence bank →"}
               </Link>
             </li>
             <li className="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
               <div className="font-mono text-xs text-slate-500">3</div>
-              <div className="mt-1 font-medium text-slate-100">Share verified profile</div>
+              <div className="mt-1 font-medium text-slate-100">Verified profile</div>
               <p className="mt-1 text-sm text-slate-400">
-                Employers see assessment-verified skills only — never résumé claims.
+                Evidence only — never résumé claims.
               </p>
               {profile?.publicEnabled && profile.publicSlug ? (
                 <Link href={`/u/${profile.publicSlug}`} className="mt-3 inline-block text-sm text-cyan-300 hover:underline">
@@ -165,7 +165,7 @@ export default async function DashboardPage() {
           {!assignments.length && (
             <Card className="md:col-span-2">
               <CardContent className="py-10 text-center text-slate-400">
-                No assignments yet. Start with the daily challenge while a manager assigns assessments.
+                No assignments yet. Start a daily evidence session — or wait for a manager to assign a timed assessment.
               </CardContent>
             </Card>
           )}
@@ -191,11 +191,11 @@ export default async function DashboardPage() {
     <div className="animate-rise space-y-6">
       <header className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">OPERATIONS DASHBOARD</p>
-          <h1 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">Crucible operations</h1>
+          <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">PROVE THE CRAFT</p>
+          <h1 className="mt-2 font-serif-display text-2xl tracking-tight sm:text-3xl">Crucible operations</h1>
           <p className="mt-2 max-w-3xl text-slate-400">
-            Premium hiring operations for exceptional software engineers and cybersecurity practitioners.
-            Timed assessments. Scores calibrated to challenge difficulty — not population percentiles.
+            Timed engineering and cybersecurity assessments that verify what résumés claim — then let employers trust
+            the scorecard.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">

@@ -90,9 +90,10 @@ export function PlaygroundsClient(props: {
       <header className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">PLAYGROUNDS</p>
-          <h1 className="mt-2 text-2xl font-semibold sm:text-3xl">Scratch, drill, organize</h1>
+          <h1 className="mt-2 font-serif-display text-2xl sm:text-3xl">Playgrounds</h1>
           <p className="mt-2 max-w-2xl text-slate-400">
-            Cloud-synced code pads. Free includes {FREE_PLAYGROUND_LIMIT} playgrounds; Premium is unlimited with folders.
+            Scratch pads beside evidence sessions. Free includes {FREE_PLAYGROUND_LIMIT}; Premium is unlimited with
+            folders.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">

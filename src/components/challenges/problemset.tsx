@@ -127,11 +127,11 @@ export function Problemset(props: {
     <div className="animate-rise space-y-6">
       <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">CRUCIBLE</p>
-          <h1 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">Problemset</h1>
+          <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">PROVE THE CRAFT</p>
+          <h1 className="mt-2 font-serif-display text-2xl tracking-tight sm:text-3xl">Evidence sessions</h1>
           <p className="mt-2 max-w-2xl text-slate-400">
-            Both lanes: interview-grade coding in TypeScript, JavaScript, Python, Go, Rust, and Java — plus
-            production missions. Submit pinpoints exactly which skills you proved.
+            Timed coding and production missions — TypeScript, JavaScript, Python, Go, Rust, Java. Public checks first;
+            hidden harnesses decide Accepted. Submit pinpoints what you proved.
           </p>
           <p className="mt-2 max-w-2xl text-xs text-slate-500" title={FREQUENCY_METHODOLOGY.detail}>
             Freq: {FREQUENCY_METHODOLOGY.label}. Acc: {ACCEPTANCE_METHODOLOGY.label} —{" "}
@@ -149,7 +149,7 @@ export function Problemset(props: {
                 : "border-slate-700 text-slate-400 hover:bg-slate-900",
             )}
           >
-            Coding ({coding.length})
+            Coding judges ({coding.length})
           </button>
           <button
             type="button"
@@ -161,7 +161,7 @@ export function Problemset(props: {
                 : "border-slate-700 text-slate-400 hover:bg-slate-900",
             )}
           >
-            Projects ({props.projects.length})
+            Production missions ({props.projects.length})
           </button>
           <Link href="/pricing" className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-100">
             Premium
