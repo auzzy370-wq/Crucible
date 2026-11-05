@@ -5,12 +5,16 @@ import { createSession } from "@/server/auth/session";
 import { writeAudit } from "@/server/security/audit";
 import { nanoid } from "nanoid";
 
-export function clerkConfigured() {
-  return Boolean(process.env.CLERK_SECRET_KEY && process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
+export function clerkPublishableKey() {
+  return (
+    process.env.CLERK_PUBLISHABLE_KEY ||
+    process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ||
+    ""
+  );
 }
 
-export function clerkPublishableKey() {
-  return process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || process.env.CLERK_PUBLISHABLE_KEY || "";
+export function clerkConfigured() {
+  return Boolean(process.env.CLERK_SECRET_KEY && clerkPublishableKey());
 }
 
 function slugifyName(name: string) {
