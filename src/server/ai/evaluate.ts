@@ -30,11 +30,19 @@ export async function evaluateSubmission(submissionId: string) {
   const testRuns = submission.testRuns;
   const latest = testRuns[testRuns.length - 1];
   const deploymentOk = submission.assignment.deployments.some((d) => d.success);
-  const hiddenTestsOk = !!latest && latest.hiddenFailed === 0 && latest.hiddenPassed > 0;
-  const publicPassRate =
-    latest && latest.passed + latest.failed > 0
-      ? latest.passed / (latest.passed + latest.failed)
-      : 0;
+  const publicPassed = latest?.passed ?? 0;
+  const publicFailed = latest?.failed ?? 0;
+  const hiddenPassed = latest?.hiddenPassed ?? 0;
+  const hiddenFailed = latest?.hiddenFailed ?? 0;
+  const publicTotal = publicPassed + publicFailed;
+  const hiddenTotal = hiddenPassed + hiddenFailed;
+  const hiddenTestsOk = !!latest && hiddenFailed === 0 && hiddenPassed > 0;
+  const publicPassRate = publicTotal > 0 ? publicPassed / publicTotal : 0;
+  const hiddenPassRate = hiddenTotal > 0 ? hiddenPassed / hiddenTotal : 0;
+  // Suites that never executed are weaker evidence than suites that ran and failed.
+  const publicExecuted = publicTotal > 0;
+  const hiddenExecuted = hiddenTotal > 0;
+  const difficulty = Math.max(1, Math.min(10, submission.assignment.assessment.challenge.difficulty || 1));
 
   const fileCount = submission.assignment.workspace?.files.length ?? 0;
   const commitCount = submission.assignment.workspace?.commits.length ?? 0;
@@ -47,19 +55,89 @@ export async function evaluateSubmission(submissionId: string) {
   const hasDockerfile = submission.assignment.workspace?.files.some((f) =>
     /dockerfile|compose/i.test(f.path),
   );
+  // Small content signal so near-identical starters still separate slightly without inventing passes.
+  const contentBytes = (submission.assignment.workspace?.files ?? []).reduce(
+    (n, f) => n + (f.content?.length ?? 0),
+    0,
+  );
+  const contentSignal = Math.min(8, Math.floor(contentBytes / 1800));
 
-  // Deterministic evidence-based baseline (never invents test results)
+  // Deterministic evidence-based baseline (never invents test results).
+  // Mix public + hidden rates, absolute case counts, and difficulty so auto-runs don't all land on one number.
   const scores: ScoreBreakdown = {
-    frontend: clamp(40 + publicPassRate * 30 + (fileCount > 3 ? 10 : 0)),
-    backend: clamp(45 + publicPassRate * 35 + (hasAuth ? 10 : 0)),
-    database: clamp(40 + (hasAuth ? 15 : 0) + publicPassRate * 20),
-    architecture: clamp(35 + (fileCount > 5 ? 20 : 10) + (commitCount > 1 ? 10 : 0)),
-    infrastructure: clamp(30 + (hasDockerfile ? 40 : 10) + (deploymentOk ? 25 : 0)),
-    security: clamp(35 + (hasAuth ? 25 : 0) + (hiddenTestsOk ? 20 : 0)),
-    testing: clamp(20 + publicPassRate * 50 + (hasTests ? 20 : 0) + (hiddenTestsOk ? 10 : 0)),
-    problemSolving: clamp(40 + submission.assignment.currentLevel * 5 + publicPassRate * 20),
-    performance: clamp(40 + (deploymentOk ? 20 : 0)),
-    collaboration: clamp(50), // updated by team assessment when present
+    frontend: clamp(
+      28 +
+        publicPassRate * 32 +
+        (publicExecuted ? Math.min(12, publicPassed * 4) : -6) +
+        Math.min(8, Math.max(0, fileCount - 2) * 2) +
+        contentSignal * 0.4,
+    ),
+    backend: clamp(
+      30 +
+        publicPassRate * 28 +
+        hiddenPassRate * 18 +
+        (hasAuth ? 10 : 0) +
+        Math.min(10, publicPassed * 3) -
+        Math.min(12, publicFailed * 2),
+    ),
+    database: clamp(
+      28 +
+        (hasAuth ? 12 : 0) +
+        publicPassRate * 16 +
+        hiddenPassRate * 14 +
+        Math.min(8, hiddenPassed * 3) -
+        Math.min(10, hiddenFailed * 2),
+    ),
+    architecture: clamp(
+      30 +
+        Math.min(18, Math.max(0, fileCount - 1) * 3) +
+        (commitCount > 1 ? 8 : commitCount === 1 ? 3 : 0) +
+        publicPassRate * 12 +
+        contentSignal,
+    ),
+    infrastructure: clamp(
+      22 +
+        (hasDockerfile ? 38 : 8) +
+        (deploymentOk ? 28 : 0) +
+        (publicExecuted ? 4 : -4) +
+        Math.min(6, difficulty),
+    ),
+    security: clamp(
+      28 +
+        (hasAuth ? 22 : 0) +
+        (hiddenTestsOk ? 22 : hiddenPassRate * 16) +
+        Math.min(8, hiddenPassed * 2) -
+        Math.min(14, hiddenFailed * 3) +
+        difficulty * 0.5,
+    ),
+    testing: clamp(
+      (publicExecuted ? 18 : 8) +
+        publicPassRate * 36 +
+        hiddenPassRate * 22 +
+        (hasTests ? 12 : 0) +
+        (hiddenTestsOk ? 12 : 0) +
+        Math.min(10, publicPassed * 2 + hiddenPassed * 2) -
+        Math.min(16, publicFailed * 2 + hiddenFailed * 3) -
+        (hiddenExecuted ? 0 : 6),
+    ),
+    problemSolving: clamp(
+      22 +
+        submission.assignment.currentLevel * 4 +
+        publicPassRate * 18 +
+        hiddenPassRate * 16 +
+        difficulty * 2.2 +
+        Math.min(12, publicPassed * 2 + hiddenPassed * 3) -
+        Math.min(14, (publicFailed + hiddenFailed) * 2),
+    ),
+    performance: clamp(
+      28 +
+        (deploymentOk ? 18 : 0) +
+        publicPassRate * 14 +
+        (publicExecuted && publicFailed === 0 ? 8 : 0) +
+        Math.min(8, difficulty) -
+        Math.min(10, hiddenFailed * 2),
+    ),
+    collaboration: clamp(42 + (commitCount > 2 ? 8 : 0) + contentSignal * 0.5),
   };
 
   const incident = await prisma.incidentRun.findFirst({

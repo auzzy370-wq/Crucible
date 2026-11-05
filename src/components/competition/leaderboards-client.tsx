@@ -114,8 +114,11 @@ export function LeaderboardsClient() {
                       {tab === "ai" && (
                         <>
                           <Badge>
-                            {r.correct}/{r.attempts}
+                            {r.correct}/{r.attempts} clears
                           </Badge>
+                          {typeof r.clearRatePct === "number" && (
+                            <Badge variant="cyan">{r.clearRatePct}% full clears</Badge>
+                          )}
                           {r.verifiedPool ? (
                             <Badge variant="emerald">verified</Badge>
                           ) : (
