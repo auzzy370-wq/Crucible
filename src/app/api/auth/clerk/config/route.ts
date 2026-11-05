@@ -1,15 +1,17 @@
 import { jsonOk, withHandler } from "@/server/auth/api";
-import { clerkConfigured, clerkPublishableKey } from "@/server/auth/clerk-bridge";
+import { clerkConfigured } from "@/server/auth/clerk-bridge";
 
-/** Public Clerk publishable key for the browser (no secret). */
+/** Whether Clerk is ready (does not expose secrets). */
 export async function GET() {
   return withHandler(async () => {
+    const enabled = clerkConfigured();
     return jsonOk({
-      enabled: clerkConfigured(),
-      publishableKey: clerkConfigured() ? clerkPublishableKey() : null,
-      note: clerkConfigured()
+      enabled,
+      signInUrl: "/sign-in",
+      signUpUrl: "/sign-up",
+      note: enabled
         ? "Clerk social (Google, GitHub, Apple, Discord, Facebook, X) is ready."
-        : "Add CLERK_PUBLISHABLE_KEY + CLERK_SECRET_KEY from a free clerk.com app to unlock all social logins with one setup.",
+        : "Run npx clerk@latest auth login && npx clerk@latest env pull in your terminal to finish Clerk setup.",
     });
   });
 }
