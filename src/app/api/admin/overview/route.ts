@@ -59,7 +59,7 @@ export async function GET() {
         apiKeyConfigured: Boolean(process.env[p.apiKeyEnv]),
       })),
       system: {
-        executionMode: process.env.EXECUTION_MODE ?? "process",
+        executionMode: process.env.EXECUTION_MODE ?? "isolated",
         aiMock: process.env.AI_FALLBACK_MOCK !== "false",
         appUrl: process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || null,
         redisConfigured: Boolean(process.env.REDIS_URL),

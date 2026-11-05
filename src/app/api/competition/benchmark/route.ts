@@ -5,6 +5,7 @@ import { jsonOk, withHandler } from "@/server/auth/api";
 import { requireUser, canReview } from "@/server/auth/session";
 import { publicAiRunView, runAiBenchmark } from "@/server/competition/ai-benchmark";
 import { writeAudit } from "@/server/security/audit";
+import { rateLimit } from "@/server/security/rate-limit";
 
 export async function GET(req: Request) {
   return withHandler(async () => {
@@ -64,6 +65,7 @@ const postSchema = z.object({
 export async function POST(req: Request) {
   return withHandler(async () => {
     const user = await requireUser();
+    await rateLimit(`benchmark:${user.id}`, 12, 60_000);
     const body = postSchema.parse(await req.json());
     const challenge = await prisma.challenge.findUnique({
       where: { id: body.challengeId },

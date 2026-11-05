@@ -16,13 +16,19 @@ export async function GET() {
     const user = await requireUser();
     const jar = await cookies();
     const token = jar.get(COOKIE)?.value;
-    const [sessions, profile, streak, assignmentCount, playgroundCount] = await Promise.all([
+    const [sessions, currentSession, profile, streak, assignmentCount, playgroundCount] = await Promise.all([
       prisma.session.findMany({
         where: { userId: user.id, expiresAt: { gt: new Date() } },
         orderBy: { createdAt: "desc" },
         take: 20,
-        select: { id: true, createdAt: true, expiresAt: true, ip: true, userAgent: true, token: true },
+        select: { id: true, createdAt: true, expiresAt: true, ip: true, userAgent: true },
       }),
+      token
+        ? prisma.session.findFirst({
+            where: { userId: user.id, token, expiresAt: { gt: new Date() } },
+            select: { id: true },
+          })
+        : Promise.resolve(null),
       user.role === "CANDIDATE" || user.role === "TEAM_MEMBER"
         ? ensureCandidateProfile(user.id).then(() =>
             prisma.candidateProfile.findUnique({ where: { userId: user.id } }),
@@ -76,11 +82,11 @@ export async function GET() {
         expiresAt: s.expiresAt,
         ip: s.ip,
         userAgent: s.userAgent,
-        current: Boolean(token && s.token === token),
+        current: Boolean(currentSession && s.id === currentSession.id),
       })),
       environment: {
         appUrl: process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || null,
-        executionMode: process.env.EXECUTION_MODE ?? "process",
+        executionMode: process.env.EXECUTION_MODE ?? "isolated",
         aiMock: process.env.AI_FALLBACK_MOCK !== "false",
       },
     });

@@ -9,6 +9,7 @@ import { multilangCommands } from "./coding-family-multilang";
 import { HIDDEN_CASES, hiddenTsRunnerSource } from "./hidden-harness";
 import { customPyRunnerSource, customTsRunnerSource } from "./custom-harness";
 import { execAllowlisted, parseAllowlistedArgv } from "./safe-exec";
+import { runInIsolatedScratch } from "./isolated-exec";
 
 /**
  * Secure execution architecture:
@@ -188,9 +189,13 @@ export async function enqueueExecution(params: {
       memoryLimit: "512m",
       auditMeta: {
         untrusted: true,
-        mode: process.env.EXECUTION_MODE ?? "process",
+        mode: (() => {
+          const m = process.env.EXECUTION_MODE ?? "isolated";
+          return m === "process" ? "isolated" : m;
+        })(),
         lightning: priority >= 10,
         allowlisted: true,
+        isolated: true,
       },
     },
   });
@@ -258,7 +263,10 @@ export async function processJob(jobId: string) {
     data: { status: "RUNNING", startedAt: new Date() },
   });
 
-  const mode = process.env.EXECUTION_MODE ?? "process";
+  // Default isolated: disposable scratch copy. Docker when explicitly requested.
+  // Legacy EXECUTION_MODE=process is remapped to isolated (never host-workspace exec).
+  const rawMode = process.env.EXECUTION_MODE ?? "isolated";
+  const mode = rawMode === "process" ? "isolated" : rawMode;
   try {
     // Always sync DB → disk before judge so Run works even if storage drifted / imports were bare.
     const { materializeWorkspaceToDisk, repairCodingHarness } = await import("./workspace");
@@ -275,7 +283,11 @@ export async function processJob(jobId: string) {
     }
 
     const result =
-      mode === "docker" ? await runInDocker(job) : await runInProcessSandbox(job);
+      mode === "docker" ? await runInDocker(job) : await runInIsolatedScratch({
+        command: job.command,
+        sourceRoot: job.workspace.rootPath,
+        timeoutSec: job.timeoutSec,
+      });
 
     const status: ExecutionStatus =
       result.timedOut ? "TIMEOUT" : result.exitCode === 0 ? "SUCCEEDED" : "FAILED";
@@ -315,25 +327,6 @@ export async function processJob(jobId: string) {
       },
     });
   }
-}
-
-async function runInProcessSandbox(job: {
-  command: string;
-  timeoutSec: number;
-  workspace: { rootPath: string };
-}) {
-  const cleanEnv: NodeJS.ProcessEnv = {
-    PATH: process.env.PATH,
-    HOME: "/tmp",
-    NODE_ENV: "test",
-    RUN_SERVER: "0",
-    GOPATH: "/tmp/go",
-    GOCACHE: "/tmp/gocache",
-    CARGO_HOME: "/tmp/cargo",
-    CARGO_TARGET_DIR: "/tmp/crucible-target",
-    RUSTUP_HOME: process.env.RUSTUP_HOME,
-  };
-  return execAllowlisted(job.command, job.workspace.rootPath, cleanEnv, job.timeoutSec);
 }
 
 async function runInDocker(job: {

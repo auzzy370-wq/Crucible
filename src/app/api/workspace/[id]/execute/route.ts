@@ -5,6 +5,7 @@ import { requireUser, canAdmin, canReview, isPremium } from "@/server/auth/sessi
 import { enqueueExecution } from "@/server/execution/runner";
 import { AppError } from "@/lib/errors";
 import { diagnoseJobResult } from "@/server/competition/diagnostics";
+import { rateLimit } from "@/server/security/rate-limit";
 
 /** Candidate-safe job types — commands are always server-authored (never client-supplied). */
 const CANDIDATE_TYPES = ["test", "hidden_test", "deploy_check", "benchmark"] as const;
@@ -100,6 +101,7 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
     if ((ADMIN_TYPES as readonly string[]).includes(body.type) && !canAdmin(user.role)) {
       throw new AppError("Only admins can run diagnostic jobs", 403, "FORBIDDEN");
     }
+    await rateLimit(`execute:${user.id}`, 30, 60_000);
     // Lightning Judge: Premium gets priority 10 (≈10× ahead of free FIFO during peak)
     const priority = isPremium(user) ? 10 : 0;
     const job = await enqueueExecution({

@@ -3,6 +3,7 @@ import path from "path";
 import { prisma } from "@/lib/db";
 import { getStorageRoot } from "@/lib/storage";
 import { starterFilesForChallenge } from "./starters";
+import { assertSafeRelativePath, resolveInsideRoot } from "./paths";
 
 import { imageTagForCodingLanguage } from "@/lib/coding-languages";
 
@@ -21,7 +22,8 @@ export async function createWorkspaceForAssignment(params: {
 
   const files = starterFilesForChallenge(params.challengeSlug, params.language, params.track);
   for (const file of files) {
-    const full = path.join(rootPath, file.path);
+    const safePath = assertSafeRelativePath(file.path);
+    const full = resolveInsideRoot(rootPath, safePath);
     await fs.mkdir(path.dirname(full), { recursive: true });
     await fs.writeFile(full, file.content, "utf8");
   }
@@ -36,7 +38,7 @@ export async function createWorkspaceForAssignment(params: {
       status: "ready",
       files: {
         create: files.map((f) => ({
-          path: f.path,
+          path: assertSafeRelativePath(f.path),
           content: f.content,
           language: f.language,
         })),
@@ -84,14 +86,15 @@ export async function refreshWorkspaceStarters(params: {
   }
 
   for (const file of files) {
-    const full = path.join(workspace.rootPath, file.path);
+    const safePath = assertSafeRelativePath(file.path);
+    const full = resolveInsideRoot(workspace.rootPath, safePath);
     await fs.mkdir(path.dirname(full), { recursive: true });
     await fs.writeFile(full, file.content, "utf8");
     await prisma.workspaceFile.upsert({
-      where: { workspaceId_path: { workspaceId: workspace.id, path: file.path } },
+      where: { workspaceId_path: { workspaceId: workspace.id, path: safePath } },
       create: {
         workspaceId: workspace.id,
-        path: file.path,
+        path: safePath,
         content: file.content,
         language: file.language,
       },
@@ -111,15 +114,16 @@ export async function materializeWorkspaceToDisk(workspaceId: string) {
 
   for (const file of workspace.files) {
     let content = file.content;
-    if (/\.(m?[jt]sx?|mjs|cjs)$/.test(file.path)) {
-      const preferTs = /\.tsx?$/.test(file.path);
+    const safePath = assertSafeRelativePath(file.path);
+    if (/\.(m?[jt]sx?|mjs|cjs)$/.test(safePath)) {
+      const preferTs = /\.tsx?$/.test(safePath);
       content = content.replace(/from\s+(["'])(\.[^"']+)\1/g, (full, quote: string, spec: string) => {
         if (/\.(?:[cm]?[jt]s|tsx|jsx|json)$/i.test(spec)) return full;
         const ext = preferTs ? ".ts" : ".js";
         return `from ${quote}${spec}${ext}${quote}`;
       });
     }
-    if (file.path === "package.json") {
+    if (safePath === "package.json") {
       try {
         const pkg = JSON.parse(content) as { type?: string; scripts?: Record<string, string> };
         pkg.type = "module";
@@ -133,7 +137,7 @@ export async function materializeWorkspaceToDisk(workspaceId: string) {
         /* keep */
       }
     }
-    const full = path.join(workspace.rootPath, file.path);
+    const full = resolveInsideRoot(workspace.rootPath, safePath);
     await fs.mkdir(path.dirname(full), { recursive: true });
     await fs.writeFile(full, content, "utf8");
     if (content !== file.content) {
@@ -187,17 +191,18 @@ export async function upsertWorkspaceFile(params: {
   language?: string;
 }) {
   const workspace = await prisma.workspace.findUniqueOrThrow({ where: { id: params.workspaceId } });
-  const full = path.join(workspace.rootPath, params.filePath);
+  const safePath = assertSafeRelativePath(params.filePath);
+  const full = resolveInsideRoot(workspace.rootPath, safePath);
   await fs.mkdir(path.dirname(full), { recursive: true });
   await fs.writeFile(full, params.content, "utf8");
 
   return prisma.workspaceFile.upsert({
     where: {
-      workspaceId_path: { workspaceId: params.workspaceId, path: params.filePath },
+      workspaceId_path: { workspaceId: params.workspaceId, path: safePath },
     },
     create: {
       workspaceId: params.workspaceId,
-      path: params.filePath,
+      path: safePath,
       content: params.content,
       language: params.language,
     },
@@ -216,10 +221,11 @@ export async function commitWorkspace(params: {
   });
   const sha = `c${Date.now().toString(36)}`;
   // Persist snapshot
-  const snapDir = path.join(workspace.rootPath, ".snapshots", sha);
+  const snapDir = resolveInsideRoot(workspace.rootPath, ".snapshots/" + sha);
   await fs.mkdir(snapDir, { recursive: true });
   for (const file of workspace.files) {
-    const dest = path.join(snapDir, file.path);
+    const safePath = assertSafeRelativePath(file.path);
+    const dest = resolveInsideRoot(snapDir, safePath);
     await fs.mkdir(path.dirname(dest), { recursive: true });
     await fs.writeFile(dest, file.content, "utf8");
   }

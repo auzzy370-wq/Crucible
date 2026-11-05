@@ -59,22 +59,12 @@ export async function POST(req: Request) {
 
 export async function GET() {
   return withHandler(async () => {
+    // Public health only — no counts or setup flags that aid probing.
     try {
-      const users = await prisma.user.count();
-      const challenges = await prisma.challenge.count();
-      return jsonOk({
-        databaseReachable: true,
-        users,
-        challenges,
-        setupConfigured: Boolean(process.env.SETUP_SECRET && process.env.SETUP_SECRET.length >= 16),
-      });
+      await prisma.$queryRaw`SELECT 1`;
+      return jsonOk({ databaseReachable: true });
     } catch {
-      return jsonOk({
-        databaseReachable: false,
-        users: null,
-        challenges: null,
-        setupConfigured: Boolean(process.env.SETUP_SECRET && process.env.SETUP_SECRET.length >= 16),
-      });
+      return jsonOk({ databaseReachable: false });
     }
   });
 }

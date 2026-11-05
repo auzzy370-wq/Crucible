@@ -34,7 +34,7 @@ export async function GET() {
       running,
       byStatus: Object.fromEntries(byStatus.map((j) => [j.status, j._count])),
       recent,
-      executionMode: process.env.EXECUTION_MODE ?? "process",
+      executionMode: process.env.EXECUTION_MODE ?? "isolated",
     });
   });
 }

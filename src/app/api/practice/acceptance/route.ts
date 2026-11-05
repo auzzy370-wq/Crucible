@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { jsonOk, withHandler } from "@/server/auth/api";
+import { requireUser } from "@/server/auth/session";
 
 /**
  * Live acceptance rates for coding problems that have hidden_test submissions.
@@ -7,6 +8,7 @@ import { jsonOk, withHandler } from "@/server/auth/api";
  */
 export async function GET() {
   return withHandler(async () => {
+    await requireUser();
     const rows = await prisma.$queryRaw<
       { challengeId: string; submissions: number; accepted: number }[]
     >`
