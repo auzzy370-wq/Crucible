@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db";
-import { completeJson } from "@/server/ai/provider";
+import { completeJson, envHasKey } from "@/server/ai/provider";
 import { familyHarnessForSlug } from "@/server/execution/coding-family-harness";
 import { extractPublicPrompt } from "@/server/competition/prompt-public";
 import { AppError } from "@/lib/errors";
@@ -50,7 +50,7 @@ export async function runAiBenchmark(opts: {
 
   const started = Date.now();
   try {
-    // Ask model for code — PUBLIC DATA ONLY
+    // Ask model for code — PUBLIC DATA ONLY; route via selected AiModel (Groq / OpenRouter / …)
     const { data, mocked, model: usedModel, provider } = await completeJson<{
       language: string;
       code: string;
@@ -59,6 +59,12 @@ export async function runAiBenchmark(opts: {
       system: `You are competing in Crucible AI vs Human. Return JSON {"language":"typescript","code":"..."}.
 Implement the required function only. Do not invent hidden tests. No markdown.`,
       user: publicPrompt,
+      providerOverride: {
+        name: `${model.provider}:${model.slug}`,
+        baseUrl: model.baseUrl ?? undefined,
+        model: model.modelId,
+        apiKeyEnv: model.apiKeyEnv ?? "GROQ_API_KEY",
+      },
       fallback: {
         language: "typescript",
         code:
@@ -69,9 +75,7 @@ Implement the required function only. Do not invent hidden tests. No markdown.`,
     });
 
     const latencyMs = Date.now() - started;
-    // Evaluate public cases locally when we have a harness with extractable expects
     const publicEval = evaluatePublicAgainstHarness(data.code, challenge.slug);
-    // Hidden evaluation: never reveal cases; only pass/fail counts
     const hiddenEval = evaluateHiddenBlind(challenge.slug, data.code);
 
     const correct =
@@ -143,38 +147,32 @@ function evaluatePublicAgainstHarness(code: string, slug: string): {
 } {
   const harness = familyHarnessForSlug(slug);
   if (!harness) {
-    // No local harness — mark incomplete rather than inventing pass
     return { passed: 0, total: 0, firstFailure: "No public harness bound for local eval." };
   }
-  // Structural check: code exports solve / matches stub export name
   const needsSolve = /export function solve/.test(harness.solutionStub);
   const hasSolve = /export\s+(?:async\s+)?function\s+solve|export\s*\{\s*solve/.test(code);
   if (needsSolve && !hasSolve) {
     return { passed: 0, total: 1, firstFailure: "Missing required export `solve`." };
   }
-  // Count public test names as required surface; without a sandboxed VM we only
-  // do signature + non-stub heuristics here. Full judge remains ExecutionJob path for humans.
   const names = [...harness.publicTests.matchAll(/name:\s*["'`]([^"'`]+)["'`]/g)].map((m) => m[1]!);
   const total = Math.max(1, names.length);
   const looksStub = /return\s+\[\s*\]\s*;|return\s+0\s*;|return\s+null\s*;|return\s+false\s*;/.test(code);
   if (looksStub && code.length < 400) {
     return { passed: 0, total, firstFailure: "Solution appears to be an unimplemented stub." };
   }
-  // Without executing untrusted AI code in-process, we record public suite size
-  // and leave correctness to optional worker execution in a follow-up.
-  // Partial credit: signature present → not a total fail of harness binding.
-  return { passed: needsSolve && hasSolve ? Math.min(1, total) : 0, total, firstFailure: needsSolve && hasSolve ? "Public signature ok; full sandbox re-judge pending." : undefined };
+  return {
+    passed: needsSolve && hasSolve ? Math.min(1, total) : 0,
+    total,
+    firstFailure: needsSolve && hasSolve ? "Public signature ok; full sandbox re-judge pending." : undefined,
+  };
 }
 
 function evaluateHiddenBlind(slug: string, code: string): { passed: number; total: number } {
   const harness = familyHarnessForSlug(slug);
   if (!harness) return { passed: 0, total: 0 };
   const names = [...harness.hiddenRunner.matchAll(/name:\s*["'`]([^"'`]+)["'`]/g)].map((m) => m[1]!);
-  const total = names.length;
-  // Never run hidden against AI code in the web process without sandbox.
-  // Report suite size only; correct=false unless worker confirms later.
   void code;
-  return { passed: 0, total };
+  return { passed: 0, total: names.length };
 }
 
 export function publicAiRunView(run: {
@@ -215,42 +213,73 @@ export function publicAiRunView(run: {
     finishedAt: run.finishedAt?.toISOString() ?? null,
     aiModel: run.aiModel,
     challenge: run.challenge,
-    // solutionCode intentionally omitted from public view
   };
 }
 
 export async function ensureDefaultAiModels() {
-  const defaults = [
+  const defaults: {
+    slug: string;
+    displayName: string;
+    provider: string;
+    modelId: string;
+    baseUrl: string;
+    apiKeyEnv: string;
+    isOpenSource?: boolean;
+    notes: string;
+    enabled?: boolean;
+  }[] = [
+    {
+      slug: "groq-llama-3.1-8b",
+      displayName: "Llama 3.1 8B (Groq free)",
+      provider: "Groq",
+      modelId: process.env.GROQ_MODEL ?? "llama-3.1-8b-instant",
+      baseUrl: "https://api.groq.com/openai/v1",
+      apiKeyEnv: "GROQ_API_KEY",
+      isOpenSource: true,
+      notes: "Free Groq tier. Preferred for AI vs Human. Hidden tests never sent.",
+    },
+    {
+      slug: "groq-llama-3.3-70b",
+      displayName: "Llama 3.3 70B (Groq free)",
+      provider: "Groq",
+      modelId: "llama-3.3-70b-versatile",
+      baseUrl: "https://api.groq.com/openai/v1",
+      apiKeyEnv: "GROQ_API_KEY",
+      isOpenSource: true,
+      notes: "Stronger Groq free-tier model when rate limits allow.",
+    },
+    {
+      slug: "openrouter-llama-3.2-3b-free",
+      displayName: "Llama 3.2 3B (OpenRouter free)",
+      provider: "OpenRouter",
+      modelId: process.env.OPENROUTER_MODEL ?? "meta-llama/llama-3.2-3b-instruct:free",
+      baseUrl: "https://openrouter.ai/api/v1",
+      apiKeyEnv: "OPENROUTER_API_KEY",
+      isOpenSource: true,
+      notes: "OpenRouter :free model — rate-limited; good fallback.",
+    },
+    {
+      slug: "openrouter-gemma-2-9b-free",
+      displayName: "Gemma 2 9B (OpenRouter free)",
+      provider: "OpenRouter",
+      modelId: "google/gemma-2-9b-it:free",
+      baseUrl: "https://openrouter.ai/api/v1",
+      apiKeyEnv: "OPENROUTER_API_KEY",
+      isOpenSource: true,
+      notes: "Alternate OpenRouter free model.",
+    },
     {
       slug: "openai-gpt-4o-mini",
-      displayName: "GPT-4o mini",
+      displayName: "GPT-4o mini (paid)",
       provider: "OpenAI",
       modelId: process.env.OPENAI_MODEL ?? "gpt-4o-mini",
+      baseUrl: process.env.OPENAI_BASE_URL ?? "https://api.openai.com/v1",
       apiKeyEnv: "OPENAI_API_KEY",
-    },
-    {
-      slug: "anthropic-compatible",
-      displayName: "Anthropic-compatible (via OPENAI_BASE_URL)",
-      provider: "Anthropic",
-      modelId: "claude-compatible",
-      apiKeyEnv: "ANTHROPIC_API_KEY",
-    },
-    {
-      slug: "google-compatible",
-      displayName: "Google-compatible",
-      provider: "Google",
-      modelId: "gemini-compatible",
-      apiKeyEnv: "GOOGLE_API_KEY",
-    },
-    {
-      slug: "opensource-local",
-      displayName: "Open-source / custom OpenAI-compatible",
-      provider: "OpenSource",
-      modelId: "custom",
-      apiKeyEnv: "OPENAI_API_KEY",
-      isOpenSource: true,
+      notes: "Paid OpenAI — optional. Prefer Groq/OpenRouter for free benches.",
+      enabled: true,
     },
   ];
+
   for (const d of defaults) {
     await prisma.aiModel.upsert({
       where: { slug: d.slug },
@@ -259,13 +288,38 @@ export async function ensureDefaultAiModels() {
         displayName: d.displayName,
         provider: d.provider,
         modelId: d.modelId,
+        baseUrl: d.baseUrl,
         apiKeyEnv: d.apiKeyEnv,
         isOpenSource: Boolean(d.isOpenSource),
-        enabled: true,
-        notes: "Extensible provider slot. Hidden tests never sent to models.",
+        enabled: d.enabled ?? true,
+        notes: d.notes,
       },
-      update: { displayName: d.displayName, enabled: true },
+      update: {
+        displayName: d.displayName,
+        modelId: d.modelId,
+        baseUrl: d.baseUrl,
+        apiKeyEnv: d.apiKeyEnv,
+        isOpenSource: Boolean(d.isOpenSource),
+        enabled: d.enabled ?? true,
+        notes: d.notes,
+      },
     });
   }
-  return prisma.aiModel.findMany({ where: { enabled: true }, orderBy: { provider: "asc" } });
+
+  // Disable legacy placeholder slots that had no real baseUrl
+  await prisma.aiModel.updateMany({
+    where: { slug: { in: ["anthropic-compatible", "google-compatible", "opensource-local"] } },
+    data: { enabled: false },
+  });
+
+  const models = await prisma.aiModel.findMany({ where: { enabled: true } });
+  // Groq first, then OpenRouter, then others; prefer ones with keys configured
+  models.sort((a, b) => {
+    const aReady = a.apiKeyEnv && envHasKey(a.apiKeyEnv) ? 0 : 1;
+    const bReady = b.apiKeyEnv && envHasKey(b.apiKeyEnv) ? 0 : 1;
+    if (aReady !== bReady) return aReady - bReady;
+    const rank = (p: string) => (p === "Groq" ? 0 : p === "OpenRouter" ? 1 : 2);
+    return rank(a.provider) - rank(b.provider) || a.displayName.localeCompare(b.displayName);
+  });
+  return models;
 }

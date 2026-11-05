@@ -27,9 +27,20 @@
 - Broken harness → infrastructure diagnostic, not contestant failure.
 - D10 Research Frontier remains objectively testable.
 
+## Free AI providers (site-hosted)
+
+Preferred for AI vs Human — no ChatGPT scrape, no local Ollama required:
+
+| Env | Provider | Models |
+|-----|----------|--------|
+| `GROQ_API_KEY` | Groq free tier | `llama-3.1-8b-instant`, `llama-3.3-70b-versatile` |
+| `OPENROUTER_API_KEY` | OpenRouter `:free` | Llama 3.2 3B, Gemma 2 9B |
+
+`runAiBenchmark` routes through the selected `AiModel` (`baseUrl` + `apiKeyEnv`). Provider auto-prefers Groq → OpenRouter → OpenAI when keys exist.
+
 ## Remaining dependencies
 
 - Full sandbox re-judge of AI-generated code (currently signature/heuristic + counts; human path uses ExecutionJob).
-- Optional provider keys for verified (non-mock) AI runs.
+- Add `GROQ_API_KEY` (or OpenRouter) in Cursor Secrets for live verified runs.
 - Tournament brackets UI beyond standings JSON.
 - Live calibrated difficulty from large submission samples.

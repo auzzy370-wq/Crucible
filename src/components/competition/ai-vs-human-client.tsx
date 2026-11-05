@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 
 export function AiVsHumanClient() {
   const [models, setModels] = useState<any[]>([]);
+  const [providerStatus, setProviderStatus] = useState<any>(null);
   const [challenges, setChallenges] = useState<any[]>([]);
   const [runs, setRuns] = useState<any[]>([]);
   const [challengeId, setChallengeId] = useState("");
@@ -18,8 +19,11 @@ export function AiVsHumanClient() {
     const res = await fetch("/api/competition/ai-models");
     const json = await res.json();
     if (json.ok) {
-      setModels(json.data.models ?? []);
-      if (!modelId && json.data.models?.[0]) setModelId(json.data.models[0].id);
+      const list = json.data.models ?? [];
+      setModels(list);
+      setProviderStatus(json.data.status ?? null);
+      const preferred = list.find((m: any) => m.ready) ?? list.find((m: any) => m.freeTier) ?? list[0];
+      if (!modelId && preferred) setModelId(preferred.id);
     }
   }
 
@@ -82,10 +86,31 @@ export function AiVsHumanClient() {
         <p className="font-mono text-xs tracking-[0.3em] text-violet-300">AI × HUMAN</p>
         <h1 className="mt-2 font-serif-display text-2xl sm:text-3xl">AI vs Human benchmarks</h1>
         <p className="mt-2 max-w-2xl text-slate-400">
-          Identical public statements for humans and models. Hidden tests never leave the judge. Mocked runs are
-          labeled experimental — a single miss never proves a model cannot solve a problem.
+          Identical public statements for humans and models. Free default: Groq / OpenRouter. Hidden tests never
+          leave the judge. Mocked runs are labeled experimental — a single miss never proves a model cannot solve a
+          problem.
         </p>
       </header>
+
+      {providerStatus && (
+        <div
+          className={`rounded-xl border px-4 py-3 text-sm ${
+            providerStatus.anyFreeKey
+              ? "border-emerald-500/30 bg-emerald-500/5 text-emerald-100"
+              : "border-amber-500/30 bg-amber-500/5 text-amber-100"
+          }`}
+        >
+          <div className="flex flex-wrap gap-2">
+            <Badge variant={providerStatus.groqReady ? "emerald" : "default"}>
+              Groq {providerStatus.groqReady ? "ready" : "needs GROQ_API_KEY"}
+            </Badge>
+            <Badge variant={providerStatus.openRouterReady ? "emerald" : "default"}>
+              OpenRouter {providerStatus.openRouterReady ? "ready" : "needs key"}
+            </Badge>
+          </div>
+          <p className="mt-2 text-xs opacity-90">{providerStatus.hint}</p>
+        </div>
+      )}
 
       <section className="grid gap-4 rounded-xl border border-slate-800 p-4 sm:grid-cols-2">
         <label className="block text-sm">
@@ -106,7 +131,7 @@ export function AiVsHumanClient() {
           </select>
         </label>
         <label className="block text-sm">
-          <span className="text-slate-400">AI model</span>
+          <span className="text-slate-400">AI model (free first)</span>
           <select
             className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2"
             value={modelId}
@@ -114,7 +139,8 @@ export function AiVsHumanClient() {
           >
             {models.map((m) => (
               <option key={m.id} value={m.id}>
-                {m.provider} · {m.displayName}
+                {m.ready ? "●" : "○"} {m.provider} · {m.displayName}
+                {m.freeTier ? " (free)" : ""}
               </option>
             ))}
           </select>
