@@ -33,7 +33,17 @@ export async function POST(req: Request) {
         "DATABASE_UNAVAILABLE",
       );
     }
-    if (!user || !(await verifyPassword(body.password, user.passwordHash))) {
+    if (!user) {
+      throw new AppError("Invalid credentials", 401, "INVALID_CREDENTIALS");
+    }
+    if (!user.passwordHash) {
+      throw new AppError(
+        "This account uses social sign-in. Continue with Google, GitHub, Apple, Facebook, Discord, or X.",
+        401,
+        "OAUTH_ONLY",
+      );
+    }
+    if (!(await verifyPassword(body.password, user.passwordHash))) {
       throw new AppError("Invalid credentials", 401, "INVALID_CREDENTIALS");
     }
     await createSession(user.id, { ip, userAgent: req.headers.get("user-agent") ?? undefined });

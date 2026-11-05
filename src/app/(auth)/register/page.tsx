@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { SocialAuthButtons } from "@/components/auth/social-auth-buttons";
 
 import { trackOptionGroups } from "@/lib/tracks";
 
@@ -153,6 +154,9 @@ export default function RegisterPage() {
               {loading ? "Creating account…" : "Start learning"}
             </Button>
           </form>
+          <div className="mt-5">
+            <SocialAuthButtons heading="Or sign up with" />
+          </div>
           <p className="mt-4 text-center text-sm text-slate-400">
             Already learning?{" "}
             <Link className="text-cyan-300 hover:underline" href="/login">

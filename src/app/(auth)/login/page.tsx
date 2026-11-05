@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { SocialAuthButtons } from "@/components/auth/social-auth-buttons";
 import { cn } from "@/lib/utils";
 
 function LoginForm() {
@@ -19,11 +20,16 @@ function LoginForm() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [dbOk, setDbOk] = useState<boolean | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(params.get("oauth_error"));
 
   useEffect(() => {
     setMode(hireIntent ? "hire" : "learn");
   }, [hireIntent]);
+
+  useEffect(() => {
+    const oauthError = params.get("oauth_error");
+    if (oauthError) setError(oauthError);
+  }, [params]);
 
   useEffect(() => {
     void (async () => {
@@ -173,6 +179,9 @@ function LoginForm() {
             {loading ? "Entering…" : mode === "hire" ? "Enter hiring workspace" : "Continue learning"}
           </Button>
         </form>
+        <div className="mt-5">
+          <SocialAuthButtons />
+        </div>
         <p className="mt-4 text-center text-sm text-slate-400">
           {mode === "hire" ? (
             <>

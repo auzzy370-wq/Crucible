@@ -114,7 +114,11 @@ More detail: [docs/VERCEL.md](docs/VERCEL.md).
 
 ## Accounts
 
-Register a learner at `/register`. Demo staff/candidate accounts are **optional** and only created when you set `ALLOW_DEMO_ACCOUNTS=true` plus `DEMO_ADMIN_PASSWORD` and `DEMO_CANDIDATE_PASSWORD` in your local environment — never commit those values.
+Register a learner at `/register`, or sign in with **Google, GitHub, Apple, Facebook, Discord, or X** when those OAuth apps are configured (see `.env.example`). Callback URL for each provider:
+
+`{APP_URL}/api/auth/oauth/{provider}/callback`
+
+Demo staff/candidate accounts are **optional** and only created when you set `ALLOW_DEMO_ACCOUNTS=true` plus `DEMO_ADMIN_PASSWORD` and `DEMO_CANDIDATE_PASSWORD` in your local environment — never commit those values.
 
 Admins can **Auto-run all assessments** and **Post assignment scores** from the Admin competition panel.
 

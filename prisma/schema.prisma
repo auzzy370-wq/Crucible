@@ -147,7 +147,8 @@ enum ReviewDecisionType {
 model User {
   id            String    @id @default(cuid())
   email         String    @unique
-  passwordHash  String
+  /** Null for OAuth-only accounts (Google, GitHub, Apple, Facebook, Discord, X). */
+  passwordHash  String?
   name          String
   role          Role      @default(CANDIDATE)
   plan          PlanTier  @default(FREE)
@@ -159,6 +160,7 @@ model User {
   lastLoginAt   DateTime?
 
   sessions            Session[]
+  oauthAccounts       OAuthAccount[]
   candidateProfile    CandidateProfile?
   createdAssessments  Assessment[]           @relation("AssessmentCreator")
   assignments         AssessmentAssignment[] @relation("CandidateAssignments")
@@ -198,6 +200,21 @@ model Session {
 
   @@index([userId])
   @@index([expiresAt])
+}
+
+model OAuthAccount {
+  id             String   @id @default(cuid())
+  userId         String
+  provider       String
+  providerUserId String
+  email          String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerUserId])
+  @@index([userId])
+  @@index([email])
 }
 
 model CandidateProfile {
