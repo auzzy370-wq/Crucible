@@ -1,18 +1,22 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { Badge } from "@/components/ui/badge";
 import { formatScore } from "@/lib/utils";
 import { ShareScorecardButton } from "@/components/saas/share-scorecard";
+import { getSessionUser, canReview, canManageCandidates } from "@/server/auth/session";
 
 export const dynamic = "force-dynamic";
 
-/** Employer-facing shareable scorecard — visible when candidate profile is public or assignment completed. */
-export default async function PublicScorecardPage({
+/** Employer scorecard — same auth as /api/scorecards (candidate, reviewer, or hiring). */
+export default async function ScorecardPage({
   params,
 }: {
   params: Promise<{ assignmentId: string }>;
 }) {
+  const user = await getSessionUser();
+  if (!user) redirect(`/login?next=/scorecard/${(await params).assignmentId}`);
+
   const { assignmentId } = await params;
   const assignment = await prisma.assessmentAssignment.findUnique({
     where: { id: assignmentId },
@@ -25,12 +29,11 @@ export default async function PublicScorecardPage({
   });
   if (!assignment?.scoreReport) notFound();
 
-  const profile = assignment.candidate.candidateProfile;
-  const shareable =
-    profile?.publicEnabled ||
-    ["COMPLETED", "UNDER_REVIEW"].includes(assignment.status);
-  if (!shareable) notFound();
+  const allowed =
+    assignment.candidateId === user.id || canReview(user.role) || canManageCandidates(user.role);
+  if (!allowed) notFound();
 
+  const profile = assignment.candidate.candidateProfile;
   const report = assignment.scoreReport;
   const verified =
     profile?.skills.filter((s) => s.source === "ASSESSMENT" || s.source === "HUMAN_REVIEW") ?? [];
@@ -173,7 +176,7 @@ export default async function PublicScorecardPage({
         )}
 
         <p className="text-xs text-slate-500">
-          Claimed résumé skills are excluded. Print this page or copy the link for ATS / hiring threads. Also available as{" "}
+          Claimed résumé skills are excluded. Print this page or share with hiring staff who have access. Also available as{" "}
           <a className="text-cyan-300 hover:underline" href={`/api/scorecards/${assignmentId}?format=ats`}>
             ATS text
           </a>

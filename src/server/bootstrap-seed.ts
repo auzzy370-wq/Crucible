@@ -468,15 +468,22 @@ export async function seedDatabase(opts?: { includeDemoAccounts?: boolean }) {
   });
 
   // —— Ready-to-use assignments + workspaces (tests already placed in starters) ——
+  // IDs are platform-generated (cuid) — never guessable fixed strings.
   async function ensureAssignment(params: {
-    id: string;
     assessmentId: string;
     candidateId: string;
     challengeSlug: string;
     track: string;
     language?: string;
   }) {
-    const existing = await prisma.assessmentAssignment.findUnique({ where: { id: params.id } });
+    const existing = await prisma.assessmentAssignment.findUnique({
+      where: {
+        assessmentId_candidateId: {
+          assessmentId: params.assessmentId,
+          candidateId: params.candidateId,
+        },
+      },
+    });
     if (existing) {
       const startedAt = existing.startedAt ?? new Date();
       const refreshed = await prisma.assessmentAssignment.update({
@@ -508,7 +515,6 @@ export async function seedDatabase(opts?: { includeDemoAccounts?: boolean }) {
     const startedAt = new Date();
     const assignment = await prisma.assessmentAssignment.create({
       data: {
-        id: params.id,
         assessmentId: params.assessmentId,
         candidateId: params.candidateId,
         assignedById: hiring.id,
@@ -529,7 +535,6 @@ export async function seedDatabase(opts?: { includeDemoAccounts?: boolean }) {
   }
 
   const assignSaas = await ensureAssignment({
-    id: "assign-saas-casey",
     assessmentId: assessmentSaas.id,
     candidateId: candidate.id,
     challengeSlug: "saas-nexus",
@@ -537,7 +542,6 @@ export async function seedDatabase(opts?: { includeDemoAccounts?: boolean }) {
   });
 
   const assignCyber = await ensureAssignment({
-    id: "assign-appsec-sam",
     assessmentId: assessmentCyber.id,
     candidateId: cyberCandidate.id,
     challengeSlug: "appsec-fortress",
@@ -545,7 +549,6 @@ export async function seedDatabase(opts?: { includeDemoAccounts?: boolean }) {
   });
 
   const assignSoc = await ensureAssignment({
-    id: "assign-soc-sam",
     assessmentId: "assess-soc-1",
     candidateId: cyberCandidate.id,
     challengeSlug: "soc-nightwatch",
@@ -553,7 +556,6 @@ export async function seedDatabase(opts?: { includeDemoAccounts?: boolean }) {
   });
 
   const assignTeamCasey = await ensureAssignment({
-    id: "assign-team-casey",
     assessmentId: assessmentTeam.id,
     candidateId: candidate.id,
     challengeSlug: "team-forge",
@@ -561,7 +563,6 @@ export async function seedDatabase(opts?: { includeDemoAccounts?: boolean }) {
   });
 
   await ensureAssignment({
-    id: "assign-team-taylor",
     assessmentId: assessmentTeam.id,
     candidateId: teammate.id,
     challengeSlug: "team-forge",
@@ -686,21 +687,14 @@ export async function seedDatabase(opts?: { includeDemoAccounts?: boolean }) {
         ? { user: cyberCandidate, key: "sam" }
         : { user: candidate, key: "casey" };
 
-    // Featured assignments already created above with stable IDs
-    const featuredAssignId =
-      c.slug === "saas-nexus"
-        ? "assign-saas-casey"
-        : c.slug === "appsec-fortress"
-          ? "assign-appsec-sam"
-          : c.slug === "soc-nightwatch"
-            ? "assign-soc-sam"
-            : c.slug === "team-forge"
-              ? "assign-team-casey"
-              : null;
+    const featured =
+      c.slug === "saas-nexus" ||
+      c.slug === "appsec-fortress" ||
+      c.slug === "soc-nightwatch" ||
+      c.slug === "team-forge";
 
-    if (!featuredAssignId) {
+    if (!featured) {
       await ensureAssignment({
-        id: `assign-lib-${c.slug}-${primary.key}`,
         assessmentId: assessId,
         candidateId: primary.user.id,
         challengeSlug: c.slug,
