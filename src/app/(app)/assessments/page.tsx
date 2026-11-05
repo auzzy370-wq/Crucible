@@ -4,28 +4,76 @@ import { AssessmentsClient } from "@/components/assessment/assessments-client";
 
 export default async function AssessmentsPage() {
   const user = await getSessionUser();
+  const isCandidate = user?.role === "CANDIDATE" || user?.role === "TEAM_MEMBER";
+
+  // Do not hydrate the full seeded library (5k+ assessments) into the page —
+  // keep every challenge available via a lean picker, but only list active / owned assessments.
   const [assessments, challenges, candidates, assignments] = await Promise.all([
     prisma.assessment.findMany({
+      where: {
+        OR: [
+          { assignments: { some: isCandidate && user ? { candidateId: user.id } : {} } },
+          ...(user ? [{ createdById: user.id }] : []),
+        ],
+      },
       include: {
-        challenge: true,
+        challenge: {
+          select: {
+            id: true,
+            title: true,
+            track: true,
+            slug: true,
+            summary: true,
+            difficulty: true,
+            tags: true,
+            publicRequirements: true,
+          },
+        },
         _count: { select: { assignments: true } },
         createdBy: { select: { name: true } },
       },
       orderBy: { createdAt: "desc" },
+      take: 120,
     }),
-    prisma.challenge.findMany({ where: { isPublished: true }, orderBy: { title: "asc" } }),
+    prisma.challenge.findMany({
+      where: { isPublished: true },
+      select: {
+        id: true,
+        title: true,
+        track: true,
+        slug: true,
+        summary: true,
+        difficulty: true,
+        tags: true,
+        publicRequirements: true,
+      },
+      orderBy: [{ track: "asc" }, { difficulty: "asc" }, { title: "asc" }],
+    }),
     prisma.user.findMany({
       where: { role: { in: ["CANDIDATE", "TEAM_MEMBER"] } },
       select: { id: true, name: true, email: true },
       orderBy: { name: "asc" },
     }),
     prisma.assessmentAssignment.findMany({
-      where: user?.role === "CANDIDATE" || user?.role === "TEAM_MEMBER" ? { candidateId: user.id } : undefined,
+      where: isCandidate && user ? { candidateId: user.id } : undefined,
       include: {
-        assessment: { include: { challenge: true } },
+        assessment: {
+          include: {
+            challenge: {
+              select: {
+                summary: true,
+                title: true,
+                difficulty: true,
+                tags: true,
+                publicRequirements: true,
+                adaptiveTrack: true,
+              },
+            },
+          },
+        },
         candidate: { select: { id: true, name: true, email: true } },
-        workspace: true,
-        scoreReport: true,
+        workspace: { select: { id: true } },
+        scoreReport: { select: { overall: true, qualified: true, tier: true } },
       },
       orderBy: { createdAt: "desc" },
       take: 100,

@@ -4,7 +4,10 @@ import { AppError } from "@/lib/errors";
 import { jsonOk, withHandler } from "@/server/auth/api";
 import { requireUser } from "@/server/auth/session";
 import { CODING_LANGUAGES, normalizeCodingLanguage } from "@/lib/coding-languages";
-import { createWorkspaceForAssignment } from "@/server/execution/workspace";
+import {
+  createWorkspaceForAssignment,
+  repairCodingHarness,
+} from "@/server/execution/workspace";
 
 const schema = z.object({
   challengeId: z.string().optional(),
@@ -60,6 +63,26 @@ export async function POST(req: Request) {
       orderBy: { createdAt: "desc" },
     });
     if (existing?.workspace) {
+      const minutes = challenge.avgMinutes || 45;
+      const dueAt = new Date(Date.now() + minutes * 60 * 1000);
+      await prisma.assessmentAssignment.update({
+        where: { id: existing.id },
+        data: {
+          status: ["COMPLETED", "FAILED", "EXPIRED"].includes(existing.status)
+            ? "IN_PROGRESS"
+            : existing.status,
+          startedAt: existing.startedAt ?? new Date(),
+          dueAt,
+        },
+      });
+      if (challenge.type === "CODING_PROBLEM") {
+        await repairCodingHarness({
+          workspaceId: existing.workspace.id,
+          challengeSlug: challenge.slug,
+          language,
+          track: challenge.track,
+        });
+      }
       return jsonOk({
         assignmentId: existing.id,
         workspaceId: existing.workspace.id,

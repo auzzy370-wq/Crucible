@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -17,7 +17,7 @@ export type ProblemRow = {
   slug: string;
   title: string;
   summary: string;
-  description: string;
+  description?: string;
   type: string;
   track: string;
   difficulty: number;
@@ -34,6 +34,8 @@ export type ProblemRow = {
   workspaceId?: string | null;
   editorialSlug?: string | null;
 };
+
+const PAGE_SIZE = 40;
 
 function label(difficulty: number): DifficultyBand {
   return difficultyBand(difficulty);
@@ -61,6 +63,7 @@ export function Problemset(props: {
   const [sort, setSort] = useState<"frequency" | "time" | "title">("frequency");
   const [lang, setLang] = useState<CodingLanguage>("typescript");
   const [starting, setStarting] = useState<string | null>(null);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const router = useRouter();
 
   const coding = props.problems;
@@ -116,6 +119,18 @@ export function Problemset(props: {
     });
     return rows;
   }, [coding, diff, tag, company, q, sort]);
+
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [mode, diff, tag, company, sort, q]);
+
+  const visible = useMemo(() => filtered.slice(0, visibleCount), [filtered, visibleCount]);
+  const hasMore = visibleCount < filtered.length;
+  const visibleProjects = useMemo(
+    () => props.projects.slice(0, visibleCount),
+    [props.projects, visibleCount],
+  );
+  const hasMoreProjects = visibleCount < props.projects.length;
 
   const counts = useMemo(() => {
     const c: Record<DifficultyBand, number> = { Easy: 0, Medium: 0, Hard: 0, Expert: 0, Impossible: 0 };
@@ -244,9 +259,13 @@ export function Problemset(props: {
             </div>
           </div>
 
+          <p className="font-mono text-[11px] text-slate-500">
+            Showing {Math.min(visible.length, filtered.length)} of {filtered.length} matching · library stays intact
+          </p>
+
           {/* Mobile card list */}
           <div className="space-y-3 md:hidden">
-            {filtered.map((p, i) => {
+            {visible.map((p, i) => {
               const L = label(p.difficulty);
               const locked = Boolean(p.isPremium) && !props.premium;
               const acc = illustrativeAcceptance(p.difficulty, p.slug);
@@ -339,7 +358,7 @@ export function Problemset(props: {
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((p, i) => {
+                {visible.map((p, i) => {
                   const L = label(p.difficulty);
                   const locked = Boolean(p.isPremium) && !props.premium;
                   const acc = illustrativeAcceptance(p.difficulty, p.slug);
@@ -412,44 +431,68 @@ export function Problemset(props: {
               </tbody>
             </table>
           </div>
+
+          {hasMore && (
+            <button
+              type="button"
+              className="inline-flex min-h-11 w-full items-center justify-center rounded-md border border-slate-700 bg-slate-950 text-sm text-slate-200 hover:border-cyan-500/40 hover:text-cyan-100"
+              onClick={() => setVisibleCount((n) => n + PAGE_SIZE)}
+            >
+              Load more ({filtered.length - visible.length} remaining)
+            </button>
+          )}
         </>
       ) : (
-        <div className="grid gap-4 lg:grid-cols-2">
-          {props.projects.map((c) => (
-            <div
-              key={c.id}
-              className={cn(
-                "rounded-xl border border-slate-800 bg-slate-950/60 p-5",
-                c.track === "CYBERSECURITY" && "border-violet-500/20",
-              )}
-            >
-              <div className="flex flex-wrap items-center gap-2">
-                <Badge
-                  variant={
-                    c.track === "CYBERSECURITY" ? "violet" : c.track === "SECURE_FULL_STACK" ? "emerald" : "cyan"
-                  }
-                >
-                  {c.track.replaceAll("_", " ")}
-                </Badge>
-                <Badge>{c.type}</Badge>
-                <Badge variant="amber">L{c.difficulty}</Badge>
-              </div>
-              <h2 className="mt-3 text-lg font-semibold text-slate-100">{c.title}</h2>
-              <p className="mt-1 text-sm text-slate-400">{c.summary}</p>
-              <div className="mt-4 flex items-center justify-between text-sm">
-                <span className="font-mono text-xs text-slate-500">60m session</span>
-                {c.workspaceId ? (
-                  <Link className="text-cyan-300 hover:underline" href={`/workspace/${c.workspaceId}`}>
-                    Open workspace →
-                  </Link>
-                ) : (
-                  <Link className="text-slate-400 hover:underline" href="/assessments">
-                    Assign →
-                  </Link>
+        <div className="space-y-4">
+          <p className="font-mono text-[11px] text-slate-500">
+            Showing {visibleProjects.length} of {props.projects.length} missions
+          </p>
+          <div className="grid gap-4 lg:grid-cols-2">
+            {visibleProjects.map((c) => (
+              <div
+                key={c.id}
+                className={cn(
+                  "rounded-xl border border-slate-800 bg-slate-950/60 p-5",
+                  c.track === "CYBERSECURITY" && "border-violet-500/20",
                 )}
+              >
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge
+                    variant={
+                      c.track === "CYBERSECURITY" ? "violet" : c.track === "SECURE_FULL_STACK" ? "emerald" : "cyan"
+                    }
+                  >
+                    {c.track.replaceAll("_", " ")}
+                  </Badge>
+                  <Badge>{c.type}</Badge>
+                  <Badge variant="amber">L{c.difficulty}</Badge>
+                </div>
+                <h2 className="mt-3 text-lg font-semibold text-slate-100">{c.title}</h2>
+                <p className="mt-1 text-sm text-slate-400">{c.summary}</p>
+                <div className="mt-4 flex items-center justify-between text-sm">
+                  <span className="font-mono text-xs text-slate-500">60m session</span>
+                  {c.workspaceId ? (
+                    <Link className="text-cyan-300 hover:underline" href={`/workspace/${c.workspaceId}`}>
+                      Open workspace →
+                    </Link>
+                  ) : (
+                    <Link className="text-slate-400 hover:underline" href="/assessments">
+                      Assign →
+                    </Link>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
+          {hasMoreProjects && (
+            <button
+              type="button"
+              className="inline-flex min-h-11 w-full items-center justify-center rounded-md border border-slate-700 bg-slate-950 text-sm text-slate-200 hover:border-cyan-500/40 hover:text-cyan-100"
+              onClick={() => setVisibleCount((n) => n + PAGE_SIZE)}
+            >
+              Load more missions ({props.projects.length - visibleProjects.length} remaining)
+            </button>
+          )}
         </div>
       )}
     </div>

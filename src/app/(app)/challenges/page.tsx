@@ -12,16 +12,34 @@ export default async function ChallengesPage({
   const sp = await searchParams;
   const user = await getSessionUser();
 
+  // Lean list payload only — full descriptions load inside the IDE, not the bank.
   const [challenges, editorialMap] = await Promise.all([
     prisma.challenge.findMany({
       where: {
         isPublished: true,
         ...(sp.track ? { track: sp.track as never } : {}),
       },
-      include: {
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        summary: true,
+        type: true,
+        track: true,
+        difficulty: true,
+        tags: true,
+        languages: true,
+        estimatedDays: true,
+        companies: true,
+        frequency: true,
+        avgMinutes: true,
+        isPremium: true,
+        owaspMappings: true,
+        mitreMappings: true,
         assessments: {
           where: { status: "PUBLISHED" },
           take: 1,
+          select: { id: true },
         },
       },
       orderBy: [{ difficulty: "asc" }, { title: "asc" }],
@@ -31,15 +49,18 @@ export default async function ChallengesPage({
 
   const workspaceByAssessment = new Map<string, string>();
   if (user) {
-    const myAssignments = await prisma.assessmentAssignment.findMany({
-      where: {
-        candidateId: user.id,
-        assessmentId: { in: challenges.flatMap((c) => c.assessments.map((a) => a.id)) },
-      },
-      include: { workspace: true },
-    });
-    for (const a of myAssignments) {
-      if (a.workspace) workspaceByAssessment.set(a.assessmentId, a.workspace.id);
+    const assessmentIds = challenges.flatMap((c) => c.assessments.map((a) => a.id));
+    if (assessmentIds.length) {
+      const myAssignments = await prisma.assessmentAssignment.findMany({
+        where: {
+          candidateId: user.id,
+          assessmentId: { in: assessmentIds },
+        },
+        select: { assessmentId: true, workspace: { select: { id: true } } },
+      });
+      for (const a of myAssignments) {
+        if (a.workspace) workspaceByAssessment.set(a.assessmentId, a.workspace.id);
+      }
     }
   }
 
@@ -50,7 +71,7 @@ export default async function ChallengesPage({
       slug: c.slug,
       title: c.title,
       summary: c.summary,
-      description: c.description,
+      description: "",
       type: c.type,
       track: c.track,
       difficulty: c.difficulty,

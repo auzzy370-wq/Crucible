@@ -17,8 +17,27 @@ export default async function DashboardPage() {
     const [assignments, streak, enrollments, profile, daily] = await Promise.all([
       prisma.assessmentAssignment.findMany({
         where: { candidateId: user.id },
-        include: { assessment: { include: { challenge: true } }, scoreReport: true, workspace: true },
+        include: {
+          assessment: {
+            include: {
+              challenge: {
+                select: {
+                  id: true,
+                  title: true,
+                  summary: true,
+                  type: true,
+                  track: true,
+                  difficulty: true,
+                  tags: true,
+                },
+              },
+            },
+          },
+          scoreReport: true,
+          workspace: { select: { id: true } },
+        },
         orderBy: { createdAt: "desc" },
+        take: 40,
       }),
       prisma.userStreak.findUnique({ where: { userId: user.id } }),
       prisma.studyPlanEnrollment.count({ where: { userId: user.id } }),
@@ -43,46 +62,51 @@ export default async function DashboardPage() {
     return (
       <div className="animate-rise space-y-6">
         <header>
-          <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">PROVE THE CRAFT</p>
+          <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">YOUR PATH</p>
           <h1 className="mt-2 font-serif-display text-2xl tracking-tight sm:text-3xl">
             {firstRunDone ? "Your Crucible" : "Evidence over puzzles"}
           </h1>
           <p className="mt-2 max-w-2xl text-slate-400">
-            Timed evidence sessions → public + hidden judge → verified profile employers can trust.
+            Follow the three steps below — same loop every time.
           </p>
         </header>
 
         <section className="rounded-2xl border border-cyan-500/20 bg-cyan-500/5 p-5">
-          <div className="text-xs font-medium uppercase tracking-wider text-cyan-200/80">Enter the crucible</div>
+          <div className="text-xs font-medium uppercase tracking-wider text-cyan-200/80">Smooth practice loop</div>
           <ol className="mt-4 grid gap-3 md:grid-cols-3">
             <li className="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
-              <div className="font-mono text-xs text-slate-500">1</div>
-              <div className="mt-1 font-medium text-slate-100">Daily evidence</div>
+              <div className="font-mono text-xs text-slate-500">1 · Start</div>
+              <div className="mt-1 font-medium text-slate-100">Daily or problem bank</div>
               <p className="mt-1 text-sm text-slate-400">
                 {daily?.challenge?.title ?? "Today’s session"} · streak {streak?.currentStreak ?? 0}
               </p>
-              <Link href="/daily" className="mt-3 inline-block text-sm text-cyan-300 hover:underline">
-                Open daily →
-              </Link>
+              <div className="mt-3 flex flex-wrap gap-3 text-sm">
+                <Link href="/daily" className="text-cyan-300 hover:underline">
+                  Open daily →
+                </Link>
+                <Link href="/challenges" className="text-slate-400 hover:underline">
+                  Browse bank →
+                </Link>
+              </div>
             </li>
             <li className="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
-              <div className="font-mono text-xs text-slate-500">2</div>
-              <div className="mt-1 font-medium text-slate-100">Judge you can trust</div>
+              <div className="font-mono text-xs text-slate-500">2 · Prove</div>
+              <div className="mt-1 font-medium text-slate-100">Run public + hidden judge</div>
               <p className="mt-1 text-sm text-slate-400">
-                Public Accepted first — then survive the hidden harness.
+                Code in the IDE. Accepted only after both judges pass.
               </p>
               <Link
-                href={codingOpen?.workspace ? `/workspace/${codingOpen.workspace.id}` : "/challenges"}
+                href={codingOpen?.workspace ? `/workspace/${codingOpen.workspace.id}` : "/workspace"}
                 className="mt-3 inline-block text-sm text-cyan-300 hover:underline"
               >
-                {codingOpen?.workspace ? "Continue workspace →" : "Open evidence bank →"}
+                {codingOpen?.workspace ? "Continue workspace →" : "Open workspaces →"}
               </Link>
             </li>
             <li className="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
-              <div className="font-mono text-xs text-slate-500">3</div>
+              <div className="font-mono text-xs text-slate-500">3 · Share</div>
               <div className="mt-1 font-medium text-slate-100">Verified profile</div>
               <p className="mt-1 text-sm text-slate-400">
-                Evidence only — never résumé claims.
+                Employers see evidence — never résumé claims.
               </p>
               {profile?.publicEnabled && profile.publicSlug ? (
                 <Link href={`/u/${profile.publicSlug}`} className="mt-3 inline-block text-sm text-cyan-300 hover:underline">
@@ -193,11 +217,10 @@ export default async function DashboardPage() {
     <div className="animate-rise space-y-6">
       <header className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">PROVE THE CRAFT</p>
+          <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">HIRING PATH</p>
           <h1 className="mt-2 font-serif-display text-2xl tracking-tight sm:text-3xl">Crucible operations</h1>
           <p className="mt-2 max-w-3xl text-slate-400">
-            Timed engineering and cybersecurity assessments that verify what résumés claim — then let employers trust
-            the scorecard.
+            Assign real work, review evidence, decide — never résumé claims alone.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -206,6 +229,36 @@ export default async function DashboardPage() {
           <Badge variant="emerald">Secure Full-Stack</Badge>
         </div>
       </header>
+
+      <section className="rounded-2xl border border-cyan-500/20 bg-cyan-500/5 p-5">
+        <div className="text-xs font-medium uppercase tracking-wider text-cyan-200/80">Smooth hiring loop</div>
+        <ol className="mt-4 grid gap-3 md:grid-cols-3">
+          <li className="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
+            <div className="font-mono text-xs text-slate-500">1</div>
+            <div className="mt-1 font-medium text-slate-100">Create & assign</div>
+            <p className="mt-1 text-sm text-slate-400">Pick a challenge, set the timer, provision a workspace.</p>
+            <Link href="/assessments" className="mt-3 inline-block text-sm text-cyan-300 hover:underline">
+              Open assessments →
+            </Link>
+          </li>
+          <li className="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
+            <div className="font-mono text-xs text-slate-500">2</div>
+            <div className="mt-1 font-medium text-slate-100">Watch evidence</div>
+            <p className="mt-1 text-sm text-slate-400">Candidates run public + hidden judges in isolated IDEs.</p>
+            <Link href="/candidates" className="mt-3 inline-block text-sm text-cyan-300 hover:underline">
+              Browse candidates →
+            </Link>
+          </li>
+          <li className="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
+            <div className="font-mono text-xs text-slate-500">3</div>
+            <div className="mt-1 font-medium text-slate-100">Human review</div>
+            <p className="mt-1 text-sm text-slate-400">AI assists — you decide qualify / hold / reject.</p>
+            <Link href="/reviews" className="mt-3 inline-block text-sm text-cyan-300 hover:underline">
+              Open review queue →
+            </Link>
+          </li>
+        </ol>
+      </section>
 
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {tiles.map((t) => (

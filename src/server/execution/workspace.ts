@@ -101,6 +101,85 @@ export async function refreshWorkspaceStarters(params: {
   return { refreshed: "full", count: files.length };
 }
 
+/** Write DB file snapshots to disk and normalize bare ESM relative imports (Node needs extensions). */
+export async function materializeWorkspaceToDisk(workspaceId: string) {
+  const workspace = await prisma.workspace.findUniqueOrThrow({
+    where: { id: workspaceId },
+    include: { files: true },
+  });
+  await fs.mkdir(workspace.rootPath, { recursive: true });
+
+  for (const file of workspace.files) {
+    let content = file.content;
+    if (/\.(m?[jt]sx?|mjs|cjs)$/.test(file.path)) {
+      const preferTs = /\.tsx?$/.test(file.path);
+      content = content.replace(/from\s+(["'])(\.[^"']+)\1/g, (full, quote: string, spec: string) => {
+        if (/\.(?:[cm]?[jt]s|tsx|jsx|json)$/i.test(spec)) return full;
+        const ext = preferTs ? ".ts" : ".js";
+        return `from ${quote}${spec}${ext}${quote}`;
+      });
+    }
+    if (file.path === "package.json") {
+      try {
+        const pkg = JSON.parse(content) as { type?: string; scripts?: Record<string, string> };
+        pkg.type = "module";
+        pkg.scripts = {
+          ...(pkg.scripts ?? {}),
+          test:
+            "node --experimental-strip-types --disable-warning=ExperimentalWarning tests/run.ts",
+        };
+        content = JSON.stringify(pkg, null, 2);
+      } catch {
+        /* keep */
+      }
+    }
+    const full = path.join(workspace.rootPath, file.path);
+    await fs.mkdir(path.dirname(full), { recursive: true });
+    await fs.writeFile(full, content, "utf8");
+    if (content !== file.content) {
+      await prisma.workspaceFile.update({
+        where: { id: file.id },
+        data: { content },
+      });
+    }
+  }
+
+  return workspace.rootPath;
+}
+
+/** Refresh harness/test runner files from current starters without wiping candidate solution code. */
+export async function repairCodingHarness(params: {
+  workspaceId: string;
+  challengeSlug: string;
+  language: string;
+  track: string;
+}) {
+  const files = starterFilesForChallenge(params.challengeSlug, params.language, params.track);
+  const harnessPaths = new Set(
+    files
+      .map((f) => f.path)
+      .filter(
+        (p) =>
+          p.startsWith("tests/") ||
+          p === "package.json" ||
+          p === "PROBLEM.md" ||
+          p === "README.md" ||
+          p === "Cargo.toml" ||
+          p === "go.mod",
+      ),
+  );
+  for (const file of files.filter((f) => harnessPaths.has(f.path))) {
+    await upsertWorkspaceFile({
+      workspaceId: params.workspaceId,
+      filePath: file.path,
+      content: file.content,
+      language: file.language,
+    });
+  }
+  await materializeWorkspaceToDisk(params.workspaceId);
+  return { repaired: harnessPaths.size };
+}
+
 export async function upsertWorkspaceFile(params: {
   workspaceId: string;
   filePath: string;

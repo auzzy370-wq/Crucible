@@ -24,11 +24,13 @@ export default async function WorkspaceIndexPage() {
   return (
     <div className="animate-rise space-y-6">
       <header>
-        <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">BROWSER IDE</p>
-        <h1 className="mt-2 text-2xl font-semibold sm:text-3xl">Isolated engineering workspaces</h1>
+        <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">STEP 2 · PROVE</p>
+        <h1 className="mt-2 text-2xl font-semibold sm:text-3xl">Your open workspaces</h1>
         <p className="mt-2 text-slate-400">
-          Monaco editor, file tree, commits, sandboxed test execution. Untrusted code never runs on the primary app
-          process with platform privileges.
+          Continue a session, hit Run for public tests, then Submit for the hidden judge. Need a new problem?{" "}
+          <Link href="/challenges" className="text-cyan-300 hover:underline">
+            Open the bank →
+          </Link>
         </p>
       </header>
       <div className="grid gap-4 md:grid-cols-2">
@@ -50,8 +52,16 @@ export default async function WorkspaceIndexPage() {
         ))}
         {!workspaces.length && (
           <Card className="md:col-span-2">
-            <CardContent className="py-10 text-center text-slate-400">
-              No workspaces yet. Assign an assessment to provision one.
+            <CardContent className="space-y-3 py-10 text-center text-slate-400">
+              <p>No open workspaces yet.</p>
+              <div className="flex flex-wrap justify-center gap-3 text-sm">
+                <Link href="/daily" className="text-cyan-300 hover:underline">
+                  Start daily →
+                </Link>
+                <Link href="/challenges" className="text-cyan-300 hover:underline">
+                  Pick from the bank →
+                </Link>
+              </div>
             </CardContent>
           </Card>
         )}

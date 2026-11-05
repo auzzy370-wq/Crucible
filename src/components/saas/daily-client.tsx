@@ -64,11 +64,10 @@ export function DailyClient(props: { daily: DailyPayload }) {
     <div className="animate-rise space-y-6">
       <header className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">PROVE THE CRAFT</p>
+          <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">STEP 1 · START</p>
           <h1 className="mt-2 font-serif-display text-2xl sm:text-3xl">Daily evidence session</h1>
           <p className="mt-2 max-w-2xl text-slate-400">
-            One timed judge a day — public examples, then the hidden harness. Streaks track consistency; scorecards track
-            craft.
+            One problem a day. Start opens the IDE — Run public tests, then Submit for the hidden judge.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">

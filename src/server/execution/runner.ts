@@ -185,7 +185,14 @@ function defaultCommand(type: string, language: string) {
 export async function processJob(jobId: string) {
   const job = await prisma.executionJob.findUnique({
     where: { id: jobId },
-    include: { workspace: { include: { files: true, assignment: true } } },
+    include: {
+      workspace: {
+        include: {
+          files: true,
+          assignment: { include: { assessment: { include: { challenge: true } } } },
+        },
+      },
+    },
   });
   if (!job || job.status !== "QUEUED") return;
 
@@ -196,6 +203,20 @@ export async function processJob(jobId: string) {
 
   const mode = process.env.EXECUTION_MODE ?? "process";
   try {
+    // Always sync DB → disk before judge so Run works even if storage drifted / imports were bare.
+    const { materializeWorkspaceToDisk, repairCodingHarness } = await import("./workspace");
+    const challenge = job.workspace.assignment.assessment.challenge;
+    if (challenge.type === "CODING_PROBLEM") {
+      await repairCodingHarness({
+        workspaceId: job.workspaceId,
+        challengeSlug: challenge.slug,
+        language: job.workspace.language,
+        track: challenge.track,
+      });
+    } else {
+      await materializeWorkspaceToDisk(job.workspaceId);
+    }
+
     const result =
       mode === "docker" ? await runInDocker(job) : await runInProcessSandbox(job);
 

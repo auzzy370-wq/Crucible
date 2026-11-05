@@ -74,6 +74,15 @@ export function AssessmentsClient(props: {
   const [timedMinutes, setTimedMinutes] = useState(60);
   const [assignAssessmentId, setAssignAssessmentId] = useState(props.assessments[0]?.id ?? "");
   const [candidateId, setCandidateId] = useState(props.candidates[0]?.id ?? "");
+  const [challengeQuery, setChallengeQuery] = useState("");
+  const filteredChallenges = challengeQuery.trim()
+    ? props.challenges
+        .filter((c) => {
+          const hay = `${c.title} ${c.slug} ${c.track} ${c.tags?.join(" ") ?? ""}`.toLowerCase();
+          return hay.includes(challengeQuery.trim().toLowerCase());
+        })
+        .slice(0, 80)
+    : props.challenges.slice(0, 80);
 
   async function createAssessment() {
     const res = await fetch("/api/assessments", {
@@ -102,11 +111,11 @@ export function AssessmentsClient(props: {
   return (
     <div className="animate-rise space-y-6">
       <header>
-        <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">ASSESSMENT MANAGEMENT</p>
-        <h1 className="mt-2 text-2xl font-semibold sm:text-3xl">Assign real engineering work</h1>
+        <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">HIRING · STEP 1</p>
+        <h1 className="mt-2 text-2xl font-semibold sm:text-3xl">Create → assign → wait for evidence</h1>
         <p className="mt-2 max-w-3xl text-slate-400">
-          Create timed Crucible assessments from the challenge library — including cybersecurity labs — and assign
-          candidates to isolated workspaces. Default session length is 60 minutes.
+          Pick a challenge from the full library, set a timer, assign a candidate. They get an isolated IDE; you review
+          after they submit.
         </p>
       </header>
 
@@ -128,17 +137,26 @@ export function AssessmentsClient(props: {
               </div>
               <div className="space-y-2">
                 <Label>Challenge</Label>
+                <Input
+                  placeholder="Search 5,000+ challenges…"
+                  value={challengeQuery}
+                  onChange={(e) => setChallengeQuery(e.target.value)}
+                />
                 <select
-                  className="flex h-10 w-full rounded-md border border-slate-700 bg-slate-950 px-3 text-sm"
+                  className="flex h-11 w-full rounded-md border border-slate-700 bg-slate-950 px-3 text-sm"
                   value={challengeId}
                   onChange={(e) => setChallengeId(e.target.value)}
                 >
-                  {props.challenges.map((c) => (
+                  {filteredChallenges.map((c) => (
                     <option key={c.id} value={c.id}>
                       [{c.track}] {c.title}
                     </option>
                   ))}
                 </select>
+                <p className="font-mono text-[11px] text-slate-500">
+                  Showing {filteredChallenges.length}
+                  {challengeQuery.trim() ? " matches" : " (type to search the full library)"}
+                </p>
               </div>
               <div className="space-y-2">
                 <Label>Timed session (minutes)</Label>
@@ -195,8 +213,18 @@ export function AssessmentsClient(props: {
       )}
 
       <section className="space-y-3">
-        <h2 className="text-lg font-semibold">Published assessments</h2>
+        <h2 className="text-lg font-semibold">Active assessments</h2>
+        <p className="text-sm text-slate-500">
+          Assigned or staff-created sessions only — the full challenge bank stays on Evidence / Create.
+        </p>
         <div className="grid gap-3 md:grid-cols-2">
+          {!props.assessments.length && (
+            <Card className="md:col-span-2">
+              <CardContent className="py-10 text-center text-slate-500">
+                No active assessments yet. Create one from the library above.
+              </CardContent>
+            </Card>
+          )}
           {props.assessments.map((a) => {
             const reqs = a.challenge.publicRequirements ?? [];
             return (

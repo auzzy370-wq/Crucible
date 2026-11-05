@@ -9,7 +9,6 @@ import {
   Shield,
   Crosshair,
   Boxes,
-  GitBranch,
   ScrollText,
   Settings,
   Terminal,
@@ -28,6 +27,7 @@ import {
   BookOpen,
   AlertTriangle,
   UserRound,
+  type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -36,32 +36,113 @@ import { Badge } from "@/components/ui/badge";
 type NavItem = {
   href: string;
   label: string;
-  icon: typeof LayoutDashboard;
+  icon: LucideIcon;
   roles?: string[];
+  hint?: string;
 };
 
-const NAV: NavItem[] = [
-  { href: "/dashboard", label: "Home", icon: LayoutDashboard },
-  { href: "/daily", label: "Daily Challenge", icon: CalendarDays },
-  { href: "/weekly", label: "Broken Production", icon: AlertTriangle },
-  { href: "/challenges", label: "Evidence bank", icon: Boxes },
-  { href: "/study-plans", label: "Study Plans", icon: Route },
-  { href: "/interview", label: "Company sessions", icon: Timer },
-  { href: "/playgrounds", label: "Playgrounds", icon: FlaskConical },
-  { href: "/contest", label: "Contest Arena", icon: Trophy },
-  { href: "/editorials", label: "Editorials", icon: BookOpen },
-  { href: "/pricing", label: "Premium", icon: Sparkles },
-  { href: "/candidates", label: "My Profile", icon: UserRound, roles: ["CANDIDATE", "TEAM_MEMBER"] },
-  { href: "/assessments", label: "Assessments", icon: Crosshair, roles: ["SUPER_ADMIN", "HIRING_MANAGER", "TECHNICAL_REVIEWER"] },
-  { href: "/candidates", label: "Candidates", icon: Users, roles: ["SUPER_ADMIN", "HIRING_MANAGER", "TECHNICAL_REVIEWER"] },
-  { href: "/reviews", label: "Technical Review", icon: ScrollText, roles: ["SUPER_ADMIN", "HIRING_MANAGER", "TECHNICAL_REVIEWER"] },
-  { href: "/teams", label: "Team Crucible", icon: Network, roles: ["SUPER_ADMIN", "HIRING_MANAGER", "TECHNICAL_REVIEWER", "TEAM_MEMBER"] },
-  { href: "/incidents", label: "Incident Sims", icon: Siren },
-  { href: "/architecture", label: "Architecture", icon: BrainCircuit, roles: ["SUPER_ADMIN", "HIRING_MANAGER", "TECHNICAL_REVIEWER"] },
-  { href: "/workspace", label: "Workspace", icon: Terminal },
-  { href: "/admin", label: "Admin / Security", icon: Shield, roles: ["SUPER_ADMIN"] },
-  { href: "/settings", label: "Settings", icon: Settings },
+type NavGroup = {
+  id: string;
+  title: string;
+  roles?: string[];
+  items: NavItem[];
+};
+
+const NAV_GROUPS: NavGroup[] = [
+  {
+    id: "practice",
+    title: "Practice",
+    roles: ["CANDIDATE", "TEAM_MEMBER"],
+    items: [
+      { href: "/dashboard", label: "Home", icon: LayoutDashboard, hint: "Your next step" },
+      { href: "/daily", label: "Daily", icon: CalendarDays, hint: "One timed session today" },
+      { href: "/challenges", label: "Problem bank", icon: Boxes, hint: "Browse & solve" },
+      { href: "/workspace", label: "Open workspaces", icon: Terminal, hint: "Continue where you left off" },
+    ],
+  },
+  {
+    id: "prep",
+    title: "Prep",
+    roles: ["CANDIDATE", "TEAM_MEMBER"],
+    items: [
+      { href: "/study-plans", label: "Study plans", icon: Route },
+      { href: "/interview", label: "Company mocks", icon: Timer },
+      { href: "/weekly", label: "Broken prod", icon: AlertTriangle },
+      { href: "/editorials", label: "Editorials", icon: BookOpen },
+      { href: "/playgrounds", label: "Playgrounds", icon: FlaskConical },
+      { href: "/contest", label: "Contest", icon: Trophy },
+    ],
+  },
+  {
+    id: "profile",
+    title: "You",
+    roles: ["CANDIDATE", "TEAM_MEMBER"],
+    items: [
+      { href: "/candidates", label: "My profile", icon: UserRound },
+      { href: "/pricing", label: "Premium", icon: Sparkles },
+      { href: "/settings", label: "Settings", icon: Settings },
+    ],
+  },
+  {
+    id: "hiring",
+    title: "Hiring",
+    roles: ["SUPER_ADMIN", "HIRING_MANAGER", "TECHNICAL_REVIEWER"],
+    items: [
+      { href: "/dashboard", label: "Ops home", icon: LayoutDashboard, hint: "Pipeline overview" },
+      { href: "/assessments", label: "Assessments", icon: Crosshair, hint: "Create & assign" },
+      { href: "/candidates", label: "Candidates", icon: Users, hint: "Profiles & evidence" },
+      { href: "/reviews", label: "Reviews", icon: ScrollText, hint: "Human decisions" },
+    ],
+  },
+  {
+    id: "team",
+    title: "Team & sims",
+    roles: ["SUPER_ADMIN", "HIRING_MANAGER", "TECHNICAL_REVIEWER", "TEAM_MEMBER"],
+    items: [
+      { href: "/teams", label: "Team crucible", icon: Network },
+      { href: "/incidents", label: "Incident sims", icon: Siren },
+      { href: "/architecture", label: "Architecture", icon: BrainCircuit, roles: ["SUPER_ADMIN", "HIRING_MANAGER", "TECHNICAL_REVIEWER"] },
+    ],
+  },
+  {
+    id: "library",
+    title: "Library",
+    roles: ["SUPER_ADMIN", "HIRING_MANAGER", "TECHNICAL_REVIEWER"],
+    items: [
+      { href: "/challenges", label: "Challenge bank", icon: Boxes },
+      { href: "/workspace", label: "Workspaces", icon: Terminal },
+      { href: "/editorials", label: "Editorials", icon: BookOpen },
+    ],
+  },
+  {
+    id: "admin",
+    title: "Admin",
+    roles: ["SUPER_ADMIN"],
+    items: [
+      { href: "/admin", label: "Security / admin", icon: Shield },
+      { href: "/pricing", label: "Billing plans", icon: Sparkles },
+      { href: "/settings", label: "Settings", icon: Settings },
+    ],
+  },
+  {
+    id: "staff-settings",
+    title: "Account",
+    roles: ["HIRING_MANAGER", "TECHNICAL_REVIEWER"],
+    items: [
+      { href: "/pricing", label: "Premium", icon: Sparkles },
+      { href: "/settings", label: "Settings", icon: Settings },
+    ],
+  },
 ];
+
+function visibleGroups(role: string) {
+  return NAV_GROUPS.map((group) => {
+    if (group.roles && !group.roles.includes(role)) return null;
+    const items = group.items.filter((item) => !item.roles || item.roles.includes(role));
+    if (!items.length) return null;
+    return { ...group, items };
+  }).filter(Boolean) as NavGroup[];
+}
 
 function NavLinks({
   pathname,
@@ -72,31 +153,44 @@ function NavLinks({
   role: string;
   onNavigate?: () => void;
 }) {
-  const items = useMemo(
-    () => NAV.filter((item) => !item.roles || item.roles.includes(role)),
-    [role],
-  );
+  const groups = useMemo(() => visibleGroups(role), [role]);
 
   return (
-    <nav className="space-y-1 px-3 pb-6">
-      {items.map((item) => {
-        const Icon = item.icon;
-        const active = pathname === item.href || pathname.startsWith(item.href + "/");
-        return (
-          <Link
-            key={`${item.href}-${item.label}`}
-            href={item.href}
-            onClick={onNavigate}
-            className={cn(
-              "flex min-h-11 items-center gap-2 rounded-lg px-3 py-2.5 text-sm transition-colors",
-              active ? "bg-cyan-500/10 text-cyan-200" : "text-slate-400 hover:bg-slate-900 hover:text-slate-100",
-            )}
-          >
-            <Icon className="h-4 w-4 shrink-0" />
-            {item.label}
-          </Link>
-        );
-      })}
+    <nav className="space-y-5 px-3 pb-6">
+      {groups.map((group) => (
+        <div key={group.id}>
+          <div className="mb-1.5 px-3 font-mono text-[10px] uppercase tracking-[0.22em] text-slate-600">
+            {group.title}
+          </div>
+          <div className="space-y-0.5">
+            {group.items.map((item) => {
+              const Icon = item.icon;
+              const active = pathname === item.href || pathname.startsWith(item.href + "/");
+              return (
+                <Link
+                  key={`${group.id}-${item.href}-${item.label}`}
+                  href={item.href}
+                  onClick={onNavigate}
+                  className={cn(
+                    "flex min-h-11 items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors",
+                    active ? "bg-cyan-500/10 text-cyan-200" : "text-slate-400 hover:bg-slate-900 hover:text-slate-100",
+                  )}
+                >
+                  <Icon className="h-4 w-4 shrink-0" />
+                  <span className="min-w-0 flex-1">
+                    <span className="block leading-tight">{item.label}</span>
+                    {item.hint && (
+                      <span className={cn("block text-[11px] leading-tight", active ? "text-cyan-200/60" : "text-slate-600")}>
+                        {item.hint}
+                      </span>
+                    )}
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      ))}
     </nav>
   );
 }
@@ -112,6 +206,7 @@ export function AppShell({
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const isCandidate = user.role === "CANDIDATE" || user.role === "TEAM_MEMBER";
+  const isStaff = ["SUPER_ADMIN", "HIRING_MANAGER", "TECHNICAL_REVIEWER"].includes(user.role);
 
   useEffect(() => {
     setOpen(false);
@@ -151,7 +246,9 @@ export function AppShell({
           <div className="truncate text-sm font-medium text-slate-100">{user.name}</div>
           {user.plan === "PREMIUM" && <Badge variant="amber">Premium</Badge>}
         </div>
-        <div className="truncate font-mono text-xs text-slate-500">{user.role}</div>
+        <div className="truncate font-mono text-xs text-slate-500">
+          {isCandidate ? "Candidate" : isStaff ? "Hiring team" : user.role}
+        </div>
       </div>
       {user.plan !== "PREMIUM" && (
         <Link href="/pricing" className="mb-2 block text-center text-xs text-amber-200 hover:underline">
@@ -164,17 +261,34 @@ export function AppShell({
     </div>
   );
 
-  const mobileTabs = [
-    { href: "/dashboard", label: "Home", icon: LayoutDashboard },
-    { href: "/daily", label: "Daily", icon: CalendarDays },
-    { href: "/challenges", label: "Evidence", icon: Boxes },
-    { href: "/workspace", label: "IDE", icon: Terminal },
-  ] as const;
+  const mobileTabs = isStaff
+    ? ([
+        { href: "/dashboard", label: "Home", icon: LayoutDashboard },
+        { href: "/assessments", label: "Assign", icon: Crosshair },
+        { href: "/candidates", label: "People", icon: Users },
+        { href: "/reviews", label: "Review", icon: ScrollText },
+      ] as const)
+    : ([
+        { href: "/dashboard", label: "Home", icon: LayoutDashboard },
+        { href: "/daily", label: "Daily", icon: CalendarDays },
+        { href: "/challenges", label: "Bank", icon: Boxes },
+        { href: "/workspace", label: "IDE", icon: Terminal },
+      ] as const);
 
   const inWorkspaceSession = /^\/workspace\/[^/]+/.test(pathname);
 
+  const journeyCopy = isCandidate
+    ? {
+        badge: "Your path",
+        body: "1 · Daily or bank → 2 · Run public + hidden judge → 3 · Publish verified profile",
+      }
+    : {
+        badge: "Hiring path",
+        body: "1 · Create assessment → 2 · Assign candidate → 3 · Review evidence → decide",
+      };
+
   return (
-    <div className="min-h-screen lg:grid lg:grid-cols-[260px_1fr]">
+    <div className="min-h-screen lg:grid lg:grid-cols-[272px_1fr]">
       <header className="sticky top-0 z-40 flex items-center justify-between gap-3 border-b border-slate-800/80 bg-slate-950/95 px-3 py-3 backdrop-blur sm:px-4 lg:hidden safe-top">
         <Link href="/dashboard" className="min-w-0">
           {brand}
@@ -193,18 +307,12 @@ export function AppShell({
       </header>
 
       <div
-        className={cn(
-          "fixed inset-0 z-50 lg:hidden",
-          open ? "pointer-events-auto" : "pointer-events-none",
-        )}
+        className={cn("fixed inset-0 z-50 lg:hidden", open ? "pointer-events-auto" : "pointer-events-none")}
         aria-hidden={!open}
       >
         <button
           type="button"
-          className={cn(
-            "absolute inset-0 bg-black/60 transition-opacity",
-            open ? "opacity-100" : "opacity-0",
-          )}
+          className={cn("absolute inset-0 bg-black/60 transition-opacity", open ? "opacity-100" : "opacity-0")}
           aria-label="Close menu overlay"
           onClick={() => setOpen(false)}
         />
@@ -222,13 +330,9 @@ export function AppShell({
           </div>
           <div className="px-5 pb-3">
             <Badge variant="cyan" className="mb-2">
-              {isCandidate ? "Prove the craft" : "Elite qualification"}
+              {journeyCopy.badge}
             </Badge>
-            <p className="text-xs leading-relaxed text-slate-400">
-              {isCandidate
-                ? "Evidence over puzzles — timed session, public + hidden judge, verified profile."
-                : "Software engineering & cybersecurity. Evidence only — never résumé claims."}
-            </p>
+            <p className="text-xs leading-relaxed text-slate-400">{journeyCopy.body}</p>
           </div>
           <div className="flex-1 overflow-y-auto overscroll-contain">
             <NavLinks pathname={pathname} role={user.role} onNavigate={() => setOpen(false)} />
@@ -241,13 +345,9 @@ export function AppShell({
         <div className="px-5 py-5">{brand}</div>
         <div className="px-5 pb-4">
           <Badge variant="cyan" className="mb-2">
-            {isCandidate ? "Prove the craft" : "Elite qualification"}
+            {journeyCopy.badge}
           </Badge>
-          <p className="text-xs leading-relaxed text-slate-400">
-            {isCandidate
-              ? "Evidence over puzzles — timed session, public + hidden judge, verified profile."
-              : "Software engineering & cybersecurity. Evidence only — never résumé claims."}
-          </p>
+          <p className="text-xs leading-relaxed text-slate-400">{journeyCopy.body}</p>
         </div>
         <div className="flex-1 overflow-y-auto">
           <NavLinks pathname={pathname} role={user.role} />
@@ -301,10 +401,6 @@ export function AppShell({
           </div>
         </nav>
       )}
-
-      <Link href="/assessments" className="sr-only">
-        <GitBranch />
-      </Link>
     </div>
   );
 }
