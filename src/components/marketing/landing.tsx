@@ -26,7 +26,6 @@ export function LandingPage(props: {
         aria-hidden
       />
 
-      {/* Full-bleed first viewport — one composition */}
       <div className="relative z-10 flex min-h-[100svh] flex-col">
         <header className="mx-auto flex w-full max-w-[1400px] items-center justify-between gap-3 px-4 py-4 safe-top sm:px-10 sm:py-6 lg:px-14">
           <div className="landing-anim-brand flex min-w-0 items-baseline gap-2 sm:gap-3">
@@ -34,10 +33,19 @@ export function LandingPage(props: {
               Crucible
             </span>
             <span className="truncate font-mono text-[9px] uppercase tracking-[0.22em] text-[var(--landing-teal)] sm:text-[10px] sm:tracking-[0.28em]">
-              Prove the craft
+              Learn · Hire
             </span>
           </div>
-          <div className="landing-anim-brand flex shrink-0 items-center gap-3 sm:gap-5" style={{ animationDelay: "0.05s" }}>
+          <div
+            className="landing-anim-brand flex shrink-0 items-center gap-3 sm:gap-5"
+            style={{ animationDelay: "0.05s" }}
+          >
+            <Link
+              href="/login?intent=hire"
+              className="hidden min-h-10 items-center px-1 text-sm text-[var(--landing-mute)] transition hover:text-[var(--landing-ink)] sm:inline-flex"
+            >
+              For employers
+            </Link>
             <Link
               href="/login"
               className="inline-flex min-h-10 items-center px-1 text-sm text-[var(--landing-mute)] transition hover:text-[var(--landing-ink)]"
@@ -48,7 +56,7 @@ export function LandingPage(props: {
               href="/register"
               className="inline-flex min-h-10 items-center rounded-md border border-cyan-400/30 px-3 text-sm font-medium text-[var(--landing-teal)] transition hover:border-cyan-300/50 hover:text-white sm:border-0 sm:px-0"
             >
-              Start free
+              Start learning
             </Link>
           </div>
         </header>
@@ -58,32 +66,31 @@ export function LandingPage(props: {
             <p className="landing-anim-brand font-mono text-[11px] uppercase tracking-[0.28em] text-[var(--landing-teal)] sm:tracking-[0.42em]">
               Crucible
             </p>
-            <h1 className="landing-anim-copy mt-4 break-words font-serif-display text-[clamp(2.35rem,9vw,5.25rem)] leading-[0.95] tracking-[-0.02em] text-[var(--landing-ink)] sm:mt-5">
-              Evidence
+            <h1 className="landing-anim-copy mt-4 break-words font-serif-display text-[clamp(2.2rem,8.5vw,4.85rem)] leading-[0.95] tracking-[-0.02em] text-[var(--landing-ink)] sm:mt-5">
+              Learn the craft.
               <br />
-              <em className="text-[var(--landing-teal)]">over puzzles.</em>
+              <em className="text-[var(--landing-teal)]">Hire the proof.</em>
             </h1>
             <p className="landing-anim-copy mt-5 max-w-md text-[15px] leading-relaxed text-[var(--landing-mute)] sm:mt-6 sm:text-lg">
-              Timed engineering and cybersecurity assessments that verify what résumés claim — then let employers trust
-              the scorecard.
+              Engineers practice with timed judges and real production work. Employers use the same arena to test who
+              can actually ship.
             </p>
             <div className="landing-anim-cta mt-7 flex w-full flex-col gap-3 sm:mt-9 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
               <Link
                 href="/register"
                 className="inline-flex min-h-12 w-full items-center justify-center rounded-md bg-cyan-400 px-6 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300 sm:w-auto"
               >
-                Enter the crucible
+                Start learning free
               </Link>
               <Link
-                href="/login"
+                href="/login?intent=hire"
                 className="inline-flex min-h-12 w-full items-center justify-center rounded-md border border-slate-700 px-5 text-sm text-slate-100 transition hover:border-slate-500 sm:w-auto"
               >
-                View demo accounts
+                Hire with Crucible
               </Link>
             </div>
           </section>
 
-          {/* Dominant IDE visual plane — not a card collage */}
           <section className="landing-anim-ide relative min-w-0 w-full lg:justify-self-stretch">
             <div className="pointer-events-none absolute -inset-8 -z-10 bg-[radial-gradient(ellipse_at_center,rgba(34,211,238,0.12),transparent_65%)]" />
             <div className="landing-ide-sheen relative overflow-hidden rounded-xl border border-cyan-400/20 bg-[#070b12]/95 shadow-[0_40px_120px_-40px_rgba(0,0,0,0.85)] backdrop-blur-sm">
@@ -92,15 +99,16 @@ export function LandingPage(props: {
                 <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-slate-600" />
                 <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-slate-600" />
                 <span className="ml-2 truncate font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500 sm:ml-3 sm:tracking-[0.22em]">
-                  workspace · evidence session
+                  learn · timed evidence session
                 </span>
                 <span className="ml-auto shrink-0 font-mono text-[11px] text-amber-300/90">41:12</span>
               </div>
               <div className="grid min-w-0 sm:grid-cols-[0.9fr_1.15fr]">
                 <aside className="hidden border-r border-white/[0.06] p-4 sm:block">
-                  <div className="font-mono text-[10px] uppercase tracking-wider text-white/30">Problem</div>
+                  <div className="font-mono text-[10px] uppercase tracking-wider text-white/30">Lesson in production</div>
                   <p className="mt-3 text-sm leading-relaxed text-white/70">
-                    Isolate tenants on invoice reads. Pass public checks — then survive the hidden cross-tenant harness.
+                    Isolate tenants on invoice reads. Pass the public checks — then survive the hidden cross-tenant
+                    harness employers also run.
                   </p>
                   <div className="mt-6 space-y-2 font-mono text-[11px] text-white/40">
                     <div>src/invoices/query.ts</div>
@@ -136,7 +144,7 @@ export function LandingPage(props: {
                     {"  }\n\n"}
                     <span className="text-white/30">07</span>
                     {"  "}
-                    <span className="text-white/35">{"// Lightning Judge · priority queue"}</span>
+                    <span className="text-white/35">{"// same judge learners and hiring teams share"}</span>
                     {"\n"}
                     <span className="text-white/30">08</span>
                     {"  "}
@@ -157,11 +165,53 @@ export function LandingPage(props: {
         </main>
       </div>
 
-      {/* Below fold — proof + one purpose sections */}
+      <section id="paths" className="relative z-10 border-t border-white/[0.06]">
+        <div className="mx-auto grid max-w-[1400px] gap-10 px-6 py-16 sm:px-10 lg:grid-cols-2 lg:gap-16 lg:px-14 lg:py-20">
+          <div>
+            <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[var(--landing-teal)]">For learners</p>
+            <h2 className="mt-3 font-serif-display text-3xl text-[var(--landing-ink)]">A place to get better</h2>
+            <p className="mt-4 max-w-md text-[15px] leading-relaxed text-[var(--landing-mute)]">
+              Daily sessions, a deep problem bank, study plans, and company-style mocks. You learn by shipping under the
+              same judges employers trust — then publish a verified profile.
+            </p>
+            <ul className="mt-6 space-y-2 font-mono text-xs text-white/45">
+              <li>1 · Practice timed coding + project missions</li>
+              <li>2 · Pass public and hidden judges</li>
+              <li>3 · Share evidence employers can open</li>
+            </ul>
+            <Link
+              href="/register"
+              className="mt-8 inline-flex min-h-11 items-center font-mono text-sm text-[var(--landing-teal)] transition hover:text-white"
+            >
+              Create a learner account →
+            </Link>
+          </div>
+          <div>
+            <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-amber-200/80">For employers</p>
+            <h2 className="mt-3 font-serif-display text-3xl text-[var(--landing-ink)]">A floor to test talent</h2>
+            <p className="mt-4 max-w-md text-[15px] leading-relaxed text-[var(--landing-mute)]">
+              Assign the work you actually care about. Watch candidates build in isolated workspaces, run hidden
+              harnesses, and collect scorecards — humans still make the hire call.
+            </p>
+            <ul className="mt-6 space-y-2 font-mono text-xs text-white/45">
+              <li>1 · Create a timed assessment from the bank</li>
+              <li>2 · Assign candidates and review evidence</li>
+              <li>3 · Qualify with documented human review</li>
+            </ul>
+            <Link
+              href="/login?intent=hire"
+              className="mt-8 inline-flex min-h-11 items-center font-mono text-sm text-amber-200/90 transition hover:text-white"
+            >
+              Enter as hiring team →
+            </Link>
+          </div>
+        </div>
+      </section>
+
       <section className="relative z-10 border-t border-white/[0.06]">
         <div className="mx-auto flex max-w-[1400px] flex-col gap-8 px-6 py-14 sm:px-10 lg:flex-row lg:items-end lg:justify-between lg:px-14">
           <div>
-            <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-white/35">Live proof</p>
+            <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-white/35">Shared proof</p>
             <p className="mt-3 max-w-xl font-serif-display text-2xl leading-snug text-[var(--landing-ink)] sm:text-3xl">
               {skills} verified skills · {timed}-minute sessions · human review
             </p>
@@ -174,7 +224,8 @@ export function LandingPage(props: {
           </Link>
         </div>
         <p className="mx-auto max-w-[1400px] px-6 pb-6 font-mono text-[11px] text-white/25 sm:px-10 lg:px-14">
-          {profiles} public {profiles === 1 ? "profile" : "profiles"} published · claimed résumé skills never appear
+          {profiles} public {profiles === 1 ? "profile" : "profiles"} published · learners and hiring teams share one
+          evidence standard
         </p>
       </section>
 
@@ -182,16 +233,16 @@ export function LandingPage(props: {
         <div className="mx-auto grid max-w-[1400px] gap-12 px-6 py-20 sm:grid-cols-3 sm:px-10 lg:px-14">
           {[
             {
-              t: "Timed assessments",
-              d: "Sixty minutes. SaaS, AppSec, SOC/IR, secure full-stack — build, break, recover.",
+              t: "Learn under pressure",
+              d: "Sixty-minute sessions across SaaS, AppSec, SOC/IR, and secure full-stack — build, break, recover.",
             },
             {
-              t: "Judge you can trust",
-              d: "Public examples and hidden harnesses across TypeScript, JavaScript, Python, Go, Rust, and Java. Accepted only when both lanes pass.",
+              t: "One judge for both sides",
+              d: "Public examples and hidden harnesses in TypeScript, JavaScript, Python, Go, Rust, and Java. Learners train on what employers score.",
             },
             {
-              t: "Verified profiles",
-              d: "Shareable qualification pages for employers. Evidence only — never claims.",
+              t: "Hire on evidence",
+              d: "Shareable qualification pages and scorecards. Résumé claims stay claims until Crucible verifies them.",
             },
           ].map((item) => (
             <div key={item.t}>

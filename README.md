@@ -1,8 +1,8 @@
 # CRUCIBLE
 
-**Release 1.4** — **Evidence over puzzles.** Elite software engineering and cybersecurity qualification.
+**Release 1.4** — **Learn the craft. Hire the proof.**
 
-Timed assessments that verify what résumés claim. Coding judges in **TypeScript, JavaScript, Python, Go, Rust, and Java** (public + hidden) *and* production missions — design, build, secure, deploy, recover. Résumés claim. **Crucible verifies.**
+Crucible is both a **learning arena** and an **employer testing floor**. Engineers practice with timed judges and production missions; hiring managers assign that same work to screen candidates. Coding judges in **TypeScript, JavaScript, Python, Go, Rust, and Java** (public + hidden). Résumés claim. **Crucible verifies.**
 
 The seed loads the **full challenge library as published 60-minute assessments** with demo assignments, workspaces, and tests already placed. See [docs/RELEASE.md](docs/RELEASE.md).
 

@@ -75,13 +75,13 @@ export default function RegisterPage() {
           <div className="mb-1 flex items-baseline gap-3">
             <span className="font-serif-display text-2xl tracking-tight text-[var(--landing-ink)]">Crucible</span>
             <span className="font-mono text-[10px] uppercase tracking-[0.28em] text-[var(--landing-teal)]">
-              Enter the crucible
+              Learn the craft
             </span>
           </div>
-          <CardTitle className="font-serif-display text-xl sm:text-2xl">Create your account</CardTitle>
+          <CardTitle className="font-serif-display text-xl sm:text-2xl">Start learning free</CardTitle>
           <CardDescription className="text-[var(--landing-mute)]">
-            Real accounts are free. Demo logins stay on the sign-in page for exploration — use your email here to keep
-            your verified profile.
+            Practice timed engineering and security work, build a verified profile, and share evidence employers can
+            trust. Hiring teams sign in from the employer path.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -154,17 +154,17 @@ export default function RegisterPage() {
               </p>
             )}
             <Button className="w-full" disabled={loading}>
-              {loading ? "Creating account…" : "Create account"}
+              {loading ? "Creating account…" : "Start learning"}
             </Button>
           </form>
           <p className="mt-4 text-center text-sm text-slate-400">
-            Already have an account?{" "}
+            Already learning?{" "}
             <Link className="text-cyan-300 hover:underline" href="/login">
               Sign in
             </Link>
             {" · "}
-            <Link className="text-slate-400 hover:underline" href="/login">
-              Try demos
+            <Link className="text-slate-400 hover:underline" href="/login?intent=hire">
+              Hire talent
             </Link>
           </p>
         </CardContent>

@@ -52,18 +52,18 @@ type NavGroup = {
 const NAV_GROUPS: NavGroup[] = [
   {
     id: "practice",
-    title: "Practice",
+    title: "Learn",
     roles: ["CANDIDATE", "TEAM_MEMBER"],
     items: [
-      { href: "/dashboard", label: "Home", icon: LayoutDashboard, hint: "Your next step" },
+      { href: "/dashboard", label: "Home", icon: LayoutDashboard, hint: "Your next lesson" },
       { href: "/daily", label: "Daily", icon: CalendarDays, hint: "One timed session today" },
-      { href: "/challenges", label: "Problem bank", icon: Boxes, hint: "Browse & solve" },
+      { href: "/challenges", label: "Problem bank", icon: Boxes, hint: "Browse & practice" },
       { href: "/workspace", label: "Open workspaces", icon: Terminal, hint: "Continue where you left off" },
     ],
   },
   {
     id: "prep",
-    title: "Prep",
+    title: "Train deeper",
     roles: ["CANDIDATE", "TEAM_MEMBER"],
     items: [
       { href: "/study-plans", label: "Study plans", icon: Route },
@@ -76,30 +76,30 @@ const NAV_GROUPS: NavGroup[] = [
   },
   {
     id: "profile",
-    title: "You",
+    title: "Your proof",
     roles: ["CANDIDATE", "TEAM_MEMBER"],
     items: [
-      { href: "/candidates", label: "My profile", icon: UserRound },
+      { href: "/candidates", label: "Verified profile", icon: UserRound },
       { href: "/pricing", label: "Premium", icon: Sparkles },
       { href: "/settings", label: "Settings", icon: Settings },
     ],
   },
   {
     id: "hiring",
-    title: "Hiring",
+    title: "Hire",
     roles: ["SUPER_ADMIN", "HIRING_MANAGER", "TECHNICAL_REVIEWER"],
     items: [
-      { href: "/dashboard", label: "Ops home", icon: LayoutDashboard, hint: "Pipeline overview" },
+      { href: "/dashboard", label: "Hiring home", icon: LayoutDashboard, hint: "Test pipeline" },
       { href: "/analytics", label: "Analytics", icon: BarChart3, hint: "Scores & funnel" },
       {
         href: "/assessments",
         label: "Assessments",
         icon: Crosshair,
-        hint: "Create & assign",
+        hint: "Create & assign tests",
         roles: ["SUPER_ADMIN", "HIRING_MANAGER"],
       },
       { href: "/candidates", label: "Candidates", icon: Users, hint: "Profiles & evidence" },
-      { href: "/reviews", label: "Reviews", icon: ScrollText, hint: "Human decisions" },
+      { href: "/reviews", label: "Reviews", icon: ScrollText, hint: "Human hire decisions" },
     ],
   },
   {
@@ -255,7 +255,7 @@ export function AppShell({
           {user.plan === "PREMIUM" && <Badge variant="amber">Premium</Badge>}
         </div>
         <div className="truncate font-mono text-xs text-slate-500">
-          {isCandidate ? "Candidate" : isStaff ? "Hiring team" : user.role}
+          {isCandidate ? "Learner" : isStaff ? "Hiring team" : user.role}
         </div>
       </div>
       {user.plan !== "PREMIUM" && !isStaff && (
@@ -294,12 +294,12 @@ export function AppShell({
 
   const journeyCopy = isCandidate
     ? {
-        badge: "Your path",
-        body: "1 · Daily or bank → 2 · Run public + hidden judge → 3 · Publish verified profile",
+        badge: "Learning path",
+        body: "1 · Practice daily or bank → 2 · Pass public + hidden judges → 3 · Share verified proof with employers",
       }
     : {
         badge: "Hiring path",
-        body: "1 · Create assessment → 2 · Assign candidate → 3 · Review evidence → decide",
+        body: "1 · Create a timed test → 2 · Assign candidates → 3 · Review evidence → decide",
       };
 
   return (

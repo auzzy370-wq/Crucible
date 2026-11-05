@@ -142,11 +142,11 @@ export function Problemset(props: {
     <div className="animate-rise space-y-6">
       <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">PROVE THE CRAFT</p>
-          <h1 className="mt-2 font-serif-display text-2xl tracking-tight sm:text-3xl">Evidence sessions</h1>
+          <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">LEARNING LIBRARY</p>
+          <h1 className="mt-2 font-serif-display text-2xl tracking-tight sm:text-3xl">Practice bank</h1>
           <p className="mt-2 max-w-2xl text-slate-400">
-            Timed coding and production missions — TypeScript, JavaScript, Python, Go, Rust, Java. Public checks first;
-            hidden harnesses decide Accepted. Submit pinpoints what you proved.
+            Train on the same timed coding and production missions employers assign — TypeScript, JavaScript, Python,
+            Go, Rust, Java. Public checks first; hidden harnesses decide Accepted.
           </p>
           <p className="mt-2 max-w-2xl text-xs text-slate-500" title={FREQUENCY_METHODOLOGY.detail}>
             Freq: {FREQUENCY_METHODOLOGY.label}. Acc: {ACCEPTANCE_METHODOLOGY.label} —{" "}

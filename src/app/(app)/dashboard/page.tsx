@@ -62,23 +62,23 @@ export default async function DashboardPage() {
     return (
       <div className="animate-rise space-y-6">
         <header>
-          <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">YOUR PATH</p>
+          <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">LEARNING PATH</p>
           <h1 className="mt-2 font-serif-display text-2xl tracking-tight sm:text-3xl">
-            {firstRunDone ? "Your Crucible" : "Evidence over puzzles"}
+            {firstRunDone ? "Keep sharpening" : "Learn by proving"}
           </h1>
           <p className="mt-2 max-w-2xl text-slate-400">
-            Follow the three steps below — same loop every time.
+            Practice the same timed work employers use to test candidates — then publish verified proof.
           </p>
         </header>
 
         <section className="rounded-2xl border border-cyan-500/20 bg-cyan-500/5 p-5">
-          <div className="text-xs font-medium uppercase tracking-wider text-cyan-200/80">Smooth practice loop</div>
+          <div className="text-xs font-medium uppercase tracking-wider text-cyan-200/80">Learning loop</div>
           <ol className="mt-4 grid gap-3 md:grid-cols-3">
             <li className="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
-              <div className="font-mono text-xs text-slate-500">1 · Start</div>
+              <div className="font-mono text-xs text-slate-500">1 · Practice</div>
               <div className="mt-1 font-medium text-slate-100">Daily or problem bank</div>
               <p className="mt-1 text-sm text-slate-400">
-                {daily?.challenge?.title ?? "Today’s session"} · streak {streak?.currentStreak ?? 0}
+                {daily?.challenge?.title ?? "Today’s lesson"} · streak {streak?.currentStreak ?? 0}
               </p>
               <div className="mt-3 flex flex-wrap gap-3 text-sm">
                 <Link href="/daily" className="text-cyan-300 hover:underline">
@@ -91,9 +91,9 @@ export default async function DashboardPage() {
             </li>
             <li className="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
               <div className="font-mono text-xs text-slate-500">2 · Prove</div>
-              <div className="mt-1 font-medium text-slate-100">Run public + hidden judge</div>
+              <div className="mt-1 font-medium text-slate-100">Pass public + hidden judges</div>
               <p className="mt-1 text-sm text-slate-400">
-                Code in the IDE. Accepted only after both judges pass.
+                Code in the IDE. You only advance when both lanes accept.
               </p>
               <Link
                 href={codingOpen?.workspace ? `/workspace/${codingOpen.workspace.id}` : "/workspace"}
@@ -103,10 +103,10 @@ export default async function DashboardPage() {
               </Link>
             </li>
             <li className="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
-              <div className="font-mono text-xs text-slate-500">3 · Share</div>
+              <div className="font-mono text-xs text-slate-500">3 · Show employers</div>
               <div className="mt-1 font-medium text-slate-100">Verified profile</div>
               <p className="mt-1 text-sm text-slate-400">
-                Employers see evidence — never résumé claims.
+                Hiring managers see evidence — never résumé claims.
               </p>
               {profile?.publicEnabled && profile.publicSlug ? (
                 <Link href={`/u/${profile.publicSlug}`} className="mt-3 inline-block text-sm text-cyan-300 hover:underline">
@@ -218,9 +218,9 @@ export default async function DashboardPage() {
       <header className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">HIRING PATH</p>
-          <h1 className="mt-2 font-serif-display text-2xl tracking-tight sm:text-3xl">Crucible operations</h1>
+          <h1 className="mt-2 font-serif-display text-2xl tracking-tight sm:text-3xl">Test who can ship</h1>
           <p className="mt-2 max-w-3xl text-slate-400">
-            Assign real work, review evidence, decide — never résumé claims alone.
+            Use the same arena learners train in — assign timed work, review evidence, hire on proof.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -231,28 +231,28 @@ export default async function DashboardPage() {
       </header>
 
       <section className="rounded-2xl border border-cyan-500/20 bg-cyan-500/5 p-5">
-        <div className="text-xs font-medium uppercase tracking-wider text-cyan-200/80">Smooth hiring loop</div>
+        <div className="text-xs font-medium uppercase tracking-wider text-cyan-200/80">Candidate testing loop</div>
         <ol className="mt-4 grid gap-3 md:grid-cols-3">
           <li className="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
-            <div className="font-mono text-xs text-slate-500">1</div>
-            <div className="mt-1 font-medium text-slate-100">Create & assign</div>
-            <p className="mt-1 text-sm text-slate-400">Pick a challenge, set the timer, provision a workspace.</p>
+            <div className="font-mono text-xs text-slate-500">1 · Assign</div>
+            <div className="mt-1 font-medium text-slate-100">Create a timed test</div>
+            <p className="mt-1 text-sm text-slate-400">Pick from the bank, set the clock, provision a workspace.</p>
             <Link href="/assessments" className="mt-3 inline-block text-sm text-cyan-300 hover:underline">
               Open assessments →
             </Link>
           </li>
           <li className="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
-            <div className="font-mono text-xs text-slate-500">2</div>
-            <div className="mt-1 font-medium text-slate-100">Watch evidence</div>
-            <p className="mt-1 text-sm text-slate-400">Candidates run public + hidden judges in isolated IDEs.</p>
+            <div className="font-mono text-xs text-slate-500">2 · Observe</div>
+            <div className="mt-1 font-medium text-slate-100">Watch real evidence</div>
+            <p className="mt-1 text-sm text-slate-400">Candidates build in isolated IDEs against public + hidden judges.</p>
             <Link href="/candidates" className="mt-3 inline-block text-sm text-cyan-300 hover:underline">
               Browse candidates →
             </Link>
           </li>
           <li className="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
-            <div className="font-mono text-xs text-slate-500">3</div>
-            <div className="mt-1 font-medium text-slate-100">Human review</div>
-            <p className="mt-1 text-sm text-slate-400">AI assists — you decide qualify / hold / reject.</p>
+            <div className="font-mono text-xs text-slate-500">3 · Decide</div>
+            <div className="mt-1 font-medium text-slate-100">Human hire review</div>
+            <p className="mt-1 text-sm text-slate-400">AI assists — you qualify, hold, or reject with reasoning.</p>
             <Link href="/reviews" className="mt-3 inline-block text-sm text-cyan-300 hover:underline">
               Open review queue →
             </Link>
