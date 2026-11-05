@@ -4,21 +4,20 @@
 
 ## Site
 
-**https://brisk-viola-qnkxoqx.tmp.now**
+**https://speedy-spinel-q0v72i0.tmp.now**
 
-- App: Crucible  
-- AI vs Human: https://brisk-viola-qnkxoqx.tmp.now/ai-vs-human  
+- AI vs Human: https://speedy-spinel-q0v72i0.tmp.now/ai-vs-human
 
 ## Keep it permanent
 
-Anonymous `*.tmp.now` deploys expire. To lock a stable `*.vercel.app` hostname, claim **this** deployment (same project as `.vercel/anonymous.json`):
+Anonymous `*.tmp.now` deploys expire. Claim **this** deployment to lock a stable hostname:
 
-https://vercel.com/claim-deployment?code=fa1febd6-897b-4aa7-b9a6-72df44c1db2a
+https://vercel.com/claim-deployment?code=0e18a47b-edec-4a2c-8e01-4a46439e9c19
 
-After claiming, if the browser hits 403, disable **Deployment Protection** on the Vercel project (see `docs/VERCEL.md`). Then update this file to the claimed `*.vercel.app` URL and keep using that forever.
+After claiming, if you get 403, disable **Deployment Protection** (see `docs/VERCEL.md`). Then update this file to the claimed `*.vercel.app` URL and keep using that forever.
 
 ## Agent rules
 
-1. Do **not** run fresh anonymous `vercel deploy` that creates another `*.tmp.now` name unless the canonical URL is dead and unclaimable.
-2. Do **not** give Cloudflare `trycloudflare.com` tunnels as the primary user link.
-3. Prefer redeploying / updating the claimed Vercel project so the hostname stays the same.
+1. Redeploy with `vercel deploy --temporary` from the same anonymous session so the hostname stays put when Vercel allows it.
+2. Do **not** give Cloudflare tunnels as the primary user link.
+3. If Vercel mints a new `*.tmp.now` because the prior anonymous session expired, update this file once and tell the user — then claim immediately.
