@@ -156,8 +156,14 @@ function evaluatePublicAgainstHarness(code: string, slug: string): {
   }
   const names = [...harness.publicTests.matchAll(/name:\s*["'`]([^"'`]+)["'`]/g)].map((m) => m[1]!);
   const total = Math.max(1, names.length);
-  const looksStub = /return\s+\[\s*\]\s*;|return\s+0\s*;|return\s+null\s*;|return\s+false\s*;/.test(code);
-  if (looksStub && code.length < 400) {
+  // Only treat as stub when the body is tiny / clearly unimplemented — real solutions
+  // often contain a trailing `return []` / `return 0` after real logic.
+  const stripped = code.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "").trim();
+  const looksStub =
+    stripped.length < 120 ||
+    /TODO|not implemented|return\s+null\s*;\s*\}?\s*$/i.test(stripped) ||
+    (/^\s*export\s+function[\s\S]{0,80}\{\s*return\s+(\[\s*\]|0|null|false)\s*;\s*\}\s*$/i.test(stripped));
+  if (looksStub) {
     return { passed: 0, total, firstFailure: "Solution appears to be an unimplemented stub." };
   }
   return {
@@ -229,51 +235,51 @@ export async function ensureDefaultAiModels() {
     enabled?: boolean;
   }[] = [
     {
-      slug: "groq-llama-3.1-8b",
-      displayName: "Llama 3.1 8B (Groq free)",
+      slug: "groq-gpt-oss-20b",
+      displayName: "GPT-OSS 20B (Groq free)",
       provider: "Groq",
-      modelId: process.env.GROQ_MODEL ?? "llama-3.1-8b-instant",
+      modelId: process.env.GROQ_MODEL ?? "openai/gpt-oss-20b",
       baseUrl: "https://api.groq.com/openai/v1",
       apiKeyEnv: "GROQ_API_KEY",
       isOpenSource: true,
-      notes: "Free Groq tier. Preferred for AI vs Human. Hidden tests never sent.",
+      notes: "Free Groq tier — preferred for AI vs Human. Hidden tests never sent.",
     },
     {
-      slug: "groq-llama-3.3-70b",
-      displayName: "Llama 3.3 70B (Groq free)",
+      slug: "groq-qwen3-27b",
+      displayName: "Qwen3.8 27B (Groq free)",
       provider: "Groq",
-      modelId: "llama-3.3-70b-versatile",
+      modelId: "qwen/qwen3.8-27b",
       baseUrl: "https://api.groq.com/openai/v1",
       apiKeyEnv: "GROQ_API_KEY",
       isOpenSource: true,
-      notes: "Stronger Groq free-tier model when rate limits allow.",
+      notes: "Stronger Groq free-tier coding model when rate limits allow.",
     },
     {
-      slug: "openrouter-llama-3.2-3b-free",
-      displayName: "Llama 3.2 3B (OpenRouter free)",
+      slug: "openrouter-north-mini-code-free",
+      displayName: "North Mini Code (OpenRouter free)",
       provider: "OpenRouter",
-      modelId: process.env.OPENROUTER_MODEL ?? "meta-llama/llama-3.2-3b-instruct:free",
+      modelId: process.env.OPENROUTER_MODEL ?? "cohere/north-mini-code:free",
       baseUrl: "https://openrouter.ai/api/v1",
       apiKeyEnv: "OPENROUTER_API_KEY",
       isOpenSource: true,
-      notes: "OpenRouter :free model — rate-limited; good fallback.",
+      notes: "OpenRouter free coding-oriented model.",
     },
     {
-      slug: "openrouter-gemma-2-9b-free",
-      displayName: "Gemma 2 9B (OpenRouter free)",
+      slug: "openrouter-gemma-4-31b-free",
+      displayName: "Gemma 4 31B (OpenRouter free)",
       provider: "OpenRouter",
-      modelId: "google/gemma-2-9b-it:free",
+      modelId: "google/gemma-4-31b-it:free",
       baseUrl: "https://openrouter.ai/api/v1",
       apiKeyEnv: "OPENROUTER_API_KEY",
       isOpenSource: true,
-      notes: "Alternate OpenRouter free model.",
+      notes: "OpenRouter :free Gemma — rate-limited fallback.",
     },
     {
       slug: "openai-gpt-4o-mini",
       displayName: "GPT-4o mini (paid)",
       provider: "OpenAI",
-      modelId: process.env.OPENAI_MODEL ?? "gpt-4o-mini",
-      baseUrl: process.env.OPENAI_BASE_URL ?? "https://api.openai.com/v1",
+      modelId: "gpt-4o-mini",
+      baseUrl: "https://api.openai.com/v1",
       apiKeyEnv: "OPENAI_API_KEY",
       notes: "Paid OpenAI — optional. Prefer Groq/OpenRouter for free benches.",
       enabled: true,
@@ -306,9 +312,21 @@ export async function ensureDefaultAiModels() {
     });
   }
 
-  // Disable legacy placeholder slots that had no real baseUrl
+  // Disable legacy / retired model slots
   await prisma.aiModel.updateMany({
-    where: { slug: { in: ["anthropic-compatible", "google-compatible", "opensource-local"] } },
+    where: {
+      slug: {
+        in: [
+          "anthropic-compatible",
+          "google-compatible",
+          "opensource-local",
+          "groq-llama-3.1-8b",
+          "groq-llama-3.3-70b",
+          "openrouter-llama-3.2-3b-free",
+          "openrouter-gemma-2-9b-free",
+        ],
+      },
+    },
     data: { enabled: false },
   });
 

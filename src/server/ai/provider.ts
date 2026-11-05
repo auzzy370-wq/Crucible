@@ -16,7 +16,7 @@ export const FREE_PROVIDER_PRESETS: LlmProviderConfig[] = [
   {
     name: "groq-free",
     baseUrl: "https://api.groq.com/openai/v1",
-    model: process.env.GROQ_MODEL ?? "llama-3.1-8b-instant",
+    model: process.env.GROQ_MODEL ?? "openai/gpt-oss-20b",
     apiKeyEnv: "GROQ_API_KEY",
   },
   {
@@ -106,35 +106,90 @@ export async function completeJson<T>(params: {
     }
   }
 
-  try {
-    const client = new OpenAI({
-      apiKey,
-      baseURL: baseUrl,
-      defaultHeaders:
-        baseUrl.includes("openrouter.ai")
-          ? {
-              "HTTP-Referer": process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || "http://localhost:3847",
-              "X-Title": "Crucible AI vs Human",
-            }
-          : undefined,
-    });
-    const completion = await client.chat.completions.create({
-      model: modelId,
-      temperature: 0.2,
-      response_format: { type: "json_object" },
-      messages: [
-        {
-          role: "system",
-          content: `${params.system}\n\nRespond with a single JSON object only.`,
-        },
-        { role: "user", content: params.user },
-      ],
-    });
-    const text = completion.choices[0]?.message?.content ?? "{}";
-    // Strip accidental markdown fences some free models emit
+  const client = new OpenAI({
+    apiKey,
+    baseURL: baseUrl,
+    defaultHeaders: baseUrl.includes("openrouter.ai")
+      ? {
+          "HTTP-Referer": process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || "http://localhost:3847",
+          "X-Title": "Crucible AI vs Human",
+        }
+      : undefined,
+  });
+
+  const messages = [
+    {
+      role: "system" as const,
+      content: `${params.system}\n\nRespond with a single JSON object only.`,
+    },
+    { role: "user" as const, content: params.user },
+  ];
+
+  const parseModelJson = (text: string): T => {
     const cleaned = text.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim();
+    const attempts = [cleaned];
+    const start = cleaned.indexOf("{");
+    const end = cleaned.lastIndexOf("}");
+    if (start >= 0 && end > start) attempts.push(cleaned.slice(start, end + 1));
+    // Competition benches: salvage {"language","code"} even when models append prose
+    const codeMatch = cleaned.match(
+      /\{\s*"language"\s*:\s*"([^"\\]*)"\s*,\s*"code"\s*:\s*"((?:\\.|[^"\\])*)"\s*(?:,\s*"explanation"\s*:\s*"((?:\\.|[^"\\])*)")?\s*\}/s,
+    );
+    if (codeMatch) {
+      try {
+        return {
+          language: codeMatch[1],
+          code: JSON.parse(`"${codeMatch[2]}"`),
+          ...(codeMatch[3] != null ? { explanation: JSON.parse(`"${codeMatch[3]}"`) } : {}),
+        } as T;
+      } catch {
+        /* fall through */
+      }
+    }
+    // Raw TypeScript export if JSON completely failed
+    if (/export\s+(?:async\s+)?function\s+\w+|export\s+class\s+\w+/.test(cleaned)) {
+      const fence = cleaned.match(/```(?:typescript|ts|javascript|js)?\s*([\s\S]*?)```/i);
+      const code = (fence?.[1] ?? cleaned).trim();
+      return { language: "typescript", code, explanation: "Recovered non-JSON model output" } as T;
+    }
+    let lastErr: unknown;
+    for (const attempt of attempts) {
+      try {
+        return JSON.parse(attempt) as T;
+      } catch (e) {
+        lastErr = e;
+      }
+    }
+    throw lastErr instanceof Error ? lastErr : new Error("Model did not return valid JSON");
+  };
+
+  try {
+    // Prefer JSON mode; some free models (esp. Groq) reject it — retry plain chat.
+    let text = "";
+    try {
+      const completion = await client.chat.completions.create({
+        model: modelId,
+        temperature: 0.2,
+        response_format: { type: "json_object" },
+        messages,
+      });
+      text = completion.choices[0]?.message?.content ?? "{}";
+    } catch (jsonModeErr) {
+      logger.warn("JSON mode unsupported; retrying plain completion", {
+        provider: providerName,
+        model: modelId,
+        err: jsonModeErr instanceof Error ? jsonModeErr.message : String(jsonModeErr),
+      });
+      const completion = await client.chat.completions.create({
+        model: modelId,
+        temperature: 0.2,
+        messages,
+      });
+      text = completion.choices[0]?.message?.content ?? "{}";
+    }
+
     return {
-      data: JSON.parse(cleaned) as T,
+      data: parseModelJson(text),
       provider: providerName,
       model: modelId,
       mocked: false,
