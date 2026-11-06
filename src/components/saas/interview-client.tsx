@@ -112,7 +112,7 @@ export function InterviewClient(props: {
   return (
     <>
     {/* No transform here — fixed mobile CTA must escape containing blocks */}
-    <div className="animate-rise space-y-8">
+    <div className="animate-rise min-w-0 space-y-8">
       <header className="overflow-hidden rounded-2xl border border-teal-300/50 bg-gradient-to-br from-teal-500/[0.12] via-white/90 to-emerald-50/80 p-5 sm:p-7">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
@@ -157,14 +157,14 @@ export function InterviewClient(props: {
         </div>
       </header>
 
-      <section className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-        <div className="space-y-5 rounded-2xl border border-slate-200 bg-white/80 p-5 sm:p-6">
+      <section className="grid min-w-0 gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+        <div className="min-w-0 space-y-5 overflow-hidden rounded-2xl border border-slate-200 bg-white/80 p-4 sm:p-6">
           <div>
             <h2 className="font-serif-display text-xl text-slate-900">Build your round</h2>
             <p className="mt-1 text-sm text-slate-600">Company · role · format. Then open the workspace.</p>
           </div>
 
-          <div>
+          <div className="min-w-0">
             <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">Round format</p>
             <div className="grid gap-2 sm:grid-cols-3">
               {INTERVIEW_ROUNDS.map((r) => (
@@ -173,14 +173,14 @@ export function InterviewClient(props: {
                   type="button"
                   onClick={() => setRoundId(r.id)}
                   className={cn(
-                    "rounded-xl border px-3 py-3 text-left transition",
+                    "min-w-0 rounded-xl border px-3 py-3 text-left transition",
                     roundId === r.id
                       ? "border-teal-400 bg-teal-50 shadow-sm"
                       : "border-slate-200 bg-white hover:border-teal-300",
                   )}
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-sm font-medium text-slate-900">{r.title}</span>
+                    <span className="min-w-0 text-sm font-medium text-slate-900">{r.title}</span>
                     <Badge variant="amber">{r.minutes}m</Badge>
                   </div>
                   <p className="mt-1 text-xs text-slate-600">{r.blurb}</p>
@@ -190,16 +190,16 @@ export function InterviewClient(props: {
             </div>
           </div>
 
-          <div>
+          <div className="min-w-0">
             <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">Company</p>
-            <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 scrollbar-none">
+            <div className="flex w-full max-w-full flex-wrap gap-1.5">
               {INTERVIEW_COMPANIES.map((c) => (
                 <button
                   key={c}
                   type="button"
                   onClick={() => setCompany(c)}
                   className={cn(
-                    "shrink-0 rounded-md border px-3 py-2 text-xs transition",
+                    "max-w-full rounded-md border px-3 py-2 text-xs transition",
                     company === c
                       ? "border-teal-400 bg-teal-50 text-teal-900"
                       : "border-slate-200 text-slate-600 hover:bg-slate-50",
@@ -209,19 +209,24 @@ export function InterviewClient(props: {
                 </button>
               ))}
             </div>
-            <Input className="mt-2" value={company} onChange={(e) => setCompany(e.target.value)} placeholder="Company" />
+            <Input
+              className="mt-2 max-w-full"
+              value={company}
+              onChange={(e) => setCompany(e.target.value)}
+              placeholder="Company"
+            />
           </div>
 
-          <div>
+          <div className="min-w-0">
             <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">Role</p>
-            <div className="flex flex-wrap gap-1.5">
+            <div className="flex w-full max-w-full flex-wrap gap-1.5">
               {INTERVIEW_ROLES.map((r) => (
                 <button
                   key={r}
                   type="button"
                   onClick={() => setRole(r)}
                   className={cn(
-                    "rounded-md border px-2.5 py-1.5 text-xs transition",
+                    "max-w-full shrink rounded-md border px-2.5 py-1.5 text-left text-xs transition",
                     role === r
                       ? "border-teal-400 bg-teal-50 text-teal-900"
                       : "border-slate-200 text-slate-600 hover:bg-slate-50",
@@ -231,7 +236,12 @@ export function InterviewClient(props: {
                 </button>
               ))}
             </div>
-            <Input className="mt-2" value={role} onChange={(e) => setRole(e.target.value)} placeholder="Role" />
+            <Input
+              className="mt-2 max-w-full"
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              placeholder="Role"
+            />
           </div>
 
           {/* Desktop keeps actions in the card; mobile uses the fixed dock below */}
@@ -239,7 +249,7 @@ export function InterviewClient(props: {
           <div className="h-28 lg:hidden" aria-hidden />
         </div>
 
-        <aside className="space-y-4">
+        <aside className="min-w-0 space-y-4">
           <div className="rounded-2xl border border-teal-200 bg-teal-50/70 p-5">
             <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-teal-700">{briefing.title}</p>
             <h3 className="mt-2 font-serif-display text-lg text-slate-900">
