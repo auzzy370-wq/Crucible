@@ -1,12 +1,6 @@
-import { SignIn } from "@clerk/nextjs";
-import { Suspense } from "react";
+import { redirect } from "next/navigation";
 
-export default function SignInPage() {
-  return (
-    <div className="landing-root flex min-h-screen items-center justify-center px-4">
-      <Suspense fallback={<p className="text-slate-600">Loading sign-in…</p>}>
-        <SignIn routing="path" path="/sign-in" signUpUrl="/sign-up" fallbackRedirectUrl="/api/auth/clerk/handoff" />
-      </Suspense>
-    </div>
-  );
+/** Legacy Clerk path — keep link compatibility. */
+export default function LegacySignIn() {
+  redirect("/login");
 }
