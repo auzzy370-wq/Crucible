@@ -179,15 +179,19 @@ export function CandidateProfilePanel({ dossier: initial }: { dossier: ProfileDo
                 {headline.trim() || p.headline || "Add a headline so employers know what you ship."}
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
-                <Badge variant="amber">{dossier.game.rank.title}</Badge>
+                <Badge variant="amber">
+                  Lv {dossier.game.level} · {dossier.game.rank.title}
+                </Badge>
                 <Badge variant="cyan">{dossier.game.xp.toLocaleString()} XP</Badge>
                 <Badge variant={trackBadgeVariant(preferredTrack)}>{trackLabel(preferredTrack)}</Badge>
                 {dossier.game.streak.current > 0 && (
                   <Badge variant="emerald">
                     {dossier.game.streak.current}-day streak
                     {dossier.game.streak.activeToday ? "" : " · cool"}
+                    {dossier.game.streak.heat >= 30 ? ` · heat ${dossier.game.streak.heat}%` : ""}
                   </Badge>
                 )}
+                {dossier.game.perfectDay && <Badge variant="emerald">Perfect day</Badge>}
                 {publicEnabled && publicSlug && <Badge>Public · /u/{publicSlug}</Badge>}
               </div>
             </div>

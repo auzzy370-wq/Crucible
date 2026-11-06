@@ -94,16 +94,24 @@ export default async function DashboardPage() {
           </p>
         </header>
 
-        <section className="rounded-2xl border border-teal-300/50 bg-gradient-to-br from-teal-500/[0.09] via-white to-emerald-50/70 p-5">
+        <section className="rounded-2xl border border-[var(--brand)]/30 bg-gradient-to-br from-[var(--brand-soft)] via-white to-orange-50/70 p-5">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
-              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-teal-700">Forge rank</p>
-              <p className="mt-1 font-serif-display text-2xl text-slate-900 sm:text-3xl">{game.rank.title}</p>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="inline-flex h-7 min-w-7 items-center justify-center rounded-md bg-[var(--brand)] px-2 font-mono text-xs font-semibold text-white">
+                  Lv {game.level}
+                </span>
+                <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--brand)]">Forge rank</p>
+              </div>
+              <p className="mt-1 text-2xl font-semibold tracking-[-0.03em] text-slate-900 sm:text-3xl">
+                {game.rank.title}
+              </p>
               <p className="mt-1 font-mono text-sm text-slate-600">
                 {game.xp.toLocaleString()} XP
                 {game.nextRank ? ` · ${game.xpToNext} to ${game.nextRank.title}` : " · max rank"}
                 {" · "}
-                {game.streak.current}d streak
+                {game.streak.current}d streak · heat {game.streak.heat}%
+                {game.perfectDay ? " · perfect day" : ""}
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -113,6 +121,9 @@ export default async function DashboardPage() {
               <Badge variant="amber">
                 {game.weeklyDone}/{game.weeklyTotal} weekly
               </Badge>
+              <Badge>
+                {game.unlockedCount}/{game.achievements.length} medals
+              </Badge>
               <Link href="/learn">
                 <Button size="sm">{game.focus.cta}</Button>
               </Link>
@@ -120,9 +131,18 @@ export default async function DashboardPage() {
           </div>
           <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/80">
             <div
-              className="h-full rounded-full bg-teal-500 transition-[width] duration-700"
+              className="learn-xp-bar h-full rounded-full bg-[var(--brand)] transition-[width] duration-700"
               style={{ width: `${game.rankProgressPct}%` }}
             />
+          </div>
+          <div className="mt-3 flex gap-1.5">
+            {game.quests.map((q) => (
+              <div
+                key={q.id}
+                className={`h-1.5 flex-1 rounded-full ${q.done ? "bg-[var(--brand)]" : "bg-slate-200"}`}
+                title={q.title}
+              />
+            ))}
           </div>
           <p className="mt-3 text-sm text-slate-600">
             Focus: <span className="text-slate-800">{game.focus.title}</span> — {game.focus.detail}

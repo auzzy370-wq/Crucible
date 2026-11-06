@@ -7,8 +7,10 @@ import {
   DAILY_XP,
   COMBO_XP,
   CHAPTER_CLEAR_XP,
+  PERFECT_DAY_XP,
 } from "@/server/learning/gamification";
 import { buildLearnerRoadmap } from "@/server/learning/roadmap";
+import { ForgeHero } from "@/components/learn/forge-hero";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -27,91 +29,25 @@ export default async function LearnHubPage() {
       <header className="space-y-4">
         <div>
           <p className="font-mono text-xs tracking-[0.3em] text-teal-700">LEARN · FORGE</p>
-          <h1 className="mt-2 font-serif-display text-2xl sm:text-3xl">Level up by proving craft</h1>
+          <h1 className="mt-2 text-2xl font-semibold tracking-[-0.03em] sm:text-3xl">Level up by proving craft</h1>
           <p className="mt-2 max-w-2xl text-slate-600">
-            Clear lessons, keep a streak, finish campaigns, and post timed evidence. XP only comes from work you finish.
+            Quests, streaks, heat, and perfect-day bonuses — XP only from work you finish.
           </p>
         </div>
-
-        <section className="overflow-hidden rounded-2xl border border-teal-300/60 bg-gradient-to-br from-teal-500/[0.1] via-white/90 to-emerald-50/80 p-5 sm:p-6">
-          <div className="flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-teal-700/80">Rank</p>
-              <p className="mt-1 font-serif-display text-3xl text-slate-900 sm:text-4xl">{game.rank.title}</p>
-              <p className="mt-1 font-mono text-sm text-slate-600">
-                {game.xp.toLocaleString()} XP
-                {game.nextRank ? ` · ${game.xpToNext} to ${game.nextRank.title}` : " · max rank"}
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <Badge variant="amber">
-                {game.streak.current} day streak
-                {game.streak.activeToday ? " · lit" : ""}
-              </Badge>
-              <Badge variant="cyan">
-                {game.questsDone}/{game.questsTotal} today
-              </Badge>
-              <Badge variant="emerald">
-                {game.weeklyDone}/{game.weeklyTotal} weekly
-              </Badge>
-              <Badge>
-                {game.unlockedCount}/{game.achievements.length} medals
-              </Badge>
-            </div>
-          </div>
-
-          <div className="mt-5">
-            <div className="mb-1.5 flex justify-between font-mono text-[10px] uppercase tracking-wider text-slate-500">
-              <span>Progress to next rank</span>
-              <span>{game.rankProgressPct}%</span>
-            </div>
-            <div className="h-2.5 overflow-hidden rounded-full bg-slate-100">
-              <div
-                className="learn-xp-bar h-full rounded-full bg-teal-500 transition-[width] duration-700 ease-out"
-                style={{ width: `${game.rankProgressPct}%` }}
-              />
-            </div>
-          </div>
-
-          <div className="mt-5 grid gap-2 sm:grid-cols-3 lg:grid-cols-6">
-            {(
-              [
-                ["Lessons", game.breakdown.lessons],
-                ["Daily", game.breakdown.daily],
-                ["Prove", game.breakdown.prove],
-                ["Campaigns", game.breakdown.campaigns],
-                ["Arcade", game.breakdown.arcade],
-                ["Streak", game.breakdown.streak],
-              ] as const
-            ).map(([label, value]) => (
-              <div key={label} className="rounded-lg border border-teal-200/70 bg-white/80 px-3 py-2">
-                <p className="font-mono text-[10px] uppercase tracking-wider text-slate-500">{label}</p>
-                <p className="font-mono text-sm text-slate-900">{value.toLocaleString()} XP</p>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-5 rounded-xl border border-slate-200 bg-white/80 p-4">
-            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">Focus now</p>
-            <h2 className="mt-1 text-lg font-medium text-slate-900">{game.focus.title}</h2>
-            <p className="mt-1 text-sm text-slate-600">{game.focus.detail}</p>
-            <div className="mt-3">
-              <Link href={game.focus.href}>
-                <Button>{game.focus.cta}</Button>
-              </Link>
-            </div>
-          </div>
-        </section>
+        <ForgeHero game={game} />
       </header>
 
       <section>
         <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
           <div>
-            <h2 className="font-serif-display text-xl text-slate-900">Today’s quests</h2>
-            <p className="mt-1 text-sm text-slate-500">Three daily objectives. Finish them to keep the forge hot.</p>
+            <h2 className="text-xl font-semibold tracking-[-0.02em] text-slate-900">Today’s quests</h2>
+            <p className="mt-1 text-sm text-slate-500">
+              Three daily objectives · {game.questsDone}/{game.questsTotal} cleared
+              {game.perfectDay ? " · perfect day bonus banked" : ` · +${PERFECT_DAY_XP} XP if you clear all three`}
+            </p>
           </div>
           <Link href={primaryQuest.href}>
-            <Button size="sm">Start: {primaryQuest.title}</Button>
+            <Button size="sm">{game.perfectDay ? "Review forge" : `Start: ${primaryQuest.title}`}</Button>
           </Link>
         </div>
         <div className="grid gap-3 md:grid-cols-3">
@@ -123,7 +59,7 @@ export default async function LearnHubPage() {
                 "learn-quest-card group rounded-xl border px-4 py-4 transition",
                 q.done
                   ? "border-emerald-300 bg-emerald-50/70"
-                  : "border-slate-200 bg-white/80 hover:border-teal-400",
+                  : "border-slate-200 bg-white/80 hover:border-[var(--brand)]/50",
               )}
               style={{ animationDelay: `${i * 0.06}s` }}
             >
@@ -131,25 +67,36 @@ export default async function LearnHubPage() {
                 <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">Quest {i + 1}</span>
                 <Badge variant={q.done ? "emerald" : "cyan"}>+{q.xp} XP</Badge>
               </div>
-              <h3 className="mt-2 font-medium text-slate-900 group-hover:text-teal-900">{q.title}</h3>
+              <h3 className="mt-2 font-medium text-slate-900 group-hover:text-[var(--brand)]">{q.title}</h3>
               <p className="mt-1 text-sm text-slate-500">{q.detail}</p>
-              <p className="mt-3 font-mono text-[11px] text-teal-700">{q.done ? "Cleared" : "Open →"}</p>
+              <p className="mt-3 font-mono text-[11px] text-[var(--brand)]">{q.done ? "Cleared" : "Open →"}</p>
             </Link>
           ))}
         </div>
       </section>
 
       <section>
-        <h2 className="font-serif-display text-xl text-slate-900">This week</h2>
-        <p className="mt-1 text-sm text-slate-500">Weekly board — lessons, dailies, and campaigns.</p>
-        <div className="mt-3 grid gap-3 md:grid-cols-3">
+        <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
+          <div>
+            <h2 className="text-xl font-semibold tracking-[-0.02em] text-slate-900">This week</h2>
+            <p className="mt-1 text-sm text-slate-500">
+              Weekly board · {game.weeklyDone}/{game.weeklyTotal} done
+              {game.weeklyDone >= game.weeklyTotal
+                ? " · weekly board clear bonus banked"
+                : " · clear all three for a board bonus"}
+            </p>
+          </div>
+        </div>
+        <div className="grid gap-3 md:grid-cols-3">
           {game.weeklyQuests.map((q) => (
             <Link
               key={q.id}
               href={q.href}
               className={cn(
                 "rounded-xl border px-4 py-4 transition",
-                q.done ? "border-amber-300 bg-amber-50/70" : "border-slate-200 bg-white/80 hover:border-teal-300",
+                q.done
+                  ? "border-amber-300 bg-amber-50/70"
+                  : "border-slate-200 bg-white/80 hover:border-[var(--brand)]/40",
               )}
             >
               <div className="flex items-center justify-between gap-2">
@@ -238,9 +185,23 @@ export default async function LearnHubPage() {
       </section>
 
       <section>
-        <h2 className="font-serif-display text-xl text-slate-900">Medals</h2>
-        <p className="mt-1 text-sm text-slate-500">Unlock by finishing real work — lessons, streaks, campaigns, evidence.</p>
-        <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
+          <div>
+            <h2 className="text-xl font-semibold tracking-[-0.02em] text-slate-900">Medals</h2>
+            <p className="mt-1 text-sm text-slate-500">
+              Unlock by finishing real work — {game.unlockedCount}/{game.achievements.length} earned
+            </p>
+          </div>
+          <div className="h-2 w-40 overflow-hidden rounded-full bg-slate-100">
+            <div
+              className="h-full rounded-full bg-[var(--brand)] transition-[width] duration-700"
+              style={{
+                width: `${Math.round((game.unlockedCount / Math.max(1, game.achievements.length)) * 100)}%`,
+              }}
+            />
+          </div>
+        </div>
+        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {game.achievements.map((a) => (
             <div
               key={a.id}
@@ -262,8 +223,8 @@ export default async function LearnHubPage() {
       </section>
 
       <p className="font-mono text-[11px] text-slate-500">
-        Lesson +{LESSON_XP} · same-day combo +{COMBO_XP} · chapter clear +{CHAPTER_CLEAR_XP} · ranks: Initiate →
-        Operator → Specialist → Elite → Distinguished
+        Lesson +{LESSON_XP} · same-day combo +{COMBO_XP} · chapter clear +{CHAPTER_CLEAR_XP} · perfect day +
+        {PERFECT_DAY_XP} · ranks: Initiate → Spark → Apprentice → … → Distinguished
       </p>
     </div>
   );

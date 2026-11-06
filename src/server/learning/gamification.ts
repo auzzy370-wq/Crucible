@@ -16,6 +16,13 @@ export const PROVE_BASE_XP = 100;
 export const COMBO_XP = 15;
 export const CHAPTER_CLEAR_XP = 100;
 export const WEEKLY_QUEST_BONUS_XP = 40;
+/** Bonus when the full weekly board is cleared. */
+export const WEEKLY_BOARD_CLEAR_XP = 80;
+/** Bonus when all three daily quests are cleared the same day. */
+export const PERFECT_DAY_XP = 60;
+/** Extra XP per active streak day (capped). */
+export const STREAK_DAY_XP = 8;
+export const STREAK_MILESTONES = [3, 7, 14, 30, 60] as const;
 
 export type LearnerRank = {
   id: string;
@@ -25,10 +32,15 @@ export type LearnerRank = {
 
 export const LEARNER_RANKS: LearnerRank[] = [
   { id: "initiate", title: "Initiate", minXp: 0 },
-  { id: "operator", title: "Operator", minXp: 150 },
-  { id: "specialist", title: "Specialist", minXp: 450 },
-  { id: "elite", title: "Elite", minXp: 1000 },
-  { id: "distinguished", title: "Distinguished", minXp: 1800 },
+  { id: "spark", title: "Spark", minXp: 75 },
+  { id: "apprentice", title: "Apprentice", minXp: 150 },
+  { id: "operator", title: "Operator", minXp: 300 },
+  { id: "craftsman", title: "Craftsman", minXp: 500 },
+  { id: "specialist", title: "Specialist", minXp: 750 },
+  { id: "veteran", title: "Veteran", minXp: 1100 },
+  { id: "elite", title: "Elite", minXp: 1500 },
+  { id: "architect", title: "Architect", minXp: 2100 },
+  { id: "distinguished", title: "Distinguished", minXp: 2800 },
 ];
 
 export type LearnerQuest = {
@@ -54,6 +66,8 @@ export type XpBreakdown = {
   campaigns: number;
   arcade: number;
   streak: number;
+  weekly: number;
+  perfectDay: number;
   total: number;
 };
 
@@ -68,12 +82,21 @@ export type PathChapter = {
 
 export type LearnerGameState = {
   xp: number;
+  level: number;
   rank: LearnerRank;
   nextRank: LearnerRank | null;
   rankProgressPct: number;
   xpToNext: number | null;
   breakdown: XpBreakdown;
-  streak: { current: number; longest: number; activeToday: boolean };
+  streak: {
+    current: number;
+    longest: number;
+    activeToday: boolean;
+    heat: number;
+    nextMilestone: number | null;
+    milestones: { days: number; reached: boolean }[];
+  };
+  perfectDay: boolean;
   paths: {
     interview: {
       done: number;
@@ -277,23 +300,6 @@ export async function buildLearnerGameState(userId: string): Promise<LearnerGame
   const arcadeClears = arcadeEnrollment?.completedSlugs.length ?? 0;
   const arcadeXp = arcadeClears * ARCADE_CLEAR_XP;
 
-  const lessonXp = (aiDone.length + ivDone.length) * LESSON_XP;
-  const dailyXp = dailyCompletions * DAILY_XP;
-  const proveXp = scoredAssignments * PROVE_BASE_XP;
-  const streakBonus = Math.min(200, (streak?.longestStreak ?? 0) * 10);
-  const breakdown: XpBreakdown = {
-    lessons: lessonXp,
-    daily: dailyXp,
-    prove: proveXp,
-    campaigns: campaignXp,
-    arcade: arcadeXp,
-    streak: streakBonus,
-    total: lessonXp + dailyXp + proveXp + campaignXp + arcadeXp + streakBonus,
-  };
-  const xp = breakdown.total;
-
-  const { rank, nextRank, rankProgressPct, xpToNext } = rankForXp(xp);
-
   const nextIv = nextInterviewLesson(ivSet);
   const nextAi = nextAiLesson(aiSet);
   const activeToday = streak?.lastDateKey === today;
@@ -301,6 +307,22 @@ export async function buildLearnerGameState(userId: string): Promise<LearnerGame
   const lessonTouchedToday =
     (ivEnrollment && dateKey(ivEnrollment.updatedAt) === today && ivDone.length > 0) ||
     (aiEnrollment && dateKey(aiEnrollment.updatedAt) === today && aiDone.length > 0);
+
+  const perfectDay = Boolean(activeToday && lessonTouchedToday && dailyDone);
+
+  const ivChapters = chaptersForPath(
+    INTERVIEW_LESSONS,
+    ivSet,
+    ["foundations", "patterns", "rounds"],
+    { foundations: "Foundations", patterns: "Patterns", rounds: "Rounds" },
+  );
+  const aiChapters = chaptersForPath(
+    AI_LESSONS,
+    aiSet,
+    ["foundations", "builder", "production"],
+    { foundations: "Foundations", builder: "Builder", production: "Production" },
+  );
+  const chaptersCleared = [...ivChapters, ...aiChapters].filter((c) => c.cleared).length;
 
   const quests: LearnerQuest[] = [
     {
@@ -380,18 +402,37 @@ export async function buildLearnerGameState(userId: string): Promise<LearnerGame
     },
   ];
 
-  const ivChapters = chaptersForPath(
-    INTERVIEW_LESSONS,
-    ivSet,
-    ["foundations", "patterns", "rounds"],
-    { foundations: "Foundations", patterns: "Patterns", rounds: "Rounds" },
-  );
-  const aiChapters = chaptersForPath(
-    AI_LESSONS,
-    aiSet,
-    ["foundations", "builder", "production"],
-    { foundations: "Foundations", builder: "Builder", production: "Production" },
-  );
+  const weeklyDoneCount = weeklyQuests.filter((q) => q.done).length;
+  const weeklyXp =
+    weeklyDoneCount * WEEKLY_QUEST_BONUS_XP +
+    (weeklyDoneCount >= weeklyQuests.length ? WEEKLY_BOARD_CLEAR_XP : 0);
+
+  const lessonBase = (aiDone.length + ivDone.length) * LESSON_XP;
+  const chapterXp = chaptersCleared * CHAPTER_CLEAR_XP;
+  /** Same-day combo when the forge is already lit and a lesson lands today. */
+  const comboXp = lessonTouchedToday && activeToday ? COMBO_XP : 0;
+  const lessonXp = lessonBase + chapterXp + comboXp;
+  const dailyXp = dailyCompletions * DAILY_XP;
+  const proveXp = scoredAssignments * PROVE_BASE_XP;
+  const streakBonus =
+    Math.min(240, (streak?.longestStreak ?? 0) * 10) +
+    Math.min(160, (streak?.currentStreak ?? 0) * STREAK_DAY_XP);
+  const perfectDayXp = perfectDay ? PERFECT_DAY_XP : 0;
+  const breakdown: XpBreakdown = {
+    lessons: lessonXp,
+    daily: dailyXp,
+    prove: proveXp,
+    campaigns: campaignXp,
+    arcade: arcadeXp,
+    streak: streakBonus,
+    weekly: weeklyXp,
+    perfectDay: perfectDayXp,
+    total:
+      lessonXp + dailyXp + proveXp + campaignXp + arcadeXp + streakBonus + weeklyXp + perfectDayXp,
+  };
+  const xp = breakdown.total;
+  const { rank, nextRank, rankProgressPct, xpToNext } = rankForXp(xp);
+  const level = Math.max(1, LEARNER_RANKS.findIndex((r) => r.id === rank.id) + 1);
 
   const achievements: LearnerAchievement[] = [
     {
@@ -399,6 +440,12 @@ export async function buildLearnerGameState(userId: string): Promise<LearnerGame
       title: "First clearance",
       detail: "Complete any craft lesson",
       unlocked: aiDone.length + ivDone.length >= 1,
+    },
+    {
+      id: "spark",
+      title: "First spark",
+      detail: "Reach Spark rank",
+      unlocked: xp >= 75,
     },
     {
       id: "streak-3",
@@ -440,7 +487,7 @@ export async function buildLearnerGameState(userId: string): Promise<LearnerGame
       id: "chapter-clear",
       title: "Chapter cleared",
       detail: "Finish every lesson in a craft chapter",
-      unlocked: [...ivChapters, ...aiChapters].some((c) => c.cleared),
+      unlocked: chaptersCleared >= 1,
     },
     {
       id: "prove-3",
@@ -475,16 +522,53 @@ export async function buildLearnerGameState(userId: string): Promise<LearnerGame
     {
       id: "operator",
       title: "Reach Operator",
-      detail: "Earn 150 XP across learn + prove",
-      unlocked: xp >= 150,
+      detail: "Earn Operator rank (300 XP)",
+      unlocked: xp >= 300,
     },
     {
       id: "elite",
       title: "Reach Elite",
-      detail: "Earn 1000 XP",
-      unlocked: xp >= 1000,
+      detail: "Earn Elite rank (1500 XP)",
+      unlocked: xp >= 1500,
+    },
+    {
+      id: "streak-14",
+      title: "Fortnight forge",
+      detail: "Hold a 14-day learning streak",
+      unlocked: (streak?.longestStreak ?? 0) >= 14,
+    },
+    {
+      id: "perfect-day",
+      title: "Perfect day",
+      detail: "Clear all three daily quests in one day",
+      unlocked:
+        perfectDay ||
+        (dailyCompletions >= 5 && aiDone.length + ivDone.length >= 5 && (streak?.longestStreak ?? 0) >= 3),
+    },
+    {
+      id: "weekly-board",
+      title: "Week cleared",
+      detail: "Finish every weekly quest on the board",
+      unlocked: weeklyDoneCount >= weeklyQuests.length,
+    },
+    {
+      id: "prove-10",
+      title: "Evidence vault",
+      detail: "Post scores on 10 timed sessions",
+      unlocked: scoredAssignments + dailyCompletions >= 10,
     },
   ];
+
+  const currentStreak = streak?.currentStreak ?? 0;
+  const streakMilestones = STREAK_MILESTONES.map((days) => ({
+    days,
+    reached: (streak?.longestStreak ?? 0) >= days || currentStreak >= days,
+  }));
+  const nextMilestone = STREAK_MILESTONES.find((d) => currentStreak < d) ?? null;
+  const heat = Math.max(
+    0,
+    Math.min(100, Math.round((currentStreak / (nextMilestone ?? 30)) * 100) || (currentStreak > 0 ? 12 : 0)),
+  );
 
   const focus = !activeToday
     ? {
@@ -511,29 +595,41 @@ export async function buildLearnerGameState(userId: string): Promise<LearnerGame
       : !dailyDone
         ? {
             title: "Post timed evidence",
-            detail: "Daily forge keeps ranks climbing",
+            detail: "Clear the last daily quest for a perfect-day bonus",
             href: "/daily",
             cta: "Open daily",
           }
-        : {
-            title: "Push a campaign",
-            detail: "Chapter maps and pack clear bonuses wait on Study plans",
-            href: "/study-plans",
-            cta: "Open campaigns",
-          };
+        : weeklyDoneCount < weeklyQuests.length
+          ? {
+              title: "Clear the weekly board",
+              detail: `${weeklyDoneCount}/${weeklyQuests.length} weekly quests done · +${WEEKLY_BOARD_CLEAR_XP} XP when complete`,
+              href: weeklyQuests.find((q) => !q.done)?.href ?? "/study-plans",
+              cta: "Next weekly quest",
+            }
+          : {
+              title: "Push a campaign",
+              detail: "Chapter maps and pack clear bonuses wait on Study plans",
+              href: "/study-plans",
+              cta: "Open campaigns",
+            };
 
   return {
     xp,
+    level,
     rank,
     nextRank,
     rankProgressPct,
     xpToNext,
     breakdown,
     streak: {
-      current: streak?.currentStreak ?? 0,
+      current: currentStreak,
       longest: streak?.longestStreak ?? 0,
       activeToday,
+      heat,
+      nextMilestone,
+      milestones: streakMilestones,
     },
+    perfectDay,
     paths: {
       interview: {
         done: ivDone.length,
@@ -556,7 +652,7 @@ export async function buildLearnerGameState(userId: string): Promise<LearnerGame
     questsDone: quests.filter((q) => q.done).length,
     questsTotal: quests.length,
     weeklyQuests,
-    weeklyDone: weeklyQuests.filter((q) => q.done).length,
+    weeklyDone: weeklyDoneCount,
     weeklyTotal: weeklyQuests.length,
     achievements,
     unlockedCount: achievements.filter((a) => a.unlocked).length,

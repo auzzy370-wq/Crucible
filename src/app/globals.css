@@ -520,9 +520,24 @@ html:not(.dark) .landing-root {
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--brand) 22%, transparent);
 }
 
+@keyframes forge-heat-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--brand) 35%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 0 10px color-mix(in srgb, var(--brand) 0%, transparent);
+  }
+}
+
+.forge-heat-pulse {
+  animation: forge-heat-pulse 2.4s ease-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .learn-quest-card,
-  .learn-xp-bar {
+  .learn-xp-bar,
+  .forge-heat-pulse {
     animation: none !important;
     transition: none !important;
   }
