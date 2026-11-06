@@ -6,9 +6,10 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { useArcadeClear } from "@/components/learn/games/use-arcade-clear";
+import { ArcadeClearFx } from "@/components/learn/games/arcade-clear-fx";
 
 export function BinaryRangeGame() {
-  const { reportClear, busy } = useArcadeClear("binary-range");
+  const { reportClear, busy, clearTick, lastXp } = useArcadeClear("binary-range");
   const [low, setLow] = useState(1);
   const [high, setHigh] = useState(100);
   const [guess, setGuess] = useState("");
@@ -63,7 +64,8 @@ export function BinaryRangeGame() {
   const pct = Math.max(2, Math.round((span / 100) * 100));
 
   return (
-    <div className="space-y-5">
+    <div className="relative space-y-5">
+      <ArcadeClearFx xp={lastXp} trigger={clearTick} />
       <div className="flex flex-wrap items-center justify-between gap-2">
         <Badge variant="emerald">Binary search trainer</Badge>
         <Badge variant="amber">{tries} guesses</Badge>

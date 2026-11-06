@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useArcadeClear } from "@/components/learn/games/use-arcade-clear";
+import { ArcadeClearFx } from "@/components/learn/games/arcade-clear-fx";
 
 const ROUNDS = [
   { prompt: "Scan an unsorted array once", answer: "O(n)", decoys: ["O(1)", "O(n log n)", "O(n²)"] },
@@ -25,7 +26,7 @@ function shuffle<T>(arr: T[]) {
 }
 
 export function BigOBlitzGame() {
-  const { reportClear, busy } = useArcadeClear("big-o-blitz");
+  const { reportClear, busy, clearTick, lastXp } = useArcadeClear("big-o-blitz");
   const [idx, setIdx] = useState(0);
   const [score, setScore] = useState(0);
   const [wrong, setWrong] = useState(0);
@@ -83,7 +84,8 @@ export function BigOBlitzGame() {
   }
 
   return (
-    <div className="space-y-5">
+    <div className="relative space-y-5">
+      <ArcadeClearFx xp={lastXp} trigger={clearTick} />
       <div className="flex flex-wrap items-center justify-between gap-2">
         <Badge variant="amber">Complexity match</Badge>
         <div className="flex gap-2">

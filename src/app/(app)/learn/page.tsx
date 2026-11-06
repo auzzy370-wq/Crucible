@@ -11,6 +11,7 @@ import {
 } from "@/server/learning/gamification";
 import { buildLearnerRoadmap } from "@/server/learning/roadmap";
 import { ForgeHero } from "@/components/learn/forge-hero";
+import { MedalShine, QuestClearedMark } from "@/components/learn/forge-fun";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -82,14 +83,17 @@ export default async function LearnHubPage() {
                 className={cn(
                   "learn-quest-card group rounded-xl border px-4 py-4 transition",
                   q.done
-                    ? "border-emerald-300 bg-emerald-50/70"
+                    ? "is-cleared border-emerald-300 bg-emerald-50/70"
                     : "border-slate-200 bg-white/80 hover:border-[var(--brand)]/50",
                 )}
                 style={{ animationDelay: `${i * 0.06}s` }}
               >
                 <div className="flex items-center justify-between gap-2">
                   <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">Quest {i + 1}</span>
-                  <Badge variant={q.done ? "emerald" : "cyan"}>+{q.xp} XP</Badge>
+                  <div className="flex items-center gap-2">
+                    <QuestClearedMark show={q.done} />
+                    <Badge variant={q.done ? "emerald" : "cyan"}>+{q.xp} XP</Badge>
+                  </div>
                 </div>
                 <h3 className="mt-2 font-medium text-slate-900 group-hover:text-[var(--brand)]">{q.title}</h3>
                 <p className="mt-1 text-sm text-slate-500">{q.detail}</p>
@@ -115,15 +119,18 @@ export default async function LearnHubPage() {
                 key={q.id}
                 href={q.href}
                 className={cn(
-                  "rounded-xl border px-4 py-4 transition",
+                  "learn-quest-card rounded-xl border px-4 py-4 transition",
                   q.done
-                    ? "border-amber-300 bg-amber-50/70"
+                    ? "is-cleared border-amber-300 bg-amber-50/70"
                     : "border-slate-200 bg-white/80 hover:border-[var(--brand)]/40",
                 )}
               >
                 <div className="flex items-center justify-between gap-2">
                   <h3 className="font-medium text-slate-900">{q.title}</h3>
-                  <Badge variant={q.done ? "emerald" : "amber"}>+{q.xp}</Badge>
+                  <div className="flex items-center gap-2">
+                    <QuestClearedMark show={q.done} />
+                    <Badge variant={q.done ? "emerald" : "amber"}>+{q.xp}</Badge>
+                  </div>
                 </div>
                 <p className="mt-1 text-sm text-slate-500">{q.detail}</p>
               </Link>
@@ -241,12 +248,16 @@ export default async function LearnHubPage() {
         {unlockedMedals.length > 0 && (
           <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
             {unlockedMedals.map((a) => (
-              <div key={a.id} className="rounded-xl border border-amber-300 bg-amber-50/70 px-4 py-3">
-                <div className="flex items-center justify-between gap-2">
+              <div
+                key={a.id}
+                className="relative overflow-hidden rounded-xl border border-amber-300 bg-amber-50/70 px-4 py-3"
+              >
+                <MedalShine active />
+                <div className="relative flex items-center justify-between gap-2">
                   <h3 className="text-sm font-medium text-slate-900">{a.title}</h3>
                   <span className="font-mono text-[10px] uppercase tracking-wider text-amber-800">Unlocked</span>
                 </div>
-                <p className="mt-1 text-xs text-slate-500">{a.detail}</p>
+                <p className="relative mt-1 text-xs text-slate-500">{a.detail}</p>
               </div>
             ))}
           </div>

@@ -7,6 +7,8 @@ import { toast } from "sonner";
 export function useArcadeClear(gameSlug: string) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
+  const [clearTick, setClearTick] = useState(0);
+  const [lastXp, setLastXp] = useState(0);
 
   async function reportClear(opts?: { perfect?: boolean; score?: number }) {
     setBusy(true);
@@ -23,6 +25,8 @@ export function useArcadeClear(gameSlug: string) {
       const json = await res.json();
       if (!json.ok) throw new Error(json.error?.message || "Could not save");
       const xp = Number(json.data?.xpEarned ?? 0);
+      setLastXp(xp);
+      setClearTick((n) => n + 1);
       if (xp > 0) toast.success(`Game cleared · +${xp} XP`);
       else toast.success("Nice run — streak updated");
       router.refresh();
@@ -35,5 +39,5 @@ export function useArcadeClear(gameSlug: string) {
     }
   }
 
-  return { reportClear, busy };
+  return { reportClear, busy, clearTick, lastXp };
 }

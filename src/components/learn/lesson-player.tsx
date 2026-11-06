@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { LessonBody } from "@/components/learn/lesson-body";
+import { ForgeSparks, XpBurst } from "@/components/learn/forge-fun";
 import { LESSON_XP } from "@/server/learning/gamification";
 
 export function LessonPlayer(props: {
@@ -102,17 +103,21 @@ export function LessonPlayer(props: {
       </header>
 
       {celebration && (
-        <div className="learn-quest-card rounded-2xl border border-amber-300 bg-gradient-to-br from-amber-50 via-white to-teal-50 p-5">
-          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-amber-800">Lesson cleared</p>
-          <p className="mt-1 font-serif-display text-3xl text-slate-900">+{celebration.xp} XP</p>
-          <div className="mt-2 flex flex-wrap gap-2">
-            <Badge variant="cyan">lesson +{LESSON_XP}</Badge>
-            {celebration.combo > 0 && <Badge variant="amber">same-day combo +{celebration.combo}</Badge>}
-            {celebration.chapter > 0 && <Badge variant="emerald">chapter clear +{celebration.chapter}</Badge>}
+        <div className="learn-quest-card relative overflow-hidden rounded-2xl border border-amber-300 bg-gradient-to-br from-amber-50 via-white to-orange-50 p-5">
+          <ForgeSparks density={10} />
+          <XpBurst amount={celebration.xp} active />
+          <div className="relative">
+            <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-amber-800">Lesson cleared</p>
+            <p className="mt-1 text-3xl font-semibold tracking-[-0.03em] text-slate-900">+{celebration.xp} XP</p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              <Badge variant="cyan">lesson +{LESSON_XP}</Badge>
+              {celebration.combo > 0 && <Badge variant="amber">same-day combo +{celebration.combo}</Badge>}
+              {celebration.chapter > 0 && <Badge variant="emerald">chapter clear +{celebration.chapter}</Badge>}
+            </div>
+            <p className="mt-2 text-sm text-slate-600">
+              {props.nextSlug ? "Loading next node…" : "Chapter or path may be complete — check the map."}
+            </p>
           </div>
-          <p className="mt-2 text-sm text-slate-600">
-            {props.nextSlug ? "Loading next node…" : "Chapter or path may be complete — check the map."}
-          </p>
         </div>
       )}
 

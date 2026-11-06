@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useArcadeClear } from "@/components/learn/games/use-arcade-clear";
+import { ArcadeClearFx } from "@/components/learn/games/arcade-clear-fx";
 import type { ArcadeGameDef } from "@/server/learning/arcade-games";
 import { ARCADE_DRILL_XP, ARCADE_DRILL_PERFECT_BONUS_XP } from "@/server/learning/arcade-games";
 
@@ -66,7 +67,7 @@ const TERM_PAIRS = [
 type Card = { id: number; text: string; pair: number; flipped: boolean; matched: boolean };
 
 export function ProceduralArcadeGame({ game }: { game: ArcadeGameDef }) {
-  const { reportClear, busy } = useArcadeClear(game.slug);
+  const { reportClear, busy, clearTick, lastXp } = useArcadeClear(game.slug);
   const need = 2 + Math.min(3, game.difficulty);
 
   const [started, setStarted] = useState(false);
@@ -411,7 +412,8 @@ export function ProceduralArcadeGame({ game }: { game: ArcadeGameDef }) {
   const quiz = quizBank[quizIdx];
 
   return (
-    <div className="space-y-4">
+    <div className="relative space-y-4">
+      <ArcadeClearFx xp={lastXp} trigger={clearTick} />
       <div className="flex flex-wrap items-center gap-2">
         <Badge variant="cyan">
           Progress {Math.min(score, need)}/{need}

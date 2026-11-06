@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useArcadeClear } from "@/components/learn/games/use-arcade-clear";
+import { ArcadeClearFx } from "@/components/learn/games/arcade-clear-fx";
 
 type Cell = { id: number; value: number; x: number; y: number; r: number; selected: boolean; found: boolean };
 
@@ -35,7 +36,7 @@ function makeLevel(level: number) {
 
 export function PairSeekerGame() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const { reportClear, busy } = useArcadeClear("pair-seeker");
+  const { reportClear, busy, clearTick, lastXp } = useArcadeClear("pair-seeker");
   const [level, setLevel] = useState(1);
   const [state, setState] = useState(() => makeLevel(1));
   const [selected, setSelected] = useState<number[]>([]);
@@ -165,7 +166,8 @@ export function PairSeekerGame() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="relative space-y-4">
+      <ArcadeClearFx xp={lastXp} trigger={clearTick} />
       <div className="flex flex-wrap items-center justify-between gap-2">
         <Badge variant="cyan">Two Sum trainer</Badge>
         <Badge variant="emerald">{wins} pairs</Badge>

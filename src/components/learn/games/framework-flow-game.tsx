@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useArcadeClear } from "@/components/learn/games/use-arcade-clear";
+import { ArcadeClearFx } from "@/components/learn/games/arcade-clear-fx";
 
 const BEATS = [
   { id: "clarify", label: "Clarify", tip: "Inputs, outputs, constraints" },
@@ -24,7 +25,7 @@ function shuffle<T>(arr: T[]) {
 }
 
 export function FrameworkFlowGame() {
-  const { reportClear, busy } = useArcadeClear("framework-flow");
+  const { reportClear, busy, clearTick, lastXp } = useArcadeClear("framework-flow");
   const [pool, setPool] = useState(() => shuffle([...BEATS]));
   const [picked, setPicked] = useState<(typeof BEATS)[number][]>([]);
   const [status, setStatus] = useState<"play" | "win" | "lose">("play");
@@ -80,7 +81,8 @@ export function FrameworkFlowGame() {
   }
 
   return (
-    <div className="space-y-5">
+    <div className="relative space-y-5">
+      <ArcadeClearFx xp={lastXp} trigger={clearTick} />
       <div className="flex flex-wrap items-center justify-between gap-2">
         <Badge variant="cyan">Live coding order</Badge>
         <Badge variant={seconds <= 10 ? "rose" : "amber"}>{seconds}s</Badge>

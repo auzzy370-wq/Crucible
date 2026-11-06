@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { ForgeSparks } from "@/components/learn/forge-fun";
 import {
   ARCADE_CLEAR_XP,
   ARCADE_DRILL_XP,
@@ -88,8 +89,9 @@ export function ArcadeLobby(props: {
 
   return (
     <div className="animate-rise space-y-8">
-      <header className="overflow-hidden rounded-2xl border border-[var(--brand)]/30 bg-gradient-to-br from-[var(--brand-soft)] via-white to-orange-50/80 p-5 sm:p-7">
-        <div className="flex flex-wrap items-start justify-between gap-4">
+      <header className="relative overflow-hidden rounded-2xl border border-[var(--brand)]/30 bg-gradient-to-br from-[var(--brand-soft)] via-white to-orange-50/80 p-5 sm:p-7">
+        <ForgeSparks density={9} />
+        <div className="relative flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0">
             <p className="font-mono text-xs tracking-[0.3em] text-[var(--brand)]">LEARN · ARCADE</p>
             <h1 className="mt-2 text-2xl font-semibold tracking-[-0.03em] text-slate-900 sm:text-3xl">
