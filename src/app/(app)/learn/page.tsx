@@ -175,7 +175,8 @@ export default async function LearnHubPage() {
             <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber-800">HTML5 drills</p>
             <h2 className="mt-1 font-serif-display text-xl text-slate-900">Learn Arcade</h2>
             <p className="mt-1 text-sm text-slate-600">
-              Framework Flow, Big-O Blitz, Pair Seeker, Binary Range — short games that teach interview craft.
+              1,000 HTML5 drills — four featured craft games plus seeded arenas for hashing, Big-O, stacks, bits, and
+              systems timing.
             </p>
           </div>
           <Link href="/learn/games">

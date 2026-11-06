@@ -8,7 +8,12 @@ import {
 import { dateKey } from "@/server/saas/daily";
 import { STUDY_PLANS } from "@/server/saas/study-plans";
 import { itemXp, PLAN_CLEAR_BONUS_XP } from "@/server/learning/study-plan-game";
-import { ARCADE_CLEAR_XP, ARCADE_PLAN_SLUG } from "@/server/learning/arcade-games";
+import {
+  ARCADE_DRILL_XP,
+  ARCADE_PLAN_SLUG,
+  ARCADE_TARGET_COUNT,
+  getArcadeGame,
+} from "@/server/learning/arcade-games";
 
 export const LESSON_XP = 50;
 export const DAILY_XP = 75;
@@ -297,8 +302,13 @@ export async function buildLearnerGameState(userId: string): Promise<LearnerGame
   }
 
   const arcadeEnrollment = allEnrollments.find((e) => e.planSlug === ARCADE_PLAN_SLUG);
-  const arcadeClears = arcadeEnrollment?.completedSlugs.length ?? 0;
-  const arcadeXp = arcadeClears * ARCADE_CLEAR_XP;
+  const arcadeClearedSlugs = arcadeEnrollment?.completedSlugs ?? [];
+  const arcadeClears = arcadeClearedSlugs.filter((slug) => getArcadeGame(slug)).length;
+  const arcadeXp = arcadeClearedSlugs.reduce((sum, slug) => {
+    const g = getArcadeGame(slug);
+    if (!g) return sum;
+    return sum + (g.featured ? 40 : ARCADE_DRILL_XP);
+  }, 0);
 
   const nextIv = nextInterviewLesson(ivSet);
   const nextAi = nextAiLesson(aiSet);
@@ -514,10 +524,28 @@ export async function buildLearnerGameState(userId: string): Promise<LearnerGame
       unlocked: arcadeClears >= 1,
     },
     {
+      id: "arcade-25",
+      title: "Arcade warm circuit",
+      detail: "Clear 25 Learn Arcade games",
+      unlocked: arcadeClears >= 25,
+    },
+    {
+      id: "arcade-100",
+      title: "Arcade centurion",
+      detail: "Clear 100 Learn Arcade games",
+      unlocked: arcadeClears >= 100,
+    },
+    {
+      id: "arcade-500",
+      title: "Arcade campaign",
+      detail: "Clear 500 Learn Arcade games",
+      unlocked: arcadeClears >= 500,
+    },
+    {
       id: "arcade-all",
       title: "Arcade complete",
-      detail: "Clear every Learn Arcade game",
-      unlocked: arcadeClears >= 4,
+      detail: `Clear all ${ARCADE_TARGET_COUNT} Learn Arcade games`,
+      unlocked: arcadeClears >= ARCADE_TARGET_COUNT,
     },
     {
       id: "operator",

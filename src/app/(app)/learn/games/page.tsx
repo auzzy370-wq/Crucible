@@ -10,13 +10,7 @@ export default async function LearnGamesPage() {
     where: { userId_planSlug: { userId: user.id, planSlug: ARCADE_PLAN_SLUG } },
   });
   const done = new Set(enrollment?.completedSlugs ?? []);
-  const completedCount = ARCADE_GAMES.filter((g) => done.has(g.slug)).length;
+  const completedCount = ARCADE_GAMES.reduce((n, g) => n + (done.has(g.slug) ? 1 : 0), 0);
 
-  return (
-    <ArcadeLobby
-      completedCount={completedCount}
-      percent={Math.round((completedCount / ARCADE_GAMES.length) * 100)}
-      games={ARCADE_GAMES.map((g) => ({ ...g, done: done.has(g.slug) }))}
-    />
-  );
+  return <ArcadeLobby completedCount={completedCount} completedSlugs={enrollment?.completedSlugs ?? []} />;
 }
