@@ -82,16 +82,26 @@ export default async function DashboardPage() {
     const completedWithScore = assignments.filter((a) => a.scoreReport);
     const firstRunDone = Boolean(streak?.currentStreak) && completedWithScore.length > 0;
 
+    const openAssignments = assignments.filter(
+      (a) => !["COMPLETED", "FAILED", "EXPIRED"].includes(a.status),
+    );
+    const recentAssignments = openAssignments.length ? openAssignments.slice(0, 4) : assignments.slice(0, 4);
+
     return (
-      <div className="animate-rise space-y-6">
-        <header>
-          <p className="font-mono text-xs tracking-[0.3em] text-teal-700">LEARNING PATH</p>
-          <h1 className="mt-2 font-serif-display text-2xl tracking-tight sm:text-3xl">
-            {firstRunDone ? "Keep sharpening" : "Learn by proving"}
-          </h1>
-          <p className="mt-2 max-w-2xl text-slate-600">
-            Quests, craft paths, and timed evidence — XP only from work you finish.
-          </p>
+      <div className="animate-rise space-y-8">
+        <header className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <p className="font-mono text-xs tracking-[0.3em] text-[var(--brand)]">HOME</p>
+            <h1 className="mt-2 text-2xl font-semibold tracking-[-0.03em] sm:text-3xl">
+              {firstRunDone ? "Keep sharpening" : "Learn by proving"}
+            </h1>
+            <p className="mt-2 max-w-xl text-slate-600">One focus, then shortcuts — deep forge lives on Learn.</p>
+          </div>
+          <Link href="/learn">
+            <Button variant="secondary" size="sm">
+              Open Learn hub
+            </Button>
+          </Link>
         </header>
 
         <section className="rounded-2xl border border-[var(--brand)]/30 bg-gradient-to-br from-[var(--brand-soft)] via-white to-orange-50/70 p-5">
@@ -101,33 +111,21 @@ export default async function DashboardPage() {
                 <span className="inline-flex h-7 min-w-7 items-center justify-center rounded-md bg-[var(--brand)] px-2 font-mono text-xs font-semibold text-white">
                   Lv {game.level}
                 </span>
-                <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--brand)]">Forge rank</p>
+                <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--brand)]">
+                  {game.rank.title}
+                </p>
               </div>
-              <p className="mt-1 text-2xl font-semibold tracking-[-0.03em] text-slate-900 sm:text-3xl">
-                {game.rank.title}
-              </p>
-              <p className="mt-1 font-mono text-sm text-slate-600">
-                {game.xp.toLocaleString()} XP
-                {game.nextRank ? ` · ${game.xpToNext} to ${game.nextRank.title}` : " · max rank"}
-                {" · "}
-                {game.streak.current}d streak · heat {game.streak.heat}%
+              <p className="mt-2 text-xl font-semibold text-slate-900">{game.focus.title}</p>
+              <p className="mt-1 text-sm text-slate-600">{game.focus.detail}</p>
+              <p className="mt-2 font-mono text-xs text-slate-500">
+                {game.xp.toLocaleString()} XP · {game.streak.current}d streak · {game.questsDone}/{game.questsTotal}{" "}
+                today
                 {game.perfectDay ? " · perfect day" : ""}
               </p>
             </div>
-            <div className="flex flex-wrap gap-2">
-              <Badge variant="cyan">
-                {game.questsDone}/{game.questsTotal} daily quests
-              </Badge>
-              <Badge variant="amber">
-                {game.weeklyDone}/{game.weeklyTotal} weekly
-              </Badge>
-              <Badge>
-                {game.unlockedCount}/{game.achievements.length} medals
-              </Badge>
-              <Link href="/learn">
-                <Button size="sm">{game.focus.cta}</Button>
-              </Link>
-            </div>
+            <Link href={game.focus.href}>
+              <Button>{game.focus.cta}</Button>
+            </Link>
           </div>
           <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/80">
             <div
@@ -135,222 +133,149 @@ export default async function DashboardPage() {
               style={{ width: `${game.rankProgressPct}%` }}
             />
           </div>
-          <div className="mt-3 flex gap-1.5">
-            {game.quests.map((q) => (
-              <div
-                key={q.id}
-                className={`h-1.5 flex-1 rounded-full ${q.done ? "bg-[var(--brand)]" : "bg-slate-200"}`}
-                title={q.title}
-              />
-            ))}
-          </div>
-          <p className="mt-3 text-sm text-slate-600">
-            Focus: <span className="text-slate-800">{game.focus.title}</span> — {game.focus.detail}
-          </p>
         </section>
 
-        <section className="grid gap-4 lg:grid-cols-3">
-          <div className="rounded-2xl border border-teal-300/50 bg-teal-500/[0.06] p-5">
-            <div className="text-xs font-medium uppercase tracking-wider text-teal-700/80">Interview Craft</div>
-            <h2 className="mt-2 text-lg font-semibold text-slate-900">
-              {ivNext ? ivNext.title : ivPercent ? "Interview path complete" : "Prepare for the loop"}
-            </h2>
-            <p className="mt-1 text-sm text-slate-600">
-              {ivNext
-                ? `${ivNext.summary} · ${ivNext.minutes} min · ${ivPercent}% done`
-                : "Coding, design, behavioral, company packs."}
-            </p>
-            <div className="mt-3 flex flex-wrap gap-3 text-sm">
-              <Link
-                href={ivNext ? `/learn/interview/${ivNext.slug}` : "/learn/interview"}
-                className="text-teal-800 hover:underline"
-              >
-                {ivNext ? "Continue lesson →" : "Start Interview Craft →"}
-              </Link>
-              <Link href="/study-plans" className="text-slate-600 hover:underline">
-                Campaigns →
-              </Link>
-            </div>
+        <section className="space-y-3">
+          <div>
+            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">Continue</p>
+            <h2 className="mt-1 text-lg font-semibold text-slate-900">Pick a lane</h2>
           </div>
-          <div className="rounded-2xl border border-emerald-300/50 bg-emerald-500/[0.06] p-5">
-            <div className="text-xs font-medium uppercase tracking-wider text-emerald-800/80">AI Craft</div>
-            <h2 className="mt-2 text-lg font-semibold text-slate-900">
-              {aiNext ? aiNext.title : aiPercent ? "AI path complete" : "Learn AI — prompt to production"}
-            </h2>
-            <p className="mt-1 text-sm text-slate-600">
-              {aiNext
-                ? `${aiNext.summary} · ${aiNext.minutes} min · ${aiPercent}% done`
-                : "Prompting, APIs, RAG, agents, evals, safety."}
-            </p>
-            <div className="mt-3 flex flex-wrap gap-3 text-sm">
-              <Link
-                href={aiNext ? `/learn/ai/${aiNext.slug}` : "/learn/ai"}
-                className="text-emerald-800 hover:underline"
-              >
-                {aiNext ? "Continue lesson →" : "Start AI Craft →"}
-              </Link>
-              <Link href="/learn" className="text-slate-600 hover:underline">
-                Learn hub →
-              </Link>
-            </div>
-          </div>
-          <div className="rounded-2xl border border-slate-200 bg-white/75 p-5">
-            <div className="text-xs font-medium uppercase tracking-wider text-slate-600">Next problem</div>
-            <h2 className="mt-2 text-lg font-semibold text-slate-900">
-              {nextProblem?.title ?? daily?.challenge?.title ?? "Pick up a practice set"}
-            </h2>
-            <p className="mt-1 text-sm text-slate-600">
-              {nextProblem
-                ? `Adaptive · D${nextProblem.difficulty} · streak ${streak?.currentStreak ?? 0}`
-                : `Daily or bank · streak ${streak?.currentStreak ?? 0}`}
-            </p>
-            <div className="mt-3 flex flex-wrap gap-3 text-sm">
-              {nextProblem ? (
-                <Link
-                  href={`/challenges?q=${encodeURIComponent(nextProblem.slug)}`}
-                  className="text-teal-700 hover:underline"
-                >
-                  Open in bank →
-                </Link>
-              ) : (
-                <Link href="/daily" className="text-teal-700 hover:underline">
-                  Open daily →
-                </Link>
-              )}
-              <Link href="/roadmap" className="text-slate-600 hover:underline">
-                Roadmap →
-              </Link>
-            </div>
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+            <Link
+              href={ivNext ? `/learn/interview/${ivNext.slug}` : "/learn/interview"}
+              className="rounded-xl border border-teal-300/50 bg-teal-500/[0.06] p-4 transition hover:border-teal-400"
+            >
+              <p className="font-mono text-[10px] uppercase tracking-wider text-teal-800">Interview</p>
+              <p className="mt-1 font-medium text-slate-900">
+                {ivNext ? ivNext.title : ivPercent ? "Path complete" : "Start Interview Craft"}
+              </p>
+              <p className="mt-1 text-sm text-slate-500">{ivPercent}% cleared</p>
+            </Link>
+            <Link
+              href={aiNext ? `/learn/ai/${aiNext.slug}` : "/learn/ai"}
+              className="rounded-xl border border-emerald-300/50 bg-emerald-500/[0.06] p-4 transition hover:border-emerald-400"
+            >
+              <p className="font-mono text-[10px] uppercase tracking-wider text-emerald-800">AI Craft</p>
+              <p className="mt-1 font-medium text-slate-900">
+                {aiNext ? aiNext.title : aiPercent ? "Path complete" : "Start AI Craft"}
+              </p>
+              <p className="mt-1 text-sm text-slate-500">{aiPercent}% cleared</p>
+            </Link>
+            <Link
+              href={nextProblem ? `/challenges?q=${encodeURIComponent(nextProblem.slug)}` : "/daily"}
+              className="rounded-xl border border-slate-200 bg-white/80 p-4 transition hover:border-[var(--brand)]/40"
+            >
+              <p className="font-mono text-[10px] uppercase tracking-wider text-slate-500">Prove</p>
+              <p className="mt-1 font-medium text-slate-900">
+                {nextProblem?.title ?? daily?.challenge?.title ?? "Daily forge"}
+              </p>
+              <p className="mt-1 text-sm text-slate-500">Streak {streak?.currentStreak ?? 0}d</p>
+            </Link>
+            <Link
+              href="/learn/games"
+              className="rounded-xl border border-amber-200 bg-amber-50/70 p-4 transition hover:border-amber-300"
+            >
+              <p className="font-mono text-[10px] uppercase tracking-wider text-amber-800">Arcade</p>
+              <p className="mt-1 font-medium text-slate-900">1,000 HTML5 drills</p>
+              <p className="mt-1 text-sm text-slate-500">{enrollments} campaigns enrolled</p>
+            </Link>
           </div>
         </section>
 
-        <section className="rounded-2xl border border-cyan-500/20 bg-cyan-500/5 p-5">
-          <div className="text-xs font-medium uppercase tracking-wider text-teal-700/80">Learning loop</div>
-          <ol className="mt-4 grid gap-3 md:grid-cols-3">
-            <li className="rounded-xl border border-slate-200 bg-white/75 p-4">
-              <div className="font-mono text-xs text-slate-500">1 · Practice</div>
-              <div className="mt-1 font-medium text-slate-900">Daily or problem bank</div>
-              <p className="mt-1 text-sm text-slate-600">
-                {daily?.challenge?.title ?? "Today’s lesson"} · streak {streak?.currentStreak ?? 0}
-              </p>
-              <div className="mt-3 flex flex-wrap gap-3 text-sm">
-                <Link href="/daily" className="text-teal-700 hover:underline">
-                  Open daily →
-                </Link>
-                <Link href="/challenges" className="text-slate-600 hover:underline">
-                  Browse bank →
-                </Link>
-              </div>
-            </li>
-            <li className="rounded-xl border border-slate-200 bg-white/75 p-4">
-              <div className="font-mono text-xs text-slate-500">2 · Prove</div>
-              <div className="mt-1 font-medium text-slate-900">Pass public + hidden judges</div>
-              <p className="mt-1 text-sm text-slate-600">
-                Pick a problem, run the tests, and clear both public and hidden checks.
-              </p>
-              <Link
-                href={codingOpen?.workspace ? `/workspace/${codingOpen.workspace.id}` : "/challenges"}
-                className="mt-3 inline-block text-sm text-teal-700 hover:underline"
-              >
-                {codingOpen?.workspace ? "Continue your problem →" : "Open problem bank →"}
+        <section className="space-y-3">
+          <div className="flex flex-wrap items-end justify-between gap-2">
+            <div>
+              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">Sessions</p>
+              <h2 className="mt-1 text-lg font-semibold text-slate-900">
+                {openAssignments.length ? "Open assignments" : "Recent assignments"}
+              </h2>
+            </div>
+            <div className="flex flex-wrap gap-3 text-sm">
+              <Link href="/challenges" className="text-[var(--brand)] hover:underline">
+                Problem bank
               </Link>
-            </li>
-            <li className="rounded-xl border border-slate-200 bg-white/75 p-4">
-              <div className="font-mono text-xs text-slate-500">3 · Show employers</div>
-              <div className="mt-1 font-medium text-slate-900">Verified profile</div>
-              <p className="mt-1 text-sm text-slate-600">
-                Hiring managers see evidence — never résumé claims.
-              </p>
               {profile?.publicEnabled && profile.publicSlug ? (
-                <Link href={`/u/${profile.publicSlug}`} className="mt-3 inline-block text-sm text-teal-700 hover:underline">
-                  View /u/{profile.publicSlug} →
+                <Link href={`/u/${profile.publicSlug}`} className="text-slate-600 hover:underline">
+                  Public profile
                 </Link>
               ) : (
-                <Link href="/candidates" className="mt-3 inline-block text-sm text-teal-700 hover:underline">
-                  Publish profile →
+                <Link href="/candidates" className="text-slate-600 hover:underline">
+                  Profile
                 </Link>
               )}
-            </li>
-          </ol>
-        </section>
-
-        <section className="grid gap-3 sm:grid-cols-3">
-          <Link href="/daily" className="rounded-xl border border-cyan-500/20 bg-cyan-500/5 p-4 hover:bg-teal-500/10">
-            <div className="text-xs uppercase tracking-wider text-slate-500">Daily challenge</div>
-            <div className="mt-1 font-mono text-2xl text-teal-800">{streak?.currentStreak ?? 0} day streak</div>
-          </Link>
-          <Link href="/study-plans" className="rounded-xl border border-slate-200 bg-white/75 p-4 hover:bg-slate-100">
-            <div className="text-xs uppercase tracking-wider text-slate-500">Study plans</div>
-            <div className="mt-1 font-mono text-2xl text-slate-900">{enrollments} enrolled</div>
-          </Link>
-          <Link href="/pricing" className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 hover:bg-amber-500/10">
-            <div className="text-xs uppercase tracking-wider text-slate-500">Plan</div>
-            <div className="mt-1 font-mono text-2xl font-semibold text-amber-800 dark:text-amber-200">
-              {user?.plan === "PREMIUM" ? "Premium" : "Free"}
+              {codingOpen?.workspace && (
+                <Link href={`/workspace/${codingOpen.workspace.id}`} className="text-slate-600 hover:underline">
+                  Resume workspace
+                </Link>
+              )}
             </div>
-          </Link>
-        </section>
+          </div>
 
-        <div className="grid gap-4 md:grid-cols-2">
-          {assignments.map((a) => (
-            <Card key={a.id}>
-              <CardHeader>
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                  <CardTitle className="text-base leading-snug">{a.assessment.title}</CardTitle>
-                  <Badge
-                    className="w-fit shrink-0"
-                    variant={a.assessment.track === "CYBERSECURITY" ? "violet" : "cyan"}
-                  >
-                    {a.assessment.track.replaceAll("_", " ")}
-                  </Badge>
-                </div>
-                <CardDescription>{a.assessment.challenge.summary}</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3 text-sm">
-                <div className="flex justify-between text-slate-600">
-                  <span>Status</span>
-                  <span className="font-mono text-slate-800">{a.status}</span>
-                </div>
-                {(a.assessment.timedMinutes || a.dueAt) && (
-                  <div className="flex items-center justify-between gap-2 text-slate-600">
-                    <span>Session</span>
-                    <SessionTimer
-                      endsAt={a.dueAt?.toISOString()}
-                      timedMinutes={a.assessment.timedMinutes}
-                      compact
-                    />
+          <div className="grid gap-4 md:grid-cols-2">
+            {recentAssignments.map((a) => (
+              <Card key={a.id}>
+                <CardHeader>
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                    <CardTitle className="text-base leading-snug">{a.assessment.title}</CardTitle>
+                    <Badge
+                      className="w-fit shrink-0"
+                      variant={a.assessment.track === "CYBERSECURITY" ? "violet" : "cyan"}
+                    >
+                      {a.assessment.track.replaceAll("_", " ")}
+                    </Badge>
                   </div>
-                )}
-                {a.scoreReport && (
-                  <div className="flex flex-wrap items-center justify-between gap-2 text-slate-600">
-                    <span>Score</span>
-                    <span className="font-mono text-teal-700">{formatScore(a.scoreReport.overall)}</span>
+                  <CardDescription>{a.assessment.challenge.summary}</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3 text-sm">
+                  <div className="flex justify-between text-slate-600">
+                    <span>Status</span>
+                    <span className="font-mono text-slate-800">{a.status}</span>
                   </div>
-                )}
-                <div className="flex flex-wrap gap-3">
-                  <Link
-                    className="text-teal-700 hover:underline"
-                    href={a.workspace ? `/workspace/${a.workspace.id}` : "/challenges"}
-                  >
-                    {a.workspace ? "Continue problem →" : "Pick a problem →"}
-                  </Link>
-                  {a.scoreReport && (
-                    <Link className="text-emerald-300 hover:underline" href={`/scorecard/${a.id}`} target="_blank">
-                      Share scorecard →
-                    </Link>
+                  {(a.assessment.timedMinutes || a.dueAt) && (
+                    <div className="flex items-center justify-between gap-2 text-slate-600">
+                      <span>Session</span>
+                      <SessionTimer
+                        endsAt={a.dueAt?.toISOString()}
+                        timedMinutes={a.assessment.timedMinutes}
+                        compact
+                      />
+                    </div>
                   )}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-          {!assignments.length && (
-            <Card className="md:col-span-2">
-              <CardContent className="py-10 text-center text-slate-600">
-                No assignments yet. Start a daily evidence session — or wait for a manager to assign a timed assessment.
-              </CardContent>
-            </Card>
-          )}
-        </div>
+                  {a.scoreReport && (
+                    <div className="flex flex-wrap items-center justify-between gap-2 text-slate-600">
+                      <span>Score</span>
+                      <span className="font-mono text-teal-700">{formatScore(a.scoreReport.overall)}</span>
+                    </div>
+                  )}
+                  <div className="flex flex-wrap gap-3">
+                    <Link
+                      className="text-teal-700 hover:underline"
+                      href={a.workspace ? `/workspace/${a.workspace.id}` : "/challenges"}
+                    >
+                      {a.workspace ? "Continue problem →" : "Pick a problem →"}
+                    </Link>
+                    {a.scoreReport && (
+                      <Link className="text-emerald-700 hover:underline" href={`/scorecard/${a.id}`} target="_blank">
+                        Share scorecard →
+                      </Link>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+            {!assignments.length && (
+              <Card className="md:col-span-2">
+                <CardContent className="py-10 text-center text-slate-600">
+                  No assignments yet. Start the{" "}
+                  <Link href="/daily" className="text-[var(--brand)] hover:underline">
+                    daily forge
+                  </Link>{" "}
+                  or wait for a manager invite.
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </section>
       </div>
     );
   }

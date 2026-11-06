@@ -15,6 +15,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
+const JUMP = [
+  { href: "#quests", label: "Quests" },
+  { href: "#paths", label: "Paths" },
+  { href: "#practice", label: "Practice" },
+  { href: "#medals", label: "Medals" },
+] as const;
+
 export default async function LearnHubPage() {
   const user = await requirePageRoles(CANDIDATE_ROLES);
   const [game, roadmap] = await Promise.all([
@@ -23,174 +30,202 @@ export default async function LearnHubPage() {
   ]);
   const nextProblem = roadmap?.nextProblems?.[0] ?? null;
   const primaryQuest = game.quests.find((q) => !q.done) ?? game.quests[0]!;
+  const unlockedMedals = game.achievements.filter((a) => a.unlocked);
+  const lockedMedals = game.achievements.filter((a) => !a.unlocked);
 
   return (
     <div className="animate-rise space-y-8">
       <header className="space-y-4">
-        <div>
-          <p className="font-mono text-xs tracking-[0.3em] text-teal-700">LEARN · FORGE</p>
-          <h1 className="mt-2 text-2xl font-semibold tracking-[-0.03em] sm:text-3xl">Level up by proving craft</h1>
-          <p className="mt-2 max-w-2xl text-slate-600">
-            Quests, streaks, heat, and perfect-day bonuses — XP only from work you finish.
-          </p>
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <p className="font-mono text-xs tracking-[0.3em] text-[var(--brand)]">LEARN · FORGE</p>
+            <h1 className="mt-2 text-2xl font-semibold tracking-[-0.03em] sm:text-3xl">Level up by proving craft</h1>
+            <p className="mt-2 max-w-2xl text-slate-600">
+              Quests first, then paths and practice — XP only from work you finish.
+            </p>
+          </div>
+          <nav className="flex flex-wrap gap-1.5" aria-label="Learn sections">
+            {JUMP.map((j) => (
+              <a
+                key={j.href}
+                href={j.href}
+                className="rounded-md border border-slate-200 bg-white/80 px-2.5 py-1.5 font-mono text-[11px] uppercase tracking-wider text-slate-600 transition hover:border-[var(--brand)]/40 hover:text-[var(--brand)]"
+              >
+                {j.label}
+              </a>
+            ))}
+          </nav>
         </div>
         <ForgeHero game={game} />
       </header>
 
-      <section>
-        <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
-          <div>
-            <h2 className="text-xl font-semibold tracking-[-0.02em] text-slate-900">Today’s quests</h2>
-            <p className="mt-1 text-sm text-slate-500">
-              Three daily objectives · {game.questsDone}/{game.questsTotal} cleared
-              {game.perfectDay ? " · perfect day bonus banked" : ` · +${PERFECT_DAY_XP} XP if you clear all three`}
-            </p>
-          </div>
-          <Link href={primaryQuest.href}>
-            <Button size="sm">{game.perfectDay ? "Review forge" : `Start: ${primaryQuest.title}`}</Button>
-          </Link>
-        </div>
-        <div className="grid gap-3 md:grid-cols-3">
-          {game.quests.map((q, i) => (
-            <Link
-              key={q.id}
-              href={q.href}
-              className={cn(
-                "learn-quest-card group rounded-xl border px-4 py-4 transition",
-                q.done
-                  ? "border-emerald-300 bg-emerald-50/70"
-                  : "border-slate-200 bg-white/80 hover:border-[var(--brand)]/50",
-              )}
-              style={{ animationDelay: `${i * 0.06}s` }}
-            >
-              <div className="flex items-center justify-between gap-2">
-                <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">Quest {i + 1}</span>
-                <Badge variant={q.done ? "emerald" : "cyan"}>+{q.xp} XP</Badge>
-              </div>
-              <h3 className="mt-2 font-medium text-slate-900 group-hover:text-[var(--brand)]">{q.title}</h3>
-              <p className="mt-1 text-sm text-slate-500">{q.detail}</p>
-              <p className="mt-3 font-mono text-[11px] text-[var(--brand)]">{q.done ? "Cleared" : "Open →"}</p>
+      <section id="quests" className="scroll-mt-20 space-y-6">
+        <div>
+          <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
+            <div>
+              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">1 · Board</p>
+              <h2 className="mt-1 text-xl font-semibold tracking-[-0.02em] text-slate-900">Today’s quests</h2>
+              <p className="mt-1 text-sm text-slate-500">
+                {game.questsDone}/{game.questsTotal} cleared
+                {game.perfectDay ? " · perfect day banked" : ` · +${PERFECT_DAY_XP} XP if you clear all three`}
+              </p>
+            </div>
+            <Link href={primaryQuest.href}>
+              <Button size="sm">{game.perfectDay ? "Browse forge" : `Start: ${primaryQuest.title}`}</Button>
             </Link>
-          ))}
+          </div>
+          <div className="grid gap-3 md:grid-cols-3">
+            {game.quests.map((q, i) => (
+              <Link
+                key={q.id}
+                href={q.href}
+                className={cn(
+                  "learn-quest-card group rounded-xl border px-4 py-4 transition",
+                  q.done
+                    ? "border-emerald-300 bg-emerald-50/70"
+                    : "border-slate-200 bg-white/80 hover:border-[var(--brand)]/50",
+                )}
+                style={{ animationDelay: `${i * 0.06}s` }}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">Quest {i + 1}</span>
+                  <Badge variant={q.done ? "emerald" : "cyan"}>+{q.xp} XP</Badge>
+                </div>
+                <h3 className="mt-2 font-medium text-slate-900 group-hover:text-[var(--brand)]">{q.title}</h3>
+                <p className="mt-1 text-sm text-slate-500">{q.detail}</p>
+                <p className="mt-3 font-mono text-[11px] text-[var(--brand)]">{q.done ? "Cleared" : "Open →"}</p>
+              </Link>
+            ))}
+          </div>
         </div>
-      </section>
 
-      <section>
-        <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
-          <div>
-            <h2 className="text-xl font-semibold tracking-[-0.02em] text-slate-900">This week</h2>
+        <div>
+          <div className="mb-3">
+            <h3 className="text-lg font-semibold tracking-[-0.02em] text-slate-900">This week</h3>
             <p className="mt-1 text-sm text-slate-500">
-              Weekly board · {game.weeklyDone}/{game.weeklyTotal} done
+              {game.weeklyDone}/{game.weeklyTotal} done
               {game.weeklyDone >= game.weeklyTotal
-                ? " · weekly board clear bonus banked"
+                ? " · board clear bonus banked"
                 : " · clear all three for a board bonus"}
             </p>
           </div>
-        </div>
-        <div className="grid gap-3 md:grid-cols-3">
-          {game.weeklyQuests.map((q) => (
-            <Link
-              key={q.id}
-              href={q.href}
-              className={cn(
-                "rounded-xl border px-4 py-4 transition",
-                q.done
-                  ? "border-amber-300 bg-amber-50/70"
-                  : "border-slate-200 bg-white/80 hover:border-[var(--brand)]/40",
-              )}
-            >
-              <div className="flex items-center justify-between gap-2">
-                <h3 className="font-medium text-slate-900">{q.title}</h3>
-                <Badge variant={q.done ? "emerald" : "amber"}>+{q.xp}</Badge>
-              </div>
-              <p className="mt-1 text-sm text-slate-500">{q.detail}</p>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      <section className="grid gap-4 lg:grid-cols-2">
-        <PathCard
-          label="Interview Craft"
-          percent={game.paths.interview.percent}
-          done={game.paths.interview.done}
-          total={game.paths.interview.total}
-          nextTitle={game.paths.interview.nextTitle}
-          href={game.paths.interview.nextHref}
-          browseHref="/learn/interview"
-          chapters={game.paths.interview.chapters}
-          accent="cyan"
-        />
-        <PathCard
-          label="AI Craft"
-          percent={game.paths.ai.percent}
-          done={game.paths.ai.done}
-          total={game.paths.ai.total}
-          nextTitle={game.paths.ai.nextTitle}
-          href={game.paths.ai.nextHref}
-          browseHref="/learn/ai"
-          chapters={game.paths.ai.chapters}
-          accent="teal"
-        />
-      </section>
-
-      <section className="rounded-2xl border border-slate-200 bg-white/80 p-5">
-        <div className="flex flex-wrap items-center gap-2">
-          <Badge variant="cyan">Prove quest</Badge>
-          <Badge variant="amber">+{DAILY_XP} XP</Badge>
-        </div>
-        <h2 className="mt-3 font-serif-display text-xl text-slate-900">
-          {nextProblem ? nextProblem.title : "Today’s timed challenge"}
-        </h2>
-        <p className="mt-2 max-w-xl text-sm text-slate-600">
-          {nextProblem
-            ? `Adaptive pick · D${nextProblem.difficulty} · ${(nextProblem.tags ?? []).slice(0, 3).join(", ") || "coding"}`
-            : "Open the daily session — same public + hidden judges employers use."}
-        </p>
-        <div className="mt-4 flex flex-wrap gap-2">
-          {nextProblem ? (
-            <Link href={`/challenges?q=${encodeURIComponent(nextProblem.slug)}`}>
-              <Button>Open recommended problem</Button>
-            </Link>
-          ) : (
-            <Link href="/daily">
-              <Button>Open today’s challenge</Button>
-            </Link>
-          )}
-          <Link href="/daily">
-            <Button variant="secondary">Daily forge</Button>
-          </Link>
-          <Link href="/study-plans">
-            <Button variant="ghost">Study campaigns</Button>
-          </Link>
-          <Link href="/learn/games">
-            <Button variant="secondary">Learn Arcade</Button>
-          </Link>
-        </div>
-      </section>
-
-      <section className="rounded-2xl border border-amber-200 bg-amber-50/60 p-5">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber-800">HTML5 drills</p>
-            <h2 className="mt-1 font-serif-display text-xl text-slate-900">Learn Arcade</h2>
-            <p className="mt-1 text-sm text-slate-600">
-              1,000 HTML5 drills — four featured craft games plus seeded arenas for hashing, Big-O, stacks, bits, and
-              systems timing.
-            </p>
+          <div className="grid gap-3 md:grid-cols-3">
+            {game.weeklyQuests.map((q) => (
+              <Link
+                key={q.id}
+                href={q.href}
+                className={cn(
+                  "rounded-xl border px-4 py-4 transition",
+                  q.done
+                    ? "border-amber-300 bg-amber-50/70"
+                    : "border-slate-200 bg-white/80 hover:border-[var(--brand)]/40",
+                )}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <h3 className="font-medium text-slate-900">{q.title}</h3>
+                  <Badge variant={q.done ? "emerald" : "amber"}>+{q.xp}</Badge>
+                </div>
+                <p className="mt-1 text-sm text-slate-500">{q.detail}</p>
+              </Link>
+            ))}
           </div>
-          <Link href="/learn/games">
-            <Button>Open arcade</Button>
-          </Link>
         </div>
       </section>
 
-      <section>
-        <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
+      <section id="paths" className="scroll-mt-20 space-y-3">
+        <div>
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">2 · Craft paths</p>
+          <h2 className="mt-1 text-xl font-semibold tracking-[-0.02em] text-slate-900">Continue a curriculum</h2>
+        </div>
+        <div className="grid gap-4 lg:grid-cols-2">
+          <PathCard
+            label="Interview Craft"
+            percent={game.paths.interview.percent}
+            done={game.paths.interview.done}
+            total={game.paths.interview.total}
+            nextTitle={game.paths.interview.nextTitle}
+            href={game.paths.interview.nextHref}
+            browseHref="/learn/interview"
+            chapters={game.paths.interview.chapters}
+            accent="cyan"
+          />
+          <PathCard
+            label="AI Craft"
+            percent={game.paths.ai.percent}
+            done={game.paths.ai.done}
+            total={game.paths.ai.total}
+            nextTitle={game.paths.ai.nextTitle}
+            href={game.paths.ai.nextHref}
+            browseHref="/learn/ai"
+            chapters={game.paths.ai.chapters}
+            accent="teal"
+          />
+        </div>
+      </section>
+
+      <section id="practice" className="scroll-mt-20 space-y-3">
+        <div>
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">3 · Practice lanes</p>
+          <h2 className="mt-1 text-xl font-semibold tracking-[-0.02em] text-slate-900">Prove it or play a drill</h2>
+        </div>
+        <div className="grid gap-4 lg:grid-cols-2">
+          <div className="rounded-2xl border border-slate-200 bg-white/80 p-5">
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant="cyan">Timed evidence</Badge>
+              <Badge variant="amber">+{DAILY_XP} XP</Badge>
+            </div>
+            <h3 className="mt-3 text-lg font-semibold text-slate-900">
+              {nextProblem ? nextProblem.title : "Today’s timed challenge"}
+            </h3>
+            <p className="mt-2 text-sm text-slate-600">
+              {nextProblem
+                ? `Adaptive pick · D${nextProblem.difficulty} · ${(nextProblem.tags ?? []).slice(0, 3).join(", ") || "coding"}`
+                : "Same public + hidden judges employers use."}
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {nextProblem ? (
+                <Link href={`/challenges?q=${encodeURIComponent(nextProblem.slug)}`}>
+                  <Button>Open problem</Button>
+                </Link>
+              ) : (
+                <Link href="/daily">
+                  <Button>Open daily</Button>
+                </Link>
+              )}
+              <Link href="/daily">
+                <Button variant="secondary">Daily forge</Button>
+              </Link>
+              <Link href="/study-plans">
+                <Button variant="ghost">Campaigns</Button>
+              </Link>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-amber-200 bg-amber-50/60 p-5">
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant="amber">HTML5</Badge>
+              <Badge>1,000 drills</Badge>
+            </div>
+            <h3 className="mt-3 text-lg font-semibold text-slate-900">Learn Arcade</h3>
+            <p className="mt-2 text-sm text-slate-600">
+              Featured craft games plus seeded arenas for hashing, Big-O, stacks, bits, and systems timing.
+            </p>
+            <div className="mt-4">
+              <Link href="/learn/games">
+                <Button>Open arcade</Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="medals" className="scroll-mt-20 space-y-3">
+        <div className="flex flex-wrap items-end justify-between gap-2">
           <div>
-            <h2 className="text-xl font-semibold tracking-[-0.02em] text-slate-900">Medals</h2>
+            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">4 · Collection</p>
+            <h2 className="mt-1 text-xl font-semibold tracking-[-0.02em] text-slate-900">Medals</h2>
             <p className="mt-1 text-sm text-slate-500">
-              Unlock by finishing real work — {game.unlockedCount}/{game.achievements.length} earned
+              {game.unlockedCount}/{game.achievements.length} earned
             </p>
           </div>
           <div className="h-2 w-40 overflow-hidden rounded-full bg-slate-100">
@@ -202,30 +237,44 @@ export default async function LearnHubPage() {
             />
           </div>
         </div>
-        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-          {game.achievements.map((a) => (
-            <div
-              key={a.id}
-              className={cn(
-                "rounded-xl border px-4 py-3",
-                a.unlocked ? "border-amber-300 bg-amber-50/70" : "border-slate-200 bg-white/60 opacity-55",
-              )}
-            >
-              <div className="flex items-center justify-between gap-2">
-                <h3 className="text-sm font-medium text-slate-900">{a.title}</h3>
-                <span className="font-mono text-[10px] uppercase tracking-wider text-slate-500">
-                  {a.unlocked ? "Unlocked" : "Locked"}
-                </span>
+
+        {unlockedMedals.length > 0 && (
+          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            {unlockedMedals.map((a) => (
+              <div key={a.id} className="rounded-xl border border-amber-300 bg-amber-50/70 px-4 py-3">
+                <div className="flex items-center justify-between gap-2">
+                  <h3 className="text-sm font-medium text-slate-900">{a.title}</h3>
+                  <span className="font-mono text-[10px] uppercase tracking-wider text-amber-800">Unlocked</span>
+                </div>
+                <p className="mt-1 text-xs text-slate-500">{a.detail}</p>
               </div>
-              <p className="mt-1 text-xs text-slate-500">{a.detail}</p>
+            ))}
+          </div>
+        )}
+
+        {lockedMedals.length > 0 && (
+          <details className="rounded-xl border border-slate-200 bg-white/60 px-4 py-3">
+            <summary className="cursor-pointer font-mono text-[11px] uppercase tracking-wider text-slate-600">
+              {lockedMedals.length} locked medals
+            </summary>
+            <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              {lockedMedals.map((a) => (
+                <div key={a.id} className="rounded-xl border border-slate-200 bg-white/80 px-4 py-3 opacity-70">
+                  <div className="flex items-center justify-between gap-2">
+                    <h3 className="text-sm font-medium text-slate-900">{a.title}</h3>
+                    <span className="font-mono text-[10px] uppercase tracking-wider text-slate-500">Locked</span>
+                  </div>
+                  <p className="mt-1 text-xs text-slate-500">{a.detail}</p>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </details>
+        )}
       </section>
 
       <p className="font-mono text-[11px] text-slate-500">
         Lesson +{LESSON_XP} · same-day combo +{COMBO_XP} · chapter clear +{CHAPTER_CLEAR_XP} · perfect day +
-        {PERFECT_DAY_XP} · ranks: Initiate → Spark → Apprentice → … → Distinguished
+        {PERFECT_DAY_XP}
       </p>
     </div>
   );
@@ -271,12 +320,12 @@ function PathCard(props: {
           </span>
         ))}
       </div>
-      <h2 className="mt-4 text-lg font-semibold text-slate-900">
+      <h3 className="mt-4 text-lg font-semibold text-slate-900">
         {props.nextTitle ? `Next: ${props.nextTitle}` : "Path complete"}
-      </h2>
+      </h3>
       <p className="mt-1 text-sm text-slate-600">
         {props.percent}% cleared
-        {props.nextTitle ? " — finish the next lesson to bank XP and keep your streak." : " — run campaigns or the bank to keep ranking up."}
+        {props.nextTitle ? " — finish the next lesson to bank XP." : " — run campaigns or the bank next."}
       </p>
       <div className="mt-4 flex flex-wrap gap-2">
         <Link href={props.href}>

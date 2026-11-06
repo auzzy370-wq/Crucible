@@ -49,19 +49,40 @@ type NavGroup = {
 /** Short groups, plain labels — no jargon destinations. */
 const NAV_GROUPS: NavGroup[] = [
   {
-    id: "learner",
-    title: "For you",
+    id: "learner-home",
+    title: "Start",
     roles: ["CANDIDATE", "TEAM_MEMBER"],
     items: [
-      { href: "/learn", label: "Learn", icon: BookOpen, hint: "XP, quests, craft paths" },
-      { href: "/learn/games", label: "Arcade", icon: Sparkles, hint: "HTML5 learning games" },
-      { href: "/study-plans", label: "Campaigns", icon: Route, hint: "Chapter maps & pack XP" },
-      { href: "/daily", label: "Daily forge", icon: CalendarDays, hint: "Streak + timed XP" },
       { href: "/dashboard", label: "Home", icon: LayoutDashboard, hint: "What to do next" },
+      { href: "/learn", label: "Learn", icon: BookOpen, hint: "Quests, paths, medals" },
+    ],
+  },
+  {
+    id: "learner-train",
+    title: "Train",
+    roles: ["CANDIDATE", "TEAM_MEMBER"],
+    items: [
+      { href: "/learn/games", label: "Arcade", icon: Sparkles, hint: "1,000 HTML5 drills" },
+      { href: "/daily", label: "Daily forge", icon: CalendarDays, hint: "Streak + timed XP" },
+      { href: "/study-plans", label: "Campaigns", icon: Route, hint: "Chapter maps & pack XP" },
       { href: "/challenges", label: "Problem bank", icon: Boxes, hint: "Browse all problems" },
       { href: "/interview", label: "Mocks", icon: Timer, hint: "Company rounds" },
+    ],
+  },
+  {
+    id: "learner-compete",
+    title: "Compete",
+    roles: ["CANDIDATE", "TEAM_MEMBER"],
+    items: [
       { href: "/tournaments", label: "Tournaments", icon: Trophy, hint: "Live contests" },
       { href: "/leaderboards", label: "Leaderboards", icon: BarChart3, hint: "Who’s ahead" },
+    ],
+  },
+  {
+    id: "learner-you",
+    title: "You",
+    roles: ["CANDIDATE", "TEAM_MEMBER"],
+    items: [
       { href: "/candidates", label: "Profile", icon: UserRound, hint: "Rank & evidence" },
       { href: "/settings", label: "Settings", icon: Settings, hint: "Account & security" },
     ],
@@ -124,6 +145,8 @@ function NavLinks({
 }) {
   const groups = useMemo(() => visibleGroups(role), [role]);
 
+  const allHrefs = useMemo(() => groups.flatMap((g) => g.items.map((i) => i.href)), [groups]);
+
   return (
     <nav className="space-y-5 px-3 pb-6">
       {groups.map((group) => (
@@ -134,9 +157,16 @@ function NavLinks({
           <div className="space-y-0.5">
             {group.items.map((item) => {
               const Icon = item.icon;
-              const active =
-                pathname === item.href ||
-                (item.href !== "/" && pathname.startsWith(`${item.href}/`));
+              const exact = pathname === item.href;
+              const prefix = item.href !== "/" && pathname.startsWith(`${item.href}/`);
+              const longerMatch = allHrefs.some(
+                (href) =>
+                  href !== item.href &&
+                  href.length > item.href.length &&
+                  (pathname === href || pathname.startsWith(`${href}/`)) &&
+                  href.startsWith(`${item.href}/`),
+              );
+              const active = exact || (prefix && !longerMatch);
               return (
                 <Link
                   key={`${group.id}-${item.href}-${item.label}`}
