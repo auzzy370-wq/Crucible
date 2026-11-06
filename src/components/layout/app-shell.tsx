@@ -384,7 +384,7 @@ export function AppShell({
           className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-[var(--surface)] lg:hidden safe-bottom"
           aria-label="Primary"
         >
-          <div className="mx-auto grid max-w-lg grid-cols-5 gap-0.5 px-1 py-1.5">
+          <div className="mx-auto grid h-14 max-w-lg grid-cols-5 gap-0.5 px-1">
             {mobileTabs.map((tab) => {
               const Icon = tab.icon;
               const active = pathname === tab.href || pathname.startsWith(tab.href + "/");
@@ -393,7 +393,7 @@ export function AppShell({
                   key={tab.href}
                   href={tab.href}
                   className={cn(
-                    "flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-lg px-1 text-[10px] font-medium",
+                    "flex h-full flex-col items-center justify-center gap-0.5 rounded-lg px-1 text-[10px] font-medium",
                     active ? "bg-teal-500/10 text-teal-800" : "text-slate-500 hover:text-slate-800",
                   )}
                 >
@@ -405,7 +405,7 @@ export function AppShell({
             <button
               type="button"
               onClick={() => setOpen(true)}
-              className="flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-lg px-1 text-[10px] font-medium text-slate-500 hover:text-slate-800"
+              className="flex h-full flex-col items-center justify-center gap-0.5 rounded-lg px-1 text-[10px] font-medium text-slate-500 hover:text-slate-800"
             >
               <Menu className="h-4 w-4" />
               More

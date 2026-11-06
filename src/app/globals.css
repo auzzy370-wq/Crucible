@@ -251,8 +251,8 @@ html.dark body {
 }
 
 .mobile-bottom-pad {
-  /* Clear fixed mobile tab bar + home indicator with room for sticky CTAs */
-  padding-bottom: calc(7.5rem + env(safe-area-inset-bottom, 0px));
+  /* Clear fixed tab bar + fixed CTA dock + home indicator */
+  padding-bottom: calc(14rem + env(safe-area-inset-bottom, 0px));
 }
 
 @media (min-width: 1024px) {
@@ -261,18 +261,46 @@ html.dark body {
   }
 }
 
-/* Stick primary actions just above the mobile tab bar */
+/*
+ * Pin primary actions above the mobile tab bar.
+ * Fixed (not sticky): html/body overflow-x: clip breaks sticky in WebKit/Blink.
+ * Tab bar is ~3.75rem content + safe-area; dock sits just above it.
+ */
 .mobile-sticky-cta {
-  position: sticky;
-  bottom: calc(4.25rem + env(safe-area-inset-bottom, 0px));
-  z-index: 30;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(3.5rem + env(safe-area-inset-bottom, 0px));
+  z-index: 35;
+  margin: 0 !important;
+  border-radius: 0;
+  border-left: 0;
+  border-right: 0;
+  border-bottom: 0;
+  box-shadow: 0 -10px 28px rgba(0, 0, 0, 0.28);
+  background: color-mix(in srgb, var(--surface) 96%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding-left: max(0.75rem, env(safe-area-inset-left, 0px));
+  padding-right: max(0.75rem, env(safe-area-inset-right, 0px));
 }
 
 @media (min-width: 1024px) {
   .mobile-sticky-cta {
     position: static;
+    left: auto;
+    right: auto;
     bottom: auto;
     z-index: auto;
+    margin: revert !important;
+    border-radius: revert;
+    border: revert;
+    box-shadow: none;
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    padding-left: revert;
+    padding-right: revert;
   }
 }
 
@@ -305,14 +333,13 @@ html.dark body {
 @keyframes rise {
   from {
     opacity: 0;
-    transform: translateY(8px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
   }
 }
 
+/* Opacity-only — transform creates a containing block that breaks position:fixed CTAs */
 .animate-rise {
   animation: rise 0.5s ease-out both;
 }
