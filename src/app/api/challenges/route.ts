@@ -59,11 +59,11 @@ export async function GET(req: Request) {
         : {}),
     };
 
-    const [total, challenges, editorialMap] = await Promise.all([
+  const [total, challenges, editorialMap, difficultyRows] = await Promise.all([
       prisma.challenge.count({ where }),
       prisma.challenge.findMany({
         where,
-        orderBy: [{ frequency: "desc" }, { difficulty: "asc" }, { title: "asc" }],
+        orderBy: [{ frequency: "desc" }, { title: "asc" }],
         skip,
         take,
         select: {
@@ -93,7 +93,43 @@ export async function GET(req: Request) {
         },
       }),
       editorialSlugByChallengeSlug(),
+      // Band totals for the coding library (ignore active difficulty so pills stay honest).
+      typeRaw === "CODING_PROBLEM"
+        ? prisma.challenge.groupBy({
+            by: ["difficulty"],
+            where: {
+              isPublished: true,
+              type: ChallengeType.CODING_PROBLEM,
+              ...(track ? { track: track as AssessmentTrack } : {}),
+              ...(company && company !== "All" ? { companies: { has: company } } : {}),
+              ...(tag && tag !== "All" && tag !== "coding" ? { tags: { has: tag } } : {}),
+              ...(q
+                ? {
+                    OR: [
+                      { title: { contains: q, mode: "insensitive" } },
+                      { slug: { contains: q, mode: "insensitive" } },
+                      { summary: { contains: q, mode: "insensitive" } },
+                      { tags: { has: q } },
+                      { companies: { has: q } },
+                    ],
+                  }
+                : {}),
+            },
+            _count: { _all: true },
+          })
+        : Promise.resolve([] as { difficulty: number; _count: { _all: number } }[]),
     ]);
+
+    const difficultyCounts = { Easy: 0, Medium: 0, Hard: 0, Expert: 0, Impossible: 0 };
+    for (const row of difficultyRows) {
+      const d = row.difficulty;
+      const n = row._count._all;
+      if (d <= 3) difficultyCounts.Easy += n;
+      else if (d <= 6) difficultyCounts.Medium += n;
+      else if (d <= 8) difficultyCounts.Hard += n;
+      else if (d === 9) difficultyCounts.Expert += n;
+      else difficultyCounts.Impossible += n;
+    }
 
     return jsonOk({
       items: challenges.map((c) => ({
@@ -122,6 +158,7 @@ export async function GET(req: Request) {
       skip,
       take,
       hasMore: skip + challenges.length < total,
+      difficultyCounts,
     });
   });
 }

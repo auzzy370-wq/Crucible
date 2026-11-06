@@ -49,6 +49,7 @@ type ApiPage = {
   skip: number;
   take: number;
   hasMore: boolean;
+  difficultyCounts?: Record<DifficultyBand, number>;
 };
 
 function label(difficulty: number): DifficultyBand {
@@ -84,6 +85,7 @@ export function Problemset(props: {
   initialMode?: "problemset" | "projects";
   premium?: boolean;
   libraryTotals?: { coding: number; projects: number };
+  difficultyCounts?: Record<DifficultyBand, number>;
   trackFilter?: string | null;
 }) {
   const [mode, setMode] = useState<"problemset" | "projects">(props.initialMode ?? "problemset");
@@ -105,6 +107,7 @@ export function Problemset(props: {
   const [remoteTotal, setRemoteTotal] = useState<number | null>(null);
   const [remoteHasMore, setRemoteHasMore] = useState(false);
   const [remoteLoading, setRemoteLoading] = useState(false);
+  const [liveDiffCounts, setLiveDiffCounts] = useState<Record<DifficultyBand, number> | null>(null);
   const router = useRouter();
 
   const libraryTotal =
@@ -151,6 +154,7 @@ export function Problemset(props: {
         });
         setRemoteTotal(json.data.total);
         setRemoteHasMore(json.data.hasMore);
+        if (json.data.difficultyCounts) setLiveDiffCounts(json.data.difficultyCounts);
       } catch (e) {
         toast.error(e instanceof Error ? e.message : "Library load failed");
       } finally {
@@ -173,6 +177,10 @@ export function Problemset(props: {
       }
       return;
     }
+    // Drop stale pages immediately so Hard never flashes Medium results.
+    setRemoteItems(null);
+    setRemoteTotal(null);
+    setRemoteHasMore(false);
     void fetchLibrary({ skip: 0, append: false });
     // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch on filter identity only
   }, [filtersActive, debouncedQ, company, tag, diff, mode, props.trackFilter]);
@@ -278,6 +286,11 @@ export function Problemset(props: {
   }, [seedCoding]);
 
   const filtered = useMemo(() => {
+    // While a server filter is in flight, don't locally filter the Easy-heavy SSR seed
+    // down to an empty list — that made Medium/Hard/Impossible look broken.
+    if (filtersActive && !remoteItems) {
+      return [];
+    }
     const rows = coding.filter((p) => {
       const L = label(p.difficulty);
       if (bookmarksOnly && !bookmarkedIds.has(p.id)) return false;
@@ -303,7 +316,19 @@ export function Problemset(props: {
       return a.title.localeCompare(b.title);
     });
     return rows;
-  }, [coding, remoteItems, diff, tag, company, q, debouncedQ, sort, bookmarksOnly, bookmarkedIds]);
+  }, [
+    coding,
+    remoteItems,
+    filtersActive,
+    diff,
+    tag,
+    company,
+    q,
+    debouncedQ,
+    sort,
+    bookmarksOnly,
+    bookmarkedIds,
+  ]);
 
   useEffect(() => {
     setVisibleCount(PAGE_SIZE);
@@ -341,10 +366,12 @@ export function Problemset(props: {
     (remoteItems && mode === "projects" ? remoteHasMore : projectsList.length < libraryTotal);
 
   const counts = useMemo(() => {
+    if (liveDiffCounts) return liveDiffCounts;
+    if (props.difficultyCounts) return props.difficultyCounts;
     const c: Record<DifficultyBand, number> = { Easy: 0, Medium: 0, Hard: 0, Expert: 0, Impossible: 0 };
     for (const p of seedCoding) c[label(p.difficulty)] += 1;
     return c;
-  }, [seedCoding]);
+  }, [liveDiffCounts, props.difficultyCounts, seedCoding]);
 
   return (
     <div className="animate-rise space-y-6">
@@ -400,7 +427,7 @@ export function Problemset(props: {
           </button>
           <Link
             href="/pricing"
-            className="col-span-2 inline-flex min-h-11 items-center justify-center rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-100 sm:col-span-1"
+            className="col-span-2 inline-flex min-h-11 items-center justify-center rounded-lg border border-amber-500/40 bg-amber-500/15 px-3 py-2 text-sm font-medium text-amber-800 dark:text-amber-100 sm:col-span-1"
           >
             Premium
           </Link>
@@ -494,14 +521,30 @@ export function Problemset(props: {
           </div>
 
           <p className="font-mono text-[11px] text-slate-500">
-            Showing {visible.length.toLocaleString()} of {matchTotal.toLocaleString()} matching
+            {remoteLoading && filtersActive && !remoteItems
+              ? `Loading ${diff === "All" ? "matches" : diff.toLowerCase()} problems…`
+              : `Showing ${visible.length.toLocaleString()} of ${matchTotal.toLocaleString()} matching`}
             {" · "}
             {(props.libraryTotals?.coding ?? seedCoding.length).toLocaleString()} in full library
-            {remoteLoading ? " · loading…" : ""}
+            {remoteLoading && remoteItems ? " · loading…" : ""}
           </p>
+
+          {filtersActive && !remoteLoading && remoteItems && visible.length === 0 && (
+            <p className="rounded-lg border border-slate-200 bg-white/70 px-4 py-6 text-sm text-slate-500">
+              No {diff === "All" ? "" : `${diff.toLowerCase()} `}problems match these filters. Clear a filter or try
+              another difficulty.
+            </p>
+          )}
 
           {/* Mobile card list */}
           <div className="space-y-3 md:hidden">
+            {remoteLoading && filtersActive && !remoteItems && (
+              <div className="space-y-3">
+                {[0, 1, 2].map((i) => (
+                  <div key={i} className="h-28 animate-pulse rounded-xl border border-slate-200 bg-white/60" />
+                ))}
+              </div>
+            )}
             {visible.map((p, i) => {
               const L = label(p.difficulty);
               const locked = Boolean(p.isPremium) && !props.premium;

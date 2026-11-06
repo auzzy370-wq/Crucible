@@ -41,28 +41,44 @@ export default async function ChallengesPage({
   const user = await getSessionUser();
   const trackFilter = sp.track ? { track: sp.track as never } : {};
 
-  const [codingTotal, projectTotal, codingChallenges, projectChallenges, editorialMap] =
+  const codingWhere = { isPublished: true, type: "CODING_PROBLEM" as const, ...trackFilter };
+  const [codingTotal, projectTotal, codingChallenges, projectChallenges, editorialMap, difficultyRows] =
     await Promise.all([
-      prisma.challenge.count({
-        where: { isPublished: true, type: "CODING_PROBLEM", ...trackFilter },
-      }),
+      prisma.challenge.count({ where: codingWhere }),
       prisma.challenge.count({
         where: { isPublished: true, type: { not: "CODING_PROBLEM" }, ...trackFilter },
       }),
       prisma.challenge.findMany({
-        where: { isPublished: true, type: "CODING_PROBLEM", ...trackFilter },
+        where: codingWhere,
         select: listSelect,
-        orderBy: [{ frequency: "desc" }, { difficulty: "asc" }, { title: "asc" }],
+        // Frequency first — do not sort Easy-first or the seed looks like Medium/Hard are empty.
+        orderBy: [{ frequency: "desc" }, { title: "asc" }],
         take: CODING_LIMIT,
       }),
       prisma.challenge.findMany({
         where: { isPublished: true, type: { not: "CODING_PROBLEM" }, ...trackFilter },
         select: listSelect,
-        orderBy: [{ frequency: "desc" }, { difficulty: "asc" }, { title: "asc" }],
+        orderBy: [{ frequency: "desc" }, { title: "asc" }],
         take: PROJECT_LIMIT,
       }),
       editorialSlugByChallengeSlug(),
+      prisma.challenge.groupBy({
+        by: ["difficulty"],
+        where: codingWhere,
+        _count: { _all: true },
+      }),
     ]);
+
+  const difficultyCounts = { Easy: 0, Medium: 0, Hard: 0, Expert: 0, Impossible: 0 };
+  for (const row of difficultyRows) {
+    const d = row.difficulty;
+    const n = row._count._all;
+    if (d <= 3) difficultyCounts.Easy += n;
+    else if (d <= 6) difficultyCounts.Medium += n;
+    else if (d <= 8) difficultyCounts.Hard += n;
+    else if (d === 9) difficultyCounts.Expert += n;
+    else difficultyCounts.Impossible += n;
+  }
 
   const challenges = [...codingChallenges, ...projectChallenges];
 
@@ -119,6 +135,7 @@ export default async function ChallengesPage({
       initialMode={sp.view === "projects" ? "projects" : "problemset"}
       premium={isPremium(user)}
       libraryTotals={{ coding: codingTotal, projects: projectTotal }}
+      difficultyCounts={difficultyCounts}
       trackFilter={sp.track ?? null}
     />
   );
