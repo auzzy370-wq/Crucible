@@ -6,6 +6,13 @@ import { prisma } from "@/lib/db";
 import { STUDY_PLANS } from "@/server/saas/study-plans";
 import { AI_LESSONS } from "@/server/learning/ai-curriculum";
 import { INTERVIEW_LESSONS } from "@/server/learning/interview-curriculum";
+import {
+  buildPlanChapters,
+  buildStudyCampaignHud,
+  itemXp,
+  scorePlanProgress,
+  type PlanGameView,
+} from "@/server/learning/study-plan-game";
 
 export default async function StudyPlansPage() {
   const user = await requirePageRoles(CANDIDATE_ROLES);
@@ -27,6 +34,15 @@ export default async function StudyPlansPage() {
     ]),
   );
 
+  const difficultyBySlug = new Map<string, number>();
+  for (const c of challenges) difficultyBySlug.set(c.slug, c.difficulty);
+  for (const l of [...AI_LESSONS, ...INTERVIEW_LESSONS]) {
+    difficultyBySlug.set(
+      l.slug,
+      l.level === "foundations" ? 2 : l.level === "builder" || l.level === "patterns" ? 5 : 8,
+    );
+  }
+
   const plans = STUDY_PLANS.map((plan) => {
     const enr = bySlug.get(plan.slug);
     const completed = new Set(enr?.completedSlugs ?? []);
@@ -39,10 +55,11 @@ export default async function StudyPlansPage() {
               id: l!.slug,
               slug: l!.slug,
               title: l!.title,
-              difficulty: l!.level === "foundations" ? 2 : l!.level === "builder" || l!.level === "patterns" ? 5 : 8,
+              difficulty: difficultyBySlug.get(l!.slug) ?? 4,
               avgMinutes: l!.minutes,
               done: completed.has(l!.slug),
               href: `${l!.hrefBase}/${l!.slug}`,
+              xp: itemXp({ itemKind: "lesson" }),
             }))
         : plan.challengeSlugs
             .map((slug) => challengeBySlug.get(slug))
@@ -55,8 +72,12 @@ export default async function StudyPlansPage() {
               avgMinutes: c!.avgMinutes,
               done: completed.has(c!.slug),
               href: `/challenges?q=${encodeURIComponent(c!.slug)}`,
+              xp: itemXp({ itemKind: "challenge", difficulty: c!.difficulty }),
             }));
-    return {
+
+    const scored = scorePlanProgress(plan, completed, difficultyBySlug);
+    const chapters = buildPlanChapters(plan, completed);
+    const view: PlanGameView & { items: typeof items } = {
       ...plan,
       enrolled: Boolean(enr),
       completedCount: completed.size,
@@ -65,8 +86,13 @@ export default async function StudyPlansPage() {
         ? Math.round((completed.size / plan.challengeSlugs.length) * 100)
         : 0,
       items,
+      chapters,
+      ...scored,
     };
+    return view;
   });
 
-  return <StudyPlansClient plans={plans} premium={isPremium(user)} />;
+  const hud = buildStudyCampaignHud(plans);
+
+  return <StudyPlansClient plans={plans} hud={hud} premium={isPremium(user)} />;
 }

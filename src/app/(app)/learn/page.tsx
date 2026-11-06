@@ -195,7 +195,7 @@ export default async function LearnHubPage() {
         {[
           { href: "/daily", title: "Daily forge", body: `+${DAILY_XP} XP · streak fuel` },
           { href: "/challenges", title: "Problem bank", body: "Browse & clear judges" },
-          { href: "/study-plans", title: "Study plans", body: "Company & role packs" },
+          { href: "/study-plans", title: "Study campaigns", body: "XP, chapters, pack clear bonuses" },
           { href: "/interview", title: "Mock interviews", body: "Timed company rounds" },
         ].map((c) => (
           <Link

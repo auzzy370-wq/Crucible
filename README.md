@@ -15,7 +15,7 @@ The seed loads the **full challenge library as published 60-minute assessments**
 | **Learning hub** | `/learn` | Next lesson + adaptive practice |
 | **Interview Craft** | `/learn/interview` | Loop mechanics, live-coding framework, DSA patterns, system design, behavioral STAR |
 | **AI Craft** | `/learn/ai` | Prompting, APIs, tools, RAG, agents, evals, safety |
-| **Study plans** | `/study-plans` | Company packs (Meta, Google, Amazon, Microsoft, Stripe…), role sprints, security |
+| **Study plans** | `/study-plans` | Gamified campaigns: chapter maps, node XP, pack clear bonus (+200), quests & medals |
 | **Company mocks** | `/interview` | Timed evidence sessions |
 | **Roadmap** | `/roadmap` | Skill tree + next problems |
 
@@ -129,7 +129,7 @@ Admins can **Auto-run all assessments** and **Post assignment scores** from the 
 - **Weekly broken production** — `/weekly` shared incident/SaaS failure for the week
 - **Contest Arena** — `/contest` optional heat + leaderboard
 - **Editorials** — `/editorials` free + Premium solutions after judge signal
-- **Study Plans** — `/study-plans` (Meta 75, Stripe 2 Weeks, Google, Security)
+- **Study Plans** — `/study-plans` campaign HUD (XP, active quest, medals), company/role packs with chapter maps and clear bonuses
 - **Lightning Judge / Debugger / AI autocomplete** — Premium priority queue, interactive debugger, Monaco AI completions
 - **Hidden harnesses** — coding Submit runs real hidden fixtures (TS/Python); Python & Go starters included
 - **Public qualification profiles** — `/u/casey-elite`, `/u/sam-appsec`, `/u/premium-prep`

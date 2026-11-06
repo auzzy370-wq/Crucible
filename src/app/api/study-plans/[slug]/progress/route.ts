@@ -4,6 +4,8 @@ import { AppError } from "@/lib/errors";
 import { jsonOk, withHandler } from "@/server/auth/api";
 import { requireUser } from "@/server/auth/session";
 import { getStudyPlan } from "@/server/saas/study-plans";
+import { itemXp, PLAN_CLEAR_BONUS_XP } from "@/server/learning/study-plan-game";
+import { touchLearnStreak } from "@/server/learning/gamification";
 
 const schema = z.object({
   challengeSlug: z.string().min(2),
@@ -27,13 +29,49 @@ export async function POST(req: Request, ctx: { params: Promise<{ slug: string }
     if (!existing) throw new AppError("Enroll in the plan first", 400, "NOT_ENROLLED");
 
     const set = new Set(existing.completedSlugs);
+    const alreadyDone = set.has(body.challengeSlug);
     if (body.done) set.add(body.challengeSlug);
     else set.delete(body.challengeSlug);
+
+    let difficulty = 4;
+    if (plan.itemKind !== "lesson") {
+      const challenge = await prisma.challenge.findUnique({
+        where: { slug: body.challengeSlug },
+        select: { difficulty: true },
+      });
+      difficulty = challenge?.difficulty ?? 4;
+    }
+
+    const nodeXp = itemXp({ itemKind: plan.itemKind, difficulty });
+    const wasComplete =
+      plan.challengeSlugs.length > 0 &&
+      plan.challengeSlugs.every((s) => existing.completedSlugs.includes(s));
+    const nowComplete =
+      plan.challengeSlugs.length > 0 && plan.challengeSlugs.every((s) => set.has(s));
+
+    let xpEarned = 0;
+    let clearBonusXp = 0;
+    if (body.done && !alreadyDone) {
+      xpEarned = nodeXp;
+      if (nowComplete && !wasComplete) {
+        clearBonusXp = PLAN_CLEAR_BONUS_XP;
+        xpEarned += clearBonusXp;
+      }
+      await touchLearnStreak(user.id);
+    }
 
     const updated = await prisma.studyPlanEnrollment.update({
       where: { id: existing.id },
       data: { completedSlugs: [...set] },
     });
-    return jsonOk(updated);
+
+    return jsonOk({
+      ...updated,
+      xpEarned,
+      clearBonusXp,
+      campaignComplete: nowComplete,
+      completedCount: set.size,
+      totalCount: plan.challengeSlugs.length,
+    });
   });
 }
