@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Sans, IBM_Plex_Mono, Instrument_Serif } from "next/font/google";
+import { IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
 import { ExtensionHydrationGuard } from "@/components/layout/extension-hydration-guard";
 import { Providers } from "@/components/layout/providers";
 import { ThemeToaster } from "@/components/layout/theme-toaster";
@@ -15,13 +15,6 @@ const mono = IBM_Plex_Mono({
   subsets: ["latin"],
   weight: ["400", "500", "600"],
   variable: "--font-ibm-mono",
-});
-
-const display = Instrument_Serif({
-  subsets: ["latin"],
-  weight: ["400"],
-  style: ["normal", "italic"],
-  variable: "--font-instrument",
 });
 
 export const metadata: Metadata = {
@@ -45,7 +38,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${sans.variable} ${mono.variable} ${display.variable} antialiased`}
+        className={`${sans.variable} ${mono.variable} antialiased`}
         suppressHydrationWarning
       >
         <ExtensionHydrationGuard />

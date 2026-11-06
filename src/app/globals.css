@@ -37,7 +37,7 @@
   --code-block-fg: #f3eee8;
 
   --font-display: var(--font-ibm-sans), "IBM Plex Sans", "Segoe UI", sans-serif;
-  --font-serif: var(--font-instrument), "Times New Roman", serif;
+  --font-serif: var(--font-ibm-sans), "IBM Plex Sans", "Segoe UI", sans-serif;
   --font-mono: var(--font-ibm-mono), "IBM Plex Mono", ui-monospace, monospace;
 
   --slate-50: #f8fafc;
@@ -333,10 +333,12 @@ html.dark body {
   animation: pulse-ring 2.4s infinite;
 }
 
+/* Kept class name for existing call sites — uses normal UI sans, not decorative serif. */
 .font-serif-display {
-  font-family: var(--font-instrument), "Instrument Serif", "Times New Roman", serif;
-  font-weight: 400;
+  font-family: var(--font-display);
+  font-weight: 600;
   font-style: normal;
+  letter-spacing: -0.02em;
 }
 
 /* Landing — shared brand plane (light + dark) */
