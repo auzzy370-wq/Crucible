@@ -1,5 +1,21 @@
 import { prisma } from "@/lib/db";
 
+export type HumanStanding = {
+  rank: number;
+  userId: string;
+  name: string;
+  publicSlug: string | null;
+  contestScore: number;
+  solvedCount: number;
+  penaltyMin: number;
+  completions: number;
+  contest: string | null;
+  verified: boolean;
+  scoring: string;
+  onDisplayedBoard: boolean;
+  metric: "contest" | "completions";
+};
+
 /** Transparent human leaderboard from contest entries + assignment completions. */
 export async function humanLeaderboard(opts?: { windowDays?: number; take?: number }) {
   const take = opts?.take ?? 50;
@@ -41,6 +57,159 @@ export async function humanLeaderboard(opts?: { windowDays?: number; take?: numb
   }));
 }
 
+/**
+ * Private standing for the signed-in viewer — always returned to them even when
+ * they fall outside the displayed top-N board.
+ */
+export async function humanViewerStanding(
+  userId: string,
+  opts?: { windowDays?: number; boardTake?: number },
+): Promise<HumanStanding | null> {
+  const boardTake = opts?.boardTake ?? 50;
+  const since =
+    opts?.windowDays != null ? new Date(Date.now() - opts.windowDays * 86400000) : null;
+
+  const myEntry = await prisma.contestEntry.findFirst({
+    where: {
+      userId,
+      ...(since ? { updatedAt: { gte: since } } : {}),
+    },
+    orderBy: [{ score: "desc" }, { penaltyMin: "asc" }],
+    include: {
+      user: { select: { id: true, name: true, candidateProfile: { select: { publicSlug: true } } } },
+      contest: { select: { slug: true } },
+    },
+  });
+
+  const myCompletions = await prisma.assessmentAssignment.count({
+    where: {
+      candidateId: userId,
+      status: { in: ["COMPLETED", "UNDER_REVIEW"] },
+      ...(since ? { updatedAt: { gte: since } } : {}),
+    },
+  });
+
+  if (myEntry) {
+    const ahead = await prisma.contestEntry.count({
+      where: {
+        ...(since ? { updatedAt: { gte: since } } : {}),
+        OR: [
+          { score: { gt: myEntry.score } },
+          { score: myEntry.score, penaltyMin: { lt: myEntry.penaltyMin } },
+          {
+            score: myEntry.score,
+            penaltyMin: myEntry.penaltyMin,
+            id: { lt: myEntry.id },
+          },
+        ],
+      },
+    });
+    const rank = ahead + 1;
+    return {
+      rank,
+      userId,
+      name: myEntry.user.name,
+      publicSlug: myEntry.user.candidateProfile?.publicSlug ?? null,
+      contestScore: myEntry.score,
+      solvedCount: myEntry.solvedCount,
+      penaltyMin: myEntry.penaltyMin,
+      completions: myCompletions,
+      contest: myEntry.contest.slug,
+      verified: true,
+      scoring: "contest_score_desc_then_penalty_asc",
+      onDisplayedBoard: rank <= boardTake,
+      metric: "contest",
+    };
+  }
+
+  // No contest entry yet — still show a private completions rank so the board isn't a blank wall.
+  if (myCompletions <= 0) {
+    return {
+      rank: 0,
+      userId,
+      name: (await prisma.user.findUnique({ where: { id: userId }, select: { name: true } }))?.name ?? "You",
+      publicSlug: null,
+      contestScore: 0,
+      solvedCount: 0,
+      penaltyMin: 0,
+      completions: 0,
+      contest: null,
+      verified: false,
+      scoring: "unranked_until_contest_or_clear",
+      onDisplayedBoard: false,
+      metric: "completions",
+    };
+  }
+
+  const completionGroups = await prisma.assessmentAssignment.groupBy({
+    by: ["candidateId"],
+    where: {
+      status: { in: ["COMPLETED", "UNDER_REVIEW"] },
+      ...(since ? { updatedAt: { gte: since } } : {}),
+    },
+    _count: { _all: true },
+  });
+  const aheadCompletions = completionGroups.filter((g) => g._count._all > myCompletions).length;
+  const tiedEarlier = completionGroups
+    .filter((g) => g._count._all === myCompletions && g.candidateId < userId)
+    .length;
+  const rank = aheadCompletions + tiedEarlier + 1;
+  const me = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { name: true, candidateProfile: { select: { publicSlug: true } } },
+  });
+
+  return {
+    rank,
+    userId,
+    name: me?.name ?? "You",
+    publicSlug: me?.candidateProfile?.publicSlug ?? null,
+    contestScore: 0,
+    solvedCount: 0,
+    penaltyMin: 0,
+    completions: myCompletions,
+    contest: null,
+    verified: true,
+    scoring: "completions_desc_until_contest_entry",
+    onDisplayedBoard: false,
+    metric: "completions",
+  };
+}
+
+export type TeamStanding = {
+  rank: number;
+  teamId: string;
+  name: string;
+  memberCount: number;
+  assessmentTitle: string;
+  overall: number;
+  qualified: boolean;
+  verified: boolean;
+  scoring: string;
+  onDisplayedBoard: boolean;
+};
+
+export async function teamViewerStanding(
+  userId: string,
+  opts?: { boardTake?: number },
+): Promise<TeamStanding | null> {
+  const boardTake = opts?.boardTake ?? 50;
+  const membership = await prisma.teamMember.findFirst({
+    where: { userId },
+    select: { teamId: true },
+    orderBy: { joinedAt: "desc" },
+  });
+  if (!membership) return null;
+
+  const full = await teamLeaderboard({ take: 500 });
+  const mine = full.find((r) => r.teamId === membership.teamId);
+  if (!mine) return null;
+  return {
+    ...mine,
+    onDisplayedBoard: mine.rank <= boardTake,
+  };
+}
+
 export async function aiLeaderboard(opts?: { take?: number }) {
   const take = opts?.take ?? 50;
   const runs = await prisma.aiBenchmarkRun.groupBy({
@@ -71,11 +240,9 @@ export async function aiLeaderboard(opts?: { take?: number }) {
     });
     const verified = all.filter((a) => a.resultClass === "verified" && !a.mocked);
     const pool = verified.length ? verified : all;
-    // Keep the latest attempt per challenge so repeats of Two Sum don't flatten the board.
     const latestByChallenge = new Map<string, (typeof pool)[number]>();
     for (const a of pool) {
       const key = a.challenge.slug;
-      // findMany is unordered here — prefer correct, then higher partial credit
       const prev = latestByChallenge.get(key);
       if (!prev || runPartial(a) > runPartial(prev) || (a.correct && !prev.correct)) {
         latestByChallenge.set(key, a);
@@ -107,7 +274,6 @@ export async function aiLeaderboard(opts?: { take?: number }) {
       provider: m.provider,
       attempts: distinct.length,
       correct,
-      /** Difficulty-weighted partial credit across distinct challenges (not flat pass%). */
       accuracyPct: scorePct,
       clearRatePct: distinct.length ? Math.round((correct / distinct.length) * 1000) / 10 : 0,
       avgLatencyMs: avgLatency ? Math.round(avgLatency) : null,
@@ -127,7 +293,6 @@ export async function aiLeaderboard(opts?: { take?: number }) {
   return rows.slice(0, take).map((r, i) => ({ rank: i + 1, ...r }));
 }
 
-/** 0–1 credit from public/hidden harness counts (full clear still wins). */
 function runPartial(a: {
   correct: boolean;
   passedPublic: number;
@@ -147,7 +312,7 @@ function runPartial(a: {
 export async function teamLeaderboard(opts?: { take?: number }) {
   const take = opts?.take ?? 50;
   const teams = await prisma.engineeringTeam.findMany({
-    take: take * 2,
+    take: Math.max(take * 2, 100),
     orderBy: { createdAt: "desc" },
     include: {
       members: { select: { userId: true } },
