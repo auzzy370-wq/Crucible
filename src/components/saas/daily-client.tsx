@@ -64,9 +64,9 @@ export function DailyClient(props: { daily: DailyPayload }) {
     <div className="animate-rise space-y-6">
       <header className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">STEP 1 · START</p>
+          <p className="font-mono text-xs tracking-[0.3em] text-teal-700">STEP 1 · START</p>
           <h1 className="mt-2 font-serif-display text-2xl sm:text-3xl">Daily evidence session</h1>
-          <p className="mt-2 max-w-2xl text-slate-400">
+          <p className="mt-2 max-w-2xl text-slate-600">
             One problem a day. Start opens the IDE — Run public tests, then Submit for the hidden judge.
           </p>
         </div>
@@ -77,7 +77,7 @@ export function DailyClient(props: { daily: DailyPayload }) {
         </div>
       </header>
 
-      <Card className="border-cyan-500/25 bg-gradient-to-br from-cyan-500/10 via-transparent to-transparent">
+      <Card className="border-teal-300/50 bg-gradient-to-br from-cyan-500/10 via-transparent to-transparent">
         <CardHeader>
           <div className="flex flex-wrap gap-2">
             <Badge variant={c.difficulty <= 3 ? "emerald" : c.difficulty <= 6 ? "amber" : "rose"}>
@@ -99,15 +99,15 @@ export function DailyClient(props: { daily: DailyPayload }) {
               .filter((t) => t !== "coding")
               .slice(0, 6)
               .map((t) => (
-                <span key={t} className="rounded border border-slate-800 px-2 py-0.5 font-mono text-[11px] text-slate-400">
+                <span key={t} className="rounded border border-slate-200 px-2 py-0.5 font-mono text-[11px] text-slate-600">
                   {t}
                 </span>
               ))}
           </div>
-          <p className="text-sm text-slate-400">Suggested time · {c.avgMinutes ?? 30} minutes</p>
+          <p className="text-sm text-slate-600">Suggested time · {c.avgMinutes ?? 30} minutes</p>
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
             <select
-              className="h-11 w-full rounded-md border border-cyan-500/30 bg-slate-950 px-3 text-sm text-cyan-100 sm:w-auto sm:min-w-[10rem]"
+              className="h-11 w-full rounded-md border border-teal-300/60 bg-white px-3 text-sm text-teal-900 sm:w-auto sm:min-w-[10rem]"
               value={lang}
               onChange={(e) => setLang(e.target.value as CodingLanguage)}
             >

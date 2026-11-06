@@ -88,7 +88,7 @@ function LoginForm() {
   }
 
   return (
-    <Card className="animate-rise relative w-full max-w-md border-cyan-400/20 bg-[#070b12]/90 backdrop-blur-sm">
+    <Card className="animate-rise relative w-full max-w-md border-teal-300/60 bg-[#070b12]/90 backdrop-blur-sm">
       <CardHeader>
         <div className="mb-1 flex items-baseline gap-3">
           <span className="font-serif-display text-2xl tracking-tight text-[var(--landing-ink)]">Crucible</span>
@@ -106,12 +106,12 @@ function LoginForm() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="mb-4 grid grid-cols-2 gap-2 rounded-lg border border-slate-800 bg-slate-950/70 p-1">
+        <div className="mb-4 grid grid-cols-2 gap-2 rounded-lg border border-slate-200 bg-white/80 p-1">
           <button
             type="button"
             className={cn(
               "min-h-10 rounded-md text-sm transition",
-              mode === "learn" ? "bg-cyan-500/15 text-cyan-100" : "text-slate-400 hover:text-slate-200",
+              mode === "learn" ? "bg-cyan-500/15 text-teal-900" : "text-slate-600 hover:text-slate-800",
             )}
             onClick={() => setMode("learn")}
           >
@@ -121,7 +121,7 @@ function LoginForm() {
             type="button"
             className={cn(
               "min-h-10 rounded-md text-sm transition",
-              mode === "hire" ? "bg-amber-500/15 text-amber-100" : "text-slate-400 hover:text-slate-200",
+              mode === "hire" ? "bg-amber-500/15 text-amber-100" : "text-slate-600 hover:text-slate-800",
             )}
             onClick={() => setMode("hire")}
           >
@@ -131,9 +131,9 @@ function LoginForm() {
 
         {mode === "learn" && (
           <div className="mb-4 space-y-2">
-            <div className="rounded-lg border border-cyan-500/20 bg-cyan-500/5 px-3 py-2.5 text-sm text-slate-300">
+            <div className="rounded-lg border border-cyan-500/20 bg-cyan-500/5 px-3 py-2.5 text-sm text-slate-700">
               New here?{" "}
-              <Link className="font-medium text-cyan-300 hover:underline" href="/register">
+              <Link className="font-medium text-teal-700 hover:underline" href="/register">
                 Create a free learner account →
               </Link>
             </div>
@@ -144,7 +144,7 @@ function LoginForm() {
           </div>
         )}
         {mode === "hire" && (
-          <div className="mb-4 rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2.5 text-sm text-slate-300">
+          <div className="mb-4 rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2.5 text-sm text-slate-700">
             Hiring workspaces use invited staff accounts. Register a learner account first if you are exploring the
             product.
           </div>
@@ -182,18 +182,18 @@ function LoginForm() {
         <div className="mt-5">
           <SocialAuthButtons />
         </div>
-        <p className="mt-4 text-center text-sm text-slate-400">
+        <p className="mt-4 text-center text-sm text-slate-600">
           {mode === "hire" ? (
             <>
               Looking to practice instead?{" "}
-              <button type="button" className="text-cyan-300 hover:underline" onClick={() => setMode("learn")}>
+              <button type="button" className="text-teal-700 hover:underline" onClick={() => setMode("learn")}>
                 Switch to learn
               </button>
             </>
           ) : (
             <>
               Hiring talent?{" "}
-              <button type="button" className="text-cyan-300 hover:underline" onClick={() => setMode("hire")}>
+              <button type="button" className="text-teal-700 hover:underline" onClick={() => setMode("hire")}>
                 Switch to hire
               </button>
             </>
@@ -210,7 +210,7 @@ export default function LoginPage() {
       <div className="landing-noise pointer-events-none absolute inset-0" aria-hidden />
       <div className="landing-mesh pointer-events-none absolute inset-0" aria-hidden />
       <div className="pointer-events-none absolute inset-0 grid-overlay opacity-50" />
-      <Suspense fallback={<div className="text-slate-400">Loading…</div>}>
+      <Suspense fallback={<div className="text-slate-600">Loading…</div>}>
         <LoginForm />
       </Suspense>
     </div>

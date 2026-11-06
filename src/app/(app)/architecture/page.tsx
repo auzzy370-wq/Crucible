@@ -53,9 +53,9 @@ export default function ArchitecturePage() {
   return (
     <div className="animate-rise space-y-6">
       <header>
-        <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">ARCHITECTURE ASSESSMENT</p>
+        <p className="font-mono text-xs tracking-[0.3em] text-teal-700">ARCHITECTURE ASSESSMENT</p>
         <h1 className="mt-2 text-2xl font-semibold sm:text-3xl">Design before you build</h1>
-        <p className="mt-2 max-w-3xl text-slate-400">
+        <p className="mt-2 max-w-3xl text-slate-600">
           Practicality, trade-offs, reliability, security, and cost awareness. Unnecessary complexity is penalized.
         </p>
       </header>
@@ -65,7 +65,7 @@ export default function ArchitecturePage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <select
-            className="h-10 w-full rounded-md border border-slate-700 bg-slate-950 px-3 text-sm"
+            className="h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm"
             value={assignmentId}
             onChange={(e) => setAssignmentId(e.target.value)}
           >
@@ -83,7 +83,7 @@ export default function ArchitecturePage() {
           />
           {PROMPTS.map((p) => (
             <div key={p} className="space-y-1">
-              <div className="text-sm text-slate-300">{p}</div>
+              <div className="text-sm text-slate-700">{p}</div>
               <Textarea
                 value={answers[p] ?? ""}
                 onChange={(e) => setAnswers({ ...answers, [p]: e.target.value })}

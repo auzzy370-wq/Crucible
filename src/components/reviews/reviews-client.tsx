@@ -44,9 +44,9 @@ export function ReviewsClient() {
   return (
     <div className="animate-rise space-y-6">
       <header>
-        <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">HUMAN TECHNICAL REVIEW</p>
+        <p className="font-mono text-xs tracking-[0.3em] text-teal-700">HUMAN TECHNICAL REVIEW</p>
         <h1 className="mt-2 text-2xl font-semibold sm:text-3xl">AI assists — humans decide</h1>
-        <p className="mt-2 max-w-3xl text-slate-400">
+        <p className="mt-2 max-w-3xl text-slate-600">
           Inspect evidence-based AI reports, override with documented reasoning, and verify cybersecurity or
           engineering skills explicitly.
         </p>
@@ -76,8 +76,8 @@ export function ReviewsClient() {
                   {item.candidate.name} — {item.assessment.title}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3 text-sm text-slate-400">
-                <pre className="max-h-40 overflow-auto rounded-lg border border-slate-800 bg-black/30 p-3 text-xs">
+              <CardContent className="space-y-3 text-sm text-slate-600">
+                <pre className="max-h-40 overflow-auto rounded-lg border border-slate-200 bg-black/30 p-3 text-xs">
                   {JSON.stringify(ai ?? { note: "No AI report yet" }, null, 2)}
                 </pre>
                 <div className="flex flex-wrap gap-2">
@@ -94,7 +94,7 @@ export function ReviewsClient() {
                     Override AI
                   </Button>
                   <a
-                    className="inline-flex min-h-10 items-center rounded-md border border-cyan-500/30 px-3 text-xs text-cyan-200 hover:bg-cyan-500/10 sm:min-h-8"
+                    className="inline-flex min-h-10 items-center rounded-md border border-teal-300/60 px-3 text-xs text-teal-800 hover:bg-teal-500/10 sm:min-h-8"
                     href={`/scorecard/${item.id}`}
                     target="_blank"
                     rel="noreferrer"
@@ -102,7 +102,7 @@ export function ReviewsClient() {
                     Share scorecard link
                   </a>
                   <a
-                    className="inline-flex min-h-10 items-center rounded-md border border-slate-700 px-3 text-xs text-slate-200 hover:bg-slate-900 sm:min-h-8"
+                    className="inline-flex min-h-10 items-center rounded-md border border-slate-300 px-3 text-xs text-slate-800 hover:bg-slate-100 sm:min-h-8"
                     href={`/api/scorecards/${item.id}`}
                     target="_blank"
                     rel="noreferrer"
@@ -110,7 +110,7 @@ export function ReviewsClient() {
                     Scorecard PDF
                   </a>
                   <a
-                    className="inline-flex min-h-10 items-center rounded-md border border-slate-700 px-3 text-xs text-slate-200 hover:bg-slate-900 sm:min-h-8"
+                    className="inline-flex min-h-10 items-center rounded-md border border-slate-300 px-3 text-xs text-slate-800 hover:bg-slate-100 sm:min-h-8"
                     href={`/api/scorecards/${item.id}?format=ats`}
                     target="_blank"
                     rel="noreferrer"
@@ -122,7 +122,7 @@ export function ReviewsClient() {
             </Card>
           );
         })}
-        {!queue.length && <div className="text-slate-400">No items awaiting review.</div>}
+        {!queue.length && <div className="text-slate-600">No items awaiting review.</div>}
       </div>
     </div>
   );

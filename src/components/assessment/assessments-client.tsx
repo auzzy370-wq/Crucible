@@ -111,9 +111,9 @@ export function AssessmentsClient(props: {
   return (
     <div className="animate-rise space-y-6">
       <header>
-        <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">HIRING · STEP 1</p>
+        <p className="font-mono text-xs tracking-[0.3em] text-teal-700">HIRING · STEP 1</p>
         <h1 className="mt-2 text-2xl font-semibold sm:text-3xl">Create → assign → wait for evidence</h1>
-        <p className="mt-2 max-w-3xl text-slate-400">
+        <p className="mt-2 max-w-3xl text-slate-600">
           Pick a challenge from the full library, set a timer, assign a candidate. They get an isolated IDE; you review
           after they submit.
         </p>
@@ -143,7 +143,7 @@ export function AssessmentsClient(props: {
                   onChange={(e) => setChallengeQuery(e.target.value)}
                 />
                 <select
-                  className="flex h-11 w-full rounded-md border border-slate-700 bg-slate-950 px-3 text-sm"
+                  className="flex h-11 w-full rounded-md border border-slate-300 bg-white px-3 text-sm"
                   value={challengeId}
                   onChange={(e) => setChallengeId(e.target.value)}
                 >
@@ -181,7 +181,7 @@ export function AssessmentsClient(props: {
               <div className="space-y-2">
                 <Label>Assessment</Label>
                 <select
-                  className="flex h-10 w-full rounded-md border border-slate-700 bg-slate-950 px-3 text-sm"
+                  className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm"
                   value={assignAssessmentId}
                   onChange={(e) => setAssignAssessmentId(e.target.value)}
                 >
@@ -195,7 +195,7 @@ export function AssessmentsClient(props: {
               <div className="space-y-2">
                 <Label>Candidate</Label>
                 <select
-                  className="flex h-10 w-full rounded-md border border-slate-700 bg-slate-950 px-3 text-sm"
+                  className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm"
                   value={candidateId}
                   onChange={(e) => setCandidateId(e.target.value)}
                 >
@@ -239,8 +239,8 @@ export function AssessmentsClient(props: {
                   <CardTitle className="text-base">{a.title}</CardTitle>
                   <CardDescription>{a.challenge.title}</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-3 text-sm text-slate-400">
-                  {a.challenge.summary && <p className="text-slate-300">{a.challenge.summary}</p>}
+                <CardContent className="space-y-3 text-sm text-slate-600">
+                  {a.challenge.summary && <p className="text-slate-700">{a.challenge.summary}</p>}
                   {reqs.length > 0 && (
                     <ul className="space-y-1 text-xs text-slate-500">
                       {reqs.slice(0, 4).map((r) => (
@@ -272,16 +272,16 @@ export function AssessmentsClient(props: {
             return (
               <Card key={a.id}>
                 <CardContent className="space-y-2 pt-4 text-sm">
-                  <div className="font-medium text-slate-100">{a.candidate.name}</div>
-                  <div className="text-slate-400">{a.assessment.title}</div>
+                  <div className="font-medium text-slate-900">{a.candidate.name}</div>
+                  <div className="text-slate-600">{a.assessment.title}</div>
                   <p className="text-xs text-slate-500">{ch.summary}</p>
                   <div className="flex flex-wrap items-center gap-2">
                     <Badge variant={a.assessment.track === "CYBERSECURITY" ? "violet" : "cyan"}>
                       {a.assessment.track}
                     </Badge>
-                    <span className="font-mono text-xs text-slate-300">{a.status}</span>
+                    <span className="font-mono text-xs text-slate-700">{a.status}</span>
                     <span className="font-mono text-xs text-emerald-300">L{a.currentLevel}</span>
-                    <span className="font-mono text-xs text-cyan-300">
+                    <span className="font-mono text-xs text-teal-700">
                       {a.scoreReport ? formatScore(a.scoreReport.overall) : "—"}
                     </span>
                   </div>
@@ -289,7 +289,7 @@ export function AssessmentsClient(props: {
                     <div className="text-[11px] text-slate-500">{reqs.length} deliverables in mission brief</div>
                   )}
                   {a.workspace ? (
-                    <Link className="inline-block text-cyan-300 hover:underline" href={`/workspace/${a.workspace.id}`}>
+                    <Link className="inline-block text-teal-700 hover:underline" href={`/workspace/${a.workspace.id}`}>
                       Open workspace →
                     </Link>
                   ) : null}
@@ -298,9 +298,9 @@ export function AssessmentsClient(props: {
             );
           })}
         </div>
-        <div className="hidden overflow-x-auto rounded-xl border border-slate-800 md:block">
+        <div className="hidden overflow-x-auto rounded-xl border border-slate-200 md:block">
           <table className="min-w-full text-left text-sm">
-            <thead className="bg-slate-950/80 text-slate-400">
+            <thead className="bg-white/85 text-slate-600">
               <tr>
                 <th className="px-4 py-3">Candidate</th>
                 <th className="px-4 py-3">Assessment</th>
@@ -317,13 +317,13 @@ export function AssessmentsClient(props: {
                 const ch = a.assessment.challenge;
                 const reqCount = ch.publicRequirements?.length ?? 0;
                 return (
-                  <tr key={a.id} className="border-t border-slate-800/80 align-top">
+                  <tr key={a.id} className="border-t border-slate-200/80 align-top">
                     <td className="px-4 py-3">{a.candidate.name}</td>
                     <td className="px-4 py-3">
                       <div>{a.assessment.title}</div>
                       <div className="mt-1 max-w-xs text-xs text-slate-500 line-clamp-2">{ch.summary}</div>
                     </td>
-                    <td className="px-4 py-3 font-mono text-xs text-slate-400">
+                    <td className="px-4 py-3 font-mono text-xs text-slate-600">
                       {reqCount ? `${reqCount} deliverables` : "—"}
                       {ch.difficulty != null ? ` · D${ch.difficulty}` : ""}
                     </td>
@@ -339,7 +339,7 @@ export function AssessmentsClient(props: {
                     </td>
                     <td className="px-4 py-3">
                       {a.workspace ? (
-                        <Link className="text-cyan-300 hover:underline" href={`/workspace/${a.workspace.id}`}>
+                        <Link className="text-teal-700 hover:underline" href={`/workspace/${a.workspace.id}`}>
                           Open
                         </Link>
                       ) : (

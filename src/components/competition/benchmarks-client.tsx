@@ -46,9 +46,9 @@ export function BenchmarksClient() {
   return (
     <div className="animate-rise space-y-6">
       <header>
-        <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">BENCHMARK REPORTS</p>
+        <p className="font-mono text-xs tracking-[0.3em] text-teal-700">BENCHMARK REPORTS</p>
         <h1 className="mt-2 font-serif-display text-2xl sm:text-3xl">Benchmark reports</h1>
-        <p className="mt-2 max-w-2xl text-slate-400">
+        <p className="mt-2 max-w-2xl text-slate-600">
           Side-by-side human and model standings from recorded runs. Experimental (mocked) AI results are labeled
           and never used to claim model incapability.
         </p>
@@ -58,10 +58,10 @@ export function BenchmarksClient() {
         <Button variant="secondary" size="sm" onClick={() => void load()}>
           Refresh
         </Button>
-        <Link href="/challenges" className="text-cyan-300 hover:underline">
+        <Link href="/challenges" className="text-teal-700 hover:underline">
           Practice problems →
         </Link>
-        <Link href="/leaderboards" className="text-cyan-300 hover:underline">
+        <Link href="/leaderboards" className="text-teal-700 hover:underline">
           Full leaderboards →
         </Link>
       </div>
@@ -71,8 +71,8 @@ export function BenchmarksClient() {
       ) : (
         <div className="grid gap-6 lg:grid-cols-2">
           {rows.map((block) => (
-            <section key={block.kind} className="rounded-xl border border-slate-800 p-4">
-              <h2 className="font-medium text-slate-100">{block.kind}</h2>
+            <section key={block.kind} className="rounded-xl border border-slate-200 p-4">
+              <h2 className="font-medium text-slate-900">{block.kind}</h2>
               <p className="mt-1 font-mono text-[11px] text-slate-500">{block.note}</p>
               <ul className="mt-3 space-y-2">
                 {block.entries.map((r: any) => (
@@ -86,7 +86,7 @@ export function BenchmarksClient() {
                         </Badge>
                       )}
                     </span>
-                    <span className="shrink-0 font-mono text-cyan-200">
+                    <span className="shrink-0 font-mono text-teal-800">
                       {r.accuracyPct != null ? `${r.accuracyPct}%` : r.contestScore}
                     </span>
                   </li>

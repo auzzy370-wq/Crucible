@@ -46,9 +46,9 @@ function renderProblemBody(md: string) {
     if (lines[0]?.startsWith("## ")) {
       return (
         <div key={i} className="space-y-2">
-          <h3 className="text-sm font-semibold tracking-wide text-slate-100">{lines[0].replace(/^##\s+/, "")}</h3>
+          <h3 className="text-sm font-semibold tracking-wide text-slate-900">{lines[0].replace(/^##\s+/, "")}</h3>
           {lines.slice(1).map((l, j) => (
-            <p key={j} className="text-sm leading-relaxed text-slate-300 whitespace-pre-wrap">
+            <p key={j} className="text-sm leading-relaxed text-slate-700 whitespace-pre-wrap">
               {formatInline(l)}
             </p>
           ))}
@@ -58,13 +58,13 @@ function renderProblemBody(md: string) {
     if (lines[0]?.startsWith("```")) {
       const code = lines.slice(1).filter((l) => !l.startsWith("```")).join("\n");
       return (
-        <pre key={i} className="overflow-x-auto rounded-lg border border-slate-800 bg-black/40 p-3 font-mono text-xs text-cyan-100">
+        <pre key={i} className="overflow-x-auto rounded-lg border border-slate-200 bg-black/40 p-3 font-mono text-xs text-teal-900">
           {code}
         </pre>
       );
     }
     return (
-      <p key={i} className="text-sm leading-relaxed text-slate-300 whitespace-pre-wrap">
+      <p key={i} className="text-sm leading-relaxed text-slate-700 whitespace-pre-wrap">
         {lines.map((l, j) => (
           <span key={j}>
             {formatInline(l)}
@@ -81,14 +81,14 @@ function formatInline(text: string) {
   return parts.map((p, i) => {
     if (p.startsWith("`") && p.endsWith("`")) {
       return (
-        <code key={i} className="rounded bg-slate-800 px-1 py-0.5 font-mono text-[12px] text-cyan-200">
+        <code key={i} className="rounded bg-slate-800 px-1 py-0.5 font-mono text-[12px] text-teal-800">
           {p.slice(1, -1)}
         </code>
       );
     }
     if (p.startsWith("**") && p.endsWith("**")) {
       return (
-        <strong key={i} className="font-semibold text-slate-100">
+        <strong key={i} className="font-semibold text-slate-900">
           {p.slice(2, -2)}
         </strong>
       );
@@ -571,7 +571,7 @@ export function WorkspaceIde(props: {
               <SessionTimer endsAt={props.dueAt} timedMinutes={props.timedMinutes} />
             </div>
             <h1 className="mt-2 break-words text-xl font-semibold sm:text-2xl">{props.title}</h1>
-            <p className="text-sm text-slate-400">
+            <p className="text-sm text-slate-600">
               {props.problemSummary || "Implement the solution and pass public + hidden tests."}
               {(props.companies?.length ?? 0) > 0 ? ` · Asked at ${props.companies!.slice(0, 3).join(", ")}` : ""}
             </p>
@@ -601,9 +601,9 @@ export function WorkspaceIde(props: {
           </div>
         </div>
         {(pairCode || joinCode !== undefined) && (
-          <div className="flex flex-wrap items-end gap-2 rounded-xl border border-slate-800 bg-slate-950/60 p-3 text-sm">
+          <div className="flex flex-wrap items-end gap-2 rounded-xl border border-slate-200 bg-white/75 p-3 text-sm">
             {pairCode && (
-              <div className="font-mono text-cyan-200">
+              <div className="font-mono text-teal-800">
                 Host code: <span className="text-lg tracking-widest">{pairCode}</span>
               </div>
             )}
@@ -628,7 +628,7 @@ export function WorkspaceIde(props: {
               </div>
               <div className="flex flex-wrap gap-2">
                 <Input
-                  className="h-8 w-20 bg-slate-950"
+                  className="h-8 w-20 bg-white"
                   type="number"
                   min={1}
                   value={bpLine}
@@ -675,7 +675,7 @@ export function WorkspaceIde(props: {
             type="button"
             className={cn(
               "flex-1 rounded-lg border px-3 py-2 text-sm",
-              panel === "problem" ? "border-cyan-400/40 bg-cyan-500/10 text-cyan-100" : "border-slate-700 text-slate-400",
+              panel === "problem" ? "border-teal-400/50 bg-teal-500/10 text-teal-900" : "border-slate-300 text-slate-600",
             )}
             onClick={() => setPanel("problem")}
           >
@@ -685,7 +685,7 @@ export function WorkspaceIde(props: {
             type="button"
             className={cn(
               "flex-1 rounded-lg border px-3 py-2 text-sm",
-              panel === "code" ? "border-cyan-400/40 bg-cyan-500/10 text-cyan-100" : "border-slate-700 text-slate-400",
+              panel === "code" ? "border-teal-400/50 bg-teal-500/10 text-teal-900" : "border-slate-300 text-slate-600",
             )}
             onClick={() => setPanel("code")}
           >
@@ -696,7 +696,7 @@ export function WorkspaceIde(props: {
         <div className="grid min-h-0 gap-3 xl:grid-cols-[minmax(280px,0.95fr)_minmax(0,1.15fr)]">
           <aside
             className={cn(
-              "max-h-[70vh] space-y-4 overflow-y-auto rounded-xl border border-slate-800 bg-slate-950/70 p-4",
+              "max-h-[70vh] space-y-4 overflow-y-auto rounded-xl border border-slate-200 bg-white/80 p-4",
               panel === "code" ? "hidden xl:block" : "block",
             )}
           >
@@ -704,7 +704,7 @@ export function WorkspaceIde(props: {
               {(props.tags ?? [])
                 .filter((t) => !["coding", "easy", "medium", "hard"].includes(t))
                 .map((t) => (
-                  <span key={t} className="rounded border border-slate-800 px-2 py-0.5 font-mono text-[11px] text-slate-400">
+                  <span key={t} className="rounded border border-slate-200 px-2 py-0.5 font-mono text-[11px] text-slate-600">
                     {t}
                   </span>
                 ))}
@@ -725,10 +725,10 @@ export function WorkspaceIde(props: {
           </aside>
 
           <div className={cn("space-y-3", panel === "problem" ? "hidden xl:block" : "block")}>
-            <section className="overflow-hidden rounded-xl border border-slate-800 bg-[#0d1117]">
-              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 px-3 py-2">
+            <section className="overflow-hidden rounded-xl border border-slate-200 bg-[#0d1117]">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 px-3 py-2">
                 <select
-                  className="max-w-full rounded border border-slate-700 bg-slate-950 px-2 py-1 font-mono text-xs text-slate-300"
+                  className="max-w-full rounded border border-slate-300 bg-white px-2 py-1 font-mono text-xs text-slate-700"
                   value={activePath}
                   onChange={(e) => setActivePath(e.target.value)}
                 >
@@ -775,7 +775,7 @@ export function WorkspaceIde(props: {
                   }}
                 />
               </div>
-              <div className="border-t border-slate-800 px-3 py-2 text-xs text-slate-500">
+              <div className="border-t border-slate-200 px-3 py-2 text-xs text-slate-500">
                 Shortcuts: Ctrl/⌘+Enter Run · Ctrl/⌘+Shift+Enter Submit · Ctrl/⌘+Shift+F Format
                 {premium ? " · AI autocomplete on" : " · "}
                 {!premium && (
@@ -789,12 +789,12 @@ export function WorkspaceIde(props: {
               </div>
             </section>
 
-            <section className="rounded-xl border border-slate-800 bg-slate-950/70 p-3">
+            <section className="rounded-xl border border-slate-200 bg-white/80 p-3">
               <div className="mb-2 flex items-center justify-between">
                 <div className="text-xs uppercase tracking-wider text-slate-500">
                   Judge {premium ? "· Lightning queue" : ""}
                 </div>
-                <div className="font-mono text-xs text-slate-400">
+                <div className="font-mono text-xs text-slate-600">
                   {caseResults.length
                     ? `${caseResults.filter((c) => c.pass).length}/${caseResults.length} passed`
                     : latestTestJob
@@ -812,7 +812,7 @@ export function WorkspaceIde(props: {
                         ? "border-amber-500/30 bg-amber-500/10 text-amber-50"
                         : judgeVerdict.label === "Wrong Answer"
                           ? "border-rose-500/30 bg-rose-500/10 text-rose-100"
-                          : "border-slate-700 bg-slate-900/80 text-slate-300",
+                          : "border-slate-300 bg-slate-100/80 text-slate-700",
                   )}
                 >
                   <div className="flex flex-wrap items-center justify-between gap-2">
@@ -847,7 +847,7 @@ export function WorkspaceIde(props: {
                       className={cn(
                         "flex items-center justify-between rounded-md border px-3 py-2 font-mono text-xs",
                         c.pass
-                          ? "border-emerald-500/20 bg-emerald-500/5 text-emerald-200"
+                          ? "border-emerald-500/20 bg-emerald-500/5 text-emerald-800"
                           : "border-rose-500/20 bg-rose-500/5 text-rose-200",
                       )}
                     >
@@ -899,7 +899,7 @@ export function WorkspaceIde(props: {
             <SessionTimer endsAt={props.dueAt} timedMinutes={props.timedMinutes} />
           </div>
           <h1 className="mt-2 break-words text-xl font-semibold sm:text-2xl">{props.title}</h1>
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-slate-600">
             {props.problemSummary || "Mission brief · sandboxed evidence · adaptive grading"}
             {props.timedMinutes ? ` · ${props.timedMinutes}-minute session` : ""}
           </p>
@@ -922,31 +922,31 @@ export function WorkspaceIde(props: {
 
       {/* Progress strip */}
       <div className="grid gap-2 sm:grid-cols-3">
-        <div className="rounded-xl border border-slate-800 bg-slate-950/60 px-3 py-2">
+        <div className="rounded-xl border border-slate-200 bg-white/75 px-3 py-2">
           <div className="text-[10px] uppercase tracking-wider text-slate-500">Deliverables</div>
-          <div className="mt-1 font-mono text-sm text-cyan-200">
+          <div className="mt-1 font-mono text-sm text-teal-800">
             {deliverableDone}/{publicReqs.length || "—"} checked
           </div>
           <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-800">
             <div
-              className="h-full rounded-full bg-cyan-400/80 transition-all"
+              className="h-full rounded-full bg-teal-500/80 transition-all"
               style={{
                 width: `${publicReqs.length ? Math.round((deliverableDone / publicReqs.length) * 100) : 0}%`,
               }}
             />
           </div>
         </div>
-        <div className="rounded-xl border border-slate-800 bg-slate-950/60 px-3 py-2">
+        <div className="rounded-xl border border-slate-200 bg-white/75 px-3 py-2">
           <div className="text-[10px] uppercase tracking-wider text-slate-500">Public tests</div>
-          <div className="mt-1 font-mono text-sm text-slate-200">
+          <div className="mt-1 font-mono text-sm text-slate-800">
             {caseResults.filter((c) => !c.hidden).length
               ? `${caseResults.filter((c) => !c.hidden && c.pass).length}/${caseResults.filter((c) => !c.hidden).length}`
               : "not run"}
           </div>
         </div>
-        <div className="rounded-xl border border-slate-800 bg-slate-950/60 px-3 py-2">
+        <div className="rounded-xl border border-slate-200 bg-white/75 px-3 py-2">
           <div className="text-[10px] uppercase tracking-wider text-slate-500">Adaptive</div>
-          <div className="mt-1 font-mono text-sm text-emerald-200">
+          <div className="mt-1 font-mono text-sm text-emerald-800">
             L{props.currentLevel ?? 1}
             {adaptive.length ? ` / ${adaptive.length}` : ""}
             {adaptive.find((l) => l.level === (props.currentLevel ?? 1))
@@ -969,7 +969,7 @@ export function WorkspaceIde(props: {
             type="button"
             className={cn(
               "flex-1 rounded-lg border px-3 py-2 text-sm",
-              projectPanel === id ? "border-cyan-400/40 bg-cyan-500/10 text-cyan-100" : "border-slate-700 text-slate-400",
+              projectPanel === id ? "border-teal-400/50 bg-teal-500/10 text-teal-900" : "border-slate-300 text-slate-600",
             )}
             onClick={() => setProjectPanel(id)}
           >
@@ -982,13 +982,13 @@ export function WorkspaceIde(props: {
         {/* Mission brief */}
         <aside
           className={cn(
-            "max-h-[75vh] space-y-4 overflow-y-auto rounded-xl border border-slate-800 bg-slate-950/70 p-4",
+            "max-h-[75vh] space-y-4 overflow-y-auto rounded-xl border border-slate-200 bg-white/80 p-4",
             projectPanel === "brief" ? "block" : "hidden xl:block",
           )}
         >
           <div>
             <div className="text-xs uppercase tracking-wider text-slate-500">Mission brief</div>
-            <p className="mt-2 text-sm leading-relaxed text-slate-300">
+            <p className="mt-2 text-sm leading-relaxed text-slate-700">
               {props.problemSummary || "Ship evidence against the public deliverables; hidden harnesses grade the rest."}
             </p>
           </div>
@@ -996,7 +996,7 @@ export function WorkspaceIde(props: {
           {(props.tags?.length ?? 0) > 0 && (
             <div className="flex flex-wrap gap-1">
               {props.tags!.map((t) => (
-                <span key={t} className="rounded border border-slate-800 px-2 py-0.5 font-mono text-[11px] text-slate-400">
+                <span key={t} className="rounded border border-slate-200 px-2 py-0.5 font-mono text-[11px] text-slate-600">
                   {t}
                 </span>
               ))}
@@ -1004,7 +1004,7 @@ export function WorkspaceIde(props: {
           )}
 
           {(props.owaspMappings?.length || props.mitreMappings?.length) && (
-            <div className="space-y-1 text-xs text-slate-400">
+            <div className="space-y-1 text-xs text-slate-600">
               {props.owaspMappings?.length ? (
                 <div>
                   <span className="text-slate-500">OWASP · </span>
@@ -1025,7 +1025,7 @@ export function WorkspaceIde(props: {
               <div className="text-xs uppercase tracking-wider text-slate-500">Public deliverables</div>
               <button
                 type="button"
-                className="text-[11px] text-cyan-300 hover:underline"
+                className="text-[11px] text-teal-700 hover:underline"
                 onClick={() => {
                   setActivePath("CHECKLIST.md");
                   setProjectPanel("code");
@@ -1037,7 +1037,7 @@ export function WorkspaceIde(props: {
             <ul className="space-y-2">
               {(publicReqs.length ? publicReqs : ["Working solution with tests"]).map((r) => (
                 <li key={r}>
-                  <label className="flex cursor-pointer items-start gap-2 text-sm text-slate-300">
+                  <label className="flex cursor-pointer items-start gap-2 text-sm text-slate-700">
                     <input
                       type="checkbox"
                       className="mt-1 accent-cyan-400"
@@ -1054,7 +1054,7 @@ export function WorkspaceIde(props: {
           {hiddenReqs.length > 0 && (
             <div>
               <div className="mb-2 text-xs uppercase tracking-wider text-slate-500">Hidden evaluation bar</div>
-              <ul className="space-y-1.5 text-sm text-slate-400">
+              <ul className="space-y-1.5 text-sm text-slate-600">
                 {hiddenReqs.map((r) => (
                   <li key={r} className="flex gap-2">
                     <span className="text-amber-400/80">●</span>
@@ -1070,9 +1070,9 @@ export function WorkspaceIde(props: {
               <div className="mb-2 text-xs uppercase tracking-wider text-slate-500">Rubric</div>
               <ul className="space-y-2">
                 {Object.entries(rubric).map(([k, v]) => (
-                  <li key={k} className="rounded-lg border border-slate-800 bg-black/20 px-3 py-2">
-                    <div className="text-xs font-semibold uppercase tracking-wide text-cyan-200/90">{k}</div>
-                    <div className="mt-0.5 text-sm text-slate-400">{v}</div>
+                  <li key={k} className="rounded-lg border border-slate-200 bg-black/20 px-3 py-2">
+                    <div className="text-xs font-semibold uppercase tracking-wide text-teal-800/90">{k}</div>
+                    <div className="mt-0.5 text-sm text-slate-600">{v}</div>
                   </li>
                 ))}
               </ul>
@@ -1092,10 +1092,10 @@ export function WorkspaceIde(props: {
                       className={cn(
                         "rounded-md border px-2.5 py-1.5 text-xs",
                         current
-                          ? "border-cyan-400/40 bg-cyan-500/10 text-cyan-100"
+                          ? "border-teal-400/50 bg-teal-500/10 text-teal-900"
                           : cleared
                             ? "border-emerald-500/20 bg-emerald-500/5 text-emerald-100/80"
-                            : "border-slate-800 text-slate-500",
+                            : "border-slate-200 text-slate-500",
                       )}
                     >
                       <span className="font-mono">L{l.level}</span> {l.title}
@@ -1108,7 +1108,7 @@ export function WorkspaceIde(props: {
           )}
 
           {(briefFile || checklistFile) && (
-            <div className="flex flex-wrap gap-2 border-t border-slate-800 pt-3">
+            <div className="flex flex-wrap gap-2 border-t border-slate-200 pt-3">
               <Button
                 size="sm"
                 variant="secondary"
@@ -1133,9 +1133,9 @@ export function WorkspaceIde(props: {
           )}
 
           {props.problemDescription && (
-            <div className="border-t border-slate-800 pt-3">
+            <div className="border-t border-slate-200 pt-3">
               <div className="mb-2 text-xs uppercase tracking-wider text-slate-500">Full brief</div>
-              <div className="space-y-3 text-sm text-slate-400">{renderProblemBody(props.problemDescription)}</div>
+              <div className="space-y-3 text-sm text-slate-600">{renderProblemBody(props.problemDescription)}</div>
             </div>
           )}
         </aside>
@@ -1144,7 +1144,7 @@ export function WorkspaceIde(props: {
         <div className={cn("space-y-3", projectPanel === "code" ? "block" : "hidden xl:block")}>
           <div className="flex flex-wrap gap-2 xl:hidden">
             <select
-              className="min-h-11 flex-1 rounded-md border border-slate-700 bg-slate-950 px-3 text-sm text-slate-100"
+              className="min-h-11 flex-1 rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-900"
               value={activePath}
               onChange={(e) => setActivePath(e.target.value)}
             >
@@ -1156,14 +1156,14 @@ export function WorkspaceIde(props: {
             </select>
           </div>
           <div className="grid min-h-0 gap-3 xl:grid-cols-[200px_1fr]">
-            <aside className="hidden rounded-xl border border-slate-800 bg-slate-950/70 p-3 xl:block">
+            <aside className="hidden rounded-xl border border-slate-200 bg-white/80 p-3 xl:block">
               <div className="mb-2 text-xs uppercase tracking-wider text-slate-500">Files · {files.length}</div>
               <ul className="max-h-[58vh] space-y-1 overflow-auto">
                 {files.map((f) => (
                   <li key={f.id}>
                     <button
                       className={`w-full rounded px-2 py-1.5 text-left font-mono text-xs ${
-                        f.path === activePath ? "bg-cyan-500/10 text-cyan-200" : "text-slate-400 hover:bg-slate-900"
+                        f.path === activePath ? "bg-teal-500/10 text-teal-800" : "text-slate-600 hover:bg-slate-100"
                       }`}
                       onClick={() => setActivePath(f.path)}
                     >
@@ -1173,8 +1173,8 @@ export function WorkspaceIde(props: {
                 ))}
               </ul>
             </aside>
-            <section className="min-w-0 overflow-hidden rounded-xl border border-slate-800 bg-[#0d1117]">
-              <div className="truncate border-b border-slate-800 px-3 py-2 font-mono text-xs text-slate-400">
+            <section className="min-w-0 overflow-hidden rounded-xl border border-slate-200 bg-[#0d1117]">
+              <div className="truncate border-b border-slate-200 px-3 py-2 font-mono text-xs text-slate-600">
                 {activePath}
               </div>
               <div className="h-[42vh] min-h-[240px] sm:h-[52vh] lg:h-[58vh]">
@@ -1213,7 +1213,7 @@ export function WorkspaceIde(props: {
                   ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-100"
                   : judgeVerdict.label === "Wrong Answer"
                     ? "border-rose-500/30 bg-rose-500/10 text-rose-100"
-                    : "border-slate-700 bg-slate-950/70 text-slate-300",
+                    : "border-slate-300 bg-white/80 text-slate-700",
               )}
             >
               <div className="text-sm font-semibold">{judgeVerdict.label}</div>
@@ -1223,29 +1223,29 @@ export function WorkspaceIde(props: {
               </div>
             </div>
           )}
-          <div className="rounded-xl border border-slate-800 bg-slate-950/70 p-3 sm:col-span-2 xl:col-span-1">
+          <div className="rounded-xl border border-slate-200 bg-white/80 p-3 sm:col-span-2 xl:col-span-1">
             <PinpointPanel pinpoint={pinpoint} compact />
           </div>
-          <div className="rounded-xl border border-slate-800 bg-slate-950/70 p-3">
+          <div className="rounded-xl border border-slate-200 bg-white/80 p-3">
             <div className="mb-2 text-xs uppercase tracking-wider text-slate-500">Git</div>
             <Input value={commitMsg} onChange={(e) => setCommitMsg(e.target.value)} className="mb-2" />
             <Button size="sm" className="w-full min-h-10" onClick={commit}>
               Commit
             </Button>
-            <ul className="mt-3 max-h-40 space-y-2 overflow-auto text-xs text-slate-400">
+            <ul className="mt-3 max-h-40 space-y-2 overflow-auto text-xs text-slate-600">
               {props.commits.map((c) => (
                 <li key={c.sha} className="break-words font-mono">
-                  <span className="text-cyan-300">{c.sha.slice(0, 8)}</span> {c.message}
+                  <span className="text-teal-700">{c.sha.slice(0, 8)}</span> {c.message}
                 </li>
               ))}
             </ul>
           </div>
-          <div className="rounded-xl border border-slate-800 bg-slate-950/70 p-3">
+          <div className="rounded-xl border border-slate-200 bg-white/80 p-3">
             <div className="mb-2 text-xs uppercase tracking-wider text-slate-500">Jobs</div>
             <ul className="max-h-40 space-y-2 overflow-auto text-xs">
               {props.jobs.map((j) => (
-                <li key={j.id} className="rounded border border-slate-800 p-2">
-                  <div className="font-mono text-slate-300">
+                <li key={j.id} className="rounded border border-slate-200 p-2">
+                  <div className="font-mono text-slate-700">
                     {j.type} · {j.status}
                   </div>
                   {(j.stdout || j.stderr) && (
@@ -1257,7 +1257,7 @@ export function WorkspaceIde(props: {
               ))}
             </ul>
           </div>
-          <div className="rounded-xl border border-slate-800 bg-black/40 p-3 sm:col-span-2 xl:col-span-1">
+          <div className="rounded-xl border border-slate-200 bg-black/40 p-3 sm:col-span-2 xl:col-span-1">
             <div className="mb-2 text-xs uppercase tracking-wider text-slate-500">Terminal</div>
             <Textarea className="min-h-[120px] font-mono text-xs sm:min-h-[160px]" value={terminal} readOnly />
           </div>
@@ -1286,7 +1286,7 @@ function guessLang(path: string, fallback: string) {
 function PinpointPanel({ pinpoint, compact }: { pinpoint: Pinpoint | null; compact?: boolean }) {
   if (!pinpoint) {
     return (
-      <div className={cn("mt-3 rounded-lg border border-slate-800 bg-black/30 p-3", compact && "mt-0")}>
+      <div className={cn("mt-3 rounded-lg border border-slate-200 bg-black/30 p-3", compact && "mt-0")}>
         <div className="text-xs uppercase tracking-wider text-slate-500">Knowledge pinpoint</div>
         <p className="mt-1 text-sm text-slate-500">
           Run public + hidden tests to map exactly which skills this mission proves — and which gaps remain.
@@ -1297,12 +1297,12 @@ function PinpointPanel({ pinpoint, compact }: { pinpoint: Pinpoint | null; compa
   return (
     <div className={cn("mt-3 space-y-2 rounded-lg border border-cyan-500/20 bg-cyan-500/5 p-3", compact && "mt-0")}>
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="text-xs uppercase tracking-wider text-cyan-300/80">Knowledge pinpoint</div>
-        <span className="font-mono text-[11px] text-slate-400">
+        <div className="text-xs uppercase tracking-wider text-teal-700/80">Knowledge pinpoint</div>
+        <span className="font-mono text-[11px] text-slate-600">
           {pinpoint.band} · D{pinpoint.difficulty}
         </span>
       </div>
-      <p className="text-sm text-slate-200">{pinpoint.summary}</p>
+      <p className="text-sm text-slate-800">{pinpoint.summary}</p>
       {pinpoint.knows.length > 0 && (
         <div>
           <div className="text-[11px] uppercase tracking-wider text-emerald-400/80">Knows</div>
@@ -1332,7 +1332,7 @@ function PinpointPanel({ pinpoint, compact }: { pinpoint: Pinpoint | null; compa
         </div>
       )}
       {pinpoint.nextFocus.length > 0 && (
-        <div className="text-[11px] text-slate-400">
+        <div className="text-[11px] text-slate-600">
           Next: {pinpoint.nextFocus.slice(0, 3).join(" · ")}
         </div>
       )}

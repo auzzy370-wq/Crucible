@@ -65,22 +65,22 @@ export function InterviewCraftClient() {
   return (
     <div className="animate-rise space-y-8">
       <header>
-        <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">INTERVIEW CRAFT</p>
+        <p className="font-mono text-xs tracking-[0.3em] text-teal-700">INTERVIEW CRAFT</p>
         <h1 className="mt-2 font-serif-display text-2xl sm:text-3xl">Prepare for the real loop</h1>
-        <p className="mt-2 max-w-2xl text-slate-400">
+        <p className="mt-2 max-w-2xl text-slate-600">
           Live coding framework, DSA patterns, system design, behavioral STAR, and company-flavored packs — then prove
           it under the same judges employers use.
         </p>
       </header>
 
-      <section className="rounded-2xl border border-cyan-500/25 bg-cyan-500/5 p-5">
+      <section className="rounded-2xl border border-teal-300/50 bg-cyan-500/5 p-5">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <div className="text-xs uppercase tracking-wider text-cyan-200/80">Your path</div>
-            <div className="mt-1 font-mono text-2xl text-cyan-100">{percent}% complete</div>
+            <div className="text-xs uppercase tracking-wider text-teal-700/80">Your path</div>
+            <div className="mt-1 font-mono text-2xl text-teal-900">{percent}% complete</div>
             {next ? (
-              <p className="mt-1 text-sm text-slate-400">
-                Next: <span className="text-slate-200">{next.title}</span> · {next.minutes} min
+              <p className="mt-1 text-sm text-slate-600">
+                Next: <span className="text-slate-800">{next.title}</span> · {next.minutes} min
               </p>
             ) : (
               <p className="mt-1 text-sm text-emerald-300">Curriculum cleared — start a company study plan or mock.</p>
@@ -104,8 +104,8 @@ export function InterviewCraftClient() {
             </Link>
           </div>
         </div>
-        <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-900">
-          <div className="h-full rounded-full bg-cyan-400/80 transition-all" style={{ width: `${percent}%` }} />
+        <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-100">
+          <div className="h-full rounded-full bg-teal-500/80 transition-all" style={{ width: `${percent}%` }} />
         </div>
       </section>
 
@@ -117,23 +117,23 @@ export function InterviewCraftClient() {
           if (!rows.length) return null;
           return (
             <section key={level} className="space-y-3">
-              <h2 className="text-sm font-semibold capitalize text-slate-200">{level}</h2>
+              <h2 className="text-sm font-semibold capitalize text-slate-800">{level}</h2>
               <div className="space-y-2">
                 {rows.map((l, idx) => (
                   <Link
                     key={l.slug}
                     href={`/learn/interview/${l.slug}`}
-                    className="flex flex-col gap-2 rounded-xl border border-slate-800 px-4 py-3 transition hover:border-cyan-500/30 sm:flex-row sm:items-center sm:justify-between"
+                    className="flex flex-col gap-2 rounded-xl border border-slate-200 px-4 py-3 transition hover:border-teal-300/60 sm:flex-row sm:items-center sm:justify-between"
                   >
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="font-mono text-[10px] text-slate-600">
                           {String(idx + 1).padStart(2, "0")}
                         </span>
-                        <span className="font-medium text-slate-100">{l.title}</span>
+                        <span className="font-medium text-slate-900">{l.title}</span>
                         {l.done && <Badge variant="emerald">done</Badge>}
                       </div>
-                      <p className="mt-1 text-sm text-slate-400">{l.summary}</p>
+                      <p className="mt-1 text-sm text-slate-600">{l.summary}</p>
                     </div>
                     <div className="flex shrink-0 flex-wrap gap-1">
                       <Badge>{l.minutes} min</Badge>

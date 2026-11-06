@@ -63,7 +63,7 @@ export default function RegisterPage() {
       <div className="landing-noise pointer-events-none absolute inset-0" aria-hidden />
       <div className="landing-mesh pointer-events-none absolute inset-0" aria-hidden />
       <div className="pointer-events-none absolute inset-0 grid-overlay opacity-50" />
-      <Card className="animate-rise relative w-full max-w-lg border-cyan-400/20 bg-[#070b12]/90 backdrop-blur-sm">
+      <Card className="animate-rise relative w-full max-w-lg border-teal-300/60 bg-[#070b12]/90 backdrop-blur-sm">
         <CardHeader>
           <div className="mb-1 flex items-baseline gap-3">
             <span className="font-serif-display text-2xl tracking-tight text-[var(--landing-ink)]">Crucible</span>
@@ -130,7 +130,7 @@ export default function RegisterPage() {
               <Label htmlFor="track">Preferred track</Label>
               <select
                 id="track"
-                className="flex h-11 w-full rounded-md border border-slate-700 bg-slate-950 px-3 text-base text-slate-100 sm:text-sm"
+                className="flex h-11 w-full rounded-md border border-slate-300 bg-white px-3 text-base text-slate-900 sm:text-sm"
                 value={form.track}
                 onChange={(e) => setForm((f) => ({ ...f, track: e.target.value }))}
               >
@@ -157,13 +157,13 @@ export default function RegisterPage() {
           <div className="mt-5">
             <SocialAuthButtons heading="Or sign up with" />
           </div>
-          <p className="mt-4 text-center text-sm text-slate-400">
+          <p className="mt-4 text-center text-sm text-slate-600">
             Already learning?{" "}
-            <Link className="text-cyan-300 hover:underline" href="/login">
+            <Link className="text-teal-700 hover:underline" href="/login">
               Sign in
             </Link>
             {" · "}
-            <Link className="text-slate-400 hover:underline" href="/login?intent=hire">
+            <Link className="text-slate-600 hover:underline" href="/login?intent=hire">
               Hire talent
             </Link>
           </p>

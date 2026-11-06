@@ -147,10 +147,10 @@ export function AdminCompetitionPanel() {
   const pct = progress.total ? Math.round((progress.done / progress.total) * 100) : 0;
 
   return (
-    <section className="space-y-4 rounded-xl border border-slate-800 p-4">
+    <section className="space-y-4 rounded-xl border border-slate-200 p-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h2 className="font-medium text-slate-100">Competition analytics</h2>
+          <h2 className="font-medium text-slate-900">Competition analytics</h2>
           <p className="text-xs text-slate-500">
             Live frontend runner · public + hidden + deploy on every assignment, then post scores
           </p>
@@ -172,13 +172,13 @@ export function AdminCompetitionPanel() {
 
       {running && (
         <div className="space-y-1">
-          <div className="flex justify-between text-[11px] text-slate-400">
+          <div className="flex justify-between text-[11px] text-slate-600">
             <span>
               Suite progress {progress.done}/{progress.total}
             </span>
             <span className="font-mono">{pct}%</span>
           </div>
-          <div className="h-2 overflow-hidden rounded-full bg-slate-900">
+          <div className="h-2 overflow-hidden rounded-full bg-slate-100">
             <div
               className="h-full rounded-full bg-cyan-500/80 transition-all duration-300"
               style={{ width: `${pct}%` }}
@@ -190,9 +190,9 @@ export function AdminCompetitionPanel() {
       {lastRun && <p className="text-xs text-emerald-300/90">{lastRun}</p>}
 
       {liveRows.length > 0 && (
-        <div className="max-h-72 overflow-auto rounded-lg border border-slate-800 text-xs">
+        <div className="max-h-72 overflow-auto rounded-lg border border-slate-200 text-xs">
           <table className="w-full">
-            <thead className="sticky top-0 bg-slate-950 text-slate-500">
+            <thead className="sticky top-0 bg-white text-slate-500">
               <tr>
                 <th className="px-2 py-1 text-left font-normal">Assessment</th>
                 <th className="px-2 py-1 text-left font-normal">Phase</th>
@@ -205,7 +205,7 @@ export function AdminCompetitionPanel() {
                 <tr
                   key={r.assignmentId}
                   className={`border-t border-slate-900 ${
-                    r.phase === "running" ? "bg-cyan-500/5 text-cyan-50" : "text-slate-300"
+                    r.phase === "running" ? "bg-cyan-500/5 text-cyan-50" : "text-slate-700"
                   }`}
                 >
                   <td className="px-2 py-1">
@@ -232,7 +232,7 @@ export function AdminCompetitionPanel() {
                   </td>
                   <td className="px-2 py-1 text-right font-mono">
                     {r.error && r.phase === "error" ? (
-                      <span className="text-rose-300">err</span>
+                      <span className="text-rose-700">err</span>
                     ) : (
                       r.overall ?? "—"
                     )}
@@ -251,23 +251,23 @@ export function AdminCompetitionPanel() {
           ["Submissions", data.totals.submissions],
           ["Tournaments", data.totals.tournaments],
         ].map(([label, value]) => (
-          <div key={String(label)} className="rounded-lg border border-slate-800 px-3 py-2">
+          <div key={String(label)} className="rounded-lg border border-slate-200 px-3 py-2">
             <div className="font-mono text-[10px] uppercase tracking-wider text-slate-500">{label}</div>
-            <div className="mt-1 font-mono text-xl text-cyan-100">{value}</div>
+            <div className="mt-1 font-mono text-xl text-teal-900">{value}</div>
           </div>
         ))}
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
-        <div className="rounded-lg border border-slate-800 px-3 py-3 text-sm">
-          <div className="font-medium text-slate-200">Human success</div>
+        <div className="rounded-lg border border-slate-200 px-3 py-3 text-sm">
+          <div className="font-medium text-slate-800">Human success</div>
           <div className="mt-1 font-mono text-2xl text-emerald-300">
             {data.human.successRatePct ?? "—"}%
           </div>
           <p className="mt-1 text-xs text-slate-500">{data.human.note}</p>
         </div>
-        <div className="rounded-lg border border-slate-800 px-3 py-3 text-sm">
-          <div className="flex items-center gap-2 font-medium text-slate-200">
+        <div className="rounded-lg border border-slate-200 px-3 py-3 text-sm">
+          <div className="flex items-center gap-2 font-medium text-slate-800">
             AI success
             {data.ai.verifiedPool ? (
               <Badge variant="emerald">verified</Badge>
@@ -296,7 +296,7 @@ export function AdminCompetitionPanel() {
       {(data.hardest ?? []).length > 0 && (
         <div>
           <p className="mb-2 text-xs uppercase tracking-wider text-slate-500">Hardest published</p>
-          <ul className="space-y-1 text-sm text-slate-300">
+          <ul className="space-y-1 text-sm text-slate-700">
             {data.hardest.map((c: any) => (
               <li key={c.slug}>
                 D{c.difficulty} · {c.title}{" "}

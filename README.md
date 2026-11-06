@@ -16,7 +16,7 @@ The seed loads the **full challenge library as published 60-minute assessments**
 | **Interview Craft** | `/learn/interview` | Loop mechanics, live-coding framework, DSA patterns, system design, behavioral STAR |
 | **AI Craft** | `/learn/ai` | Prompting, APIs, tools, RAG, agents, evals, safety |
 | **Study plans** | `/study-plans` | Gamified campaigns: chapter maps, node XP, pack clear bonus (+200), quests & medals |
-| **Company mocks** | `/interview` | Timed evidence sessions |
+| **Company mocks** | `/interview` | Phone / coding / onsite rounds, briefings, 1 free mock then Premium |
 | **Roadmap** | `/roadmap` | Skill tree + next problems |
 
 ## Tracks

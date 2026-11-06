@@ -1,14 +1,21 @@
 "use client";
 
 import Link from "next/link";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { COMPANIES } from "@/lib/saas";
+import { cn } from "@/lib/utils";
+import {
+  FREE_MOCK_LIMIT,
+  INTERVIEW_COMPANIES,
+  INTERVIEW_ROLES,
+  INTERVIEW_ROUNDS,
+  ROUND_BRIEFING,
+  type InterviewRoundKind,
+} from "@/server/saas/interview-rounds";
 
 type Sim = {
   id: string;
@@ -16,19 +23,33 @@ type Sim = {
   role: string;
   status: string;
   timedMinutes: number;
+  roundKind?: string | null;
   createdAt: string;
   challenge: { title: string; slug: string; difficulty: number };
+  workspaceId?: string | null;
 };
 
-export function InterviewClient(props: { premium: boolean; sims: Sim[] }) {
+export function InterviewClient(props: {
+  premium: boolean;
+  sims: Sim[];
+  freeRemaining: number;
+}) {
   const router = useRouter();
-  const [company, setCompany] = useState("Google");
-  const [role, setRole] = useState("Software Engineer");
+  const [company, setCompany] = useState<string>(INTERVIEW_COMPANIES[0] ?? "Google");
+  const [role, setRole] = useState<string>(INTERVIEW_ROLES[0]);
+  const [roundId, setRoundId] = useState<InterviewRoundKind>("coding");
   const [busy, setBusy] = useState(false);
 
+  const round = useMemo(() => INTERVIEW_ROUNDS.find((r) => r.id === roundId) ?? INTERVIEW_ROUNDS[1]!, [roundId]);
+  const briefing = ROUND_BRIEFING[round.id];
+
+  const companiesTried = useMemo(() => new Set(props.sims.map((s) => s.company)).size, [props.sims]);
+  const inProgress = props.sims.filter((s) => s.status === "IN_PROGRESS").length;
+  const canStart = props.premium || props.freeRemaining > 0;
+
   async function start() {
-    if (!props.premium) {
-      toast.error("Interview Simulations require Premium");
+    if (!canStart) {
+      toast.error("Free mock used — upgrade for unlimited company rounds");
       router.push("/pricing");
       return;
     }
@@ -37,11 +58,11 @@ export function InterviewClient(props: { premium: boolean; sims: Sim[] }) {
       const res = await fetch("/api/interview", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ company, role }),
+        body: JSON.stringify({ company, role, roundKind: round.id }),
       });
       const json = await res.json();
       if (!json.ok) throw new Error(json.error?.message || "Could not start");
-      toast.success(`${company} simulation ready — ${json.data.timedMinutes}m`);
+      toast.success(`${company} ${round.title} ready · ${json.data.timedMinutes}m · +${round.xp} XP on clear`);
       if (json.data.workspaceId) {
         router.push(`/workspace/${json.data.workspaceId}`);
       } else {
@@ -55,81 +76,215 @@ export function InterviewClient(props: { premium: boolean; sims: Sim[] }) {
   }
 
   return (
-    <div className="animate-rise space-y-6">
-      <header className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">PROVE THE CRAFT</p>
-          <h1 className="mt-2 font-serif-display text-2xl sm:text-3xl">Timed company sessions</h1>
-          <p className="mt-2 max-w-2xl text-slate-400">
-            Pick a company, open a timed evidence workspace, and run the public + hidden judge — Lightning priority on
-            Premium.
-          </p>
+    <div className="animate-rise space-y-8">
+      <header className="overflow-hidden rounded-2xl border border-teal-300/50 bg-gradient-to-br from-teal-500/[0.12] via-white/90 to-emerald-50/80 p-5 sm:p-7">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="font-mono text-xs tracking-[0.3em] text-teal-700">MOCK INTERVIEWS</p>
+            <h1 className="mt-2 font-serif-display text-2xl text-slate-900 sm:text-3xl">
+              Company rounds. Real clock. Same judge.
+            </h1>
+            <p className="mt-2 max-w-2xl text-slate-600">
+              Pick a company and round length, get a briefing, then open a timed evidence workspace — public + hidden
+              harnesses, just like the loop.
+            </p>
+          </div>
+          {!props.premium && (
+            <div className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+              {props.freeRemaining > 0 ? (
+                <>
+                  <strong>{props.freeRemaining}</strong> free mock left · then Premium for unlimited
+                </>
+              ) : (
+                <>
+                  Free mock used.{" "}
+                  <Link href="/pricing" className="font-medium text-teal-800 underline">
+                    Unlock unlimited
+                  </Link>
+                </>
+              )}
+            </div>
+          )}
         </div>
-        {!props.premium && (
-          <Link href="/pricing" className="w-full sm:w-auto">
-            <Button className="w-full sm:w-auto">Unlock with Premium</Button>
-          </Link>
-        )}
+
+        <div className="mt-5 grid gap-3 sm:grid-cols-3">
+          {[
+            { label: "Mocks run", value: String(props.sims.length) },
+            { label: "In progress", value: String(inProgress) },
+            { label: "Companies tried", value: String(companiesTried) },
+          ].map((s) => (
+            <div key={s.label} className="rounded-xl border border-teal-200/70 bg-white/80 px-3 py-3">
+              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">{s.label}</p>
+              <p className="mt-1 font-serif-display text-2xl text-slate-900">{s.value}</p>
+            </div>
+          ))}
+        </div>
       </header>
 
-      <Card className={props.premium ? "border-cyan-500/25" : "border-slate-800"}>
-        <CardHeader>
-          <CardTitle>Start a mock loop</CardTitle>
-          <CardDescription>
-            {props.premium
-              ? "Premium: company packs + timed workspace provisioned instantly."
-              : "Preview the flow — upgrade to launch a live simulation."}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 scrollbar-none">
-            {COMPANIES.map((c) => (
-              <button
-                key={c}
-                type="button"
-                onClick={() => setCompany(c)}
-                className={`shrink-0 rounded-md border px-3 py-2 text-xs ${
-                  company === c
-                    ? "border-cyan-400/40 bg-cyan-500/10 text-cyan-100"
-                    : "border-slate-800 text-slate-400 hover:bg-slate-900"
-                }`}
-              >
-                {c}
-              </button>
-            ))}
+      <section className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+        <div className="space-y-5 rounded-2xl border border-slate-200 bg-white/80 p-5 sm:p-6">
+          <div>
+            <h2 className="font-serif-display text-xl text-slate-900">Build your round</h2>
+            <p className="mt-1 text-sm text-slate-600">Company · role · format. Then open the workspace.</p>
           </div>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <Input value={company} onChange={(e) => setCompany(e.target.value)} placeholder="Company" />
-            <Input value={role} onChange={(e) => setRole(e.target.value)} placeholder="Role" />
+
+          <div>
+            <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">Round format</p>
+            <div className="grid gap-2 sm:grid-cols-3">
+              {INTERVIEW_ROUNDS.map((r) => (
+                <button
+                  key={r.id}
+                  type="button"
+                  onClick={() => setRoundId(r.id)}
+                  className={cn(
+                    "rounded-xl border px-3 py-3 text-left transition",
+                    roundId === r.id
+                      ? "border-teal-400 bg-teal-50 shadow-sm"
+                      : "border-slate-200 bg-white hover:border-teal-300",
+                  )}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-sm font-medium text-slate-900">{r.title}</span>
+                    <Badge variant="amber">{r.minutes}m</Badge>
+                  </div>
+                  <p className="mt-1 text-xs text-slate-600">{r.blurb}</p>
+                  <p className="mt-2 font-mono text-[10px] text-teal-700">+{r.xp} XP on clear</p>
+                </button>
+              ))}
+            </div>
           </div>
-          <Button className="w-full sm:w-auto" disabled={busy} onClick={start}>
-            {busy ? "Provisioning…" : `Start ${company} simulation`}
-          </Button>
-        </CardContent>
-      </Card>
+
+          <div>
+            <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">Company</p>
+            <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 scrollbar-none">
+              {INTERVIEW_COMPANIES.map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => setCompany(c)}
+                  className={cn(
+                    "shrink-0 rounded-md border px-3 py-2 text-xs transition",
+                    company === c
+                      ? "border-teal-400 bg-teal-50 text-teal-900"
+                      : "border-slate-200 text-slate-600 hover:bg-slate-50",
+                  )}
+                >
+                  {c}
+                </button>
+              ))}
+            </div>
+            <Input className="mt-2" value={company} onChange={(e) => setCompany(e.target.value)} placeholder="Company" />
+          </div>
+
+          <div>
+            <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">Role</p>
+            <div className="flex flex-wrap gap-1.5">
+              {INTERVIEW_ROLES.map((r) => (
+                <button
+                  key={r}
+                  type="button"
+                  onClick={() => setRole(r)}
+                  className={cn(
+                    "rounded-md border px-2.5 py-1.5 text-xs transition",
+                    role === r
+                      ? "border-teal-400 bg-teal-50 text-teal-900"
+                      : "border-slate-200 text-slate-600 hover:bg-slate-50",
+                  )}
+                >
+                  {r}
+                </button>
+              ))}
+            </div>
+            <Input className="mt-2" value={role} onChange={(e) => setRole(e.target.value)} placeholder="Role" />
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            <Button disabled={busy || !canStart} onClick={() => void start()}>
+              {busy ? "Provisioning…" : `Start ${company} · ${round.title}`}
+            </Button>
+            <Link href="/learn/interview">
+              <Button variant="secondary">Interview Craft lessons</Button>
+            </Link>
+            {!props.premium && !canStart && (
+              <Link href="/pricing">
+                <Button variant="outline">Go Premium</Button>
+              </Link>
+            )}
+          </div>
+        </div>
+
+        <aside className="space-y-4">
+          <div className="rounded-2xl border border-teal-200 bg-teal-50/70 p-5">
+            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-teal-700">{briefing.title}</p>
+            <h3 className="mt-2 font-serif-display text-lg text-slate-900">
+              {company} · {round.title}
+            </h3>
+            <ol className="mt-3 list-decimal space-y-2 pl-4 text-sm text-slate-700">
+              {briefing.steps.map((step) => (
+                <li key={step}>{step}</li>
+              ))}
+            </ol>
+            <p className="mt-4 font-mono text-[11px] text-slate-500">
+              Clock: {round.minutes} minutes · Difficulty bias: {round.difficultyBias}
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-slate-200 bg-white/80 p-5">
+            <h3 className="font-serif-display text-lg text-slate-900">Before you start</h3>
+            <ul className="mt-3 space-y-2 text-sm text-slate-600">
+              <li>Quiet room, one screen, timer visible.</li>
+              <li>Talk through constraints before the first keystroke.</li>
+              <li>Public tests first — hidden harness after green.</li>
+              <li>
+                Prep with{" "}
+                <Link href="/study-plans" className="text-teal-700 hover:underline">
+                  study campaigns
+                </Link>{" "}
+                if the company has a pack.
+              </li>
+            </ul>
+          </div>
+        </aside>
+      </section>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-semibold">Recent simulations</h2>
+        <div className="flex flex-wrap items-end justify-between gap-2">
+          <h2 className="font-serif-display text-xl text-slate-900">Recent simulations</h2>
+          <p className="font-mono text-[11px] text-slate-500">{props.sims.length} total</p>
+        </div>
         <div className="grid gap-3 md:grid-cols-2">
           {props.sims.map((s) => (
-            <Card key={s.id}>
-              <CardHeader>
-                <div className="flex flex-wrap gap-2">
-                  <Badge variant="cyan">{s.company}</Badge>
-                  <Badge>{s.status}</Badge>
-                  <Badge variant="amber">{s.timedMinutes}m</Badge>
-                </div>
-                <CardTitle className="text-base">{s.challenge.title}</CardTitle>
-                <CardDescription>
-                  {s.role} · {new Date(s.createdAt).toLocaleString()}
-                </CardDescription>
-              </CardHeader>
-            </Card>
+            <article key={s.id} className="rounded-2xl border border-slate-200 bg-white/80 p-4">
+              <div className="flex flex-wrap gap-2">
+                <Badge variant="cyan">{s.company}</Badge>
+                <Badge variant={s.status === "IN_PROGRESS" ? "amber" : s.status === "COMPLETED" ? "emerald" : "default"}>
+                  {s.status.replaceAll("_", " ")}
+                </Badge>
+                <Badge variant="amber">{s.timedMinutes}m</Badge>
+                {s.roundKind && <Badge>{s.roundKind}</Badge>}
+              </div>
+              <h3 className="mt-3 font-medium text-slate-900">{s.challenge.title}</h3>
+              <p className="mt-1 text-sm text-slate-600">
+                {s.role} · {new Date(s.createdAt).toLocaleString()}
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {s.workspaceId && s.status === "IN_PROGRESS" && (
+                  <Link href={`/workspace/${s.workspaceId}`}>
+                    <Button size="sm">Resume workspace</Button>
+                  </Link>
+                )}
+                <Link href={`/challenges?q=${encodeURIComponent(s.challenge.slug)}`}>
+                  <Button size="sm" variant="secondary">
+                    View problem
+                  </Button>
+                </Link>
+              </div>
+            </article>
           ))}
           {!props.sims.length && (
-            <Card className="md:col-span-2">
-              <CardContent className="py-10 text-center text-slate-500">No simulations yet.</CardContent>
-            </Card>
+            <div className="rounded-2xl border border-dashed border-slate-300 bg-white/60 px-4 py-12 text-center text-sm text-slate-500 md:col-span-2">
+              No simulations yet — start a company round above.
+            </div>
           )}
         </div>
       </section>

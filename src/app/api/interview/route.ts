@@ -4,6 +4,11 @@ import { AppError } from "@/lib/errors";
 import { jsonOk, withHandler } from "@/server/auth/api";
 import { isPremium, requireUser } from "@/server/auth/session";
 import { createWorkspaceForAssignment } from "@/server/execution/workspace";
+import {
+  FREE_MOCK_LIMIT,
+  getInterviewRound,
+  type InterviewRoundKind,
+} from "@/server/saas/interview-rounds";
 
 export async function GET() {
   return withHandler(async () => {
@@ -14,7 +19,14 @@ export async function GET() {
       orderBy: { createdAt: "desc" },
       take: 40,
     });
-    return jsonOk({ sims, premium: isPremium(user) });
+    const totalUsed = await prisma.interviewSimulation.count({ where: { userId: user.id } });
+    const premium = isPremium(user);
+    return jsonOk({
+      sims,
+      premium,
+      freeRemaining: premium ? 999 : Math.max(0, FREE_MOCK_LIMIT - totalUsed),
+      freeLimit: FREE_MOCK_LIMIT,
+    });
   });
 }
 
@@ -22,15 +34,31 @@ const startSchema = z.object({
   company: z.string().min(2),
   role: z.string().min(2).default("Software Engineer"),
   challengeId: z.string().optional(),
+  roundKind: z.enum(["phone", "coding", "onsite"]).default("coding"),
 });
+
+function difficultyFilter(bias: "easy" | "mixed" | "hard") {
+  if (bias === "easy") return { lte: 4 };
+  if (bias === "hard") return { gte: 6 };
+  return { gte: 3, lte: 8 };
+}
 
 export async function POST(req: Request) {
   return withHandler(async () => {
     const user = await requireUser();
-    if (!isPremium(user)) {
-      throw new AppError("Interview Simulations are a Premium feature. Upgrade to unlock.", 402, "PREMIUM_REQUIRED");
+    const premium = isPremium(user);
+    const totalUsed = await prisma.interviewSimulation.count({ where: { userId: user.id } });
+    if (!premium && totalUsed >= FREE_MOCK_LIMIT) {
+      throw new AppError(
+        "Free mock interview used. Upgrade to Premium for unlimited company rounds.",
+        402,
+        "PREMIUM_REQUIRED",
+      );
     }
+
     const body = startSchema.parse(await req.json());
+    const round = getInterviewRound(body.roundKind);
+    const diff = difficultyFilter(round.difficultyBias);
 
     let challenge = body.challengeId
       ? await prisma.challenge.findUnique({ where: { id: body.challengeId } })
@@ -42,13 +70,33 @@ export async function POST(req: Request) {
           isPublished: true,
           type: "CODING_PROBLEM",
           companies: { has: body.company },
+          difficulty: diff,
         },
         orderBy: { frequency: "desc" },
         take: 20,
       });
-      challenge = pool[Math.floor(Math.random() * Math.max(pool.length, 1))] ?? null;
+      if (!pool.length) {
+        const fallbackPool = await prisma.challenge.findMany({
+          where: {
+            isPublished: true,
+            type: "CODING_PROBLEM",
+            companies: { has: body.company },
+          },
+          orderBy: { frequency: "desc" },
+          take: 20,
+        });
+        challenge = fallbackPool[Math.floor(Math.random() * Math.max(fallbackPool.length, 1))] ?? null;
+      } else {
+        challenge = pool[Math.floor(Math.random() * pool.length)] ?? null;
+      }
     }
 
+    if (!challenge) {
+      challenge = await prisma.challenge.findFirst({
+        where: { isPublished: true, type: "CODING_PROBLEM", difficulty: diff },
+        orderBy: { frequency: "desc" },
+      });
+    }
     if (!challenge) {
       challenge = await prisma.challenge.findFirst({
         where: { isPublished: true, type: "CODING_PROBLEM" },
@@ -57,7 +105,7 @@ export async function POST(req: Request) {
     }
     if (!challenge) throw new AppError("No coding challenges available", 404, "NOT_FOUND");
 
-    const timedMinutes = challenge.avgMinutes || 45;
+    const timedMinutes = round.minutes || challenge.avgMinutes || 45;
     const sim = await prisma.interviewSimulation.create({
       data: {
         userId: user.id,
@@ -71,15 +119,14 @@ export async function POST(req: Request) {
       include: { challenge: true },
     });
 
-    // Ensure a published assessment + assignment + workspace for the candidate
     let assessment = await prisma.assessment.findFirst({
       where: { challengeId: challenge.id, status: "PUBLISHED" },
     });
     if (!assessment) {
       assessment = await prisma.assessment.create({
         data: {
-          title: `${body.company} Interview — ${challenge.title}`,
-          description: `Timed interview simulation for ${body.role}`,
+          title: `${body.company} ${round.title} — ${challenge.title}`,
+          description: `Timed ${round.title} simulation for ${body.role}`,
           challengeId: challenge.id,
           track: challenge.track,
           status: "PUBLISHED",
@@ -135,6 +182,8 @@ export async function POST(req: Request) {
         simulation: sim,
         workspaceId: assignment.workspace?.id,
         timedMinutes,
+        roundKind: round.id as InterviewRoundKind,
+        xp: round.xp,
       },
       { status: 201 },
     );

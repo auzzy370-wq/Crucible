@@ -158,9 +158,9 @@ export function StudyPlansClient(props: { plans: Plan[]; hud: Hud; premium: bool
       <header className="space-y-4">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">STUDY · CAMPAIGNS</p>
+            <p className="font-mono text-xs tracking-[0.3em] text-teal-700">STUDY · CAMPAIGNS</p>
             <h1 className="mt-2 font-serif-display text-2xl sm:text-3xl">Clear packs. Bank XP. Ship ready.</h1>
-            <p className="mt-2 max-w-2xl text-slate-400">
+            <p className="mt-2 max-w-2xl text-slate-600">
               Company and role campaigns broken into chapters. Each node pays XP; finishing a pack pays a clear bonus.
             </p>
           </div>
@@ -171,14 +171,14 @@ export function StudyPlansClient(props: { plans: Plan[]; hud: Hud; premium: bool
           )}
         </div>
 
-        <section className="overflow-hidden rounded-2xl border border-cyan-400/20 bg-gradient-to-br from-cyan-500/[0.07] via-slate-950/80 to-slate-950 p-5 sm:p-6">
+        <section className="overflow-hidden rounded-2xl border border-teal-300/60 bg-gradient-to-br from-teal-500/[0.09] via-white/80 to-white p-5 sm:p-6">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
-              <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-cyan-300/80">Campaign XP</p>
-              <p className="mt-1 font-serif-display text-3xl text-slate-50 sm:text-4xl">
+              <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-teal-700/80">Campaign XP</p>
+              <p className="mt-1 font-serif-display text-3xl text-slate-900 sm:text-4xl">
                 {props.hud.totalEarnedXp.toLocaleString()}
               </p>
-              <p className="mt-1 font-mono text-sm text-slate-400">
+              <p className="mt-1 font-mono text-sm text-slate-600">
                 {props.hud.enrolledCount} enlisted · {props.hud.completedPlans} packs cleared
               </p>
             </div>
@@ -190,11 +190,11 @@ export function StudyPlansClient(props: { plans: Plan[]; hud: Hud; premium: bool
             </div>
           </div>
 
-          <div className="mt-5 rounded-xl border border-slate-800/80 bg-slate-950/50 p-4">
+          <div className="mt-5 rounded-xl border border-slate-200/80 bg-white/70 p-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
                 <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-slate-500">Active quest</p>
-                <h2 className="mt-1 text-lg font-medium text-slate-100">{props.hud.quest.title}</h2>
+                <h2 className="mt-1 text-lg font-medium text-slate-900">{props.hud.quest.title}</h2>
                 <p className="mt-1 text-sm text-slate-500">{props.hud.quest.detail}</p>
               </div>
               <Badge variant="amber">+{props.hud.quest.xp} XP</Badge>
@@ -240,9 +240,9 @@ export function StudyPlansClient(props: { plans: Plan[]; hud: Hud; premium: bool
                     {active.earnedXp}/{active.totalXp} XP
                   </span>
                 </div>
-                <div className="h-2.5 overflow-hidden rounded-full bg-slate-900">
+                <div className="h-2.5 overflow-hidden rounded-full bg-slate-100">
                   <div
-                    className="h-full rounded-full bg-cyan-400 transition-[width] duration-700"
+                    className="h-full rounded-full bg-teal-500 transition-[width] duration-700"
                     style={{ width: `${active.percent}%` }}
                   />
                 </div>
@@ -253,18 +253,18 @@ export function StudyPlansClient(props: { plans: Plan[]; hud: Hud; premium: bool
       </header>
 
       <section>
-        <h2 className="font-serif-display text-xl text-slate-100">Campaign medals</h2>
+        <h2 className="font-serif-display text-xl text-slate-900">Campaign medals</h2>
         <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
           {props.hud.medals.map((m) => (
             <div
               key={m.id}
               className={cn(
                 "rounded-xl border px-3 py-3",
-                m.unlocked ? "border-amber-500/25 bg-amber-500/[0.06]" : "border-slate-800/80 opacity-50",
+                m.unlocked ? "border-amber-500/25 bg-amber-500/[0.06]" : "border-slate-200/80 opacity-50",
               )}
             >
               <div className="flex items-center justify-between gap-2">
-                <h3 className="text-sm font-medium text-slate-100">{m.title}</h3>
+                <h3 className="text-sm font-medium text-slate-900">{m.title}</h3>
                 <span className="font-mono text-[10px] uppercase text-slate-500">
                   {m.unlocked ? "Unlocked" : "Locked"}
                 </span>
@@ -278,7 +278,7 @@ export function StudyPlansClient(props: { plans: Plan[]; hud: Hud; premium: bool
       <section id="catalog" className="space-y-4">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h2 className="font-serif-display text-xl text-slate-100">Campaign catalog</h2>
+            <h2 className="font-serif-display text-xl text-slate-900">Campaign catalog</h2>
             <p className="mt-1 text-sm text-slate-500">Enlist, clear chapters, collect the pack bonus.</p>
           </div>
           <div className="flex flex-wrap gap-1.5">
@@ -297,8 +297,8 @@ export function StudyPlansClient(props: { plans: Plan[]; hud: Hud; premium: bool
                 className={cn(
                   "rounded-md border px-3 py-1.5 text-xs transition",
                   filter === id
-                    ? "border-cyan-400/40 bg-cyan-500/10 text-cyan-100"
-                    : "border-slate-800 text-slate-400 hover:text-slate-200",
+                    ? "border-teal-400/50 bg-teal-500/10 text-teal-900"
+                    : "border-slate-200 text-slate-600 hover:text-slate-800",
                 )}
               >
                 {label}
@@ -320,8 +320,8 @@ export function StudyPlansClient(props: { plans: Plan[]; hud: Hud; premium: bool
                   plan.campaignComplete
                     ? "border-emerald-500/30 bg-emerald-500/[0.04]"
                     : plan.premium
-                      ? "border-amber-500/25 bg-slate-950/70"
-                      : "border-slate-800 bg-slate-950/60",
+                      ? "border-amber-500/25 bg-white/80"
+                      : "border-slate-200 bg-white/75",
                 )}
               >
                 <div className="flex flex-wrap gap-2">
@@ -336,8 +336,8 @@ export function StudyPlansClient(props: { plans: Plan[]; hud: Hud; premium: bool
                   {plan.premium && <Badge variant="amber">Premium</Badge>}
                   {plan.campaignComplete && <Badge variant="emerald">Cleared</Badge>}
                 </div>
-                <h3 className="mt-3 font-serif-display text-xl text-slate-100">{plan.title}</h3>
-                <p className="mt-1 text-sm text-slate-400">{plan.subtitle}</p>
+                <h3 className="mt-3 font-serif-display text-xl text-slate-900">{plan.title}</h3>
+                <p className="mt-1 text-sm text-slate-600">{plan.subtitle}</p>
 
                 <div className="mt-4">
                   <div className="mb-1 flex justify-between font-mono text-[11px] text-slate-500">
@@ -349,11 +349,11 @@ export function StudyPlansClient(props: { plans: Plan[]; hud: Hud; premium: bool
                       {plan.earnedXp}/{plan.totalXp} XP
                     </span>
                   </div>
-                  <div className="h-2 overflow-hidden rounded-full bg-slate-900">
+                  <div className="h-2 overflow-hidden rounded-full bg-slate-100">
                     <div
                       className={cn(
                         "h-full rounded-full transition-[width] duration-700",
-                        plan.campaignComplete ? "bg-emerald-400" : "bg-cyan-400",
+                        plan.campaignComplete ? "bg-emerald-400" : "bg-teal-500",
                       )}
                       style={{ width: `${plan.percent}%` }}
                     />
@@ -368,8 +368,8 @@ export function StudyPlansClient(props: { plans: Plan[]; hud: Hud; premium: bool
                         className={cn(
                           "rounded border px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider",
                           ch.cleared
-                            ? "border-emerald-500/40 text-emerald-200"
-                            : "border-slate-700 text-slate-500",
+                            ? "border-emerald-500/40 text-emerald-800"
+                            : "border-slate-300 text-slate-500",
                         )}
                       >
                         {ch.title} {ch.done}/{ch.total}
@@ -430,12 +430,12 @@ export function StudyPlansClient(props: { plans: Plan[]; hud: Hud; premium: bool
                               item.done
                                 ? "border-emerald-500/25 bg-emerald-500/[0.04]"
                                 : item.slug === plan.nextItemSlug
-                                  ? "border-cyan-500/35 bg-cyan-500/[0.05]"
-                                  : "border-slate-800",
+                                  ? "border-teal-400/50 bg-teal-500/[0.05]"
+                                  : "border-slate-200",
                             )}
                           >
                             <div className="min-w-0">
-                              <div className="truncate font-medium text-slate-100">
+                              <div className="truncate font-medium text-slate-900">
                                 {idx + 1}. {item.title}
                               </div>
                               <div className="font-mono text-[11px] text-slate-500">
@@ -449,15 +449,15 @@ export function StudyPlansClient(props: { plans: Plan[]; hud: Hud; premium: bool
                                 className={cn(
                                   "rounded-md border px-2 py-1 text-xs",
                                   item.done
-                                    ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-200"
-                                    : "border-slate-700 text-slate-400",
+                                    ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-800"
+                                    : "border-slate-300 text-slate-600",
                                 )}
                                 disabled={busy === `${plan.slug}:${item.slug}`}
                                 onClick={() => void toggle(plan.slug, item.slug, item.done)}
                               >
                                 {item.done ? "Done" : "Clear"}
                               </button>
-                              <Link href={item.href ?? "/challenges"} className="text-xs text-cyan-300 hover:underline">
+                              <Link href={item.href ?? "/challenges"} className="text-xs text-teal-700 hover:underline">
                                 Open
                               </Link>
                             </div>
@@ -466,7 +466,7 @@ export function StudyPlansClient(props: { plans: Plan[]; hud: Hud; premium: bool
                       );
                     })}
                     {!plan.campaignComplete && (
-                      <li className="rounded-lg border border-dashed border-amber-500/30 px-3 py-2 font-mono text-[11px] text-amber-100/80">
+                      <li className="rounded-lg border border-dashed border-amber-500/30 px-3 py-2 font-mono text-[11px] text-amber-900/80">
                         Pack clear bonus · +{plan.clearBonusXp} XP when every node is done
                       </li>
                     )}

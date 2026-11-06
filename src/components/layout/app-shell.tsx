@@ -56,10 +56,10 @@ const NAV_GROUPS: NavGroup[] = [
       { href: "/study-plans", label: "Study plans", icon: Route, hint: "Follow a path" },
       { href: "/daily", label: "Today’s challenge", icon: CalendarDays, hint: "One timed problem" },
       { href: "/challenges", label: "Problem bank", icon: Boxes, hint: "Browse all problems" },
-      { href: "/interview", label: "Mock interviews", icon: Timer, hint: "Timed company-style rounds" },
+      { href: "/interview", label: "Mock interviews", icon: Timer, hint: "Company rounds + briefing" },
       { href: "/tournaments", label: "Tournaments", icon: Trophy, hint: "Live contests" },
       { href: "/leaderboards", label: "Leaderboards", icon: BarChart3, hint: "Who’s ahead" },
-      { href: "/candidates", label: "My profile", icon: UserRound, hint: "Skills you’ve proven" },
+      { href: "/candidates", label: "My profile", icon: UserRound, hint: "Craft dossier & evidence" },
       { href: "/settings", label: "Settings", icon: Settings, hint: "Account & security" },
     ],
   },
@@ -141,7 +141,7 @@ function NavLinks({
                   onClick={onNavigate}
                   className={cn(
                     "flex min-h-11 items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors",
-                    active ? "bg-cyan-500/10 text-cyan-200" : "text-slate-400 hover:bg-slate-900 hover:text-slate-100",
+                    active ? "bg-teal-500/10 text-teal-800" : "text-slate-600 hover:bg-slate-100 hover:text-slate-900",
                   )}
                 >
                   <Icon className="h-4 w-4 shrink-0" />
@@ -151,7 +151,7 @@ function NavLinks({
                       <span
                         className={cn(
                           "block text-[11px] leading-tight",
-                          active ? "text-cyan-200/60" : "text-slate-600",
+                          active ? "text-teal-800/60" : "text-slate-600",
                         )}
                       >
                         {item.hint}
@@ -202,21 +202,21 @@ export function AppShell({
 
   const brand = (
     <div className="flex items-center gap-3">
-      <div className="pulse-live flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-cyan-400/40 bg-cyan-400/10 font-mono text-sm font-bold text-cyan-300">
+      <div className="pulse-live flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-teal-400/50 bg-teal-500/10 font-mono text-sm font-bold text-teal-700">
         CR
       </div>
       <div className="min-w-0">
-        <div className="truncate text-sm font-semibold tracking-[0.22em] text-slate-100">CRUCIBLE</div>
-        <div className="truncate text-[10px] font-medium tracking-[0.18em] text-cyan-300/90">PROVE THE CRAFT</div>
+        <div className="truncate text-sm font-semibold tracking-[0.22em] text-slate-900">CRUCIBLE</div>
+        <div className="truncate text-[10px] font-medium tracking-[0.18em] text-teal-700">PROVE THE CRAFT</div>
       </div>
     </div>
   );
 
   const userBlock = (
-    <div className="border-t border-slate-800/80 p-4">
+    <div className="border-t border-slate-200/80 p-4">
       <div className="mb-3 min-w-0">
         <div className="flex items-center gap-2">
-          <div className="truncate text-sm font-medium text-slate-100">{user.name}</div>
+          <div className="truncate text-sm font-medium text-slate-900">{user.name}</div>
           {user.plan === "PREMIUM" && <Badge variant="amber">Premium</Badge>}
         </div>
         <div className="truncate font-mono text-xs text-slate-500">
@@ -224,7 +224,7 @@ export function AppShell({
         </div>
       </div>
       {user.plan !== "PREMIUM" && !isStaff && (
-        <Link href="/pricing" className="mb-2 block text-center text-xs text-amber-200 hover:underline">
+        <Link href="/pricing" className="mb-2 block text-center text-xs text-amber-800 hover:underline">
           Upgrade to Premium →
         </Link>
       )}
@@ -269,7 +269,7 @@ export function AppShell({
 
   return (
     <div className="min-h-screen lg:grid lg:grid-cols-[272px_1fr]">
-      <header className="sticky top-0 z-40 flex items-center justify-between gap-3 border-b border-slate-800/80 bg-slate-950/95 px-3 py-3 backdrop-blur sm:px-4 lg:hidden safe-top">
+      <header className="sticky top-0 z-40 flex items-center justify-between gap-3 border-b border-slate-200/80 bg-white/95 px-3 py-3 backdrop-blur sm:px-4 lg:hidden safe-top">
         <Link href="/dashboard" className="min-w-0">
           {brand}
         </Link>
@@ -296,13 +296,13 @@ export function AppShell({
       >
         <button
           type="button"
-          className={cn("absolute inset-0 bg-black/60 transition-opacity", open ? "opacity-100" : "opacity-0")}
+          className={cn("absolute inset-0 bg-slate-900/25 transition-opacity", open ? "opacity-100" : "opacity-0")}
           aria-label="Close menu overlay"
           onClick={() => setOpen(false)}
         />
         <aside
           className={cn(
-            "absolute inset-y-0 left-0 flex w-[min(100%,20rem)] max-w-full flex-col border-r border-slate-800 bg-slate-950 shadow-2xl transition-transform duration-200 ease-out safe-top safe-bottom",
+            "absolute inset-y-0 left-0 flex w-[min(100%,20rem)] max-w-full flex-col border-r border-slate-200 bg-white shadow-xl transition-transform duration-200 ease-out safe-top safe-bottom",
             open ? "translate-x-0" : "-translate-x-full",
           )}
         >
@@ -316,7 +316,7 @@ export function AppShell({
             <Badge variant="cyan" className="mb-2">
               {journeyCopy.badge}
             </Badge>
-            <p className="text-xs leading-relaxed text-slate-400">{journeyCopy.body}</p>
+            <p className="text-xs leading-relaxed text-slate-600">{journeyCopy.body}</p>
           </div>
           <div className="flex-1 overflow-y-auto overscroll-contain">
             <NavLinks pathname={pathname} role={user.role} onNavigate={() => setOpen(false)} />
@@ -325,13 +325,13 @@ export function AppShell({
         </aside>
       </div>
 
-      <aside className="hidden border-r border-slate-800/80 bg-slate-950/80 backdrop-blur lg:flex lg:flex-col">
+      <aside className="hidden border-r border-slate-200/80 bg-white/85 backdrop-blur lg:flex lg:flex-col">
         <div className="px-5 py-5">{brand}</div>
         <div className="px-5 pb-4">
           <Badge variant="cyan" className="mb-2">
             {journeyCopy.badge}
           </Badge>
-          <p className="text-xs leading-relaxed text-slate-400">{journeyCopy.body}</p>
+          <p className="text-xs leading-relaxed text-slate-600">{journeyCopy.body}</p>
         </div>
         <div className="flex-1 overflow-y-auto">
           <NavLinks pathname={pathname} role={user.role} />
@@ -353,7 +353,7 @@ export function AppShell({
 
       {!inCodingSession && (
         <nav
-          className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-800/90 bg-slate-950/95 backdrop-blur lg:hidden safe-bottom"
+          className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 backdrop-blur lg:hidden safe-bottom"
           aria-label="Primary"
         >
           <div className="mx-auto grid max-w-lg grid-cols-5 gap-0.5 px-1 py-1.5">
@@ -366,7 +366,7 @@ export function AppShell({
                   href={tab.href}
                   className={cn(
                     "flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-lg px-1 text-[10px] font-medium",
-                    active ? "bg-cyan-500/10 text-cyan-200" : "text-slate-500 hover:text-slate-200",
+                    active ? "bg-teal-500/10 text-teal-800" : "text-slate-500 hover:text-slate-800",
                   )}
                 >
                   <Icon className="h-4 w-4" />
@@ -377,7 +377,7 @@ export function AppShell({
             <button
               type="button"
               onClick={() => setOpen(true)}
-              className="flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-lg px-1 text-[10px] font-medium text-slate-500 hover:text-slate-200"
+              className="flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-lg px-1 text-[10px] font-medium text-slate-500 hover:text-slate-800"
             >
               <Menu className="h-4 w-4" />
               More

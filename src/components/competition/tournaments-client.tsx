@@ -43,9 +43,9 @@ export function TournamentsClient() {
   return (
     <div className="animate-rise space-y-6">
       <header>
-        <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">TOURNAMENT CENTER</p>
+        <p className="font-mono text-xs tracking-[0.3em] text-teal-700">TOURNAMENT CENTER</p>
         <h1 className="mt-2 font-serif-display text-2xl sm:text-3xl">Tournaments</h1>
-        <p className="mt-2 max-w-2xl text-slate-400">
+        <p className="mt-2 max-w-2xl text-slate-600">
           Scheduled and live heats across human, AI, hybrid, and team modes. Standings update from verified
           submissions — not fabricated scores.
         </p>
@@ -55,10 +55,10 @@ export function TournamentsClient() {
         <Button variant="secondary" size="sm" onClick={() => void load()}>
           Refresh
         </Button>
-        <Link href="/contest" className="inline-flex items-center text-sm text-cyan-300 hover:underline">
+        <Link href="/contest" className="inline-flex items-center text-sm text-teal-700 hover:underline">
           Weekly heat →
         </Link>
-        <Link href="/leaderboards" className="inline-flex items-center text-sm text-cyan-300 hover:underline">
+        <Link href="/leaderboards" className="inline-flex items-center text-sm text-teal-700 hover:underline">
           Leaderboards →
         </Link>
       </div>
@@ -68,11 +68,11 @@ export function TournamentsClient() {
       ) : (
         <div className="space-y-4">
           {tournaments.map((t) => (
-            <article key={t.id} className="rounded-xl border border-slate-800 px-4 py-4">
+            <article key={t.id} className="rounded-xl border border-slate-200 px-4 py-4">
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div>
-                  <h2 className="font-medium text-slate-100">{t.title}</h2>
-                  <p className="mt-1 text-sm text-slate-400">{t.description}</p>
+                  <h2 className="font-medium text-slate-900">{t.title}</h2>
+                  <p className="mt-1 text-sm text-slate-600">{t.description}</p>
                 </div>
                 <div className="flex flex-wrap gap-1">
                   <Badge variant={t.status === "LIVE" ? "emerald" : t.status === "SCHEDULED" ? "cyan" : "default"}>
@@ -87,21 +87,21 @@ export function TournamentsClient() {
               </p>
               <div className="mt-3 space-y-1">
                 {t.problems?.slice(0, 5).map((p: any) => (
-                  <div key={p.ordinal} className="text-sm text-slate-300">
+                  <div key={p.ordinal} className="text-sm text-slate-700">
                     <span className="font-mono text-slate-500">#{p.ordinal}</span> {p.challenge?.title}{" "}
                     <span className="text-slate-500">D{p.challenge?.difficulty}</span>
                   </div>
                 ))}
               </div>
               {t.standings?.length > 0 && (
-                <div className="mt-3 border-t border-slate-800 pt-3">
+                <div className="mt-3 border-t border-slate-200 pt-3">
                   <p className="mb-1 text-xs uppercase tracking-wider text-slate-500">Live standings</p>
                   {t.standings.slice(0, 5).map((s: any) => (
                     <div key={s.userId} className="flex justify-between text-sm">
                       <span>
                         #{s.rank} {s.name}
                       </span>
-                      <span className="font-mono text-cyan-200">{s.score}</span>
+                      <span className="font-mono text-teal-800">{s.score}</span>
                     </div>
                   ))}
                 </div>
@@ -120,7 +120,7 @@ export function TournamentsClient() {
             </article>
           ))}
           {!tournaments.length && (
-            <p className="rounded-xl border border-slate-800 px-4 py-10 text-center text-slate-500">
+            <p className="rounded-xl border border-slate-200 px-4 py-10 text-center text-slate-500">
               No tournaments scheduled. Admins can create via API; weekly heat appears under Contest.
             </p>
           )}

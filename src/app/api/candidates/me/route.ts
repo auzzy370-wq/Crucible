@@ -52,6 +52,13 @@ export async function PUT(req: Request) {
       where: { id: updated.id },
       data: {
         cybersecurity: body.cybersecurity,
+        languages: body.languages,
+        frameworks: body.frameworks,
+        databases: body.databases,
+        cloud: body.cloud,
+        infrastructure: body.infrastructure,
+        aiExperience: body.aiExperience,
+        yearsExperience: body.yearsExperience,
         preferredTrack: body.preferredTrack,
         publicSlug: body.publicSlug === "" ? null : body.publicSlug || undefined,
         publicEnabled: body.publicEnabled,

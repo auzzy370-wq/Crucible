@@ -67,7 +67,7 @@ export function AiCraftClient() {
       <header>
         <p className="font-mono text-xs tracking-[0.3em] text-violet-300">AI CRAFT</p>
         <h1 className="mt-2 font-serif-display text-2xl sm:text-3xl">Learn AI end-to-end</h1>
-        <p className="mt-2 max-w-2xl text-slate-400">
+        <p className="mt-2 max-w-2xl text-slate-600">
           Prompting, API integration, tools, RAG, agents, evals, and safety — then prove it on the same benches
           humans and models share.
         </p>
@@ -79,8 +79,8 @@ export function AiCraftClient() {
             <div className="text-xs uppercase tracking-wider text-violet-200/80">Your path</div>
             <div className="mt-1 font-mono text-2xl text-violet-100">{percent}% complete</div>
             {next ? (
-              <p className="mt-1 text-sm text-slate-400">
-                Next: <span className="text-slate-200">{next.title}</span> · {next.minutes} min
+              <p className="mt-1 text-sm text-slate-600">
+                Next: <span className="text-slate-800">{next.title}</span> · {next.minutes} min
               </p>
             ) : (
               <p className="mt-1 text-sm text-emerald-300">Curriculum cleared — keep practicing in the problem bank.</p>
@@ -101,7 +101,7 @@ export function AiCraftClient() {
             </Link>
           </div>
         </div>
-        <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-900">
+        <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-100">
           <div className="h-full rounded-full bg-violet-400/80 transition-all" style={{ width: `${percent}%` }} />
         </div>
       </section>
@@ -114,23 +114,23 @@ export function AiCraftClient() {
           if (!rows.length) return null;
           return (
             <section key={level} className="space-y-3">
-              <h2 className="text-sm font-semibold capitalize text-slate-200">{level}</h2>
+              <h2 className="text-sm font-semibold capitalize text-slate-800">{level}</h2>
               <div className="space-y-2">
                 {rows.map((l, idx) => (
                   <Link
                     key={l.slug}
                     href={`/learn/ai/${l.slug}`}
-                    className="flex flex-col gap-2 rounded-xl border border-slate-800 px-4 py-3 transition hover:border-violet-500/30 sm:flex-row sm:items-center sm:justify-between"
+                    className="flex flex-col gap-2 rounded-xl border border-slate-200 px-4 py-3 transition hover:border-violet-500/30 sm:flex-row sm:items-center sm:justify-between"
                   >
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="font-mono text-[10px] text-slate-600">
                           {String(idx + 1).padStart(2, "0")}
                         </span>
-                        <span className="font-medium text-slate-100">{l.title}</span>
+                        <span className="font-medium text-slate-900">{l.title}</span>
                         {l.done && <Badge variant="emerald">done</Badge>}
                       </div>
-                      <p className="mt-1 text-sm text-slate-400">{l.summary}</p>
+                      <p className="mt-1 text-sm text-slate-600">{l.summary}</p>
                     </div>
                     <div className="flex shrink-0 flex-wrap gap-1">
                       <Badge>{l.minutes} min</Badge>

@@ -34,16 +34,16 @@ export const viewport = {
   initialScale: 1,
   maximumScale: 5,
   viewportFit: "cover" as const,
-  themeColor: "#070b12",
+  themeColor: "#eaf3fa",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <body className={`${sans.variable} ${mono.variable} ${display.variable} antialiased`}>
         <Providers>
           {children}
-          <Toaster theme="dark" richColors position="top-center" closeButton />
+          <Toaster theme="light" richColors position="top-center" closeButton />
         </Providers>
       </body>
     </html>

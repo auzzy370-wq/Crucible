@@ -40,9 +40,9 @@ export function WeeklyClient() {
   return (
     <div className="animate-rise space-y-6">
       <header>
-        <p className="font-mono text-xs tracking-[0.3em] text-rose-300">WEEKLY BROKEN PRODUCTION</p>
+        <p className="font-mono text-xs tracking-[0.3em] text-rose-700">WEEKLY BROKEN PRODUCTION</p>
         <h1 className="mt-2 text-2xl font-semibold sm:text-3xl">{data.title}</h1>
-        <p className="mt-2 max-w-3xl text-slate-400">{data.synopsis}</p>
+        <p className="mt-2 max-w-3xl text-slate-600">{data.synopsis}</p>
         <div className="mt-3 flex flex-wrap gap-2">
           <Badge variant="amber">{data.weekKey}</Badge>
           <Badge variant="cyan">{data.challenge?.title}</Badge>

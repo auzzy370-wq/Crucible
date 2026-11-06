@@ -20,21 +20,21 @@ export default async function LearnHubPage() {
     <div className="animate-rise space-y-8">
       <header className="space-y-4">
         <div>
-          <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">LEARN · FORGE</p>
+          <p className="font-mono text-xs tracking-[0.3em] text-teal-700">LEARN · FORGE</p>
           <h1 className="mt-2 font-serif-display text-2xl sm:text-3xl">Level up by proving craft</h1>
-          <p className="mt-2 max-w-2xl text-slate-400">
+          <p className="mt-2 max-w-2xl text-slate-600">
             Clear lessons, keep a streak, and post timed evidence. XP and ranks come only from work you finish —
             nothing is invented.
           </p>
         </div>
 
         {/* HUD */}
-        <section className="overflow-hidden rounded-2xl border border-cyan-400/20 bg-gradient-to-br from-cyan-500/[0.07] via-slate-950/80 to-slate-950 p-5 sm:p-6">
+        <section className="overflow-hidden rounded-2xl border border-teal-300/60 bg-gradient-to-br from-teal-500/[0.09] via-white/80 to-white p-5 sm:p-6">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
-              <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-cyan-300/80">Rank</p>
-              <p className="mt-1 font-serif-display text-3xl text-slate-50 sm:text-4xl">{game.rank.title}</p>
-              <p className="mt-1 font-mono text-sm text-slate-400">
+              <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-teal-700/80">Rank</p>
+              <p className="mt-1 font-serif-display text-3xl text-slate-900 sm:text-4xl">{game.rank.title}</p>
+              <p className="mt-1 font-mono text-sm text-slate-600">
                 {game.xp.toLocaleString()} XP
                 {game.nextRank ? ` · ${game.xpToNext} to ${game.nextRank.title}` : " · max rank"}
               </p>
@@ -57,9 +57,9 @@ export default async function LearnHubPage() {
               <span>Progress to next rank</span>
               <span>{game.rankProgressPct}%</span>
             </div>
-            <div className="h-2.5 overflow-hidden rounded-full bg-slate-900">
+            <div className="h-2.5 overflow-hidden rounded-full bg-slate-100">
               <div
-                className="learn-xp-bar h-full rounded-full bg-cyan-400 transition-[width] duration-700 ease-out"
+                className="learn-xp-bar h-full rounded-full bg-teal-500 transition-[width] duration-700 ease-out"
                 style={{ width: `${game.rankProgressPct}%` }}
               />
             </div>
@@ -71,7 +71,7 @@ export default async function LearnHubPage() {
       <section>
         <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
           <div>
-            <h2 className="font-serif-display text-xl text-slate-100">Today’s quests</h2>
+            <h2 className="font-serif-display text-xl text-slate-900">Today’s quests</h2>
             <p className="mt-1 text-sm text-slate-500">Three objectives. Finish them to keep the forge hot.</p>
           </div>
           <Link href={primaryQuest.href}>
@@ -87,7 +87,7 @@ export default async function LearnHubPage() {
                 "learn-quest-card group rounded-xl border px-4 py-4 transition",
                 q.done
                   ? "border-emerald-500/30 bg-emerald-500/5"
-                  : "border-slate-800 bg-slate-950/60 hover:border-cyan-500/35",
+                  : "border-slate-200 bg-white/75 hover:border-teal-400/50",
               )}
               style={{ animationDelay: `${i * 0.06}s` }}
             >
@@ -97,9 +97,9 @@ export default async function LearnHubPage() {
                 </span>
                 <Badge variant={q.done ? "emerald" : "cyan"}>+{q.xp} XP</Badge>
               </div>
-              <h3 className="mt-2 font-medium text-slate-100 group-hover:text-cyan-100">{q.title}</h3>
+              <h3 className="mt-2 font-medium text-slate-900 group-hover:text-teal-900">{q.title}</h3>
               <p className="mt-1 text-sm text-slate-500">{q.detail}</p>
-              <p className="mt-3 font-mono text-[11px] text-cyan-300/80">
+              <p className="mt-3 font-mono text-[11px] text-teal-700/80">
                 {q.done ? "Cleared" : "Open →"}
               </p>
             </Link>
@@ -132,15 +132,15 @@ export default async function LearnHubPage() {
       </section>
 
       {/* Recommended prove */}
-      <section className="rounded-2xl border border-slate-800 bg-slate-950/60 p-5">
+      <section className="rounded-2xl border border-slate-200 bg-white/75 p-5">
         <div className="flex flex-wrap items-center gap-2">
           <Badge variant="cyan">Prove quest</Badge>
           <Badge variant="amber">+{DAILY_XP} XP</Badge>
         </div>
-        <h2 className="mt-3 font-serif-display text-xl text-slate-100">
+        <h2 className="mt-3 font-serif-display text-xl text-slate-900">
           {nextProblem ? nextProblem.title : "Today’s timed challenge"}
         </h2>
-        <p className="mt-2 max-w-xl text-sm text-slate-400">
+        <p className="mt-2 max-w-xl text-sm text-slate-600">
           {nextProblem
             ? `Adaptive pick · D${nextProblem.difficulty} · ${(nextProblem.tags ?? []).slice(0, 3).join(", ") || "coding"}`
             : "Open the daily session — same public + hidden judges employers use."}
@@ -166,7 +166,7 @@ export default async function LearnHubPage() {
 
       {/* Achievements */}
       <section>
-        <h2 className="font-serif-display text-xl text-slate-100">Medals</h2>
+        <h2 className="font-serif-display text-xl text-slate-900">Medals</h2>
         <p className="mt-1 text-sm text-slate-500">Unlock by finishing real work — lessons, streaks, and evidence.</p>
         <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {game.achievements.map((a) => (
@@ -176,11 +176,11 @@ export default async function LearnHubPage() {
                 "rounded-xl border px-4 py-3",
                 a.unlocked
                   ? "border-amber-500/25 bg-amber-500/[0.06]"
-                  : "border-slate-800/80 bg-slate-950/40 opacity-55",
+                  : "border-slate-200/80 bg-white/60 opacity-55",
               )}
             >
               <div className="flex items-center justify-between gap-2">
-                <h3 className="text-sm font-medium text-slate-100">{a.title}</h3>
+                <h3 className="text-sm font-medium text-slate-900">{a.title}</h3>
                 <span className="font-mono text-[10px] uppercase tracking-wider text-slate-500">
                   {a.unlocked ? "Unlocked" : "Locked"}
                 </span>
@@ -201,9 +201,9 @@ export default async function LearnHubPage() {
           <Link
             key={c.href}
             href={c.href}
-            className="rounded-xl border border-slate-800 px-4 py-4 transition hover:border-cyan-500/30"
+            className="rounded-xl border border-slate-200 px-4 py-4 transition hover:border-teal-300/60"
           >
-            <div className="font-medium text-slate-100">{c.title}</div>
+            <div className="font-medium text-slate-900">{c.title}</div>
             <p className="mt-1 text-sm text-slate-500">{c.body}</p>
           </Link>
         ))}
@@ -227,8 +227,8 @@ function PathCard(props: {
   accent: "cyan" | "teal";
 }) {
   const border =
-    props.accent === "cyan" ? "border-cyan-500/25 bg-cyan-500/5" : "border-emerald-500/20 bg-emerald-500/[0.04]";
-  const bar = props.accent === "cyan" ? "bg-cyan-400" : "bg-emerald-400/90";
+    props.accent === "cyan" ? "border-teal-300/50 bg-cyan-500/5" : "border-emerald-500/20 bg-emerald-500/[0.04]";
+  const bar = props.accent === "cyan" ? "bg-teal-500" : "bg-emerald-400/90";
 
   return (
     <div className={cn("rounded-2xl border p-5", border)}>
@@ -239,13 +239,13 @@ function PathCard(props: {
         </Badge>
         <Badge variant="amber">+{LESSON_XP} XP / lesson</Badge>
       </div>
-      <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-900">
+      <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-100">
         <div className={cn("h-full rounded-full transition-[width] duration-700", bar)} style={{ width: `${props.percent}%` }} />
       </div>
-      <h2 className="mt-4 text-lg font-semibold text-slate-100">
+      <h2 className="mt-4 text-lg font-semibold text-slate-900">
         {props.nextTitle ? `Next: ${props.nextTitle}` : "Path complete"}
       </h2>
-      <p className="mt-1 text-sm text-slate-400">
+      <p className="mt-1 text-sm text-slate-600">
         {props.percent}% cleared
         {props.nextTitle ? " — finish the next lesson to bank XP and keep your streak." : " — run mocks or the bank to keep ranking up."}
       </p>

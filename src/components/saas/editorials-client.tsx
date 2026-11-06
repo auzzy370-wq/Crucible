@@ -38,9 +38,9 @@ export function EditorialsClient() {
   return (
     <div className="animate-rise space-y-6">
       <header>
-        <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">PROVE THE CRAFT</p>
+        <p className="font-mono text-xs tracking-[0.3em] text-teal-700">PROVE THE CRAFT</p>
         <h1 className="mt-2 font-serif-display text-2xl sm:text-3xl">Editorials</h1>
-        <p className="mt-2 max-w-3xl text-slate-400">
+        <p className="mt-2 max-w-3xl text-slate-600">
           Study after the judge — public Accepted and hidden harness green first. Free foundations; Premium unlocks
           deeper craft writeups.
         </p>
@@ -53,7 +53,7 @@ export function EditorialsClient() {
               <button
                 type="button"
                 onClick={() => open(r.slug)}
-                className="min-h-14 w-full rounded-xl border border-slate-800 px-4 py-3 text-left hover:bg-slate-900/60"
+                className="min-h-14 w-full rounded-xl border border-slate-200 px-4 py-3 text-left hover:bg-slate-100/60"
               >
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="font-medium">{r.title}</span>
@@ -67,16 +67,16 @@ export function EditorialsClient() {
           ))}
         </ul>
 
-        <article className="min-h-[280px] rounded-xl border border-slate-800 bg-slate-950/50 p-5">
+        <article className="min-h-[280px] rounded-xl border border-slate-200 bg-white/70 p-5">
           {!active && <p className="text-slate-500">Select an editorial.</p>}
           {active?.locked && (
             <div className="space-y-3">
               <h2 className="text-lg font-semibold">{active.title}</h2>
-              <p className="text-sm text-slate-400">
+              <p className="text-sm text-slate-600">
                 {active.approach} · {active.complexity}
               </p>
-              <p className="text-amber-200">Premium required to read the full solution.</p>
-              <Link href="/pricing" className="text-sm text-cyan-300 hover:underline">
+              <p className="text-amber-800">Premium required to read the full solution.</p>
+              <Link href="/pricing" className="text-sm text-teal-700 hover:underline">
                 Upgrade →
               </Link>
             </div>
@@ -84,13 +84,13 @@ export function EditorialsClient() {
           {active && !active.locked && (
             <div className="space-y-3">
               <h2 className="text-lg font-semibold">{active.title}</h2>
-              <div className="flex flex-wrap gap-2 text-xs text-slate-400">
+              <div className="flex flex-wrap gap-2 text-xs text-slate-600">
                 <span>{active.approach}</span>
                 <span>·</span>
                 <span>{active.complexity}</span>
                 {premium && active.isPremium && <Badge variant="amber">Premium</Badge>}
               </div>
-              <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed text-slate-300">{active.bodyMd}</pre>
+              <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed text-slate-700">{active.bodyMd}</pre>
             </div>
           )}
         </article>

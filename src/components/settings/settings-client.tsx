@@ -214,10 +214,10 @@ export function SettingsClient({ role }: { role: string }) {
   const tabs = allowedTabs.map((id) => ({ id, label: tabLabels[id] }));
 
   if (loading) {
-    return <p className="text-slate-400">Loading settings…</p>;
+    return <p className="text-slate-600">Loading settings…</p>;
   }
   if (!data) {
-    return <p className="text-rose-300">Settings unavailable</p>;
+    return <p className="text-rose-700">Settings unavailable</p>;
   }
 
   const isCandidate = data.account.role === "CANDIDATE" || data.account.role === "TEAM_MEMBER";
@@ -225,9 +225,9 @@ export function SettingsClient({ role }: { role: string }) {
   return (
     <div className="animate-rise space-y-6">
       <header>
-        <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">YOUR ACCOUNT</p>
+        <p className="font-mono text-xs tracking-[0.3em] text-teal-700">YOUR ACCOUNT</p>
         <h1 className="mt-2 text-2xl font-semibold sm:text-3xl">Settings</h1>
-        <p className="mt-2 max-w-2xl text-slate-400">
+        <p className="mt-2 max-w-2xl text-slate-600">
           Manage profile preferences, privacy, password, and active sessions — one place for how Crucible works for you.
         </p>
       </header>
@@ -237,11 +237,11 @@ export function SettingsClient({ role }: { role: string }) {
           <CardContent className="pt-5">
             <div className="text-xs uppercase tracking-wider text-slate-500">Plan</div>
             <div className="mt-1 flex items-center gap-2">
-              <span className="font-mono text-xl text-slate-100">{data.account.plan}</span>
+              <span className="font-mono text-xl text-slate-900">{data.account.plan}</span>
               {data.account.plan === "PREMIUM" && <Badge variant="amber">Premium</Badge>}
             </div>
             {data.account.plan !== "PREMIUM" && (
-              <Link href="/pricing" className="mt-2 inline-block text-sm text-amber-200 hover:underline">
+              <Link href="/pricing" className="mt-2 inline-block text-sm text-amber-800 hover:underline">
                 Upgrade →
               </Link>
             )}
@@ -250,14 +250,14 @@ export function SettingsClient({ role }: { role: string }) {
         <Card>
           <CardContent className="pt-5">
             <div className="text-xs uppercase tracking-wider text-slate-500">Streak</div>
-            <div className="mt-1 font-mono text-xl text-cyan-200">{data.stats.currentStreak} day</div>
+            <div className="mt-1 font-mono text-xl text-teal-800">{data.stats.currentStreak} day</div>
             <div className="text-xs text-slate-500">Best {data.stats.longestStreak}</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-5">
             <div className="text-xs uppercase tracking-wider text-slate-500">Activity</div>
-            <div className="mt-1 font-mono text-xl text-slate-100">{data.stats.assignments} sessions</div>
+            <div className="mt-1 font-mono text-xl text-slate-900">{data.stats.assignments} sessions</div>
             <div className="text-xs text-slate-500">{data.stats.playgrounds} playgrounds</div>
           </CardContent>
         </Card>
@@ -272,8 +272,8 @@ export function SettingsClient({ role }: { role: string }) {
             className={cn(
               "shrink-0 rounded-md border px-3 py-2 text-sm",
               tab === t.id
-                ? "border-cyan-400/40 bg-cyan-500/10 text-cyan-100"
-                : "border-slate-800 text-slate-400 hover:bg-slate-900",
+                ? "border-teal-400/50 bg-teal-500/10 text-teal-900"
+                : "border-slate-200 text-slate-600 hover:bg-slate-100",
             )}
           >
             {t.label}
@@ -324,7 +324,7 @@ export function SettingsClient({ role }: { role: string }) {
                 <div className="space-y-2">
                   <Label>Preferred track</Label>
                   <select
-                    className="flex h-11 w-full rounded-md border border-slate-700 bg-slate-950 px-3 text-sm"
+                    className="flex h-11 w-full rounded-md border border-slate-300 bg-white px-3 text-sm"
                     value={track}
                     onChange={(e) => setTrack(e.target.value)}
                   >
@@ -437,13 +437,13 @@ export function SettingsClient({ role }: { role: string }) {
                 </Button>
                 <p className="text-sm text-slate-500">
                   Résumé uploads and skill evidence also live on{" "}
-                  <Link href="/candidates" className="text-cyan-300 hover:underline">
+                  <Link href="/candidates" className="text-teal-700 hover:underline">
                     My profile →
                   </Link>
                 </p>
               </>
             ) : (
-              <p className="text-sm text-slate-400">
+              <p className="text-sm text-slate-600">
                 Hiring-team accounts use Assessments and Reviews. Candidate-track preferences appear when you use a
                 candidate demo or personal practice account.
               </p>
@@ -461,7 +461,7 @@ export function SettingsClient({ role }: { role: string }) {
           <CardContent className="space-y-4">
             {isCandidate ? (
               <>
-                <label className="flex items-center gap-3 rounded-lg border border-slate-800 px-3 py-3 text-sm">
+                <label className="flex items-center gap-3 rounded-lg border border-slate-200 px-3 py-3 text-sm">
                   <input
                     type="checkbox"
                     checked={publicEnabled}
@@ -470,7 +470,7 @@ export function SettingsClient({ role }: { role: string }) {
                   />
                   <span>
                     Enable public profile at{" "}
-                    <span className="font-mono text-cyan-200">/u/{publicSlug || "your-slug"}</span>
+                    <span className="font-mono text-teal-800">/u/{publicSlug || "your-slug"}</span>
                   </span>
                 </label>
                 <div className="space-y-2">
@@ -486,9 +486,9 @@ export function SettingsClient({ role }: { role: string }) {
                 </Button>
               </>
             ) : (
-              <p className="text-sm text-slate-400">Public profiles apply to candidate accounts.</p>
+              <p className="text-sm text-slate-600">Public profiles apply to candidate accounts.</p>
             )}
-            <div className="rounded-lg border border-slate-800 bg-slate-950/60 p-4 text-sm text-slate-400">
+            <div className="rounded-lg border border-slate-200 bg-white/75 p-4 text-sm text-slate-600">
               Human oversight is mandatory for qualification. Automated scores assist reviewers and never hire on their
               own. Candidate artifacts default to 365-day retention; audit logs keep longer for compliance.
             </div>
@@ -539,11 +539,11 @@ export function SettingsClient({ role }: { role: string }) {
             {(data.sessions ?? []).map((s: any) => (
               <div
                 key={s.id}
-                className="flex flex-col gap-2 rounded-xl border border-slate-800 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+                className="flex flex-col gap-2 rounded-xl border border-slate-200 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
               >
                 <div className="min-w-0 text-sm">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-medium text-slate-100">{s.current ? "This device" : "Other session"}</span>
+                    <span className="font-medium text-slate-900">{s.current ? "This device" : "Other session"}</span>
                     {s.current && <Badge variant="cyan">current</Badge>}
                   </div>
                   <div className="mt-1 truncate font-mono text-[11px] text-slate-500">

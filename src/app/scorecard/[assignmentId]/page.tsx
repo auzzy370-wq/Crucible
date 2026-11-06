@@ -65,7 +65,7 @@ export default async function ScorecardPage({
       <div className="pointer-events-none absolute inset-0 grid-overlay opacity-40" />
       <header className="relative z-10 mx-auto flex max-w-4xl items-center justify-between px-6 py-6">
         <Link href="/" className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-cyan-400/40 bg-cyan-400/10 font-mono text-xs font-bold text-cyan-300">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-teal-400/50 bg-teal-500/10 font-mono text-xs font-bold text-teal-700">
             CR
           </div>
           <span className="text-sm font-semibold tracking-[0.2em]">CRUCIBLE</span>
@@ -75,11 +75,11 @@ export default async function ScorecardPage({
 
       <main className="relative z-10 mx-auto max-w-4xl space-y-8 px-6 pb-20">
         <div className="animate-rise">
-          <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">EMPLOYER SCORECARD</p>
+          <p className="font-mono text-xs tracking-[0.3em] text-teal-700">EMPLOYER SCORECARD</p>
           <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
             {assignment.candidate.name}
           </h1>
-          <p className="mt-2 text-lg text-slate-300">{assignment.assessment.title}</p>
+          <p className="mt-2 text-lg text-slate-700">{assignment.assessment.title}</p>
           <div className="mt-4 flex flex-wrap gap-2">
             <Badge variant={assignment.assessment.track === "CYBERSECURITY" ? "violet" : "cyan"}>
               {assignment.assessment.track}
@@ -91,7 +91,7 @@ export default async function ScorecardPage({
             </Badge>
           </div>
           {profile?.publicSlug && profile.publicEnabled && (
-            <Link href={`/u/${profile.publicSlug}`} className="mt-4 inline-block text-sm text-cyan-300 hover:underline">
+            <Link href={`/u/${profile.publicSlug}`} className="mt-4 inline-block text-sm text-teal-700 hover:underline">
               Public qualification profile →
             </Link>
           )}
@@ -101,18 +101,18 @@ export default async function ScorecardPage({
           {categories.map(([label, score]) => (
             <div
               key={label}
-              className="flex items-center justify-between rounded-xl border border-slate-800 bg-slate-950/50 px-4 py-3"
+              className="flex items-center justify-between rounded-xl border border-slate-200 bg-white/70 px-4 py-3"
             >
-              <span className="text-sm text-slate-400">{label}</span>
-              <span className="font-mono text-slate-100">{formatScore(score)}</span>
+              <span className="text-sm text-slate-600">{label}</span>
+              <span className="font-mono text-slate-900">{formatScore(score)}</span>
             </div>
           ))}
         </section>
 
         {diagnostics && (
           <section className="animate-rise space-y-3 rounded-xl border border-cyan-500/20 bg-cyan-500/5 p-5">
-            <p className="font-mono text-xs tracking-[0.25em] text-cyan-300">KNOWLEDGE PINPOINT</p>
-            <p className="text-slate-200">{diagnostics.summary}</p>
+            <p className="font-mono text-xs tracking-[0.25em] text-teal-700">KNOWLEDGE PINPOINT</p>
+            <p className="text-slate-800">{diagnostics.summary}</p>
             {diagnostics.band != null && (
               <p className="font-mono text-xs text-slate-500">
                 {diagnostics.band} · D{diagnostics.difficulty ?? "—"}/10
@@ -147,7 +147,7 @@ export default async function ScorecardPage({
         )}
 
         <section className="animate-rise space-y-3">
-          <h2 className="text-sm font-semibold text-slate-100">Verified skills on this scorecard</h2>
+          <h2 className="text-sm font-semibold text-slate-900">Verified skills on this scorecard</h2>
           <div className="flex flex-wrap gap-2">
             {verified.length ? (
               verified.map((s) => (
@@ -163,10 +163,10 @@ export default async function ScorecardPage({
 
         {assignment.reviews.length > 0 && (
           <section className="animate-rise space-y-3">
-            <h2 className="text-sm font-semibold text-slate-100">Human review</h2>
+            <h2 className="text-sm font-semibold text-slate-900">Human review</h2>
             <ul className="space-y-2">
               {assignment.reviews.map((r) => (
-                <li key={r.id} className="rounded-xl border border-slate-800 px-4 py-3 text-sm text-slate-300">
+                <li key={r.id} className="rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-700">
                   <Badge className="mb-2">{r.decision}</Badge>
                   <p>{r.reasoning}</p>
                 </li>
@@ -177,7 +177,7 @@ export default async function ScorecardPage({
 
         <p className="text-xs text-slate-500">
           Claimed résumé skills are excluded. Print this page or share with hiring staff who have access. Also available as{" "}
-          <a className="text-cyan-300 hover:underline" href={`/api/scorecards/${assignmentId}?format=ats`}>
+          <a className="text-teal-700 hover:underline" href={`/api/scorecards/${assignmentId}?format=ats`}>
             ATS text
           </a>
           .

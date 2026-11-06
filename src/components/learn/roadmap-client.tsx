@@ -48,9 +48,9 @@ export function RoadmapClient() {
   return (
     <div className="animate-rise space-y-8">
       <header>
-        <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">ADAPTIVE PATH</p>
+        <p className="font-mono text-xs tracking-[0.3em] text-teal-700">ADAPTIVE PATH</p>
         <h1 className="mt-2 font-serif-display text-2xl sm:text-3xl">Personal roadmap</h1>
-        <p className="mt-2 max-w-2xl text-slate-400">
+        <p className="mt-2 max-w-2xl text-slate-600">
           Crucible tracks what you clear, where you stall, and which skills transfer — then raises difficulty as you
           improve.
         </p>
@@ -63,27 +63,27 @@ export function RoadmapClient() {
           ["Medium clears", String(data.mastery.medium)],
           ["Hard clears", String(data.mastery.hard)],
         ].map(([k, v]) => (
-          <div key={k} className="rounded-xl border border-slate-800 bg-slate-950/60 px-4 py-3">
+          <div key={k} className="rounded-xl border border-slate-200 bg-white/75 px-4 py-3">
             <div className="text-[10px] uppercase tracking-wider text-slate-500">{k}</div>
-            <div className="mt-1 font-mono text-lg text-cyan-100">{v}</div>
+            <div className="mt-1 font-mono text-lg text-teal-900">{v}</div>
           </div>
         ))}
       </section>
 
       <section className="grid gap-6 lg:grid-cols-2">
-        <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-5">
-          <h2 className="text-sm font-semibold text-slate-100">Skill tree</h2>
+        <div className="rounded-xl border border-slate-200 bg-white/75 p-5">
+          <h2 className="text-sm font-semibold text-slate-900">Skill tree</h2>
           <p className="mt-1 text-xs text-slate-500">Prerequisites unlock as mastery grows from verified clears.</p>
           <ul className="mt-4 space-y-3">
             {data.skillTree.map((n) => (
-              <li key={n.id} className="rounded-lg border border-slate-800 px-3 py-2">
+              <li key={n.id} className="rounded-lg border border-slate-200 px-3 py-2">
                 <div className="flex items-center justify-between gap-2">
                   {n.href ? (
-                    <Link href={n.href} className="text-slate-200 hover:text-cyan-200">
+                    <Link href={n.href} className="text-slate-800 hover:text-teal-800">
                       {n.label}
                     </Link>
                   ) : (
-                    <span className="text-slate-200">{n.label}</span>
+                    <span className="text-slate-800">{n.label}</span>
                   )}
                   <Badge variant="cyan">
                     {n.total != null ? `${n.mastery}/${n.total}` : `×${n.mastery}`}
@@ -97,8 +97,8 @@ export function RoadmapClient() {
           </ul>
         </div>
 
-        <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-5">
-          <h2 className="text-sm font-semibold text-slate-100">Focus signals</h2>
+        <div className="rounded-xl border border-slate-200 bg-white/75 p-5">
+          <h2 className="text-sm font-semibold text-slate-900">Focus signals</h2>
           <p className="mt-1 text-xs text-slate-500">
             Target difficulty band ~{data.targetDifficulty}/10 based on recent performance.
           </p>
@@ -116,7 +116,7 @@ export function RoadmapClient() {
             </div>
             <div>
               <div className="text-[10px] uppercase tracking-wider text-slate-500">Recurring gaps</div>
-              <ul className="mt-2 space-y-1 text-sm text-slate-300">
+              <ul className="mt-2 space-y-1 text-sm text-slate-700">
                 {!data.recurringGaps.length && <li className="text-slate-500">Pinpoint gaps appear after judged submits.</li>}
                 {data.recurringGaps.map((g) => (
                   <li key={g}>· {g}</li>
@@ -127,8 +127,8 @@ export function RoadmapClient() {
         </div>
       </section>
 
-      <section className="rounded-xl border border-slate-800 bg-slate-950/60 p-5">
-        <h2 className="text-sm font-semibold text-slate-100">Recommended next</h2>
+      <section className="rounded-xl border border-slate-200 bg-white/75 p-5">
+        <h2 className="text-sm font-semibold text-slate-900">Recommended next</h2>
         <p className="mt-1 text-xs text-slate-500">Problems matched to your weak tags and rising difficulty.</p>
         <ul className="mt-4 divide-y divide-slate-800">
           {!data.nextProblems.length && (
@@ -143,14 +143,14 @@ export function RoadmapClient() {
           {data.nextProblems.map((p) => (
             <li key={p.id} className="flex flex-wrap items-center justify-between gap-2 py-3">
               <div>
-                <div className="text-slate-100">{p.title}</div>
+                <div className="text-slate-900">{p.title}</div>
                 <div className="font-mono text-[11px] text-slate-500">
                   {difficultyBand(p.difficulty)} · {p.tags.filter((t) => t !== "coding").slice(0, 4).join(", ")}
                 </div>
               </div>
               <Link
                 href={`/challenges?q=${encodeURIComponent(p.slug)}`}
-                className="text-sm text-cyan-300 hover:underline"
+                className="text-sm text-teal-700 hover:underline"
               >
                 Open →
               </Link>

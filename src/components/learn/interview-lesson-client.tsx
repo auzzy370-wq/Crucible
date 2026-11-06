@@ -56,7 +56,7 @@ export function InterviewLessonClient(props: {
   return (
     <div className="animate-rise mx-auto max-w-3xl space-y-6">
       <div className="flex flex-wrap items-center gap-2 text-sm">
-        <Link href="/learn/interview" className="text-cyan-300 hover:underline">
+        <Link href="/learn/interview" className="text-teal-700 hover:underline">
           ← Interview Craft
         </Link>
         <span className="text-slate-600">/</span>
@@ -70,7 +70,7 @@ export function InterviewLessonClient(props: {
           {done && <Badge variant="emerald">completed</Badge>}
         </div>
         <h1 className="mt-3 font-serif-display text-2xl sm:text-3xl">{props.title}</h1>
-        <p className="mt-2 text-slate-400">{props.summary}</p>
+        <p className="mt-2 text-slate-600">{props.summary}</p>
         <div className="mt-3 flex flex-wrap gap-1">
           {props.skills.map((s) => (
             <Badge key={s} variant="cyan">
@@ -80,7 +80,7 @@ export function InterviewLessonClient(props: {
         </div>
       </header>
 
-      <article className="rounded-2xl border border-slate-800 bg-slate-950/50 p-5 sm:p-6">
+      <article className="rounded-2xl border border-slate-200 bg-white/70 p-5 sm:p-6">
         <LessonBody md={props.bodyMd} />
       </article>
 
@@ -104,20 +104,20 @@ export function InterviewLessonClient(props: {
         </Link>
       </div>
 
-      <nav className="flex justify-between gap-3 border-t border-slate-800 pt-4 text-sm">
+      <nav className="flex justify-between gap-3 border-t border-slate-200 pt-4 text-sm">
         {props.prevSlug ? (
-          <Link href={`/learn/interview/${props.prevSlug}`} className="text-slate-400 hover:text-cyan-200">
+          <Link href={`/learn/interview/${props.prevSlug}`} className="text-slate-600 hover:text-teal-800">
             ← Previous
           </Link>
         ) : (
           <span />
         )}
         {props.nextSlug ? (
-          <Link href={`/learn/interview/${props.nextSlug}`} className="text-cyan-300 hover:underline">
+          <Link href={`/learn/interview/${props.nextSlug}`} className="text-teal-700 hover:underline">
             Next →
           </Link>
         ) : (
-          <Link href="/learn/interview" className="text-cyan-300 hover:underline">
+          <Link href="/learn/interview" className="text-teal-700 hover:underline">
             Back to path →
           </Link>
         )}

@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { Badge } from "@/components/ui/badge";
 import { formatScore } from "@/lib/utils";
+import { trackBadgeVariant, trackLabel } from "@/lib/tracks";
+import { buildLearnerGameState } from "@/server/learning/gamification";
 
 export const dynamic = "force-dynamic";
 
@@ -18,7 +20,9 @@ export default async function PublicQualificationProfile({
       skills: true,
       user: {
         select: {
+          id: true,
           name: true,
+          githubLogin: true,
           assignments: {
             where: {
               OR: [
@@ -43,13 +47,20 @@ export default async function PublicQualificationProfile({
   const portfolio = profile.skills.filter((s) => s.source === "PORTFOLIO");
   const scored = profile.user.assignments.filter((a) => a.scoreReport);
   const best = scored.reduce((m, a) => Math.max(m, a.scoreReport?.overall ?? 0), 0);
+  const game = await buildLearnerGameState(profile.user.id);
+
+  const links = [
+    profile.portfolioUrl ? { href: profile.portfolioUrl, label: "Portfolio" } : null,
+    profile.githubUrl ? { href: profile.githubUrl, label: "GitHub" } : null,
+    profile.linkedInUrl ? { href: profile.linkedInUrl, label: "LinkedIn" } : null,
+  ].filter(Boolean) as { href: string; label: string }[];
 
   return (
     <div className="min-h-screen">
       <div className="pointer-events-none absolute inset-0 grid-overlay opacity-40" />
       <header className="relative z-10 mx-auto flex max-w-4xl items-center justify-between px-6 py-6">
         <Link href="/" className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-cyan-400/40 bg-cyan-400/10 font-mono text-xs font-bold text-cyan-300">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-teal-400/50 bg-teal-500/10 font-mono text-xs font-bold text-teal-700">
             CR
           </div>
           <span className="text-sm font-semibold tracking-[0.2em]">CRUCIBLE</span>
@@ -58,21 +69,80 @@ export default async function PublicQualificationProfile({
       </header>
 
       <main className="relative z-10 mx-auto max-w-4xl space-y-8 px-6 pb-20">
-        <div className="animate-rise">
-          <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">VERIFIED PROFILE</p>
-          <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">{profile.user.name}</h1>
-          <p className="mt-2 text-lg text-slate-300">{profile.headline || "Crucible candidate"}</p>
-          {profile.bio && <p className="mt-4 max-w-2xl text-slate-400">{profile.bio}</p>}
+        <section className="animate-rise overflow-hidden rounded-2xl border border-teal-300/60 bg-gradient-to-br from-teal-500/[0.1] via-white/80 to-white p-6 sm:p-8">
+          <p className="font-mono text-xs tracking-[0.3em] text-teal-700">VERIFIED PROFILE</p>
+          <h1 className="mt-3 font-serif-display text-3xl tracking-tight text-slate-900 sm:text-4xl">
+            {profile.user.name}
+          </h1>
+          <p className="mt-2 text-lg text-slate-700">{profile.headline || "Crucible candidate"}</p>
+          {profile.bio && <p className="mt-4 max-w-2xl text-slate-600">{profile.bio}</p>}
           <div className="mt-4 flex flex-wrap gap-2">
-            <Badge variant="cyan">{profile.preferredTrack}</Badge>
+            <Badge variant="amber">{game.rank.title}</Badge>
+            <Badge variant="cyan">{game.xp.toLocaleString()} XP</Badge>
+            <Badge variant={trackBadgeVariant(profile.preferredTrack)}>{trackLabel(profile.preferredTrack)}</Badge>
             {profile.yearsExperience != null && <Badge>{profile.yearsExperience}+ years</Badge>}
             {verified.length > 0 && <Badge variant="emerald">{verified.length} verified skills</Badge>}
             {best > 0 && <Badge variant="amber">Best {formatScore(best)}</Badge>}
+            {game.streak.longest > 0 && <Badge variant="emerald">Longest streak {game.streak.longest}d</Badge>}
           </div>
-        </div>
+          {links.length > 0 && (
+            <div className="mt-5 flex flex-wrap gap-3">
+              {links.map((l) => (
+                <a
+                  key={l.href}
+                  href={l.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-sm text-teal-700 hover:underline"
+                >
+                  {l.label} →
+                </a>
+              ))}
+            </div>
+          )}
+          <div className="mt-6 grid gap-3 sm:grid-cols-3">
+            <div className="rounded-xl border border-slate-200/80 bg-white/70 px-3 py-3">
+              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">Interview craft</p>
+              <p className="mt-1 font-serif-display text-2xl text-slate-900">{game.paths.interview.percent}%</p>
+              <p className="text-xs text-slate-500">
+                {game.paths.interview.done}/{game.paths.interview.total} lessons
+              </p>
+            </div>
+            <div className="rounded-xl border border-slate-200/80 bg-white/70 px-3 py-3">
+              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">AI craft</p>
+              <p className="mt-1 font-serif-display text-2xl text-slate-900">{game.paths.ai.percent}%</p>
+              <p className="text-xs text-slate-500">
+                {game.paths.ai.done}/{game.paths.ai.total} lessons
+              </p>
+            </div>
+            <div className="rounded-xl border border-slate-200/80 bg-white/70 px-3 py-3">
+              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">Medals</p>
+              <p className="mt-1 font-serif-display text-2xl text-slate-900">
+                {game.unlockedCount}/{game.achievements.length}
+              </p>
+              <p className="text-xs text-slate-500">Learn achievements</p>
+            </div>
+          </div>
+        </section>
+
+        {(profile.languages.length > 0 ||
+          profile.frameworks.length > 0 ||
+          profile.cybersecurity.length > 0) && (
+          <section className="animate-rise space-y-3">
+            <h2 className="font-serif-display text-xl text-slate-900">Stack (self-reported)</h2>
+            <p className="text-xs text-slate-500">Not the same as verified skills — listed by the candidate.</p>
+            <div className="flex flex-wrap gap-1.5">
+              {[...profile.languages, ...profile.frameworks, ...profile.cybersecurity].map((x) => (
+                <Badge key={x} variant="cyan">
+                  {x}
+                </Badge>
+              ))}
+            </div>
+          </section>
+        )}
 
         <section className="animate-rise space-y-3">
-          <h2 className="text-sm font-semibold tracking-wide text-slate-100">Assessment-verified skills</h2>
+          <h2 className="font-serif-display text-xl text-slate-900">Assessment-verified skills</h2>
           <p className="text-xs text-slate-500">
             Claimed résumé skills are never shown here. Only assessment and human-review evidence appears as verified.
           </p>
@@ -100,18 +170,16 @@ export default async function PublicQualificationProfile({
         </section>
 
         <section className="animate-rise space-y-3">
-          <h2 className="text-sm font-semibold tracking-wide text-slate-100">Assessments</h2>
+          <h2 className="font-serif-display text-xl text-slate-900">Assessments</h2>
           <div className="space-y-2">
             {profile.user.assignments.map((a) => (
               <div
                 key={a.id}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-800 bg-slate-950/50 px-4 py-3"
+                className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white/70 px-4 py-3"
               >
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="font-medium">{a.assessment.title}</span>
-                  <Badge variant={a.assessment.track === "CYBERSECURITY" ? "violet" : "cyan"}>
-                    {a.assessment.track}
-                  </Badge>
+                  <Badge variant={trackBadgeVariant(a.assessment.track)}>{trackLabel(a.assessment.track)}</Badge>
                   {a.scoreReport && (
                     <>
                       <Badge variant="emerald">{formatScore(a.scoreReport.overall)}</Badge>
@@ -120,7 +188,7 @@ export default async function PublicQualificationProfile({
                   )}
                 </div>
                 {a.scoreReport && (
-                  <Link href={`/scorecard/${a.id}`} className="text-sm text-cyan-300 hover:underline">
+                  <Link href={`/scorecard/${a.id}`} className="text-sm text-teal-700 hover:underline">
                     Scorecard →
                   </Link>
                 )}

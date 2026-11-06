@@ -4,18 +4,18 @@
 export function LessonBody({ md }: { md: string }) {
   const blocks = md.trim().split(/\n\n+/);
   return (
-    <div className="space-y-4 text-sm leading-relaxed text-slate-300">
+    <div className="space-y-4 text-sm leading-relaxed text-slate-700">
       {blocks.map((block, i) => {
         if (block.startsWith("### ")) {
           return (
-            <h3 key={i} className="pt-2 text-base font-semibold text-slate-100">
+            <h3 key={i} className="pt-2 text-base font-semibold text-slate-900">
               {block.slice(4)}
             </h3>
           );
         }
         if (block.startsWith("## ")) {
           return (
-            <h2 key={i} className="pt-2 font-serif-display text-xl text-slate-50">
+            <h2 key={i} className="pt-2 font-serif-display text-xl text-slate-900">
               {block.slice(3)}
             </h2>
           );
@@ -26,7 +26,7 @@ export function LessonBody({ md }: { md: string }) {
           return (
             <pre
               key={i}
-              className="overflow-x-auto rounded-lg border border-slate-800 bg-black/50 p-3 font-mono text-[11px] text-cyan-100/90"
+              className="overflow-x-auto rounded-lg border border-slate-200 bg-black/50 p-3 font-mono text-[11px] text-teal-900/90"
             >
               {code}
             </pre>
@@ -44,9 +44,9 @@ export function LessonBody({ md }: { md: string }) {
             );
           if (rows.length) {
             return (
-              <div key={i} className="overflow-x-auto rounded-lg border border-slate-800">
+              <div key={i} className="overflow-x-auto rounded-lg border border-slate-200">
                 <table className="w-full text-left text-xs">
-                  <thead className="border-b border-slate-800 text-slate-500">
+                  <thead className="border-b border-slate-200 text-slate-500">
                     <tr>
                       {rows[0]!.map((c) => (
                         <th key={c} className="px-3 py-2 font-medium">
@@ -57,9 +57,9 @@ export function LessonBody({ md }: { md: string }) {
                   </thead>
                   <tbody>
                     {rows.slice(1).map((r, ri) => (
-                      <tr key={ri} className="border-b border-slate-800/80">
+                      <tr key={ri} className="border-b border-slate-200/80">
                         {r.map((c, ci) => (
-                          <td key={ci} className="px-3 py-2 text-slate-300">
+                          <td key={ci} className="px-3 py-2 text-slate-700">
                             {c}
                           </td>
                         ))}
@@ -82,8 +82,8 @@ export function LessonBody({ md }: { md: string }) {
           );
         }
         const html = block
-          .replace(/\*\*(.+?)\*\*/g, "<strong class='text-slate-100'>$1</strong>")
-          .replace(/`([^`]+)`/g, "<code class='rounded bg-slate-900 px-1 font-mono text-[11px] text-cyan-200'>$1</code>");
+          .replace(/\*\*(.+?)\*\*/g, "<strong class='text-slate-900'>$1</strong>")
+          .replace(/`([^`]+)`/g, "<code class='rounded bg-slate-100 px-1 font-mono text-[11px] text-teal-800'>$1</code>");
         return <p key={i} dangerouslySetInnerHTML={{ __html: html }} />;
       })}
     </div>

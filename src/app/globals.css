@@ -3,16 +3,16 @@
 @tailwind utilities;
 
 :root {
-  --bg-0: #070b12;
-  --bg-1: #0b1220;
-  --bg-2: #111827;
-  --line: #1f2a3d;
-  --text: #e5eefb;
-  --muted: #8aa0b8;
-  --accent: #22d3ee;
-  --accent-2: #34d399;
-  --danger: #fb7185;
-  --warning: #fbbf24;
+  --bg-0: #f3f8fc;
+  --bg-1: #eaf3fa;
+  --bg-2: #ffffff;
+  --line: #c9d9e8;
+  --text: #0f1c2e;
+  --muted: #5b7390;
+  --accent: #0e8f9f;
+  --accent-2: #0f9f6e;
+  --danger: #e11d48;
+  --warning: #d97706;
   --font-display: "IBM Plex Sans", "Segoe UI", sans-serif;
   --font-serif: var(--font-instrument), "Times New Roman", serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
@@ -25,15 +25,16 @@ body {
 
 html {
   overflow-x: clip;
+  color-scheme: light;
 }
 
 body {
   color: var(--text);
   background:
-    radial-gradient(1200px 600px at 10% -10%, rgba(34, 211, 238, 0.12), transparent 55%),
-    radial-gradient(900px 500px at 90% 0%, rgba(52, 211, 153, 0.08), transparent 50%),
-    radial-gradient(800px 400px at 50% 100%, rgba(251, 113, 133, 0.05), transparent 45%),
-    linear-gradient(180deg, var(--bg-0), var(--bg-1) 40%, #060910);
+    radial-gradient(1100px 560px at 12% -8%, rgba(14, 143, 159, 0.14), transparent 55%),
+    radial-gradient(900px 480px at 92% 0%, rgba(15, 159, 110, 0.1), transparent 50%),
+    radial-gradient(700px 380px at 50% 100%, rgba(14, 143, 159, 0.06), transparent 45%),
+    linear-gradient(180deg, #f7fbfe 0%, var(--bg-0) 42%, #e8f2f8 100%);
   font-family: var(--font-display);
   overflow-x: clip;
   -webkit-tap-highlight-color: transparent;
@@ -47,7 +48,6 @@ body {
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
-/* Mobile-first touch & overflow guards */
 @layer base {
   html {
     -webkit-text-size-adjust: 100%;
@@ -87,8 +87,8 @@ body {
 
 .grid-overlay {
   background-image:
-    linear-gradient(rgba(34, 211, 238, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(34, 211, 238, 0.04) 1px, transparent 1px);
+    linear-gradient(rgba(14, 143, 159, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(14, 143, 159, 0.06) 1px, transparent 1px);
   background-size: 48px 48px;
   mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
 }
@@ -110,13 +110,13 @@ body {
 
 @keyframes pulse-ring {
   0% {
-    box-shadow: 0 0 0 0 rgba(34, 211, 238, 0.35);
+    box-shadow: 0 0 0 0 rgba(14, 143, 159, 0.35);
   }
   70% {
-    box-shadow: 0 0 0 12px rgba(34, 211, 238, 0);
+    box-shadow: 0 0 0 12px rgba(14, 143, 159, 0);
   }
   100% {
-    box-shadow: 0 0 0 0 rgba(34, 211, 238, 0);
+    box-shadow: 0 0 0 0 rgba(14, 143, 159, 0);
   }
 }
 
@@ -128,30 +128,29 @@ body {
   font-family: var(--font-serif);
 }
 
-/* Landing — cinematic premium surface (original CRUCIBLE cyan) */
+/* Landing — bright cyan brand plane */
 .landing-root {
-  --landing-ink: #e5eefb;
-  --landing-mute: #8aa0b8;
-  --landing-line: rgba(34, 211, 238, 0.14);
-  --landing-teal: #22d3ee;
+  --landing-ink: #0f1c2e;
+  --landing-mute: #5b7390;
+  --landing-line: rgba(14, 143, 159, 0.18);
+  --landing-teal: #0e8f9f;
   background:
-    radial-gradient(ellipse 90% 70% at 70% 20%, rgba(34, 211, 238, 0.12), transparent 55%),
-    radial-gradient(ellipse 60% 50% at 10% 80%, rgba(52, 211, 153, 0.07), transparent 50%),
-    radial-gradient(ellipse 50% 40% at 90% 90%, rgba(251, 113, 133, 0.04), transparent 45%),
-    linear-gradient(165deg, #060910 0%, #070b12 42%, #0b1220 100%);
+    radial-gradient(ellipse 90% 70% at 70% 18%, rgba(14, 143, 159, 0.16), transparent 55%),
+    radial-gradient(ellipse 60% 50% at 8% 82%, rgba(15, 159, 110, 0.1), transparent 50%),
+    linear-gradient(165deg, #f8fcff 0%, #eef6fb 48%, #e4f1f7 100%);
   color: var(--landing-ink);
 }
 
 .landing-noise {
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
-  opacity: 0.035;
-  mix-blend-mode: overlay;
+  opacity: 0.025;
+  mix-blend-mode: multiply;
 }
 
 .landing-mesh {
   background:
-    linear-gradient(rgba(34, 211, 238, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(34, 211, 238, 0.04) 1px, transparent 1px);
+    linear-gradient(rgba(14, 143, 159, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(14, 143, 159, 0.05) 1px, transparent 1px);
   background-size: 72px 72px;
   mask-image: radial-gradient(ellipse 80% 70% at 60% 40%, black 20%, transparent 75%);
 }
@@ -203,15 +202,15 @@ body {
 
 .landing-hero-plane {
   background:
-    radial-gradient(ellipse 90% 70% at 75% 15%, rgba(34, 211, 238, 0.14), transparent 55%),
-    radial-gradient(ellipse 55% 45% at 8% 85%, rgba(52, 211, 153, 0.08), transparent 50%),
-    linear-gradient(168deg, #05080e 0%, #070b12 48%, #0a1420 100%);
+    radial-gradient(ellipse 90% 70% at 75% 15%, rgba(14, 143, 159, 0.18), transparent 55%),
+    radial-gradient(ellipse 55% 45% at 8% 85%, rgba(15, 159, 110, 0.1), transparent 50%),
+    linear-gradient(168deg, #f9fcff 0%, #eaf4fa 48%, #dceef5 100%);
 }
 
 .landing-hero-fade {
   background:
-    linear-gradient(to top, rgba(7, 11, 18, 0.92) 0%, rgba(7, 11, 18, 0.55) 42%, rgba(7, 11, 18, 0.2) 100%),
-    linear-gradient(to right, rgba(7, 11, 18, 0.55) 0%, transparent 45%);
+    linear-gradient(to top, rgba(243, 248, 252, 0.95) 0%, rgba(243, 248, 252, 0.55) 42%, rgba(243, 248, 252, 0.12) 100%),
+    linear-gradient(to right, rgba(243, 248, 252, 0.55) 0%, transparent 45%);
 }
 
 .landing-anim-brand {
@@ -249,7 +248,7 @@ body {
   height: 10px;
 }
 ::-webkit-scrollbar-thumb {
-  background: #243044;
+  background: #b7c9da;
   border-radius: 999px;
 }
 
@@ -269,7 +268,7 @@ body {
 }
 
 .learn-xp-bar {
-  box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.15);
+  box-shadow: 0 0 0 1px rgba(14, 143, 159, 0.18);
 }
 
 @media (prefers-reduced-motion: reduce) {

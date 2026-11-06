@@ -56,11 +56,11 @@ export function PricingClient(props: {
   return (
     <div className="animate-rise space-y-8">
       <header className="mx-auto max-w-3xl text-center">
-        <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">PROVE THE CRAFT</p>
+        <p className="font-mono text-xs tracking-[0.3em] text-teal-700">PROVE THE CRAFT</p>
         <h1 className="mt-3 font-serif-display text-3xl tracking-tight sm:text-4xl">
           Evidence over puzzles
         </h1>
-        <p className="mt-3 text-slate-400">
+        <p className="mt-3 text-slate-600">
           Free forever for core evidence sessions. Premium unlocks company intel, Lightning Judge, study plans,
           simulations, autocomplete, debugger, and unlimited playgrounds.
         </p>
@@ -80,8 +80,8 @@ export function PricingClient(props: {
             <CardDescription>Coding judges + production missions</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="font-mono text-3xl text-slate-100">$0</div>
-            <ul className="space-y-2 text-sm text-slate-400">
+            <div className="font-mono text-3xl text-slate-900">$0</div>
+            <ul className="space-y-2 text-sm text-slate-600">
               <li>Public evidence sessions + daily challenge</li>
               <li>Free study plans</li>
               <li>3 playgrounds</li>
@@ -89,7 +89,7 @@ export function PricingClient(props: {
             </ul>
           </CardContent>
         </Card>
-        <Card className="border-cyan-500/30 bg-cyan-500/5">
+        <Card className="border-teal-300/60 bg-cyan-500/5">
           <CardHeader>
             <div className="flex items-center gap-2">
               <CardTitle>Premium</CardTitle>
@@ -99,10 +99,10 @@ export function PricingClient(props: {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-end gap-3">
-              <div className="font-mono text-3xl text-slate-50">
+              <div className="font-mono text-3xl text-slate-900">
                 ${interval === "yearly" ? PLAN_PRICING.yearly : PLAN_PRICING.monthly}
               </div>
-              <div className="pb-1 text-sm text-slate-400">/{interval === "yearly" ? "year" : "month"}</div>
+              <div className="pb-1 text-sm text-slate-600">/{interval === "yearly" ? "year" : "month"}</div>
             </div>
             <div className="flex gap-2">
               <Button
@@ -142,11 +142,11 @@ export function PricingClient(props: {
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {PREMIUM_FEATURES.map((f) => (
-          <Card key={f.id} className="border-slate-800/90">
+          <Card key={f.id} className="border-slate-200">
             <CardHeader>
               <CardTitle className="text-base">{f.title}</CardTitle>
             </CardHeader>
-            <CardContent className="text-sm leading-relaxed text-slate-400">{f.blurb}</CardContent>
+            <CardContent className="text-sm leading-relaxed text-slate-600">{f.blurb}</CardContent>
           </Card>
         ))}
       </section>

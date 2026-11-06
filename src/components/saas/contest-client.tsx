@@ -39,9 +39,9 @@ export function ContestClient() {
   return (
     <div className="animate-rise space-y-6">
       <header>
-        <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">PROVE THE CRAFT</p>
+        <p className="font-mono text-xs tracking-[0.3em] text-teal-700">PROVE THE CRAFT</p>
         <h1 className="mt-2 font-serif-display text-2xl sm:text-3xl">{contest.title}</h1>
-        <p className="mt-2 max-w-3xl text-slate-400">{contest.description}</p>
+        <p className="mt-2 max-w-3xl text-slate-600">{contest.description}</p>
         <div className="mt-3 flex flex-wrap gap-2">
           <Badge variant="cyan">Ends {new Date(contest.endsAt).toLocaleString()}</Badge>
           <Badge>{contest.problems?.length ?? 0} problems</Badge>
@@ -49,9 +49,9 @@ export function ContestClient() {
       </header>
 
       <section className="space-y-2">
-        <h2 className="text-sm font-semibold text-slate-200">Heat set</h2>
+        <h2 className="text-sm font-semibold text-slate-800">Heat set</h2>
         {contest.problems?.map((p: any) => (
-          <div key={p.id} className="rounded-xl border border-slate-800 px-4 py-3">
+          <div key={p.id} className="rounded-xl border border-slate-200 px-4 py-3">
             <div className="font-medium">
               {p.ordinal}. {p.challenge.title}
             </div>
@@ -59,7 +59,7 @@ export function ContestClient() {
             <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center">
               <Link
                 href="/challenges"
-                className="inline-flex min-h-11 items-center justify-center rounded-md border border-slate-700 px-3 text-sm text-cyan-300 sm:min-h-0 sm:justify-start sm:border-0 sm:px-0"
+                className="inline-flex min-h-11 items-center justify-center rounded-md border border-slate-300 px-3 text-sm text-teal-700 sm:min-h-0 sm:justify-start sm:border-0 sm:px-0"
               >
                 Open evidence bank →
               </Link>
@@ -72,32 +72,32 @@ export function ContestClient() {
       </section>
 
       <section className="space-y-2">
-        <h2 className="text-sm font-semibold text-slate-200">Leaderboard</h2>
+        <h2 className="text-sm font-semibold text-slate-800">Leaderboard</h2>
         <div className="space-y-2 sm:hidden">
           {(contest.entries ?? []).map((e: any, i: number) => (
             <div
               key={e.id}
-              className="flex items-center justify-between gap-3 rounded-xl border border-slate-800 px-4 py-3"
+              className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 px-4 py-3"
             >
               <div className="min-w-0">
                 <div className="font-mono text-[10px] text-slate-600">#{i + 1}</div>
-                <div className="truncate text-sm font-medium text-slate-100">{e.user?.name}</div>
+                <div className="truncate text-sm font-medium text-slate-900">{e.user?.name}</div>
               </div>
               <div className="shrink-0 text-right font-mono text-sm">
-                <div className="text-cyan-200">{e.score}</div>
+                <div className="text-teal-800">{e.score}</div>
                 <div className="text-[11px] text-slate-500">{e.solvedCount} solved</div>
               </div>
             </div>
           ))}
           {!(contest.entries ?? []).length && (
-            <p className="rounded-xl border border-slate-800 px-4 py-8 text-center text-slate-500">
+            <p className="rounded-xl border border-slate-200 px-4 py-8 text-center text-slate-500">
               Be the first on the board.
             </p>
           )}
         </div>
-        <div className="hidden overflow-x-auto rounded-xl border border-slate-800 sm:block">
+        <div className="hidden overflow-x-auto rounded-xl border border-slate-200 sm:block">
           <table className="w-full min-w-[420px] text-left text-sm">
-            <thead className="border-b border-slate-800 text-xs uppercase tracking-wider text-slate-500">
+            <thead className="border-b border-slate-200 text-xs uppercase tracking-wider text-slate-500">
               <tr>
                 <th className="px-4 py-3">#</th>
                 <th className="px-4 py-3">Engineer</th>
@@ -107,10 +107,10 @@ export function ContestClient() {
             </thead>
             <tbody>
               {(contest.entries ?? []).map((e: any, i: number) => (
-                <tr key={e.id} className="border-b border-slate-800/80">
+                <tr key={e.id} className="border-b border-slate-200/80">
                   <td className="px-4 py-3 font-mono text-slate-500">{i + 1}</td>
                   <td className="px-4 py-3">{e.user?.name}</td>
-                  <td className="px-4 py-3 font-mono text-cyan-200">{e.score}</td>
+                  <td className="px-4 py-3 font-mono text-teal-800">{e.score}</td>
                   <td className="px-4 py-3 font-mono">{e.solvedCount}</td>
                 </tr>
               ))}

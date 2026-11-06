@@ -56,7 +56,7 @@ export function SocialAuthButtons({ heading = "Or continue with" }: { heading?: 
           {enabled.map((p) => (
             <Button key={p.id} variant="secondary" className="justify-start gap-2" asChild>
               <a href={p.startUrl}>
-                <span className="inline-flex h-5 w-5 items-center justify-center rounded bg-slate-900 font-mono text-[10px] text-slate-200">
+                <span className="inline-flex h-5 w-5 items-center justify-center rounded bg-slate-100 font-mono text-[10px] text-slate-800">
                   {ICONS[p.id] || p.label.slice(0, 1)}
                 </span>
                 {p.label}

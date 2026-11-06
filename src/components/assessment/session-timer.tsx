@@ -35,7 +35,7 @@ export function SessionTimer(props: {
     return (
       <div
         className={cn(
-          "inline-flex items-center gap-2 rounded-lg border border-slate-700/80 bg-slate-950/80 px-3 py-1.5 font-mono text-xs text-slate-300",
+          "inline-flex items-center gap-2 rounded-lg border border-slate-300/80 bg-white/85 px-3 py-1.5 font-mono text-xs text-slate-700",
           props.className,
         )}
       >
@@ -59,8 +59,8 @@ export function SessionTimer(props: {
           : urgent
             ? "border-amber-500/40 bg-amber-500/10 text-amber-100"
             : warn
-              ? "border-cyan-500/30 bg-cyan-500/5 text-cyan-100"
-              : "border-slate-700/80 bg-slate-950/80 text-slate-200",
+              ? "border-teal-300/60 bg-cyan-500/5 text-teal-900"
+              : "border-slate-300/80 bg-white/85 text-slate-800",
         props.className,
       )}
       role="timer"

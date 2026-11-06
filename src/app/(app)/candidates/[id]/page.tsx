@@ -29,9 +29,9 @@ export default async function CandidateDetailPage({ params }: { params: Promise<
   return (
     <div className="animate-rise space-y-6">
       <header>
-        <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">CANDIDATE DOSSIER</p>
+        <p className="font-mono text-xs tracking-[0.3em] text-teal-700">CANDIDATE DOSSIER</p>
         <h1 className="mt-2 text-2xl font-semibold sm:text-3xl">{candidate.name}</h1>
-        <p className="text-slate-400">{candidate.email}</p>
+        <p className="text-slate-600">{candidate.email}</p>
       </header>
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>
@@ -61,7 +61,7 @@ export default async function CandidateDetailPage({ params }: { params: Promise<
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
             {candidate.assignments.map((a) => (
-              <div key={a.id} className="rounded-lg border border-slate-800 p-3">
+              <div key={a.id} className="rounded-lg border border-slate-200 p-3">
                 <div className="font-medium">{a.assessment.title}</div>
                 <div className="mt-1 flex flex-wrap gap-2">
                   <Badge variant={a.assessment.track === "CYBERSECURITY" ? "violet" : "cyan"}>{a.assessment.track}</Badge>

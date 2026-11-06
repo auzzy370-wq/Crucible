@@ -6,7 +6,7 @@ import { stripeEnabled } from "@/server/saas/stripe";
 export default async function PricingPage() {
   const user = await getSessionUser();
   return (
-    <Suspense fallback={<div className="text-slate-400">Loading pricing…</div>}>
+    <Suspense fallback={<div className="text-slate-600">Loading pricing…</div>}>
       <PricingClient
         premium={isPremium(user)}
         planExpiresAt={user?.planExpiresAt?.toISOString() ?? null}

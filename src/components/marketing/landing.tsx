@@ -26,7 +26,7 @@ export function LandingPage(props: {
             className="landing-anim-ambient absolute bottom-[-25%] right-[-15%] h-[60vh] w-[55vw] rounded-full bg-[radial-gradient(circle,rgba(52,211,153,0.1),transparent_70%)] blur-3xl"
             style={{ animationDelay: "-6s" }}
           />
-          <pre className="landing-anim-plane pointer-events-none absolute inset-0 overflow-hidden px-4 pt-[18vh] font-mono text-[11px] leading-[1.7] text-cyan-200/[0.11] sm:px-10 sm:text-[12px] lg:px-16 lg:text-[13px]">
+          <pre className="landing-anim-plane pointer-events-none absolute inset-0 overflow-hidden px-4 pt-[18vh] font-mono text-[11px] leading-[1.7] text-teal-800/[0.11] sm:px-10 sm:text-[12px] lg:px-16 lg:text-[13px]">
             {`// timed evidence session · shared judge
 export async function listInvoices(orgId: string) {
   // enforce tenant boundary on every read
@@ -50,7 +50,7 @@ await deployCheck();
           </Link>
           <Link
             href="/register"
-            className="inline-flex min-h-10 items-center text-sm font-medium text-[var(--landing-teal)] transition hover:text-white"
+            className="inline-flex min-h-10 items-center text-sm font-medium text-[var(--landing-teal)] transition hover:text-teal-900"
           >
             Start learning
           </Link>
@@ -69,13 +69,13 @@ await deployCheck();
           <div className="landing-anim-cta mt-8 flex w-full flex-col gap-3 sm:mt-10 sm:w-auto sm:flex-row sm:items-center sm:gap-4">
             <Link
               href="/register"
-              className="inline-flex min-h-12 w-full items-center justify-center rounded-md bg-cyan-400 px-6 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300 sm:w-auto"
+              className="inline-flex min-h-12 w-full items-center justify-center rounded-md bg-teal-600 px-6 text-sm font-semibold text-white transition hover:bg-teal-500 sm:w-auto"
             >
               Start learning free
             </Link>
             <Link
               href="/login?intent=hire"
-              className="inline-flex min-h-12 w-full items-center justify-center rounded-md border border-slate-600/80 px-5 text-sm text-slate-100 transition hover:border-slate-400 sm:w-auto"
+              className="inline-flex min-h-12 w-full items-center justify-center rounded-md border border-slate-600/80 px-5 text-sm text-slate-900 transition hover:border-slate-400 sm:w-auto"
             >
               Hire with Crucible
             </Link>
@@ -83,7 +83,7 @@ await deployCheck();
         </div>
       </section>
 
-      <section id="paths" className="relative z-10 border-t border-white/[0.06]">
+      <section id="paths" className="relative z-10 border-t border-slate-200/80">
         <div className="mx-auto grid max-w-[1400px] gap-10 px-6 py-16 sm:px-10 lg:grid-cols-2 lg:gap-16 lg:px-14 lg:py-20">
           <div>
             <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[var(--landing-teal)]">For learners</p>
@@ -92,33 +92,33 @@ await deployCheck();
               Daily sessions, a deep problem bank, study plans, and company-style mocks. You learn by shipping under the
               same judges employers trust — then publish a verified profile.
             </p>
-            <ul className="mt-6 space-y-2 font-mono text-xs text-white/45">
+            <ul className="mt-6 space-y-2 font-mono text-xs text-slate-500">
               <li>1 · Practice timed coding + project missions</li>
               <li>2 · Pass public and hidden judges</li>
               <li>3 · Share evidence employers can open</li>
             </ul>
             <Link
               href="/register"
-              className="mt-8 inline-flex min-h-11 items-center font-mono text-sm text-[var(--landing-teal)] transition hover:text-white"
+              className="mt-8 inline-flex min-h-11 items-center font-mono text-sm text-[var(--landing-teal)] transition hover:text-teal-900"
             >
               Create a learner account →
             </Link>
           </div>
           <div>
-            <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-amber-200/80">For employers</p>
+            <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-amber-800/80">For employers</p>
             <h2 className="mt-3 font-serif-display text-3xl text-[var(--landing-ink)]">A floor to test talent</h2>
             <p className="mt-4 max-w-md text-[15px] leading-relaxed text-[var(--landing-mute)]">
               Assign the work you actually care about. Watch candidates build in isolated workspaces, run hidden
               harnesses, and collect scorecards — humans still make the hire call.
             </p>
-            <ul className="mt-6 space-y-2 font-mono text-xs text-white/45">
+            <ul className="mt-6 space-y-2 font-mono text-xs text-slate-500">
               <li>1 · Create a timed assessment from the bank</li>
               <li>2 · Assign candidates and review evidence</li>
               <li>3 · Qualify with documented human review</li>
             </ul>
             <Link
               href="/login?intent=hire"
-              className="mt-8 inline-flex min-h-11 items-center font-mono text-sm text-amber-200/90 transition hover:text-white"
+              className="mt-8 inline-flex min-h-11 items-center font-mono text-sm text-amber-800 transition hover:text-amber-950"
             >
               Enter as hiring team →
             </Link>
@@ -126,28 +126,28 @@ await deployCheck();
         </div>
       </section>
 
-      <section className="relative z-10 border-t border-white/[0.06]">
+      <section className="relative z-10 border-t border-slate-200/80">
         <div className="mx-auto flex max-w-[1400px] flex-col gap-8 px-6 py-14 sm:px-10 lg:flex-row lg:items-end lg:justify-between lg:px-14">
           <div>
-            <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-white/35">Shared proof</p>
+            <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-slate-500">Shared proof</p>
             <p className="mt-3 max-w-xl font-serif-display text-2xl leading-snug text-[var(--landing-ink)] sm:text-3xl">
               {skills} verified skills · {timed}-minute sessions · human review
             </p>
           </div>
           <Link
             href={`/u/${sampleSlug}`}
-            className="font-mono text-sm text-[var(--landing-teal)] transition hover:text-white"
+            className="font-mono text-sm text-[var(--landing-teal)] transition hover:text-teal-900"
           >
             Open a live qualification profile →
           </Link>
         </div>
-        <p className="mx-auto max-w-[1400px] px-6 pb-6 font-mono text-[11px] text-white/25 sm:px-10 lg:px-14">
+        <p className="mx-auto max-w-[1400px] px-6 pb-6 font-mono text-[11px] text-slate-500 sm:px-10 lg:px-14">
           {profiles} public {profiles === 1 ? "profile" : "profiles"} published · learners and hiring teams share one
           evidence standard
         </p>
       </section>
 
-      <section className="relative z-10 border-t border-white/[0.06] bg-black/20">
+      <section className="relative z-10 border-t border-slate-200/80 bg-teal-50/40">
         <div className="mx-auto grid max-w-[1400px] gap-12 px-6 py-20 sm:grid-cols-3 sm:px-10 lg:px-14">
           {[
             {

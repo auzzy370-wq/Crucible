@@ -40,11 +40,11 @@ function BarRow({ label, value, max, mono }: { label: string; value: number; max
   return (
     <div className="space-y-1">
       <div className="flex items-center justify-between gap-2 text-sm">
-        <span className={mono ? "font-mono text-xs text-slate-400" : "capitalize text-slate-400"}>{label}</span>
-        <span className="font-mono text-slate-100">{value}</span>
+        <span className={mono ? "font-mono text-xs text-slate-600" : "capitalize text-slate-600"}>{label}</span>
+        <span className="font-mono text-slate-900">{value}</span>
       </div>
-      <div className="h-2 overflow-hidden rounded-full bg-slate-900">
-        <div className="h-full rounded-full bg-cyan-400/70 transition-all" style={{ width: `${pct}%` }} />
+      <div className="h-2 overflow-hidden rounded-full bg-slate-100">
+        <div className="h-full rounded-full bg-teal-500/70 transition-all" style={{ width: `${pct}%` }} />
       </div>
     </div>
   );
@@ -60,7 +60,7 @@ function SparkBars({ points }: { points: { date: string; value: number }[] }) {
       {points.map((p) => (
         <div key={p.date} className="group relative flex-1" title={`${p.date}: ${p.value}`}>
           <div
-            className="w-full rounded-t-sm bg-cyan-400/60 transition group-hover:bg-cyan-300"
+            className="w-full rounded-t-sm bg-teal-500/60 transition group-hover:bg-cyan-300"
             style={{ height: `${Math.max(4, Math.round((p.value / max) * 100))}%` }}
           />
         </div>
@@ -95,7 +95,7 @@ export function AnalyticsPanel({ data, compact }: { data: AnalyticsData; compact
           <Card key={t.label}>
             <CardContent className="pt-5">
               <div className="text-xs uppercase tracking-wider text-slate-500">{t.label}</div>
-              <div className="mt-1 font-mono text-2xl text-slate-50">{t.value ?? "—"}</div>
+              <div className="mt-1 font-mono text-2xl text-slate-900">{t.value ?? "—"}</div>
             </CardContent>
           </Card>
         ))}
@@ -207,7 +207,7 @@ export function AnalyticsPanel({ data, compact }: { data: AnalyticsData; compact
               {(data.topAssessments ?? []).map((a) => (
                 <div
                   key={`${a.title}-${a.slug}`}
-                  className="flex items-center justify-between gap-2 rounded-lg border border-slate-800 px-3 py-2 text-sm"
+                  className="flex items-center justify-between gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm"
                 >
                   <div className="min-w-0">
                     <div className="truncate font-medium">{a.title}</div>
@@ -215,7 +215,7 @@ export function AnalyticsPanel({ data, compact }: { data: AnalyticsData; compact
                       {a.slug} · {a.type} · {a.track}
                     </div>
                   </div>
-                  <span className="font-mono text-cyan-200">{a.count}</span>
+                  <span className="font-mono text-teal-800">{a.count}</span>
                 </div>
               ))}
               {!(data.topAssessments ?? []).length && <p className="text-sm text-slate-500">No volume yet.</p>}
@@ -238,7 +238,7 @@ export function AnalyticsPanel({ data, compact }: { data: AnalyticsData; compact
               </div>
               <div className="grid grid-cols-2 gap-2">
                 {Object.entries(data.authActivity ?? {}).map(([k, v]) => (
-                  <div key={k} className="flex justify-between rounded-lg border border-slate-800 px-3 py-2">
+                  <div key={k} className="flex justify-between rounded-lg border border-slate-200 px-3 py-2">
                     <span className="font-mono text-[11px] text-slate-500">{k}</span>
                     <span className="font-mono">{v}</span>
                   </div>

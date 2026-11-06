@@ -36,9 +36,9 @@ export function LeaderboardsClient() {
   return (
     <div className="animate-rise space-y-6">
       <header>
-        <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">RANKINGS</p>
+        <p className="font-mono text-xs tracking-[0.3em] text-teal-700">RANKINGS</p>
         <h1 className="mt-2 font-serif-display text-2xl sm:text-3xl">Global leaderboards</h1>
-        <p className="mt-2 max-w-2xl text-slate-400">
+        <p className="mt-2 max-w-2xl text-slate-600">
           Separate boards for humans, AI models, and teams. Verified results are distinguished from experimental
           runs — a single AI miss never claims incapability.
         </p>
@@ -58,7 +58,7 @@ export function LeaderboardsClient() {
             onClick={() => setTab(id)}
             className={cn(
               "rounded-lg border px-3 py-2 text-sm",
-              tab === id ? "border-cyan-400/40 bg-cyan-500/10 text-cyan-100" : "border-slate-700 text-slate-400",
+              tab === id ? "border-teal-400/50 bg-teal-500/10 text-teal-900" : "border-slate-300 text-slate-600",
             )}
           >
             {label}
@@ -74,9 +74,9 @@ export function LeaderboardsClient() {
       {loading ? (
         <p className="text-slate-500">Loading standings…</p>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-slate-800">
+        <div className="overflow-x-auto rounded-xl border border-slate-200">
           <table className="w-full min-w-[640px] text-left text-sm">
-            <thead className="border-b border-slate-800 bg-slate-950/80 text-xs uppercase tracking-wider text-slate-500">
+            <thead className="border-b border-slate-200 bg-white/85 text-xs uppercase tracking-wider text-slate-500">
               <tr>
                 <th className="px-4 py-3">Rank</th>
                 <th className="px-4 py-3">{tab === "ai" ? "Model" : tab === "team" ? "Team" : "Competitor"}</th>
@@ -86,17 +86,17 @@ export function LeaderboardsClient() {
             </thead>
             <tbody>
               {rows.map((r) => (
-                <tr key={r.rank + (r.userId || r.modelId || r.teamId)} className="border-b border-slate-800/80">
+                <tr key={r.rank + (r.userId || r.modelId || r.teamId)} className="border-b border-slate-200/80">
                   <td className="px-4 py-3 font-mono text-slate-500">#{r.rank}</td>
                   <td className="px-4 py-3">
-                    <div className="font-medium text-slate-100">
+                    <div className="font-medium text-slate-900">
                       {r.name || r.displayName || "—"}
                     </div>
                     <div className="font-mono text-[11px] text-slate-500">
                       {r.provider || r.contest || r.assessmentTitle || r.publicSlug || ""}
                     </div>
                   </td>
-                  <td className="px-4 py-3 font-mono text-cyan-100">
+                  <td className="px-4 py-3 font-mono text-teal-900">
                     {tab === "ai"
                       ? `${r.accuracyPct}%`
                       : tab === "team"

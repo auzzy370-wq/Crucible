@@ -187,7 +187,7 @@ export function AiVsHumanClient() {
       <header>
         <p className="font-mono text-xs tracking-[0.3em] text-violet-300">AI × HUMAN</p>
         <h1 className="mt-2 font-serif-display text-2xl sm:text-3xl">AI vs Human benchmarks</h1>
-        <p className="mt-2 max-w-2xl text-slate-400">
+        <p className="mt-2 max-w-2xl text-slate-600">
           Pick a curated coding problem, submit to a free model, and the same public + hidden harnesses that grade
           humans run on the model&apos;s code.
         </p>
@@ -223,11 +223,11 @@ export function AiVsHumanClient() {
         </div>
       )}
 
-      <section className="grid gap-4 rounded-xl border border-slate-800 p-4 sm:grid-cols-2">
+      <section className="grid gap-4 rounded-xl border border-slate-200 p-4 sm:grid-cols-2">
         <label className="block text-sm">
-          <span className="text-slate-400">Challenge (judgable only)</span>
+          <span className="text-slate-600">Challenge (judgable only)</span>
           <select
-            className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2"
+            className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2"
             value={challengeId}
             onChange={(e) => {
               setChallengeId(e.target.value);
@@ -245,9 +245,9 @@ export function AiVsHumanClient() {
           {selected?.summary && <p className="mt-1 text-xs text-slate-500">{selected.summary}</p>}
         </label>
         <label className="block text-sm">
-          <span className="text-slate-400">AI model</span>
+          <span className="text-slate-600">AI model</span>
           <select
-            className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2"
+            className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2"
             value={modelId}
             onChange={(e) => setModelId(e.target.value)}
           >
@@ -279,7 +279,7 @@ export function AiVsHumanClient() {
           </span>
           {sweepProgress && (
             <div className="sm:col-span-2 space-y-1">
-              <div className="flex justify-between text-[11px] text-slate-400">
+              <div className="flex justify-between text-[11px] text-slate-600">
                 <span className="truncate pr-2">
                   {sweepProgress.current ? `Testing · ${sweepProgress.current}` : "Starting suites…"}
                 </span>
@@ -287,7 +287,7 @@ export function AiVsHumanClient() {
                   {sweepProgress.done}/{sweepProgress.total}
                 </span>
               </div>
-              <div className="h-2 overflow-hidden rounded-full bg-slate-900">
+              <div className="h-2 overflow-hidden rounded-full bg-slate-100">
                 <div
                   className="h-full rounded-full bg-violet-500/80 transition-all"
                   style={{
@@ -329,9 +329,9 @@ export function AiVsHumanClient() {
       )}
 
       {humanCompare[0] && (
-        <div className="rounded-xl border border-slate-800 px-4 py-3 text-sm text-slate-300">
+        <div className="rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-700">
           Human hidden-suite acceptance on this challenge:{" "}
-          <span className="font-mono text-cyan-200">
+          <span className="font-mono text-teal-800">
             {humanCompare[0].humanAcceptancePct ?? "—"}%
           </span>{" "}
           ({humanCompare[0].submissions} jobs)
@@ -339,10 +339,10 @@ export function AiVsHumanClient() {
       )}
 
       <section>
-        <h2 className="mb-2 text-sm font-semibold text-slate-200">Recent AI runs</h2>
-        <div className="overflow-x-auto rounded-xl border border-slate-800">
+        <h2 className="mb-2 text-sm font-semibold text-slate-800">Recent AI runs</h2>
+        <div className="overflow-x-auto rounded-xl border border-slate-200">
           <table className="w-full min-w-[720px] text-left text-sm">
-            <thead className="border-b border-slate-800 text-xs uppercase tracking-wider text-slate-500">
+            <thead className="border-b border-slate-200 text-xs uppercase tracking-wider text-slate-500">
               <tr>
                 <th className="px-3 py-2">Model</th>
                 <th className="px-3 py-2">Challenge</th>
@@ -353,7 +353,7 @@ export function AiVsHumanClient() {
             </thead>
             <tbody>
               {runs.map((r) => (
-                <tr key={r.id} className="border-b border-slate-800/80 align-top">
+                <tr key={r.id} className="border-b border-slate-200/80 align-top">
                   <td className="px-3 py-2">{r.aiModel?.displayName ?? "—"}</td>
                   <td className="px-3 py-2">
                     {r.challenge?.title ?? "—"}

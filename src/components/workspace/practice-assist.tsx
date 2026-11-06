@@ -181,8 +181,8 @@ export function PracticeAssist(props: {
   ] as const;
 
   return (
-    <div className="rounded-xl border border-slate-800 bg-slate-950/50">
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 px-3 py-2">
+    <div className="rounded-xl border border-slate-200 bg-white/70">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 px-3 py-2">
         <div className="flex flex-wrap gap-1">
           {tabs.map(([id, label]) => (
             <button
@@ -190,7 +190,7 @@ export function PracticeAssist(props: {
               type="button"
               className={cn(
                 "rounded-md px-2.5 py-1 text-xs",
-                tab === id ? "bg-cyan-500/15 text-cyan-100" : "text-slate-500 hover:text-slate-300",
+                tab === id ? "bg-cyan-500/15 text-teal-900" : "text-slate-500 hover:text-slate-700",
               )}
               onClick={() => setTab(id)}
             >
@@ -205,7 +205,7 @@ export function PracticeAssist(props: {
             "rounded-md border px-2 py-1 text-xs",
             bookmarked
               ? "border-amber-500/40 bg-amber-500/10 text-amber-100"
-              : "border-slate-700 text-slate-400 hover:text-slate-200",
+              : "border-slate-300 text-slate-600 hover:text-slate-800",
           )}
           title={bookmarked ? "Remove bookmark" : "Bookmark problem"}
         >
@@ -222,13 +222,13 @@ export function PracticeAssist(props: {
               Progressive hints — reveal one at a time. Official grading never uses these.
             </p>
             {data.stats.live && data.stats.acceptancePct != null && (
-              <p className="font-mono text-[11px] text-slate-400">
+              <p className="font-mono text-[11px] text-slate-600">
                 Live acceptance {data.stats.acceptancePct}% · {data.stats.accepted}/{data.stats.submissions}{" "}
                 hidden submits
               </p>
             )}
             {data.hints.slice(0, hintReveal).map((h, i) => (
-              <div key={i} className="rounded-lg border border-slate-800 bg-black/30 px-3 py-2 text-slate-300">
+              <div key={i} className="rounded-lg border border-slate-200 bg-black/30 px-3 py-2 text-slate-700">
                 <span className="font-mono text-[10px] text-slate-500">Hint {i + 1}</span>
                 <p className="mt-1">{h}</p>
               </div>
@@ -251,7 +251,7 @@ export function PracticeAssist(props: {
               {data.history.map((h) => (
                 <li
                   key={h.id}
-                  className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-slate-800 px-2.5 py-1.5 font-mono text-[11px] text-slate-300"
+                  className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-slate-200 px-2.5 py-1.5 font-mono text-[11px] text-slate-700"
                 >
                   <span>
                     {h.type} · {h.status}
@@ -271,9 +271,9 @@ export function PracticeAssist(props: {
         {!loading && tab === "custom" && (
           <div className="space-y-2">
             <p className="text-xs text-slate-500">
-              JSON array of cases: <code className="text-cyan-200">args</code> passed to{" "}
-              <code className="text-cyan-200">solve(...)</code>. Optional{" "}
-              <code className="text-cyan-200">expected</code>. Not used for grading.
+              JSON array of cases: <code className="text-teal-800">args</code> passed to{" "}
+              <code className="text-teal-800">solve(...)</code>. Optional{" "}
+              <code className="text-teal-800">expected</code>. Not used for grading.
             </p>
             <Textarea
               className="min-h-[140px] font-mono text-xs"
@@ -290,10 +290,10 @@ export function PracticeAssist(props: {
           <ul className="space-y-2">
             {!data.related.length && <p className="text-slate-500">No related problems yet.</p>}
             {data.related.map((r) => (
-              <li key={r.id} className="rounded-lg border border-slate-800 px-3 py-2">
+              <li key={r.id} className="rounded-lg border border-slate-200 px-3 py-2">
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <div className="text-slate-100">{r.title}</div>
+                    <div className="text-slate-900">{r.title}</div>
                     <div className="mt-0.5 font-mono text-[10px] text-slate-500">
                       {difficultyBand(r.difficulty)} · {r.tags.filter((t) => t !== "coding").slice(0, 3).join(", ")}
                     </div>
@@ -324,16 +324,16 @@ export function PracticeAssist(props: {
             <ul className="max-h-64 space-y-2 overflow-y-auto">
               {!discussPosts.length && <li className="text-slate-500">No discussion yet — start the thread.</li>}
               {discussPosts.map((p) => (
-                <li key={p.id} className="rounded-lg border border-slate-800 px-3 py-2">
+                <li key={p.id} className="rounded-lg border border-slate-200 px-3 py-2">
                   <div className="flex items-center justify-between gap-2 text-[11px] text-slate-500">
                     <span>{p.author.name}</span>
                     <span>{new Date(p.createdAt).toLocaleString()}</span>
                   </div>
-                  <p className="mt-1 whitespace-pre-wrap text-slate-300">{p.body}</p>
+                  <p className="mt-1 whitespace-pre-wrap text-slate-700">{p.body}</p>
                   {p.replies?.length ? (
-                    <ul className="mt-2 space-y-1 border-l border-slate-800 pl-3">
+                    <ul className="mt-2 space-y-1 border-l border-slate-200 pl-3">
                       {p.replies.map((r) => (
-                        <li key={r.id} className="text-xs text-slate-400">
+                        <li key={r.id} className="text-xs text-slate-600">
                           <span className="text-slate-500">{r.author.name}: </span>
                           {r.body}
                         </li>

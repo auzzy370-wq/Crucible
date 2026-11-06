@@ -345,9 +345,9 @@ export function AdminClient() {
   return (
     <div className="animate-rise space-y-6">
       <header>
-        <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">SUPER ADMIN</p>
+        <p className="font-mono text-xs tracking-[0.3em] text-teal-700">SUPER ADMIN</p>
         <h1 className="mt-2 text-2xl font-semibold sm:text-3xl">Platform control plane</h1>
-        <p className="mt-2 max-w-3xl text-slate-400">
+        <p className="mt-2 max-w-3xl text-slate-600">
           Users, assignments, challenge library, execution queue, AI providers, audit trail, and system posture —
           everything needed to operate Crucible.
         </p>
@@ -362,8 +362,8 @@ export function AdminClient() {
             className={cn(
               "shrink-0 rounded-md border px-3 py-2 text-sm",
               tab === t.id
-                ? "border-cyan-400/40 bg-cyan-500/10 text-cyan-100"
-                : "border-slate-800 text-slate-400 hover:bg-slate-900",
+                ? "border-teal-400/50 bg-teal-500/10 text-teal-900"
+                : "border-slate-200 text-slate-600 hover:bg-slate-100",
             )}
           >
             {t.label}
@@ -387,7 +387,7 @@ export function AdminClient() {
               <Card key={t.label}>
                 <CardContent className="pt-5">
                   <div className="text-xs uppercase tracking-wider text-slate-500">{t.label}</div>
-                  <div className="mt-1 font-mono text-2xl text-slate-50">{t.value ?? "—"}</div>
+                  <div className="mt-1 font-mono text-2xl text-slate-900">{t.value ?? "—"}</div>
                 </CardContent>
               </Card>
             ))}
@@ -400,8 +400,8 @@ export function AdminClient() {
               </CardHeader>
               <CardContent className="grid grid-cols-2 gap-2 text-sm">
                 {Object.entries(overview.usersByRole ?? {}).map(([k, v]) => (
-                  <div key={k} className="flex justify-between rounded-lg border border-slate-800 px-3 py-2">
-                    <span className="text-slate-400">{k}</span>
+                  <div key={k} className="flex justify-between rounded-lg border border-slate-200 px-3 py-2">
+                    <span className="text-slate-600">{k}</span>
                     <span className="font-mono">{String(v)}</span>
                   </div>
                 ))}
@@ -413,8 +413,8 @@ export function AdminClient() {
               </CardHeader>
               <CardContent className="grid grid-cols-2 gap-2 text-sm">
                 {Object.entries(overview.jobs ?? {}).map(([k, v]) => (
-                  <div key={k} className="flex justify-between rounded-lg border border-slate-800 px-3 py-2">
-                    <span className="text-slate-400">{k}</span>
+                  <div key={k} className="flex justify-between rounded-lg border border-slate-200 px-3 py-2">
+                    <span className="text-slate-600">{k}</span>
                     <span className="font-mono">{String(v)}</span>
                   </div>
                 ))}
@@ -431,7 +431,7 @@ export function AdminClient() {
                 {(overview.recentUsers ?? []).map((u: any) => (
                   <div
                     key={u.id}
-                    className="flex items-center justify-between gap-2 rounded-lg border border-slate-800 px-3 py-2 text-sm"
+                    className="flex items-center justify-between gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm"
                   >
                     <div className="min-w-0">
                       <div className="truncate font-medium">{u.name}</div>
@@ -451,9 +451,9 @@ export function AdminClient() {
               </CardHeader>
               <CardContent className="space-y-2">
                 {(overview.recentAudits ?? []).map((l: any) => (
-                  <div key={l.id} className="rounded-lg border border-slate-800 px-3 py-2 text-sm">
-                    <div className="font-mono text-xs text-cyan-200">{l.action}</div>
-                    <div className="text-slate-400">
+                  <div key={l.id} className="rounded-lg border border-slate-200 px-3 py-2 text-sm">
+                    <div className="font-mono text-xs text-teal-800">{l.action}</div>
+                    <div className="text-slate-600">
                       {l.actor?.name ?? "system"} · {l.entityType}
                       {l.entityId ? ` · ${String(l.entityId).slice(0, 12)}` : ""}
                     </div>
@@ -467,13 +467,13 @@ export function AdminClient() {
           </section>
 
           <div className="flex flex-wrap gap-3 text-sm">
-            <Link href="/assessments" className="text-cyan-300 hover:underline">
+            <Link href="/assessments" className="text-teal-700 hover:underline">
               Assessments →
             </Link>
-            <Link href="/reviews" className="text-cyan-300 hover:underline">
+            <Link href="/reviews" className="text-teal-700 hover:underline">
               Review queue →
             </Link>
-            <Link href="/challenges" className="text-cyan-300 hover:underline">
+            <Link href="/challenges" className="text-teal-700 hover:underline">
               Challenge bank →
             </Link>
           </div>
@@ -483,15 +483,15 @@ export function AdminClient() {
       {tab === "analytics" && (
         <div className="space-y-4">
           <div>
-            <h2 className="text-lg font-medium text-slate-100">Platform analytics</h2>
-            <p className="text-sm text-slate-400">
+            <h2 className="text-lg font-medium text-slate-900">Platform analytics</h2>
+            <p className="text-sm text-slate-600">
               Qualification funnel, score distributions, track health, and 30-day activity — Super Admin only.
             </p>
           </div>
           {analytics ? (
             <AnalyticsPanel data={analytics} />
           ) : (
-            <p className="text-slate-400">Loading analytics…</p>
+            <p className="text-slate-600">Loading analytics…</p>
           )}
         </div>
       )}
@@ -513,7 +513,7 @@ export function AdminClient() {
                 className="sm:max-w-sm"
               />
               <select
-                className="h-11 rounded-md border border-slate-700 bg-slate-950 px-3 text-sm"
+                className="h-11 rounded-md border border-slate-300 bg-white px-3 text-sm"
                 value={userRole}
                 onChange={(e) => setUserRole(e.target.value)}
               >
@@ -530,10 +530,10 @@ export function AdminClient() {
             </div>
             <div className="space-y-2">
               {users.map((u) => (
-                <div key={u.id} className="rounded-xl border border-slate-800 p-4">
+                <div key={u.id} className="rounded-xl border border-slate-200 p-4">
                   <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                     <div className="min-w-0">
-                      <div className="font-medium text-slate-100">{u.name}</div>
+                      <div className="font-medium text-slate-900">{u.name}</div>
                       <div className="truncate font-mono text-xs text-slate-500">{u.email}</div>
                       <div className="mt-1 font-mono text-[11px] text-slate-600">
                         {u._count.assignments} assignments · {u._count.reviews} reviews · {u._count.sessions} sessions
@@ -541,7 +541,7 @@ export function AdminClient() {
                     </div>
                     <div className="flex flex-wrap gap-2">
                       <select
-                        className="h-10 rounded-md border border-slate-700 bg-slate-950 px-2 text-xs"
+                        className="h-10 rounded-md border border-slate-300 bg-white px-2 text-xs"
                         value={u.role}
                         disabled={busy}
                         onChange={(e) => void patchUser(u.id, { role: e.target.value })}
@@ -553,7 +553,7 @@ export function AdminClient() {
                         ))}
                       </select>
                       <select
-                        className="h-10 rounded-md border border-slate-700 bg-slate-950 px-2 text-xs"
+                        className="h-10 rounded-md border border-slate-300 bg-white px-2 text-xs"
                         value={u.plan}
                         disabled={busy}
                         onChange={(e) => void patchUser(u.id, { plan: e.target.value })}
@@ -599,7 +599,7 @@ export function AdminClient() {
                   className="sm:max-w-sm"
                 />
                 <select
-                  className="h-11 rounded-md border border-slate-700 bg-slate-950 px-3 text-sm"
+                  className="h-11 rounded-md border border-slate-300 bg-white px-3 text-sm"
                   value={assignStatus}
                   onChange={(e) => setAssignStatus(e.target.value)}
                 >
@@ -616,11 +616,11 @@ export function AdminClient() {
               </div>
               <div className="space-y-2">
                 {(assignments?.assignments ?? []).map((row: any) => (
-                  <div key={row.id} className="rounded-xl border border-slate-800 p-4 text-sm">
+                  <div key={row.id} className="rounded-xl border border-slate-200 p-4 text-sm">
                     <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                       <div className="min-w-0 space-y-1">
-                        <div className="font-medium text-slate-100">{row.assessment.title}</div>
-                        <div className="text-slate-400">
+                        <div className="font-medium text-slate-900">{row.assessment.title}</div>
+                        <div className="text-slate-600">
                           {row.candidate.name} ·{" "}
                           <span className="font-mono text-xs">{row.candidate.email}</span>
                         </div>
@@ -635,18 +635,18 @@ export function AdminClient() {
                           {row.workspace?.id && (
                             <Link
                               href={`/workspace/${row.workspace.id}`}
-                              className="text-xs text-cyan-300 hover:underline"
+                              className="text-xs text-teal-700 hover:underline"
                             >
                               Workspace →
                             </Link>
                           )}
-                          <Link href={`/scorecards/${row.id}`} className="text-xs text-cyan-300 hover:underline">
+                          <Link href={`/scorecards/${row.id}`} className="text-xs text-teal-700 hover:underline">
                             Scorecard →
                           </Link>
                         </div>
                       </div>
                       <select
-                        className="h-10 rounded-md border border-slate-700 bg-slate-950 px-2 text-xs"
+                        className="h-10 rounded-md border border-slate-300 bg-white px-2 text-xs"
                         value={row.status}
                         disabled={busy}
                         onChange={(e) => void patchAssignment(row.id, { status: e.target.value })}
@@ -697,7 +697,7 @@ export function AdminClient() {
                   className="sm:max-w-sm"
                 />
                 <select
-                  className="h-11 rounded-md border border-slate-700 bg-slate-950 px-3 text-sm"
+                  className="h-11 rounded-md border border-slate-300 bg-white px-3 text-sm"
                   value={libPublished}
                   onChange={(e) => setLibPublished(e.target.value)}
                 >
@@ -711,17 +711,17 @@ export function AdminClient() {
                 <Button variant="outline" disabled={busy} onClick={() => void scanIntegrityLibrary()}>
                   Scan integrity
                 </Button>
-                <Link href="/challenges" className="self-center text-sm text-cyan-300 hover:underline">
+                <Link href="/challenges" className="self-center text-sm text-teal-700 hover:underline">
                   Open bank →
                 </Link>
               </div>
               <div className="space-y-2">
                 {!library && <p className="text-slate-500">Loading challenge library…</p>}
                 {(library?.challenges ?? []).map((c: any) => (
-                  <div key={c.id} className="rounded-xl border border-slate-800 p-4 text-sm">
+                  <div key={c.id} className="rounded-xl border border-slate-200 p-4 text-sm">
                     <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                       <div className="min-w-0">
-                        <div className="font-medium text-slate-100">{c.title}</div>
+                        <div className="font-medium text-slate-900">{c.title}</div>
                         <div className="font-mono text-[11px] text-slate-500">
                           {c.slug} · {c.type} · {c.track} · {c._count.assessments} assessments
                         </div>
@@ -777,7 +777,7 @@ export function AdminClient() {
                           {c.isPremium ? "Make free" : "Make premium"}
                         </Button>
                         <select
-                          className="h-9 rounded-md border border-slate-700 bg-slate-950 px-2 text-xs"
+                          className="h-9 rounded-md border border-slate-300 bg-white px-2 text-xs"
                           value={c.difficulty}
                           disabled={busy}
                           onChange={(e) => void patchChallenge(c.id, { difficulty: Number(e.target.value) })}
@@ -796,17 +796,17 @@ export function AdminClient() {
               </div>
 
               {integrityDetail && (
-                <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-4 text-sm">
+                <div className="rounded-xl border border-slate-200 bg-white/75 p-4 text-sm">
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <div className="font-medium text-slate-100">
+                    <div className="font-medium text-slate-900">
                       Last scan · {integrityDetail.slug} ·{" "}
                       <span
                         className={cn(
                           integrityDetail.status === "pass"
                             ? "text-emerald-300"
                             : integrityDetail.status === "fail"
-                              ? "text-rose-300"
-                              : "text-amber-200",
+                              ? "text-rose-700"
+                              : "text-amber-800",
                         )}
                       >
                         {integrityDetail.status}
@@ -833,7 +833,7 @@ export function AdminClient() {
                             ? "border-rose-500/30 text-rose-100"
                             : f.severity === "warning"
                               ? "border-amber-500/30 text-amber-50"
-                              : "border-slate-800 text-slate-400",
+                              : "border-slate-200 text-slate-600",
                         )}
                       >
                         [{f.severity}] {f.code}: {f.message}
@@ -846,13 +846,13 @@ export function AdminClient() {
                 </div>
               )}
 
-              <div className="border-t border-slate-800 pt-4">
-                <h3 className="mb-3 text-sm font-medium text-slate-200">Recent assessments</h3>
+              <div className="border-t border-slate-200 pt-4">
+                <h3 className="mb-3 text-sm font-medium text-slate-800">Recent assessments</h3>
                 <div className="space-y-2">
                   {(library?.assessments ?? []).map((a: any) => (
                     <div
                       key={a.id}
-                      className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-slate-800 px-3 py-2 text-sm"
+                      className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm"
                     >
                       <div className="min-w-0">
                         <div className="truncate font-medium">{a.title}</div>
@@ -893,24 +893,24 @@ export function AdminClient() {
               {integrity && (
                 <div className="grid gap-3 sm:grid-cols-4">
                   {["pass", "warn", "fail", "unknown"].map((k) => (
-                    <div key={k} className="rounded-xl border border-slate-800 px-4 py-3">
+                    <div key={k} className="rounded-xl border border-slate-200 px-4 py-3">
                       <div className="text-[10px] uppercase tracking-wider text-slate-500">{k}</div>
-                      <div className="font-mono text-xl text-slate-100">{integrity.counts?.[k] ?? 0}</div>
+                      <div className="font-mono text-xl text-slate-900">{integrity.counts?.[k] ?? 0}</div>
                     </div>
                   ))}
                 </div>
               )}
               <div>
-                <h3 className="mb-2 text-sm font-medium text-slate-200">Needs attention</h3>
+                <h3 className="mb-2 text-sm font-medium text-slate-800">Needs attention</h3>
                 <div className="space-y-2">
                   {!integrity && <p className="text-slate-500">Loading…</p>}
                   {(integrity?.worst ?? []).map((c: any) => (
                     <div
                       key={c.id}
-                      className="flex flex-col gap-2 rounded-lg border border-slate-800 px-3 py-2 text-sm sm:flex-row sm:items-center sm:justify-between"
+                      className="flex flex-col gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm sm:flex-row sm:items-center sm:justify-between"
                     >
                       <div className="min-w-0">
-                        <div className="font-medium text-slate-100">{c.title}</div>
+                        <div className="font-medium text-slate-900">{c.title}</div>
                         <div className="font-mono text-[11px] text-slate-500">
                           {c.slug} · labeled {c.difficulty}
                           {c.calibratedDifficulty != null ? ` · cal ${c.calibratedDifficulty}` : ""}
@@ -975,7 +975,7 @@ export function AdminClient() {
               {(jobs.recent ?? []).map((j: any) => (
                 <div
                   key={j.id}
-                  className="flex flex-col gap-2 rounded-lg border border-slate-800 px-3 py-2 text-sm sm:flex-row sm:items-center sm:justify-between"
+                  className="flex flex-col gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm sm:flex-row sm:items-center sm:justify-between"
                 >
                   <div className="min-w-0">
                     <div className="flex flex-wrap gap-2">
@@ -1022,7 +1022,7 @@ export function AdminClient() {
             </CardHeader>
             <CardContent className="space-y-3">
               {providers.map((p) => (
-                <div key={p.id} className="rounded-lg border border-slate-800 p-3 text-sm">
+                <div key={p.id} className="rounded-lg border border-slate-200 p-3 text-sm">
                   <div className="font-medium">{p.name}</div>
                   <div className="font-mono text-xs text-slate-500">
                     {p.model} · {p.baseUrl}
@@ -1088,12 +1088,12 @@ export function AdminClient() {
             </div>
             <div className="space-y-2">
               {audits.map((l) => (
-                <div key={l.id} className="rounded-lg border border-slate-800 px-3 py-2 text-sm">
+                <div key={l.id} className="rounded-lg border border-slate-200 px-3 py-2 text-sm">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-mono text-cyan-200">{l.action}</span>
+                    <span className="font-mono text-teal-800">{l.action}</span>
                     <Badge>{l.entityType}</Badge>
                   </div>
-                  <div className="mt-1 text-slate-400">
+                  <div className="mt-1 text-slate-600">
                     {l.actor ? `${l.actor.name} (${l.actor.role})` : "system"}
                     {l.entityId ? ` · ${l.entityId}` : ""}
                   </div>
@@ -1121,10 +1121,10 @@ export function AdminClient() {
               {Object.entries(overview.system ?? {}).map(([k, v]) => (
                 <div
                   key={k}
-                  className="flex items-center justify-between rounded-lg border border-slate-800 px-3 py-2 text-sm"
+                  className="flex items-center justify-between rounded-lg border border-slate-200 px-3 py-2 text-sm"
                 >
                   <span className="font-mono text-xs text-slate-500">{k}</span>
-                  <span className="font-mono text-slate-200">{String(v)}</span>
+                  <span className="font-mono text-slate-800">{String(v)}</span>
                 </div>
               ))}
             </CardContent>
@@ -1133,7 +1133,7 @@ export function AdminClient() {
             <CardHeader>
               <CardTitle>Security posture</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2 text-sm text-slate-400">
+            <CardContent className="space-y-2 text-sm text-slate-600">
               <p>
                 Candidate code runs in disposable sandboxes with CPU/memory/timeouts and restricted networking. Docker
                 sockets must not be exposed to candidate workloads. Controlled-vuln labs stay isolated and never target
@@ -1146,7 +1146,7 @@ export function AdminClient() {
               </p>
               <p>
                 Avg overall score across reports:{" "}
-                <span className="font-mono text-cyan-200">{formatScore(a?.averageScores?.overall ?? 0)}</span>
+                <span className="font-mono text-teal-800">{formatScore(a?.averageScores?.overall ?? 0)}</span>
               </p>
             </CardContent>
           </Card>
@@ -1155,19 +1155,19 @@ export function AdminClient() {
               <CardTitle>Quick ops links</CardTitle>
             </CardHeader>
             <CardContent className="flex flex-wrap gap-3 text-sm">
-              <Link href="/assessments" className="text-cyan-300 hover:underline">
+              <Link href="/assessments" className="text-teal-700 hover:underline">
                 Assessments →
               </Link>
-              <Link href="/candidates" className="text-cyan-300 hover:underline">
+              <Link href="/candidates" className="text-teal-700 hover:underline">
                 Candidates →
               </Link>
-              <Link href="/reviews" className="text-cyan-300 hover:underline">
+              <Link href="/reviews" className="text-teal-700 hover:underline">
                 Reviews →
               </Link>
-              <Link href="/teams" className="text-cyan-300 hover:underline">
+              <Link href="/teams" className="text-teal-700 hover:underline">
                 Teams →
               </Link>
-              <Link href="/architecture" className="text-cyan-300 hover:underline">
+              <Link href="/architecture" className="text-teal-700 hover:underline">
                 Architecture →
               </Link>
             </CardContent>
@@ -1175,7 +1175,7 @@ export function AdminClient() {
         </div>
       )}
 
-      {tab === "overview" && !overview && <p className="text-slate-400">Loading control plane…</p>}
+      {tab === "overview" && !overview && <p className="text-slate-600">Loading control plane…</p>}
     </div>
   );
 }
