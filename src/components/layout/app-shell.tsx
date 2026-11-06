@@ -29,6 +29,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
+import { CrucibleLockup } from "@/components/brand/crucible-lockup";
 
 type NavItem = {
   href: string;
@@ -202,21 +203,7 @@ export function AppShell({
     router.refresh();
   }
 
-  const brand = (
-    <div className="flex items-center gap-3">
-      <div className="crucible-mark pulse-live flex h-11 w-11 shrink-0 items-center justify-center rounded-xl font-mono text-sm font-bold tracking-tight text-teal-700">
-        CR
-      </div>
-      <div className="min-w-0">
-        <div className="truncate font-serif-display text-xl leading-none tracking-[-0.02em] text-slate-900">
-          Crucible
-        </div>
-        <div className="mt-0.5 truncate font-mono text-[10px] font-medium tracking-[0.2em] text-teal-700">
-          PROVE THE CRAFT
-        </div>
-      </div>
-    </div>
-  );
+  const brand = <CrucibleLockup href="/dashboard" size="md" markClassName="pulse-live" />;
 
   const userBlock = (
     <div className="border-t border-slate-200/80 p-4">
@@ -276,9 +263,7 @@ export function AppShell({
   return (
     <div className="min-h-screen lg:grid lg:grid-cols-[272px_1fr]">
       <header className="sticky top-0 z-40 flex items-center justify-between gap-3 border-b border-slate-200/80 bg-slate-50/95 px-3 py-3 backdrop-blur sm:px-4 lg:hidden safe-top">
-        <Link href="/dashboard" className="min-w-0">
-          {brand}
-        </Link>
+        <div className="min-w-0">{brand}</div>
         <div className="flex items-center gap-2">
           <ThemeToggle />
           {inCodingSession ? (

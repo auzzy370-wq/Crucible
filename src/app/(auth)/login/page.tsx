@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { SocialAuthButtons } from "@/components/auth/social-auth-buttons";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
+import { CrucibleLockup } from "@/components/brand/crucible-lockup";
 import { cn } from "@/lib/utils";
 
 function LoginForm() {
@@ -91,13 +92,11 @@ function LoginForm() {
   return (
     <Card className="animate-rise relative w-full max-w-md border-teal-300/50 bg-slate-50/90 backdrop-blur-sm">
       <CardHeader>
-        <div className="mb-1 flex items-center justify-between gap-3">
-          <div className="flex items-baseline gap-3">
-            <span className="font-serif-display text-2xl tracking-tight text-slate-900">Crucible</span>
-            <span className="font-mono text-[10px] uppercase tracking-[0.28em] text-teal-700">Learn · Hire</span>
-          </div>
+        <div className="mb-3 flex items-start justify-between gap-3">
+          <CrucibleLockup href="/" size="md" showTagline />
           <ThemeToggle />
         </div>
+        <p className="mb-1 font-mono text-[10px] uppercase tracking-[0.28em] text-teal-600">Learn · Hire</p>
         <CardTitle className="font-serif-display text-xl sm:text-2xl">
           {mode === "hire" ? "Hire on evidence" : "Learn by proving"}
         </CardTitle>
