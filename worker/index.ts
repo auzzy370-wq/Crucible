@@ -17,7 +17,7 @@ async function tick() {
 
 async function main() {
   logger.info("CRUCIBLE execution worker starting", {
-    mode: process.env.EXECUTION_MODE ?? "process",
+    mode: process.env.EXECUTION_MODE ?? "docker",
   });
   await tick();
   setInterval(tick, INTERVAL_MS);

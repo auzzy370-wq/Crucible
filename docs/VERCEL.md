@@ -1,6 +1,6 @@
 # Deploy CRUCIBLE on Vercel
 
-Vercel runs the Next.js control plane. You still need a **hosted Postgres** database (Neon is the simplest free option). Redis is optional (rate limiting fails open). Sandboxed Docker execution is **not** available on Vercel — the app uses `EXECUTION_MODE=process` for demo/testing.
+Vercel runs the Next.js control plane. You still need a **hosted Postgres** database (Neon is the simplest free option). Redis is optional (rate limiting fails open). Sandboxed Docker execution is **not** available on Vercel — set `EXECUTION_MODE=docker` and attach a separate worker with a Docker daemon for Run/Judge; without it those jobs fail closed.
 
 ## 1. Create a Neon Postgres database (free)
 
@@ -35,7 +35,7 @@ Suggested values:
 | `SESSION_SECRET` | long random string |
 | `SETUP_SECRET` | long random string (for `/api/setup`) |
 | `AI_FALLBACK_MOCK` | `true` |
-| `EXECUTION_MODE` | `process` |
+| `EXECUTION_MODE` | `docker` (Run/Judge need a worker; Vercel alone fails closed) |
 | `NEXT_PUBLIC_APP_URL` | `https://your-app.vercel.app` |
 | `APP_URL` | same as above |
 | `REDIS_URL` | omit on Vercel, or use Upstash — never localhost |

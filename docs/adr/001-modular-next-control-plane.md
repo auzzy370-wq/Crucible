@@ -10,7 +10,7 @@ CRUCIBLE needs a production-oriented control plane (RBAC, assessments, review) a
 
 ## Decision
 
-Use Next.js (TypeScript) + Prisma/Postgres for the control plane and UI. Run untrusted jobs through a dedicated worker with pluggable `EXECUTION_MODE` (`process` for local, `docker` for stronger isolation). Keep LLM access behind a provider interface with mock fallback.
+Use Next.js (TypeScript) + Prisma/Postgres for the control plane and UI. Run untrusted jobs through a dedicated worker with `EXECUTION_MODE=docker` only (host-process mode is refused). Keep LLM access behind a provider interface with mock fallback.
 
 ## Consequences
 

@@ -1,5 +1,6 @@
 import { nanoid } from "nanoid";
 import { prisma } from "@/lib/db";
+import { AppError } from "@/lib/errors";
 import { resolveBootstrapRole } from "@/server/auth/admin-bootstrap";
 import { createSession } from "@/server/auth/session";
 import { writeAudit } from "@/server/security/audit";
@@ -35,8 +36,20 @@ export async function loginWithOAuthProfile(
 
   let user = existingLink?.user ?? null;
 
+  // Link-by-email only when the provider proved the inbox. Otherwise an attacker
+  // could attach Discord/X (or similar) to a victim account that shares an address.
   if (!user) {
-    user = await prisma.user.findUnique({ where: { email } });
+    const byEmail = await prisma.user.findUnique({ where: { email } });
+    if (byEmail) {
+      if (!profile.emailVerified) {
+        throw new AppError(
+          "Sign in with a verified email before linking this provider to an existing account",
+          403,
+          "OAUTH_EMAIL_UNVERIFIED",
+        );
+      }
+      user = byEmail;
+    }
   }
 
   const bootstrapRole = resolveBootstrapRole({

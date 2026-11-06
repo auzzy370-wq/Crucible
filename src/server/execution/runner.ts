@@ -8,14 +8,16 @@ import { normalizeCodingLanguage } from "@/lib/coding-languages";
 import { multilangCommands } from "./coding-family-multilang";
 import { HIDDEN_CASES, hiddenTsRunnerSource } from "./hidden-harness";
 import { customPyRunnerSource, customTsRunnerSource } from "./custom-harness";
-import { execAllowlisted, parseAllowlistedArgv } from "./safe-exec";
-import { runInIsolatedScratch } from "./isolated-exec";
+import { parseAllowlistedArgv } from "./safe-exec";
+import { resolveExecutionMode } from "./execution-mode";
+
+export { resolveExecutionMode };
 
 /**
  * Secure execution architecture:
  * - Commands are always server-authored from an allowlist — never from the client.
- * - Prefer disposable containers (EXECUTION_MODE=docker).
- * - process mode runs allowlisted binaries with shell:false.
+ * - Candidate / model code runs only in disposable containers (EXECUTION_MODE=docker).
+ * - Host-process and scratch-dir modes are refused (not a sandbox).
  */
 
 export type CustomCase = { name?: string; args: unknown[]; expected?: unknown };
@@ -189,13 +191,10 @@ export async function enqueueExecution(params: {
       memoryLimit: "512m",
       auditMeta: {
         untrusted: true,
-        mode: (() => {
-          const m = process.env.EXECUTION_MODE ?? "isolated";
-          return m === "process" ? "isolated" : m;
-        })(),
+        mode: "docker",
         lightning: priority >= 10,
         allowlisted: true,
-        isolated: true,
+        containerized: true,
       },
     },
   });
@@ -263,11 +262,10 @@ export async function processJob(jobId: string) {
     data: { status: "RUNNING", startedAt: new Date() },
   });
 
-  // Default isolated: disposable scratch copy. Docker when explicitly requested.
-  // Legacy EXECUTION_MODE=process is remapped to isolated (never host-workspace exec).
-  const rawMode = process.env.EXECUTION_MODE ?? "isolated";
-  const mode = rawMode === "process" ? "isolated" : rawMode;
   try {
+    // Fail closed: only disposable containers. Never spawn candidate code on the host.
+    resolveExecutionMode();
+
     // Always sync DB → disk before judge so Run works even if storage drifted / imports were bare.
     const { materializeWorkspaceToDisk, repairCodingHarness } = await import("./workspace");
     const challenge = job.workspace.assignment.assessment.challenge;
@@ -282,12 +280,7 @@ export async function processJob(jobId: string) {
       await materializeWorkspaceToDisk(job.workspaceId);
     }
 
-    const result =
-      mode === "docker" ? await runInDocker(job) : await runInIsolatedScratch({
-        command: job.command,
-        sourceRoot: job.workspace.rootPath,
-        timeoutSec: job.timeoutSec,
-      });
+    const result = await runInDocker(job);
 
     const status: ExecutionStatus =
       result.timedOut ? "TIMEOUT" : result.exitCode === 0 ? "SUCCEEDED" : "FAILED";
@@ -314,7 +307,7 @@ export async function processJob(jobId: string) {
       action: "execution.complete",
       entityType: "ExecutionJob",
       entityId: jobId,
-      metadata: { status, mode, type: job.type, priority: job.priority },
+      metadata: { status, mode: "docker", type: job.type, priority: job.priority },
     });
   } catch (err) {
     await prisma.executionJob.update({
@@ -349,7 +342,8 @@ async function runInDocker(job: {
             ? "eclipse-temurin:21-jdk-alpine"
             : "node:20-alpine";
 
-  const network = job.networkMode === "none" ? "none" : "bridge";
+  // Candidate code never gets host network. Deploy checks may use bridge only.
+  const network = job.networkMode === "egress-limited" ? "bridge" : "none";
   const inner = parseAllowlistedArgv(job.command);
   const { spawn } = await import("child_process");
   return new Promise<{ stdout: string; stderr: string; exitCode: number; timedOut: boolean }>((resolve) => {
@@ -377,13 +371,18 @@ async function runInDocker(job: {
         `${job.workspace.rootPath}:/workspace:ro`,
         "-w",
         "/workspace",
+        // Do not forward host env into the container
+        "-e",
+        "HOME=/tmp",
+        "-e",
+        "NODE_ENV=test",
         image,
         ...inner,
       ],
       {
         cwd: process.cwd(),
-        env: { ...process.env, PATH: process.env.PATH },
-        stdio: ["ignore", "pipe", "pipe"] as const,
+        env: { ...process.env, PATH: process.env.PATH ?? "/usr/bin:/bin" },
+        stdio: ["ignore", "pipe", "pipe"],
         shell: false,
       },
     );

@@ -86,7 +86,7 @@ export async function GET() {
       })),
       environment: {
         appUrl: process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || null,
-        executionMode: process.env.EXECUTION_MODE ?? "isolated",
+        executionMode: process.env.EXECUTION_MODE ?? "docker",
         aiMock: process.env.AI_FALLBACK_MOCK !== "false",
       },
     });

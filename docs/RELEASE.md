@@ -35,7 +35,7 @@ npm start              # http://localhost:3847
 
 ## Vercel
 
-1. Set `DATABASE_URL`, `SESSION_SECRET`, `SETUP_SECRET`, `EXECUTION_MODE=process`, `AI_FALLBACK_MOCK=true`
+1. Set `DATABASE_URL`, `SESSION_SECRET`, `SETUP_SECRET`, `EXECUTION_MODE=docker`, `AI_FALLBACK_MOCK=true` (Run/Judge needs a Docker worker; control-plane-only deploys fail closed)
 2. **Do not** set `REDIS_URL=localhost`
 3. Deploy, then `POST /api/setup` with `{ "secret": "<SETUP_SECRET>", "seed": true }`
 4. Disable Deployment Protection if you see `403 FORBIDDEN`

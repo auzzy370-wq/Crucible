@@ -34,7 +34,7 @@ jobs:
       REDIS_URL: redis://localhost:6379
       SESSION_SECRET: ci-session-secret
       AI_FALLBACK_MOCK: "true"
-      EXECUTION_MODE: process
+      EXECUTION_MODE: docker
       APP_URL: http://localhost:3847
       NEXT_PUBLIC_APP_URL: http://localhost:3847
       STORAGE_ROOT: /tmp/gauntlet-storage

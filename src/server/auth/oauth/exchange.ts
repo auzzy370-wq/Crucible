@@ -1,4 +1,4 @@
-import { decodeJwt } from "jose";
+import { createRemoteJWKSet, jwtVerify } from "jose";
 import { appleClientSecret, callbackUrl } from "./config";
 import type { OAuthProfile, OAuthProvider } from "./types";
 import { AppError } from "@/lib/errors";
@@ -12,12 +12,30 @@ async function readJson(res: Response) {
   }
 }
 
+const appleJwks = createRemoteJWKSet(new URL("https://appleid.apple.com/auth/keys"));
+
+/** Verify Apple's id_token from the token endpoint — never trust a browser-posted JWT. */
+async function verifyAppleIdToken(idToken: string) {
+  const audience = process.env.APPLE_CLIENT_ID;
+  if (!audience) throw new AppError("Apple Sign In is not configured", 500, "OAUTH_CONFIG");
+  const { payload } = await jwtVerify(idToken, appleJwks, {
+    issuer: "https://appleid.apple.com",
+    audience,
+  });
+  return payload as {
+    sub?: string;
+    email?: string;
+    email_verified?: boolean | string;
+  };
+}
+
 export async function exchangeCodeForProfile(opts: {
   provider: OAuthProvider;
   code: string;
   req: Request;
   pkceVerifier?: string | null;
   appleUserName?: string | null;
+  /** Ignored for identity — Apple identity comes only from Apple's token response. */
   appleIdToken?: string | null;
 }): Promise<OAuthProfile> {
   const { provider, code, req } = opts;
@@ -44,11 +62,15 @@ export async function exchangeCodeForProfile(opts: {
     });
     const profile = await readJson(profileRes);
     if (!profile.email) throw new AppError("Google account has no email", 400, "OAUTH_NO_EMAIL");
+    const emailVerified = Boolean(profile.email_verified);
+    if (!emailVerified) {
+      throw new AppError("Google email is not verified", 403, "OAUTH_EMAIL_UNVERIFIED");
+    }
     return {
       provider,
       providerUserId: String(profile.sub),
       email: String(profile.email).toLowerCase(),
-      emailVerified: Boolean(profile.email_verified),
+      emailVerified: true,
       name: String(profile.name || profile.email),
       avatarUrl: profile.picture ?? null,
     };
@@ -80,22 +102,25 @@ export async function exchangeCodeForProfile(opts: {
       },
     });
     const user = await readJson(userRes);
-    let email = typeof user.email === "string" ? user.email : null;
-    if (!email) {
-      const emailsRes = await fetch("https://api.github.com/user/emails", {
-        headers: {
-          Authorization: `Bearer ${token.access_token}`,
-          Accept: "application/vnd.github+json",
-          "User-Agent": "Crucible",
-        },
-      });
-      const emails = (await readJson(emailsRes)) as { email: string; primary?: boolean; verified?: boolean }[];
-      const primary = Array.isArray(emails)
-        ? emails.find((e) => e.primary && e.verified) || emails.find((e) => e.verified) || emails[0]
-        : null;
-      email = primary?.email ?? null;
+    let email: string | null = null;
+    const emailsRes = await fetch("https://api.github.com/user/emails", {
+      headers: {
+        Authorization: `Bearer ${token.access_token}`,
+        Accept: "application/vnd.github+json",
+        "User-Agent": "Crucible",
+      },
+    });
+    const emails = (await readJson(emailsRes)) as { email: string; primary?: boolean; verified?: boolean }[];
+    if (Array.isArray(emails)) {
+      const verified =
+        emails.find((e) => e.primary && e.verified) || emails.find((e) => e.verified) || null;
+      email = verified?.email ?? null;
     }
-    if (!email) throw new AppError("GitHub account has no email", 400, "OAUTH_NO_EMAIL");
+    if (!email && typeof user.email === "string") {
+      // GitHub user.email may be public but not proven verified — refuse linking on it alone.
+      email = null;
+    }
+    if (!email) throw new AppError("GitHub account has no verified email", 400, "OAUTH_NO_EMAIL");
     return {
       provider,
       providerUserId: String(user.id),
@@ -127,15 +152,17 @@ export async function exchangeCodeForProfile(opts: {
       })}`,
     );
     const profile = await readJson(profileRes);
-    const email =
-      typeof profile.email === "string"
-        ? profile.email.toLowerCase()
-        : `fb_${profile.id}@oauth.crucible.local`;
+    // Facebook emails are not strongly verified here — use a provider-scoped synthetic address
+    // when linking by email would be unsafe.
+    const hasEmail = typeof profile.email === "string" && profile.email.includes("@");
+    const email = hasEmail
+      ? String(profile.email).toLowerCase()
+      : `fb_${profile.id}@oauth.crucible.local`;
     return {
       provider,
       providerUserId: String(profile.id),
       email,
-      emailVerified: Boolean(profile.email),
+      emailVerified: false,
       name: String(profile.name || email),
       avatarUrl: profile.picture?.data?.url ?? null,
     };
@@ -162,6 +189,9 @@ export async function exchangeCodeForProfile(opts: {
     });
     const profile = await readJson(profileRes);
     if (!profile.email) throw new AppError("Discord account has no email", 400, "OAUTH_NO_EMAIL");
+    if (!profile.verified) {
+      throw new AppError("Discord email is not verified", 403, "OAUTH_EMAIL_UNVERIFIED");
+    }
     const avatar = profile.avatar
       ? `https://cdn.discordapp.com/avatars/${profile.id}/${profile.avatar}.png`
       : null;
@@ -169,7 +199,7 @@ export async function exchangeCodeForProfile(opts: {
       provider,
       providerUserId: String(profile.id),
       email: String(profile.email).toLowerCase(),
-      emailVerified: Boolean(profile.verified),
+      emailVerified: true,
       name: String(profile.global_name || profile.username || profile.email),
       avatarUrl: avatar,
     };
@@ -203,6 +233,7 @@ export async function exchangeCodeForProfile(opts: {
     const body = await readJson(profileRes);
     const user = body.data;
     if (!user?.id) throw new AppError("X profile missing", 400, "OAUTH_PROFILE");
+    // X does not provide a verified email in this flow — never claim a real inbox.
     const email = `x_${user.id}@oauth.crucible.local`;
     return {
       provider,
@@ -214,7 +245,7 @@ export async function exchangeCodeForProfile(opts: {
     };
   }
 
-  // Apple
+  // Apple — identity only from Apple's verified token response
   const clientSecret = await appleClientSecret();
   const tokenRes = await fetch("https://appleid.apple.com/auth/token", {
     method: "POST",
@@ -231,21 +262,18 @@ export async function exchangeCodeForProfile(opts: {
   if (!tokenRes.ok || !token.id_token) {
     throw new AppError(token.error_description || "Apple token exchange failed", 401, "OAUTH_TOKEN");
   }
-  const claims = decodeJwt(opts.appleIdToken || token.id_token) as {
-    sub?: string;
-    email?: string;
-    email_verified?: boolean | string;
-  };
+  const claims = await verifyAppleIdToken(String(token.id_token));
   if (!claims.sub) throw new AppError("Apple id_token missing subject", 400, "OAUTH_PROFILE");
+  const emailVerified = claims.email_verified === true || claims.email_verified === "true";
   const email =
-    typeof claims.email === "string"
+    typeof claims.email === "string" && emailVerified
       ? claims.email.toLowerCase()
       : `apple_${claims.sub}@oauth.crucible.local`;
   return {
     provider,
     providerUserId: claims.sub,
     email,
-    emailVerified: claims.email_verified === true || claims.email_verified === "true",
+    emailVerified: typeof claims.email === "string" ? emailVerified : false,
     name: opts.appleUserName || email.split("@")[0] || "Apple User",
   };
 }

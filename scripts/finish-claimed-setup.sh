@@ -39,7 +39,7 @@ add_env DATABASE_URL "$DATABASE_URL"
 add_env SESSION_SECRET "$SESSION_SECRET"
 add_env SETUP_SECRET "$SETUP_SECRET"
 add_env AI_FALLBACK_MOCK true
-add_env EXECUTION_MODE process
+add_env EXECUTION_MODE docker
 
 echo "==> Deploy production"
 npx vercel --prod --yes | tee /tmp/vercel-prod.out

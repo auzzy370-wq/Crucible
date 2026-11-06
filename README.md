@@ -79,12 +79,12 @@ See **[docs/VERCEL.md](docs/VERCEL.md)**. You need a Neon (or other) Postgres `D
 
 ```bash
 vercel login && vercel link
-vercel env add DATABASE_URL   # also SESSION_SECRET, SETUP_SECRET, EXECUTION_MODE=process, AI_FALLBACK_MOCK=true, NEXT_PUBLIC_APP_URL
+vercel env add DATABASE_URL   # also SESSION_SECRET, SETUP_SECRET, EXECUTION_MODE=docker, AI_FALLBACK_MOCK=true, NEXT_PUBLIC_APP_URL
 vercel --prod
 curl -X POST https://YOUR_APP.vercel.app/api/setup -H 'content-type: application/json' -d '{"secret":"YOUR_SETUP_SECRET","seed":true}'
 ```
 
-Docker-based candidate isolation is not available on Vercel; use `EXECUTION_MODE=process` for UI/API testing.
+Candidate code execution requires `EXECUTION_MODE=docker` (host-process mode is refused). On Vercel without a Docker worker, Run/Judge jobs fail closed until a container executor is attached.
 
 ## Quick start (local)
 
