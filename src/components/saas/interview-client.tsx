@@ -113,9 +113,9 @@ export function InterviewClient(props: {
     <>
     {/* No transform here — fixed mobile CTA must escape containing blocks */}
     <div className="animate-rise min-w-0 space-y-8">
-      <header className="overflow-hidden rounded-2xl border border-teal-300/50 bg-gradient-to-br from-teal-500/[0.12] via-white/90 to-emerald-50/80 p-5 sm:p-7">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <div>
+      <header className="min-w-0 rounded-2xl border border-teal-300/50 bg-gradient-to-br from-teal-500/[0.12] via-white/90 to-emerald-50/80 p-4 sm:p-7">
+        <div className="flex min-w-0 flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div className="min-w-0">
             <p className="font-mono text-xs tracking-[0.3em] text-teal-700">MOCK INTERVIEWS</p>
             <h1 className="mt-2 font-serif-display text-2xl text-slate-900 sm:text-3xl">
               Company rounds. Real clock. Same judge.
@@ -126,7 +126,7 @@ export function InterviewClient(props: {
             </p>
           </div>
           {!props.premium && (
-            <div className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            <div className="min-w-0 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
               {props.freeRemaining > 0 ? (
                 <>
                   <strong>{props.freeRemaining}</strong> free mock left · then Premium for unlimited
@@ -143,13 +143,13 @@ export function InterviewClient(props: {
           )}
         </div>
 
-        <div className="mt-5 grid gap-3 sm:grid-cols-3">
+        <div className="mt-5 grid w-full min-w-0 grid-cols-1 gap-3 sm:grid-cols-3">
           {[
             { label: "Mocks run", value: String(props.sims.length) },
             { label: "In progress", value: String(inProgress) },
             { label: "Companies tried", value: String(companiesTried) },
           ].map((s) => (
-            <div key={s.label} className="rounded-xl border border-teal-200/70 bg-white/80 px-3 py-3">
+            <div key={s.label} className="min-w-0 rounded-xl border border-teal-200/70 bg-white/80 px-3 py-3">
               <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">{s.label}</p>
               <p className="mt-1 font-serif-display text-2xl text-slate-900">{s.value}</p>
             </div>
@@ -158,32 +158,34 @@ export function InterviewClient(props: {
       </header>
 
       <section className="grid min-w-0 gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-        <div className="min-w-0 space-y-5 overflow-hidden rounded-2xl border border-slate-200 bg-white/80 p-4 sm:p-6">
-          <div>
+        <div className="min-w-0 space-y-5 rounded-2xl border border-slate-200 bg-white/80 p-4 sm:p-6">
+          <div className="min-w-0">
             <h2 className="font-serif-display text-xl text-slate-900">Build your round</h2>
             <p className="mt-1 text-sm text-slate-600">Company · role · format. Then open the workspace.</p>
           </div>
 
           <div className="min-w-0">
             <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">Round format</p>
-            <div className="grid gap-2 sm:grid-cols-3">
+            <div className="grid w-full min-w-0 grid-cols-1 gap-2 sm:grid-cols-3">
               {INTERVIEW_ROUNDS.map((r) => (
                 <button
                   key={r.id}
                   type="button"
                   onClick={() => setRoundId(r.id)}
                   className={cn(
-                    "min-w-0 rounded-xl border px-3 py-3 text-left transition",
+                    "box-border w-full min-w-0 max-w-full rounded-xl border px-3 py-3 text-left transition",
                     roundId === r.id
                       ? "border-teal-400 bg-teal-50 shadow-sm"
                       : "border-slate-200 bg-white hover:border-teal-300",
                   )}
                 >
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="min-w-0 text-sm font-medium text-slate-900">{r.title}</span>
-                    <Badge variant="amber">{r.minutes}m</Badge>
+                  <div className="flex min-w-0 items-start justify-between gap-2">
+                    <span className="min-w-0 flex-1 break-words text-sm font-medium text-slate-900">{r.title}</span>
+                    <Badge variant="amber" className="shrink-0">
+                      {r.minutes}m
+                    </Badge>
                   </div>
-                  <p className="mt-1 text-xs text-slate-600">{r.blurb}</p>
+                  <p className="mt-1 break-words text-xs text-slate-600">{r.blurb}</p>
                   <p className="mt-2 font-mono text-[10px] text-teal-700">+{r.xp} XP on clear</p>
                 </button>
               ))}
