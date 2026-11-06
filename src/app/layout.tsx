@@ -42,7 +42,7 @@ export const viewport = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <body className={`${sans.variable} ${mono.variable} ${display.variable} antialiased`}>
         <Providers>
           {children}
