@@ -2,7 +2,7 @@
 
 **Live demo tunnel (HTTPS):**
 
-**https://interview-sessions-navigation-directories.trycloudflare.com**
+**https://friendship-won-platform-cats.trycloudflare.com**
 
 - Learn hub: `/learn`
 - Learn Arcade: `/learn/games`
