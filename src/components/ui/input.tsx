@@ -10,6 +10,8 @@ export const Input = React.forwardRef<HTMLInputElement, React.InputHTMLAttribute
         className,
       )}
       ref={ref}
+      // Chrome / password managers inject attrs like __gcruniqueid before hydrate.
+      suppressHydrationWarning
       {...props}
     />
   ),

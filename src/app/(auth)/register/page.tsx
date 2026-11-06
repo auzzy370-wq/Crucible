@@ -77,7 +77,7 @@ export default function RegisterPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <form className="space-y-4" onSubmit={onSubmit}>
+          <form className="space-y-4" onSubmit={onSubmit} suppressHydrationWarning>
             <div className="space-y-2">
               <Label htmlFor="name">Full name</Label>
               <Input
@@ -132,6 +132,7 @@ export default function RegisterPage() {
                 className="flex h-11 w-full rounded-md border border-slate-300 bg-white px-3 text-base text-slate-900 sm:text-sm"
                 value={form.track}
                 onChange={(e) => setForm((f) => ({ ...f, track: e.target.value }))}
+                suppressHydrationWarning
               >
                 {trackOptionGroups().map((g) => (
                   <optgroup key={g.group} label={g.group}>

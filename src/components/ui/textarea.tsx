@@ -9,6 +9,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, React.TextareaHTML
         className,
       )}
       ref={ref}
+      suppressHydrationWarning
       {...props}
     />
   ),
