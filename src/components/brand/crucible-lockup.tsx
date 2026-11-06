@@ -20,6 +20,8 @@ type LockupProps = {
   href?: string | null;
   size?: "sm" | "md" | "lg";
   showTagline?: boolean;
+  /** Hide the wordmark below this breakpoint (mark stays). */
+  wordmarkFrom?: "sm" | "md" | "always";
   className?: string;
   markClassName?: string;
 };
@@ -49,10 +51,13 @@ export function CrucibleLockup({
   href = "/dashboard",
   size = "md",
   showTagline = false,
+  wordmarkFrom = "always",
   className,
   markClassName,
 }: LockupProps) {
   const s = sizes[size];
+  const wordmarkVisibility =
+    wordmarkFrom === "sm" ? "hidden sm:block" : wordmarkFrom === "md" ? "hidden md:block" : "block";
   const inner = (
     <div className={cn("flex items-center", s.gap, className)}>
       <div
@@ -64,10 +69,10 @@ export function CrucibleLockup({
       >
         <CrucibleGlyph />
       </div>
-      <div className="min-w-0 leading-none">
-        <div className={cn("truncate font-serif-display text-slate-900", s.title)}>Crucible</div>
+      <div className={cn("min-w-0 leading-none", wordmarkVisibility)}>
+        <div className={cn("font-serif-display text-slate-900", s.title)}>Crucible</div>
         {showTagline && (
-          <div className={cn("mt-1.5 truncate font-mono text-slate-500", s.tag)}>PROVE THE CRAFT</div>
+          <div className={cn("mt-1.5 font-mono text-slate-500", s.tag)}>PROVE THE CRAFT</div>
         )}
       </div>
     </div>
