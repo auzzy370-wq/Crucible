@@ -73,13 +73,14 @@ export default async function LearnHubPage() {
             </div>
           </div>
 
-          <div className="mt-5 grid gap-2 sm:grid-cols-5">
+          <div className="mt-5 grid gap-2 sm:grid-cols-3 lg:grid-cols-6">
             {(
               [
                 ["Lessons", game.breakdown.lessons],
                 ["Daily", game.breakdown.daily],
                 ["Prove", game.breakdown.prove],
                 ["Campaigns", game.breakdown.campaigns],
+                ["Arcade", game.breakdown.arcade],
                 ["Streak", game.breakdown.streak],
               ] as const
             ).map(([label, value]) => (
@@ -214,6 +215,24 @@ export default async function LearnHubPage() {
           </Link>
           <Link href="/study-plans">
             <Button variant="ghost">Study campaigns</Button>
+          </Link>
+          <Link href="/learn/games">
+            <Button variant="secondary">Learn Arcade</Button>
+          </Link>
+        </div>
+      </section>
+
+      <section className="rounded-2xl border border-amber-200 bg-amber-50/60 p-5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber-800">HTML5 drills</p>
+            <h2 className="mt-1 font-serif-display text-xl text-slate-900">Learn Arcade</h2>
+            <p className="mt-1 text-sm text-slate-600">
+              Framework Flow, Big-O Blitz, Pair Seeker, Binary Range — short games that teach interview craft.
+            </p>
+          </div>
+          <Link href="/learn/games">
+            <Button>Open arcade</Button>
           </Link>
         </div>
       </section>

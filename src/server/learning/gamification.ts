@@ -8,6 +8,7 @@ import {
 import { dateKey } from "@/server/saas/daily";
 import { STUDY_PLANS } from "@/server/saas/study-plans";
 import { itemXp, PLAN_CLEAR_BONUS_XP } from "@/server/learning/study-plan-game";
+import { ARCADE_CLEAR_XP, ARCADE_PLAN_SLUG } from "@/server/learning/arcade-games";
 
 export const LESSON_XP = 50;
 export const DAILY_XP = 75;
@@ -51,6 +52,7 @@ export type XpBreakdown = {
   daily: number;
   prove: number;
   campaigns: number;
+  arcade: number;
   streak: number;
   total: number;
 };
@@ -271,6 +273,10 @@ export async function buildLearnerGameState(userId: string): Promise<LearnerGame
     }
   }
 
+  const arcadeEnrollment = allEnrollments.find((e) => e.planSlug === ARCADE_PLAN_SLUG);
+  const arcadeClears = arcadeEnrollment?.completedSlugs.length ?? 0;
+  const arcadeXp = arcadeClears * ARCADE_CLEAR_XP;
+
   const lessonXp = (aiDone.length + ivDone.length) * LESSON_XP;
   const dailyXp = dailyCompletions * DAILY_XP;
   const proveXp = scoredAssignments * PROVE_BASE_XP;
@@ -280,8 +286,9 @@ export async function buildLearnerGameState(userId: string): Promise<LearnerGame
     daily: dailyXp,
     prove: proveXp,
     campaigns: campaignXp,
+    arcade: arcadeXp,
     streak: streakBonus,
-    total: lessonXp + dailyXp + proveXp + campaignXp + streakBonus,
+    total: lessonXp + dailyXp + proveXp + campaignXp + arcadeXp + streakBonus,
   };
   const xp = breakdown.total;
 
@@ -452,6 +459,18 @@ export async function buildLearnerGameState(userId: string): Promise<LearnerGame
       title: "Pack cleared",
       detail: "Complete a full study campaign",
       unlocked: campaignsCleared >= 1,
+    },
+    {
+      id: "arcade-first",
+      title: "Arcade warm-up",
+      detail: "Clear any Learn Arcade game",
+      unlocked: arcadeClears >= 1,
+    },
+    {
+      id: "arcade-all",
+      title: "Arcade complete",
+      detail: "Clear every Learn Arcade game",
+      unlocked: arcadeClears >= 4,
     },
     {
       id: "operator",

@@ -52,6 +52,7 @@ const NAV_GROUPS: NavGroup[] = [
     roles: ["CANDIDATE", "TEAM_MEMBER"],
     items: [
       { href: "/learn", label: "Learn", icon: BookOpen, hint: "XP, quests, craft paths" },
+      { href: "/learn/games", label: "Arcade", icon: Sparkles, hint: "HTML5 learning games" },
       { href: "/study-plans", label: "Campaigns", icon: Route, hint: "Chapter maps & pack XP" },
       { href: "/daily", label: "Daily forge", icon: CalendarDays, hint: "Streak + timed XP" },
       { href: "/dashboard", label: "Home", icon: LayoutDashboard, hint: "What to do next" },
