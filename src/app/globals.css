@@ -24,8 +24,9 @@
   --foreground: #0f1c2e;
   --surface: #ffffff;
   --surface-elevated: #ffffff;
-  --brand: #0e8f9f;
-  --brand-soft: rgba(14, 143, 159, 0.12);
+  --brand: #0f766e;
+  --brand-hover: #0d9488;
+  --brand-soft: rgba(15, 118, 110, 0.12);
   --brand-ink: #0f1c2e;
 
   --font-display: var(--font-ibm-sans), "IBM Plex Sans", "Segoe UI", sans-serif;
@@ -82,26 +83,27 @@
 }
 
 .dark {
-  --bg-0: #070d14;
-  --bg-1: #0b1420;
-  --bg-2: #121c28;
+  --bg-0: #07090d;
+  --bg-1: #0c1016;
+  --bg-2: #121820;
   --line: #243246;
   --text: #e8eef5;
   --muted: #8b9cb3;
   --accent: #2dd4bf;
   --accent-2: #34d399;
-  --background: #070d14;
+  --background: #07090d;
   --foreground: #e8eef5;
-  --surface: #0f1824;
-  --surface-elevated: #152032;
-  --brand: #2dd4bf;
-  --brand-soft: rgba(45, 212, 191, 0.14);
-  --brand-ink: #e8eef5;
+  --surface: #0c1016;
+  --surface-elevated: #121820;
+  --brand: #0d9488;
+  --brand-hover: #14b8a6;
+  --brand-soft: rgba(13, 148, 136, 0.14);
+  --brand-ink: #f1f5f9;
 
   /* Semantic remap: low numbers = surfaces, high numbers = ink */
-  --slate-50: #0c141c;
-  --slate-100: #111a24;
-  --slate-200: #1c2a3a;
+  --slate-50: #0c1016;
+  --slate-100: #121820;
+  --slate-200: #1c2430;
   --slate-300: #2a3b4f;
   --slate-400: #5b7390;
   --slate-500: #8b9cb3;
@@ -178,10 +180,8 @@ body {
 .dark body,
 html.dark body {
   background:
-    radial-gradient(1000px 520px at 10% -10%, rgba(45, 212, 191, 0.12), transparent 55%),
-    radial-gradient(800px 420px at 95% 0%, rgba(52, 211, 153, 0.08), transparent 50%),
-    radial-gradient(640px 360px at 50% 110%, rgba(34, 211, 238, 0.06), transparent 45%),
-    linear-gradient(180deg, #0a121c 0%, var(--bg-0) 45%, #060a10 100%);
+    radial-gradient(900px 480px at 12% -12%, rgba(13, 148, 136, 0.08), transparent 55%),
+    linear-gradient(180deg, #090c11 0%, var(--bg-0) 48%, #05070a 100%);
 }
 
 /* Solid white surfaces → elevated ink panels in dark (keeps text-white intact) */
@@ -320,7 +320,9 @@ html.dark body {
 }
 
 .font-serif-display {
-  font-family: var(--font-serif);
+  font-family: var(--font-instrument), "Instrument Serif", "Times New Roman", serif;
+  font-weight: 400;
+  font-style: normal;
 }
 
 /* Landing — shared brand plane (light + dark) */
@@ -337,7 +339,7 @@ html.dark body {
 }
 
 .dark .landing-root {
-  background: linear-gradient(180deg, #080d14 0%, #070b11 55%, #05080c 100%);
+  background: linear-gradient(180deg, #090c11 0%, #07090d 55%, #05070a 100%);
 }
 
 .landing-noise {
@@ -409,7 +411,7 @@ html.dark body {
 }
 
 .dark .landing-hero-plane {
-  background: linear-gradient(180deg, #0a1018 0%, #080d14 100%);
+  background: linear-gradient(180deg, #0a0e14 0%, #07090d 100%);
 }
 
 .landing-hero-fade {

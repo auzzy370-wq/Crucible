@@ -1,18 +1,15 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
-/**
- * Stamp mark — a solid “C” cut from a rounded plate.
- * Reads at 16px; no illustrative pot/vessel.
- */
+/** Stamp mark — bold C cut from a rounded plate. */
 export function CrucibleGlyph({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 32 32" fill="none" aria-hidden className={cn("h-full w-full", className)}>
-      <rect width="32" height="32" rx="8" fill="currentColor" />
+    <svg viewBox="0 0 40 40" fill="none" aria-hidden className={cn("h-full w-full", className)}>
+      <rect width="40" height="40" rx="10" fill="currentColor" />
       <path
-        d="M22.2 10.4a7.6 7.6 0 1 0 0 11.2"
-        stroke="var(--mark-cut, #070d14)"
-        strokeWidth="3.2"
+        d="M27.5 12.8a9.6 9.6 0 1 0 0 14.4"
+        stroke="var(--mark-cut, #07090d)"
+        strokeWidth="4.2"
         strokeLinecap="round"
       />
     </svg>
@@ -29,20 +26,20 @@ type LockupProps = {
 
 const sizes = {
   sm: {
-    mark: "h-7 w-7",
-    title: "text-[15px] tracking-[-0.03em]",
+    mark: "h-8 w-8",
+    title: "text-base tracking-[-0.03em]",
     tag: "text-[9px] tracking-[0.16em]",
     gap: "gap-2.5",
   },
   md: {
-    mark: "h-9 w-9",
-    title: "text-[1.35rem] tracking-[-0.03em]",
+    mark: "h-11 w-11",
+    title: "text-[1.5rem] tracking-[-0.035em]",
     tag: "text-[10px] tracking-[0.18em]",
     gap: "gap-3",
   },
   lg: {
-    mark: "h-11 w-11",
-    title: "text-[1.65rem] tracking-[-0.035em]",
+    mark: "h-12 w-12",
+    title: "text-[1.75rem] tracking-[-0.04em]",
     tag: "text-[11px] tracking-[0.2em]",
     gap: "gap-3.5",
   },
@@ -60,7 +57,7 @@ export function CrucibleLockup({
     <div className={cn("flex items-center", s.gap, className)}>
       <div
         className={cn(
-          "flex shrink-0 items-center justify-center text-teal-500 [--mark-cut:#f3f8fc] dark:[--mark-cut:#070d14]",
+          "flex shrink-0 items-center justify-center text-[var(--brand)] [--mark-cut:#f7fbfd] dark:[--mark-cut:#07090d]",
           s.mark,
           markClassName,
         )}
@@ -78,7 +75,7 @@ export function CrucibleLockup({
 
   if (!href) return inner;
   return (
-    <Link href={href} className="min-w-0 outline-none focus-visible:ring-2 focus-visible:ring-teal-500/40">
+    <Link href={href} className="min-w-0 outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/40">
       {inner}
     </Link>
   );

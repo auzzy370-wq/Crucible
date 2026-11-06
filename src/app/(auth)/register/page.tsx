@@ -62,7 +62,7 @@ export default function RegisterPage() {
   return (
     <div className="landing-root relative flex min-h-screen items-center justify-center px-4 py-10 safe-top safe-bottom">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(13,148,136,0.12),transparent_50%)]" />
-      <Card className="animate-rise relative w-full max-w-lg border-slate-200 bg-slate-50 shadow-xl shadow-slate-950/20">
+      <Card className="animate-rise relative w-full max-w-lg border-slate-200 bg-[var(--surface-elevated)] shadow-2xl shadow-black/40">
         <CardHeader className="space-y-4">
           <div className="flex items-start justify-between gap-3">
             <CrucibleLockup href="/" size="md" />

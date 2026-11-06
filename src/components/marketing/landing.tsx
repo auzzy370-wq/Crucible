@@ -21,7 +21,7 @@ export function LandingPage(props: {
         <div className="landing-hero-plane absolute inset-0" aria-hidden>
           <div className="landing-noise absolute inset-0 opacity-40" />
           <div className="landing-mesh absolute inset-0 opacity-60" />
-          <div className="absolute inset-x-0 top-0 h-[55%] bg-[radial-gradient(ellipse_at_70%_20%,rgba(13,148,136,0.16),transparent_55%)]" />
+          <div className="absolute inset-x-0 top-0 h-[50%] bg-[radial-gradient(ellipse_at_70%_10%,rgba(13,148,136,0.1),transparent_55%)]" />
           <div className="landing-hero-fade absolute inset-0" />
         </div>
 
@@ -37,7 +37,7 @@ export function LandingPage(props: {
             </Link>
             <Link
               href="/register"
-              className="inline-flex min-h-10 items-center rounded-md bg-teal-600 px-3.5 text-sm font-medium text-white transition hover:bg-teal-500"
+              className="inline-flex min-h-10 items-center rounded-md bg-[var(--brand)] px-3.5 text-sm font-medium text-white transition hover:bg-[var(--brand-hover)]"
             >
               Start learning
             </Link>
@@ -57,7 +57,7 @@ export function LandingPage(props: {
           <div className="landing-anim-cta mt-9 flex w-full flex-col gap-3 sm:mt-10 sm:w-auto sm:flex-row sm:items-center">
             <Link
               href="/register"
-              className="inline-flex min-h-12 w-full items-center justify-center rounded-md bg-teal-600 px-6 text-sm font-semibold text-white transition hover:bg-teal-500 sm:w-auto"
+              className="inline-flex min-h-12 w-full items-center justify-center rounded-md bg-[var(--brand)] px-6 text-sm font-semibold text-white transition hover:bg-[var(--brand-hover)] sm:w-auto"
             >
               Start learning free
             </Link>

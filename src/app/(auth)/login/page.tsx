@@ -90,7 +90,7 @@ function LoginForm() {
   }
 
   return (
-    <Card className="animate-rise relative w-full max-w-md border-slate-200 bg-slate-50 shadow-xl shadow-slate-950/20">
+    <Card className="animate-rise relative w-full max-w-md border-slate-200 bg-[var(--surface-elevated)] shadow-2xl shadow-black/40">
       <CardHeader className="space-y-4">
         <div className="flex items-start justify-between gap-3">
           <CrucibleLockup href="/" size="md" />
@@ -113,7 +113,9 @@ function LoginForm() {
             type="button"
             className={cn(
               "min-h-10 rounded-md text-sm font-medium transition",
-              mode === "learn" ? "bg-slate-50 text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-800",
+              mode === "learn"
+                ? "bg-[var(--surface-elevated)] text-slate-900 shadow-sm ring-1 ring-slate-200"
+                : "text-slate-500 hover:text-slate-800",
             )}
             onClick={() => setMode("learn")}
           >
@@ -123,7 +125,9 @@ function LoginForm() {
             type="button"
             className={cn(
               "min-h-10 rounded-md text-sm font-medium transition",
-              mode === "hire" ? "bg-slate-50 text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-800",
+              mode === "hire"
+                ? "bg-[var(--surface-elevated)] text-slate-900 shadow-sm ring-1 ring-slate-200"
+                : "text-slate-500 hover:text-slate-800",
             )}
             onClick={() => setMode("hire")}
           >
