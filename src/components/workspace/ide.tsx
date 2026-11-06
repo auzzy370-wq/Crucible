@@ -58,7 +58,10 @@ function renderProblemBody(md: string) {
     if (lines[0]?.startsWith("```")) {
       const code = lines.slice(1).filter((l) => !l.startsWith("```")).join("\n");
       return (
-        <pre key={i} className="overflow-x-auto rounded-lg border border-slate-200 bg-black/40 p-3 font-mono text-xs text-teal-900">
+        <pre
+          key={i}
+          className="overflow-x-auto rounded-lg border border-[var(--code-chip-border)] bg-[var(--code-block-bg)] p-3 font-mono text-xs text-[var(--code-block-fg)]"
+        >
           {code}
         </pre>
       );
@@ -81,7 +84,10 @@ function formatInline(text: string) {
   return parts.map((p, i) => {
     if (p.startsWith("`") && p.endsWith("`")) {
       return (
-        <code key={i} className="rounded bg-slate-800 px-1 py-0.5 font-mono text-[12px] text-teal-800">
+        <code
+          key={i}
+          className="rounded border border-[var(--code-chip-border)] bg-[var(--code-chip-bg)] px-1.5 py-0.5 font-mono text-[12px] font-medium text-[var(--code-chip-fg)]"
+        >
           {p.slice(1, -1)}
         </code>
       );

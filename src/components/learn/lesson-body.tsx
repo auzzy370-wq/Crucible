@@ -83,7 +83,10 @@ export function LessonBody({ md }: { md: string }) {
         }
         const html = block
           .replace(/\*\*(.+?)\*\*/g, "<strong class='text-slate-900'>$1</strong>")
-          .replace(/`([^`]+)`/g, "<code class='rounded bg-slate-100 px-1 font-mono text-[11px] text-teal-800'>$1</code>");
+          .replace(
+            /`([^`]+)`/g,
+            "<code class='rounded border border-[var(--code-chip-border)] bg-[var(--code-chip-bg)] px-1.5 py-0.5 font-mono text-[11px] font-medium text-[var(--code-chip-fg)]'>$1</code>",
+          );
         return <p key={i} dangerouslySetInnerHTML={{ __html: html }} />;
       })}
     </div>

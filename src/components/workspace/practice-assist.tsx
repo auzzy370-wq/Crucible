@@ -271,9 +271,19 @@ export function PracticeAssist(props: {
         {!loading && tab === "custom" && (
           <div className="space-y-2">
             <p className="text-xs text-slate-500">
-              JSON array of cases: <code className="text-teal-800">args</code> passed to{" "}
-              <code className="text-teal-800">solve(...)</code>. Optional{" "}
-              <code className="text-teal-800">expected</code>. Not used for grading.
+              JSON array of cases:{" "}
+              <code className="rounded border border-[var(--code-chip-border)] bg-[var(--code-chip-bg)] px-1 font-mono text-[var(--code-chip-fg)]">
+                args
+              </code>{" "}
+              passed to{" "}
+              <code className="rounded border border-[var(--code-chip-border)] bg-[var(--code-chip-bg)] px-1 font-mono text-[var(--code-chip-fg)]">
+                solve(...)
+              </code>
+              . Optional{" "}
+              <code className="rounded border border-[var(--code-chip-border)] bg-[var(--code-chip-bg)] px-1 font-mono text-[var(--code-chip-fg)]">
+                expected
+              </code>
+              . Not used for grading.
             </p>
             <Textarea
               className="min-h-[140px] font-mono text-xs"

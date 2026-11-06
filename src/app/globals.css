@@ -29,6 +29,12 @@
   --brand-soft: rgba(255, 90, 31, 0.12);
   --brand-ink: #12141a;
   --brand-flame: #ff5a1f;
+  /* Inline/fenced code chips — never use remapped slate/teal scales here */
+  --code-chip-bg: #ece8e4;
+  --code-chip-fg: #1a1512;
+  --code-chip-border: #d5cec6;
+  --code-block-bg: #141820;
+  --code-block-fg: #f3eee8;
 
   --font-display: var(--font-ibm-sans), "IBM Plex Sans", "Segoe UI", sans-serif;
   --font-serif: var(--font-instrument), "Times New Roman", serif;
@@ -102,6 +108,11 @@
   --brand-soft: rgba(255, 90, 31, 0.16);
   --brand-ink: #f4f1ec;
   --brand-flame: #ff5a1f;
+  --code-chip-bg: #1a2029;
+  --code-chip-fg: #ffc4a0;
+  --code-chip-border: #2a3340;
+  --code-block-bg: #0c1016;
+  --code-block-fg: #f3eee8;
 
   /* Semantic remap: low numbers = surfaces, high numbers = ink */
   --slate-50: #0c1016;
