@@ -21,11 +21,11 @@ import {
 type GameRow = ArcadeGameDef & { done: boolean };
 
 const accentBorder = {
-  teal: "border-teal-300 bg-teal-50/70",
-  amber: "border-amber-300 bg-amber-50/70",
-  emerald: "border-emerald-300 bg-emerald-50/70",
-  cyan: "border-cyan-300 bg-cyan-50/70",
-  orange: "border-orange-300 bg-orange-50/70",
+  teal: "border-teal-300 bg-teal-50",
+  amber: "border-amber-300 bg-amber-50",
+  emerald: "border-emerald-300 bg-emerald-50",
+  cyan: "border-cyan-300 bg-cyan-50",
+  orange: "border-orange-300 bg-orange-50",
 } as const;
 
 const PAGE_SIZE = 20;
@@ -305,8 +305,8 @@ function GameCard({ game }: { game: GameRow }) {
         <Badge>{game.minutes} min</Badge>
         {game.done && <Badge variant="emerald">cleared</Badge>}
       </div>
-      <h3 className="mt-3 text-lg font-semibold text-slate-900">{game.title}</h3>
-      <p className="mt-1 text-sm text-slate-600">{game.blurb}</p>
+      <h3 className="mt-3 font-serif-display text-lg font-semibold text-slate-900">{game.title}</h3>
+      <p className="mt-1 text-sm text-slate-500">{game.blurb}</p>
       <div className="mt-4">
         <Link href={`/learn/games/${game.slug}`}>
           <Button size="sm">{game.done ? "Play again" : "Play"}</Button>
