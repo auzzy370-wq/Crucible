@@ -2,16 +2,16 @@ import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
-/** Official flame + vessel mark (raster). Kept on a white plate so black/orange stays true in dark mode. */
+/** Official flame + vessel mark — no plate/border, just the glyph. */
 export function CrucibleGlyph({ className }: { className?: string }) {
   return (
-    <span className={cn("relative block overflow-hidden rounded-[0.35rem] bg-white", className)}>
+    <span className={cn("relative block", className)}>
       <Image
         src="/brand/crucible-mark.png"
         alt=""
         width={128}
         height={128}
-        className="h-full w-full object-contain p-[6%]"
+        className="h-full w-full object-contain"
       />
     </span>
   );
@@ -78,7 +78,7 @@ export function CrucibleLockup({
     wordmarkFrom === "sm" ? "hidden sm:block" : wordmarkFrom === "md" ? "hidden md:block" : "block";
   const inner = (
     <div className={cn("flex items-center", s.gap, className)}>
-      <CrucibleGlyph className={cn("shrink-0 shadow-sm ring-1 ring-black/5", s.mark, markClassName)} />
+      <CrucibleGlyph className={cn("shrink-0", s.mark, markClassName)} />
       <div className={cn("min-w-0 leading-none", wordmarkVisibility)}>
         <CrucibleWordmark className={s.title} />
         {showTagline && (
