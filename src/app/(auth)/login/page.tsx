@@ -162,7 +162,7 @@ function LoginForm() {
             {error}
           </div>
         )}
-        <form className="space-y-4" onSubmit={onSubmit}>
+        <form className="space-y-4" onSubmit={onSubmit} suppressHydrationWarning>
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input id="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="username" />
