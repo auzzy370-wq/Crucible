@@ -23,6 +23,7 @@ import {
   BookOpen,
   UserRound,
   BarChart3,
+  Briefcase,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -67,6 +68,7 @@ const NAV_GROUPS: NavGroup[] = [
       { href: "/study-plans", label: "Campaigns", icon: Route, hint: "Chapter maps & pack XP" },
       { href: "/challenges", label: "Problem bank", icon: Boxes, hint: "Browse all problems" },
       { href: "/interview", label: "Mocks", icon: Timer, hint: "Company rounds" },
+      { href: "/jobs", label: "Jobs", icon: Briefcase, hint: "Tier-company openings" },
     ],
   },
   {

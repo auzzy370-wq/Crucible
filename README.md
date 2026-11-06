@@ -18,6 +18,7 @@ The seed loads the **full challenge library as published 60-minute assessments**
 | **AI Craft** | `/learn/ai` | Prompting, APIs, tools, RAG, agents, evals, safety |
 | **Study plans** | `/study-plans` | Gamified campaigns: chapter maps, node XP, pack clear bonus (+200), quests & medals |
 | **Company mocks** | `/interview` | Phone / coding / onsite rounds, briefings, 1 free mock then Premium |
+| **Jobs** | `/jobs` | Live eng openings from Google, Amazon, Meta, and the rest of the company list — Apply opens the official posting |
 | **Roadmap** | `/roadmap` | Skill tree + next problems |
 
 ## Tracks

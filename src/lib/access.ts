@@ -47,6 +47,10 @@ export const PAGE_ROLE_ACCESS: { prefix: string; roles: readonly string[] }[] = 
   { prefix: "/roadmap", roles: CANDIDATE_ROLES },
   { prefix: "/learn", roles: CANDIDATE_ROLES },
   { prefix: "/interview", roles: CANDIDATE_ROLES },
+  {
+    prefix: "/jobs",
+    roles: [...CANDIDATE_ROLES, ...STAFF_ROLES],
+  },
   { prefix: "/playgrounds", roles: CANDIDATE_ROLES },
   {
     prefix: "/leaderboards",
