@@ -324,6 +324,39 @@ html.dark body {
   background-color: color-mix(in srgb, var(--surface-elevated) 50%, transparent);
 }
 
+/* Pastel accent fills that still ship as default Tailwind colors */
+.dark .bg-emerald-50,
+.dark .bg-emerald-50\/70,
+.dark .bg-emerald-50\/80,
+.dark .bg-orange-50,
+.dark .bg-orange-50\/70,
+.dark .bg-orange-50\/80,
+.dark .bg-rose-50,
+.dark .bg-violet-50 {
+  background-color: var(--surface-elevated) !important;
+}
+
+.dark .from-amber-50,
+.dark .from-orange-50,
+.dark .from-emerald-50 {
+  --tw-gradient-from: var(--brand-soft) var(--tw-gradient-from-position);
+  --tw-gradient-to: rgb(255 255 255 / 0) var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+
+.dark .via-white {
+  --tw-gradient-to: rgb(255 255 255 / 0) var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--surface) var(--tw-gradient-via-position), var(--tw-gradient-to);
+}
+
+.dark .to-orange-50,
+.dark .to-orange-50\/70,
+.dark .to-orange-50\/80,
+.dark .to-amber-50,
+.dark .to-emerald-50 {
+  --tw-gradient-to: var(--surface-elevated) var(--tw-gradient-to-position);
+}
+
 .safe-top {
   padding-top: env(safe-area-inset-top, 0px);
 }

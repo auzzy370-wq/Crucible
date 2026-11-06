@@ -20,12 +20,13 @@ import {
 
 type GameRow = ArcadeGameDef & { done: boolean };
 
+/** Accent borders only — fills always use surface so dark mode stays readable. */
 const accentBorder = {
-  teal: "border-teal-300 bg-teal-50",
-  amber: "border-amber-300 bg-amber-50",
-  emerald: "border-emerald-300 bg-emerald-50",
-  cyan: "border-cyan-300 bg-cyan-50",
-  orange: "border-orange-300 bg-orange-50",
+  teal: "border-teal-300 dark:border-[var(--brand)]/40",
+  amber: "border-amber-300 dark:border-amber-400/45",
+  emerald: "border-emerald-300 dark:border-emerald-400/45",
+  cyan: "border-cyan-300 dark:border-[var(--brand)]/40",
+  orange: "border-orange-300 dark:border-[var(--brand)]/45",
 } as const;
 
 const PAGE_SIZE = 20;
@@ -88,16 +89,16 @@ export function ArcadeLobby(props: {
   const percent = Math.round((props.completedCount / ARCADE_TARGET_COUNT) * 100);
 
   return (
-    <div className="animate-rise space-y-8">
-      <header className="relative overflow-hidden rounded-2xl border border-[var(--brand)]/30 bg-gradient-to-br from-[var(--brand-soft)] via-white to-orange-50/80 p-5 sm:p-7">
+    <div className="animate-rise min-w-0 space-y-8">
+      <header className="relative min-w-0 overflow-hidden rounded-2xl border border-[var(--brand)]/30 bg-gradient-to-br from-[var(--brand-soft)] via-[var(--surface)] to-[var(--surface-elevated)] p-5 sm:p-7">
         <ForgeSparks density={9} />
-        <div className="relative flex flex-wrap items-start justify-between gap-4">
+        <div className="relative flex min-w-0 flex-wrap items-start justify-between gap-4">
           <div className="min-w-0">
             <p className="font-mono text-xs tracking-[0.3em] text-[var(--brand)]">LEARN · ARCADE</p>
-            <h1 className="mt-2 text-2xl font-semibold tracking-[-0.03em] text-slate-900 sm:text-3xl">
+            <h1 className="mt-2 font-serif-display text-2xl font-semibold tracking-[-0.03em] text-slate-900 sm:text-3xl">
               {ARCADE_TARGET_COUNT.toLocaleString()} HTML5 drills
             </h1>
-            <p className="mt-2 max-w-xl text-slate-600">
+            <p className="mt-2 max-w-xl text-sm text-[var(--muted)] sm:text-base">
               Featured craft first, then browse by family. Drills +{ARCADE_DRILL_XP} XP · featured +{ARCADE_CLEAR_XP} XP.
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
@@ -108,10 +109,12 @@ export function ArcadeLobby(props: {
             </div>
           </div>
           {continueGame && (
-            <div className="w-full max-w-sm rounded-xl border border-slate-200 bg-white/90 p-4 sm:w-auto">
+            <div className="w-full max-w-sm rounded-xl border border-slate-200 bg-[var(--surface-elevated)] p-4 sm:w-auto">
               <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">Continue</p>
               <p className="mt-1 font-medium text-slate-900">{continueGame.title}</p>
-              <p className="mt-1 text-sm text-slate-500">{continueGame.skill} · D{continueGame.difficulty}</p>
+              <p className="mt-1 text-sm text-slate-500">
+                {continueGame.skill} · D{continueGame.difficulty}
+              </p>
               <div className="mt-3">
                 <Link href={`/learn/games/${continueGame.slug}`}>
                   <Button size="sm">Play next</Button>
@@ -120,14 +123,17 @@ export function ArcadeLobby(props: {
             </div>
           )}
         </div>
-        <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/80">
-          <div className="h-full rounded-full bg-[var(--brand)] transition-[width]" style={{ width: `${percent}%` }} />
+        <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-200/80">
+          <div
+            className="h-full rounded-full bg-[var(--brand)] transition-[width]"
+            style={{ width: `${percent}%` }}
+          />
         </div>
       </header>
 
-      <section className="space-y-3">
+      <section className="min-w-0 space-y-3">
         <div className="flex flex-wrap items-end justify-between gap-2">
-          <div>
+          <div className="min-w-0">
             <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">1 · Featured</p>
             <h2 className="mt-1 text-lg font-semibold text-slate-900">Craft originals</h2>
           </div>
@@ -135,15 +141,15 @@ export function ArcadeLobby(props: {
             ← Learn hub
           </Link>
         </div>
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid min-w-0 gap-3 sm:grid-cols-2">
           {featured.map((g) => (
             <GameCard key={g.slug} game={g} />
           ))}
         </div>
       </section>
 
-      <section className="space-y-4">
-        <div>
+      <section className="min-w-0 space-y-4">
+        <div className="min-w-0">
           <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">2 · Catalog</p>
           <h2 className="mt-1 text-lg font-semibold text-slate-900">Browse by family</h2>
           <p className="mt-1 text-sm text-slate-500">
@@ -151,7 +157,7 @@ export function ArcadeLobby(props: {
           </p>
         </div>
 
-        <div className="flex flex-wrap gap-1.5">
+        <div className="flex max-w-full flex-wrap gap-1.5">
           <FamilyChip
             active={family === "all"}
             label="All drills"
@@ -178,8 +184,8 @@ export function ArcadeLobby(props: {
           })}
         </div>
 
-        <div className="sticky top-0 z-10 -mx-1 rounded-xl border border-slate-200/80 bg-white/95 p-3 backdrop-blur supports-[backdrop-filter]:bg-white/80">
-          <div className="grid gap-2 sm:grid-cols-3">
+        <div className="sticky top-0 z-10 min-w-0 rounded-xl border border-slate-200/80 bg-[var(--surface-elevated)]/95 p-3 backdrop-blur">
+          <div className="grid min-w-0 gap-2 sm:grid-cols-3">
             <Input
               value={q}
               onChange={(e) => {
@@ -188,9 +194,10 @@ export function ArcadeLobby(props: {
               }}
               placeholder="Search title, skill, slug…"
               aria-label="Search arcade games"
+              className="max-w-full"
             />
             <select
-              className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm"
+              className="h-10 max-w-full rounded-md border border-slate-200 bg-[var(--surface)] px-3 text-sm text-slate-900"
               value={skill}
               onChange={(e) => {
                 setSkill(e.target.value);
@@ -205,7 +212,7 @@ export function ArcadeLobby(props: {
               ))}
             </select>
             <select
-              className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm"
+              className="h-10 max-w-full rounded-md border border-slate-200 bg-[var(--surface)] px-3 text-sm text-slate-900"
               value={cleared}
               onChange={(e) => {
                 setCleared(e.target.value as "all" | "done" | "open");
@@ -219,16 +226,16 @@ export function ArcadeLobby(props: {
           </div>
         </div>
 
-        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white/80">
+        <div className="min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-[var(--surface-elevated)]">
           {pageGames.length === 0 ? (
             <p className="px-4 py-10 text-center text-sm text-slate-500">No drills match those filters.</p>
           ) : (
-            <ul className="divide-y divide-slate-100">
+            <ul className="divide-y divide-slate-200">
               {pageGames.map((g) => (
-                <li key={g.slug}>
+                <li key={g.slug} className="min-w-0">
                   <Link
                     href={`/learn/games/${g.slug}`}
-                    className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 transition hover:bg-[var(--brand-soft)]/40"
+                    className="flex min-w-0 flex-wrap items-center justify-between gap-3 px-4 py-3 transition hover:bg-[var(--brand-soft)]/40"
                   >
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
@@ -240,7 +247,9 @@ export function ArcadeLobby(props: {
                     <div className="flex shrink-0 flex-wrap items-center gap-2">
                       <Badge variant="cyan">{g.skill}</Badge>
                       <Badge variant="amber">D{g.difficulty}</Badge>
-                      <span className="font-mono text-[11px] text-[var(--brand)]">{g.done ? "Replay →" : "Play →"}</span>
+                      <span className="font-mono text-[11px] text-[var(--brand)]">
+                        {g.done ? "Replay →" : "Play →"}
+                      </span>
                     </div>
                   </Link>
                 </li>
@@ -281,10 +290,10 @@ function FamilyChip(props: {
       type="button"
       onClick={props.onClick}
       className={cn(
-        "rounded-full border px-3 py-1.5 text-left text-sm transition",
+        "max-w-full rounded-full border px-3 py-1.5 text-left text-sm transition",
         props.active
           ? "border-[var(--brand)] bg-[var(--brand)] text-white"
-          : "border-slate-200 bg-white text-slate-700 hover:border-[var(--brand)]/40",
+          : "border-slate-200 bg-[var(--surface-elevated)] text-slate-700 hover:border-[var(--brand)]/40",
       )}
     >
       <span className="font-medium">{props.label}</span>
@@ -299,14 +308,19 @@ function FamilyChip(props: {
 
 function GameCard({ game }: { game: GameRow }) {
   return (
-    <article className={cn("rounded-2xl border p-4 sm:p-5", accentBorder[game.accent])}>
+    <article
+      className={cn(
+        "min-w-0 rounded-2xl border bg-[var(--surface-elevated)] p-4 sm:p-5",
+        accentBorder[game.accent],
+      )}
+    >
       <div className="flex flex-wrap items-center gap-2">
         <Badge variant="cyan">{game.skill}</Badge>
         <Badge>{game.minutes} min</Badge>
         {game.done && <Badge variant="emerald">cleared</Badge>}
       </div>
       <h3 className="mt-3 font-serif-display text-lg font-semibold text-slate-900">{game.title}</h3>
-      <p className="mt-1 text-sm text-slate-500">{game.blurb}</p>
+      <p className="mt-1 text-sm text-[var(--muted)]">{game.blurb}</p>
       <div className="mt-4">
         <Link href={`/learn/games/${game.slug}`}>
           <Button size="sm">{game.done ? "Play again" : "Play"}</Button>

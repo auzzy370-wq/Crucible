@@ -12,7 +12,7 @@ export function ForgeHero({ game }: { game: LearnerGameState }) {
   const sparkDensity = game.perfectDay ? 14 : game.streak.heat >= 70 ? 12 : game.streak.heat >= 30 ? 8 : 4;
 
   return (
-    <section className="relative overflow-hidden rounded-2xl border border-[var(--brand)]/30 bg-gradient-to-br from-[var(--brand-soft)] via-white to-orange-50/70 p-5 sm:p-6">
+    <section className="relative min-w-0 overflow-hidden rounded-2xl border border-[var(--brand)]/30 bg-gradient-to-br from-[var(--brand-soft)] via-[var(--surface)] to-[var(--surface-elevated)] p-5 sm:p-6">
       <ForgeSparks density={sparkDensity} />
 
       <div className="relative flex flex-wrap items-start justify-between gap-4">
