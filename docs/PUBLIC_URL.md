@@ -5,6 +5,7 @@
 **https://fought-honors-hostel-timing.trycloudflare.com**
 
 - Learn hub: `/learn`
+- Learn Arcade: `/learn/games`
 - Study campaigns: `/study-plans`
 - Mock interviews: `/interview`
 - Register any email (not `@gauntlet.local`) or use a seeded demo account when `DEMO_*` passwords are set locally
