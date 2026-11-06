@@ -53,7 +53,7 @@ export function LandingPage(props: {
 
   return (
     <div className="landing-root relative min-h-screen overflow-x-clip">
-      <section className="landing-hero-plane relative isolate flex min-h-[100svh] flex-col">
+      <section className="landing-hero-plane relative isolate flex flex-col sm:min-h-[100svh]">
         <div className="pointer-events-none absolute inset-0" aria-hidden>
           <div className="landing-hero-glow absolute inset-0" />
           <div className="landing-noise absolute inset-0" />
@@ -82,31 +82,31 @@ export function LandingPage(props: {
           </div>
         </header>
 
-        <div className="relative z-10 mx-auto flex w-full max-w-[1200px] flex-1 flex-col px-4 pb-10 pt-3 sm:px-8 sm:pb-20 sm:pt-6 lg:px-10">
-          <div className="mb-8 sm:hidden">
+        <div className="relative z-10 mx-auto flex w-full max-w-[1200px] flex-1 flex-col px-4 pb-8 pt-2 sm:px-8 sm:pb-20 sm:pt-6 lg:px-10">
+          <div className="mb-4 sm:hidden">
             <WorkspacePreview />
           </div>
 
-          <div className="mt-auto max-w-xl sm:max-w-md lg:max-w-xl">
-            <p className="landing-anim-brand font-serif-display text-[clamp(3.25rem,14vw,8.5rem)] leading-[0.88] tracking-[-0.04em] text-[#0f1c2e] dark:text-white">
+          <div className="max-w-xl sm:mt-auto sm:max-w-md lg:max-w-xl">
+            <p className="landing-anim-brand font-serif-display text-[clamp(2.75rem,12vw,8.5rem)] leading-[0.9] tracking-[-0.04em] text-[#0f1c2e] dark:text-white">
               Crucible
             </p>
-            <h1 className="landing-anim-copy mt-4 text-[1.15rem] font-medium leading-snug text-[#334155] dark:text-white/90 sm:mt-5 sm:text-[1.35rem]">
+            <h1 className="landing-anim-copy mt-2.5 text-[1.05rem] font-medium leading-snug text-[#334155] dark:text-white/90 sm:mt-5 sm:text-[1.35rem]">
               Learn the craft. Hire the proof.
             </h1>
-            <p className="landing-anim-copy mt-3 text-[15px] leading-relaxed text-[#5b7390] dark:text-white/55">
+            <p className="landing-anim-copy mt-2 text-[14px] leading-relaxed text-[#5b7390] dark:text-white/55 sm:mt-3 sm:text-[15px]">
               Timed judges and real production work — one arena for engineers who practice and employers who hire.
             </p>
-            <div className="landing-anim-cta mt-7 flex w-full flex-col gap-2.5 sm:mt-9 sm:flex-row sm:items-center sm:gap-3">
+            <div className="landing-anim-cta mt-5 flex w-full flex-col gap-2 sm:mt-9 sm:flex-row sm:items-center sm:gap-3">
               <Link
                 href="/register"
-                className="inline-flex min-h-12 w-full items-center justify-center rounded-md bg-[var(--brand)] px-6 text-sm font-semibold text-white transition hover:bg-[var(--brand-hover)] sm:w-auto"
+                className="inline-flex min-h-11 w-full items-center justify-center rounded-md bg-[var(--brand)] px-6 text-sm font-semibold text-white transition hover:bg-[var(--brand-hover)] sm:min-h-12 sm:w-auto"
               >
                 Start learning free
               </Link>
               <Link
                 href="/login?intent=hire"
-                className="inline-flex min-h-12 w-full items-center justify-center rounded-md border border-slate-300 bg-white/70 px-5 text-sm text-slate-800 transition hover:border-slate-400 hover:bg-white dark:border-white/20 dark:bg-white/5 dark:text-white dark:hover:border-white/35 dark:hover:bg-white/10 sm:w-auto"
+                className="inline-flex min-h-11 w-full items-center justify-center rounded-md border border-slate-300 bg-white/70 px-5 text-sm text-slate-800 transition hover:border-slate-400 hover:bg-white dark:border-white/20 dark:bg-white/5 dark:text-white dark:hover:border-white/35 dark:hover:bg-white/10 sm:min-h-12 sm:w-auto"
               >
                 Hire with Crucible
               </Link>
