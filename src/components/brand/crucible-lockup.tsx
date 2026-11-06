@@ -2,16 +2,24 @@ import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
-/** Official flame + vessel mark — no plate/border, just the glyph. */
+/** Official flame + vessel mark — flat dark glyph by default; light twin when html.light. */
 export function CrucibleGlyph({ className }: { className?: string }) {
   return (
     <span className={cn("relative block", className)}>
       <Image
-        src="/brand/crucible-mark.png"
+        src="/brand/crucible-mark-dark.png"
         alt=""
         width={128}
         height={128}
-        className="h-full w-full object-contain"
+        priority
+        className="h-full w-full object-contain [:where(html.light)_&]:hidden"
+      />
+      <Image
+        src="/brand/crucible-mark-light.png"
+        alt=""
+        width={128}
+        height={128}
+        className="hidden h-full w-full object-contain [:where(html.light)_&]:block"
       />
     </span>
   );
