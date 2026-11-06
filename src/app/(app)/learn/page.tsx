@@ -78,15 +78,15 @@ export default async function LearnHubPage() {
             {nextAi
               ? `Next lesson: ${nextAi.title} (${nextAi.minutes} min)`
               : aiDone.size
-                ? "Path complete — keep sharpening on AI vs Human."
+                ? "Path complete — keep practicing in the problem bank."
                 : "Start with what LLMs are, then ship integrations safely."}
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
             <Link href={nextAi ? `/learn/ai/${nextAi.slug}` : "/learn/ai"}>
-              <Button>{nextAi ? "Continue AI lesson" : "Open AI Craft"}</Button>
+              <Button>{nextAi ? "Continue AI lesson" : "Open AI lessons"}</Button>
             </Link>
-            <Link href="/ai-vs-human">
-              <Button variant="secondary">Benchmark a model</Button>
+            <Link href="/challenges">
+              <Button variant="secondary">Practice in the bank</Button>
             </Link>
           </div>
         </div>

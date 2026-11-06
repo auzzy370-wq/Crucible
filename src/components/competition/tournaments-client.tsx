@@ -58,8 +58,8 @@ export function TournamentsClient() {
         <Link href="/contest" className="inline-flex items-center text-sm text-cyan-300 hover:underline">
           Weekly heat →
         </Link>
-        <Link href="/ai-vs-human" className="inline-flex items-center text-sm text-cyan-300 hover:underline">
-          AI vs Human bench →
+        <Link href="/leaderboards" className="inline-flex items-center text-sm text-cyan-300 hover:underline">
+          Leaderboards →
         </Link>
       </div>
 

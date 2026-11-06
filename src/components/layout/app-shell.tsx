@@ -11,11 +11,8 @@ import {
   Boxes,
   ScrollText,
   Settings,
-  Terminal,
-  Siren,
   Network,
   LogOut,
-  BrainCircuit,
   Menu,
   X,
   Sparkles,
@@ -47,81 +44,50 @@ type NavGroup = {
   items: NavItem[];
 };
 
+/** Short groups, plain labels — no jargon destinations. */
 const NAV_GROUPS: NavGroup[] = [
-  /** Learner: Learn → Practice → Compete → You */
   {
-    id: "learn",
-    title: "1 · Learn",
+    id: "learner",
+    title: "For you",
     roles: ["CANDIDATE", "TEAM_MEMBER"],
     items: [
-      { href: "/dashboard", label: "Home", icon: LayoutDashboard, hint: "What’s next" },
-      { href: "/learn", label: "Learn", icon: BookOpen, hint: "Interview + AI lessons" },
-      { href: "/study-plans", label: "Study plans", icon: Route, hint: "Company & role packs" },
-    ],
-  },
-  {
-    id: "practice",
-    title: "2 · Practice",
-    roles: ["CANDIDATE", "TEAM_MEMBER"],
-    items: [
-      { href: "/daily", label: "Daily", icon: CalendarDays, hint: "One timed session" },
-      { href: "/challenges", label: "Problem bank", icon: Boxes, hint: "Browse & solve" },
-      { href: "/interview", label: "Company mocks", icon: Timer, hint: "Timed interview sim" },
-      { href: "/workspace", label: "Workspaces", icon: Terminal, hint: "Open IDE sessions" },
-    ],
-  },
-  {
-    id: "compete",
-    title: "3 · Compete",
-    roles: ["CANDIDATE", "TEAM_MEMBER"],
-    items: [
-      { href: "/ai-vs-human", label: "AI vs Human", icon: BrainCircuit, hint: "Same challenge, fair judge" },
-      { href: "/tournaments", label: "Tournaments", icon: Trophy, hint: "Live events" },
-      { href: "/leaderboards", label: "Leaderboards", icon: BarChart3, hint: "Standings" },
-    ],
-  },
-  {
-    id: "you",
-    title: "4 · You",
-    roles: ["CANDIDATE", "TEAM_MEMBER"],
-    items: [
-      { href: "/candidates", label: "Your profile", icon: UserRound, hint: "Skills you’ve cleared" },
-      { href: "/settings", label: "Settings", icon: Settings },
+      { href: "/dashboard", label: "Home", icon: LayoutDashboard, hint: "What to do next" },
+      { href: "/learn", label: "Lessons", icon: BookOpen, hint: "Interview & AI guides" },
+      { href: "/study-plans", label: "Study plans", icon: Route, hint: "Follow a path" },
+      { href: "/daily", label: "Today’s challenge", icon: CalendarDays, hint: "One timed problem" },
+      { href: "/challenges", label: "Problem bank", icon: Boxes, hint: "Browse all problems" },
+      { href: "/interview", label: "Mock interviews", icon: Timer, hint: "Timed company-style rounds" },
+      { href: "/tournaments", label: "Tournaments", icon: Trophy, hint: "Live contests" },
+      { href: "/leaderboards", label: "Leaderboards", icon: BarChart3, hint: "Who’s ahead" },
+      { href: "/candidates", label: "My profile", icon: UserRound, hint: "Skills you’ve proven" },
+      { href: "/settings", label: "Settings", icon: Settings, hint: "Account & security" },
     ],
   },
   {
     id: "team-member",
-    title: "Team",
+    title: "Your team",
     roles: ["TEAM_MEMBER"],
-    items: [
-      { href: "/teams", label: "Team crucible", icon: Network },
-      { href: "/incidents", label: "Incident sims", icon: Siren },
-    ],
+    items: [{ href: "/teams", label: "Team page", icon: Network, hint: "Shared work" }],
   },
   {
     id: "hiring",
-    title: "Hire",
+    title: "Hiring",
     roles: ["SUPER_ADMIN", "HIRING_MANAGER", "TECHNICAL_REVIEWER"],
     items: [
-      { href: "/dashboard", label: "Home", icon: LayoutDashboard, hint: "Pipeline" },
-      { href: "/assessments", label: "Assessments", icon: Crosshair, hint: "Create & assign", roles: ["SUPER_ADMIN", "HIRING_MANAGER"] },
-      { href: "/candidates", label: "Candidates", icon: Users, hint: "Evidence" },
-      { href: "/reviews", label: "Reviews", icon: ScrollText, hint: "Hire decisions" },
-      { href: "/analytics", label: "Analytics", icon: BarChart3 },
-    ],
-  },
-  {
-    id: "staff-tools",
-    title: "Tools",
-    roles: ["SUPER_ADMIN", "HIRING_MANAGER", "TECHNICAL_REVIEWER"],
-    items: [
-      { href: "/challenges", label: "Challenge bank", icon: Boxes },
-      { href: "/workspace", label: "Workspaces", icon: Terminal },
-      { href: "/teams", label: "Team crucible", icon: Network },
-      { href: "/incidents", label: "Incident sims", icon: Siren },
-      { href: "/architecture", label: "Architecture", icon: BrainCircuit, roles: ["SUPER_ADMIN", "HIRING_MANAGER", "TECHNICAL_REVIEWER"] },
-      { href: "/ai-vs-human", label: "AI vs Human", icon: BrainCircuit },
-      { href: "/admin", label: "Admin", icon: Shield, roles: ["SUPER_ADMIN"] },
+      { href: "/dashboard", label: "Home", icon: LayoutDashboard, hint: "Hiring overview" },
+      {
+        href: "/assessments",
+        label: "Assessments",
+        icon: Crosshair,
+        hint: "Create & assign tests",
+        roles: ["SUPER_ADMIN", "HIRING_MANAGER"],
+      },
+      { href: "/candidates", label: "Candidates", icon: Users, hint: "People & evidence" },
+      { href: "/reviews", label: "Reviews", icon: ScrollText, hint: "Approve or reject" },
+      { href: "/analytics", label: "Analytics", icon: BarChart3, hint: "Pipeline numbers" },
+      { href: "/challenges", label: "Problem bank", icon: Boxes, hint: "Challenge catalog" },
+      { href: "/teams", label: "Teams", icon: Network, hint: "Group assignments" },
+      { href: "/admin", label: "Admin", icon: Shield, hint: "Platform controls", roles: ["SUPER_ADMIN"] },
     ],
   },
   {
@@ -129,8 +95,8 @@ const NAV_GROUPS: NavGroup[] = [
     title: "Account",
     roles: ["SUPER_ADMIN", "HIRING_MANAGER", "TECHNICAL_REVIEWER"],
     items: [
-      { href: "/pricing", label: "Billing", icon: Sparkles },
-      { href: "/settings", label: "Settings", icon: Settings },
+      { href: "/pricing", label: "Billing", icon: Sparkles, hint: "Plan & payments" },
+      { href: "/settings", label: "Settings", icon: Settings, hint: "Account & security" },
     ],
   },
 ];
@@ -165,7 +131,6 @@ function NavLinks({
           <div className="space-y-0.5">
             {group.items.map((item) => {
               const Icon = item.icon;
-              // Prefer exact / child match; avoid /learn lighting up unrelated paths.
               const active =
                 pathname === item.href ||
                 (item.href !== "/" && pathname.startsWith(`${item.href}/`));
@@ -183,7 +148,12 @@ function NavLinks({
                   <span className="min-w-0 flex-1">
                     <span className="block leading-tight">{item.label}</span>
                     {item.hint && (
-                      <span className={cn("block text-[11px] leading-tight", active ? "text-cyan-200/60" : "text-slate-600")}>
+                      <span
+                        className={cn(
+                          "block text-[11px] leading-tight",
+                          active ? "text-cyan-200/60" : "text-slate-600",
+                        )}
+                      >
                         {item.hint}
                       </span>
                     )}
@@ -268,33 +238,33 @@ export function AppShell({
     ? user.role === "TECHNICAL_REVIEWER"
       ? ([
           { href: "/dashboard", label: "Home", icon: LayoutDashboard },
-          { href: "/analytics", label: "Stats", icon: BarChart3 },
           { href: "/candidates", label: "People", icon: Users },
           { href: "/reviews", label: "Review", icon: ScrollText },
+          { href: "/analytics", label: "Stats", icon: BarChart3 },
         ] as const)
       : ([
           { href: "/dashboard", label: "Home", icon: LayoutDashboard },
-          { href: "/analytics", label: "Stats", icon: BarChart3 },
-          { href: "/assessments", label: "Assign", icon: Crosshair },
+          { href: "/assessments", label: "Tests", icon: Crosshair },
           { href: "/reviews", label: "Review", icon: ScrollText },
+          { href: "/candidates", label: "People", icon: Users },
         ] as const)
     : ([
         { href: "/dashboard", label: "Home", icon: LayoutDashboard },
-        { href: "/learn", label: "Learn", icon: BookOpen },
+        { href: "/learn", label: "Lessons", icon: BookOpen },
         { href: "/challenges", label: "Practice", icon: Boxes },
-        { href: "/ai-vs-human", label: "Compete", icon: BrainCircuit },
+        { href: "/leaderboards", label: "Ranks", icon: BarChart3 },
       ] as const);
 
-  const inWorkspaceSession = /^\/workspace\/[^/]+/.test(pathname);
+  const inCodingSession = /^\/workspace\/[^/]+/.test(pathname);
 
   const journeyCopy = isCandidate
     ? {
-        badge: "Your path",
-        body: "Learn the craft → solve problems under the judge → level up",
+        badge: "Simple path",
+        body: "Lessons → practice a problem → climb the board",
       }
     : {
         badge: "Hiring path",
-        body: "Create a test → assign → review evidence → decide",
+        body: "Create a test → assign → review → decide",
       };
 
   return (
@@ -303,8 +273,7 @@ export function AppShell({
         <Link href="/dashboard" className="min-w-0">
           {brand}
         </Link>
-        {/* Menu lives in the bottom tab "More" when tabs are shown; only keep top control in workspace (no bottom bar). */}
-        {inWorkspaceSession ? (
+        {inCodingSession ? (
           <Button
             type="button"
             variant="secondary"
@@ -375,14 +344,14 @@ export function AppShell({
         <div
           className={cn(
             "relative mx-auto max-w-7xl px-3 py-4 sm:px-6 sm:py-6 lg:px-8 lg:pb-6",
-            !inWorkspaceSession && "mobile-bottom-pad",
+            !inCodingSession && "mobile-bottom-pad",
           )}
         >
           {children}
         </div>
       </main>
 
-      {!inWorkspaceSession && (
+      {!inCodingSession && (
         <nav
           className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-800/90 bg-slate-950/95 backdrop-blur lg:hidden safe-bottom"
           aria-label="Primary"

@@ -188,13 +188,13 @@ export default async function DashboardPage() {
               <div className="font-mono text-xs text-slate-500">2 · Prove</div>
               <div className="mt-1 font-medium text-slate-100">Pass public + hidden judges</div>
               <p className="mt-1 text-sm text-slate-400">
-                Code in the IDE. You only advance when both lanes accept.
+                Pick a problem, run the tests, and clear both public and hidden checks.
               </p>
               <Link
-                href={codingOpen?.workspace ? `/workspace/${codingOpen.workspace.id}` : "/workspace"}
+                href={codingOpen?.workspace ? `/workspace/${codingOpen.workspace.id}` : "/challenges"}
                 className="mt-3 inline-block text-sm text-cyan-300 hover:underline"
               >
-                {codingOpen?.workspace ? "Continue workspace →" : "Open workspaces →"}
+                {codingOpen?.workspace ? "Continue your problem →" : "Open problem bank →"}
               </Link>
             </li>
             <li className="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
@@ -270,9 +270,9 @@ export default async function DashboardPage() {
                 <div className="flex flex-wrap gap-3">
                   <Link
                     className="text-cyan-300 hover:underline"
-                    href={a.workspace ? `/workspace/${a.workspace.id}` : "/workspace"}
+                    href={a.workspace ? `/workspace/${a.workspace.id}` : "/challenges"}
                   >
-                    {a.workspace ? "Open workspace →" : "View workspaces →"}
+                    {a.workspace ? "Continue problem →" : "Pick a problem →"}
                   </Link>
                   {a.scoreReport && (
                     <Link className="text-emerald-300 hover:underline" href={`/scorecard/${a.id}`} target="_blank">

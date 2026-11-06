@@ -138,7 +138,7 @@ function LoginForm() {
               </Link>
             </div>
             <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2.5 text-xs text-amber-100">
-              Every signed-in learner can use AI vs Human. Admins can auto-run all assessments and post scores from
+              Every signed-in learner can practice timed problems. Admins can auto-run assessments and post scores from
               Admin.
             </div>
           </div>

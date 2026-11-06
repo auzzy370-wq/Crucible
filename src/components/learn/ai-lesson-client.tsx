@@ -92,8 +92,8 @@ export function AiLessonClient(props: {
             <Button variant="secondary">Practice in problem bank</Button>
           </Link>
         )}
-        <Link href="/ai-vs-human">
-          <Button variant="ghost">Try AI vs Human →</Button>
+        <Link href="/challenges">
+          <Button variant="ghost">Practice a problem →</Button>
         </Link>
       </div>
 

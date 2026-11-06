@@ -61,10 +61,6 @@ export const PAGE_ROLE_ACCESS: { prefix: string; roles: readonly string[] }[] = 
     roles: [...CANDIDATE_ROLES, ...STAFF_ROLES],
   },
   {
-    prefix: "/ai-vs-human",
-    roles: [...CANDIDATE_ROLES, ...STAFF_ROLES],
-  },
-  {
     prefix: "/benchmarks",
     roles: [...CANDIDATE_ROLES, ...STAFF_ROLES],
   },

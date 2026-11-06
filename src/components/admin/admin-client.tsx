@@ -1167,9 +1167,6 @@ export function AdminClient() {
               <Link href="/teams" className="text-cyan-300 hover:underline">
                 Teams →
               </Link>
-              <Link href="/incidents" className="text-cyan-300 hover:underline">
-                Incidents →
-              </Link>
               <Link href="/architecture" className="text-cyan-300 hover:underline">
                 Architecture →
               </Link>

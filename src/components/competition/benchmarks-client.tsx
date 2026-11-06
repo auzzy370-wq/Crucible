@@ -58,8 +58,8 @@ export function BenchmarksClient() {
         <Button variant="secondary" size="sm" onClick={() => void load()}>
           Refresh
         </Button>
-        <Link href="/ai-vs-human" className="text-cyan-300 hover:underline">
-          Run a benchmark →
+        <Link href="/challenges" className="text-cyan-300 hover:underline">
+          Practice problems →
         </Link>
         <Link href="/leaderboards" className="text-cyan-300 hover:underline">
           Full leaderboards →

@@ -83,7 +83,7 @@ export function AiCraftClient() {
                 Next: <span className="text-slate-200">{next.title}</span> · {next.minutes} min
               </p>
             ) : (
-              <p className="mt-1 text-sm text-emerald-300">Curriculum cleared — keep practicing in AI vs Human.</p>
+              <p className="mt-1 text-sm text-emerald-300">Curriculum cleared — keep practicing in the problem bank.</p>
             )}
           </div>
           <div className="flex flex-wrap gap-2">
@@ -96,8 +96,8 @@ export function AiCraftClient() {
                 Start AI Craft
               </Button>
             )}
-            <Link href="/ai-vs-human">
-              <Button variant="secondary">AI vs Human bench</Button>
+            <Link href="/challenges">
+              <Button variant="secondary">Open problem bank</Button>
             </Link>
           </div>
         </div>

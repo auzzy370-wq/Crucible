@@ -1,8 +1,6 @@
-import { CANDIDATE_ROLES, STAFF_ROLES } from "@/lib/access";
-import { requirePageRoles } from "@/server/auth/page-guard";
-import { AiVsHumanClient } from "@/components/competition/ai-vs-human-client";
+import { redirect } from "next/navigation";
 
-export default async function AiVsHumanPage() {
-  await requirePageRoles([...CANDIDATE_ROLES, ...STAFF_ROLES]);
-  return <AiVsHumanClient />;
+/** Removed from product nav — keep URL from 404ing old bookmarks. */
+export default function AiVsHumanRemoved() {
+  redirect("/leaderboards");
 }
