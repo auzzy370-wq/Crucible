@@ -9,7 +9,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   const [client] = useState(() => new QueryClient());
   return (
     <ClerkProviderWrap>
-      <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+      <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} storageKey="crucible-theme">
         <QueryClientProvider client={client}>{children}</QueryClientProvider>
       </ThemeProvider>
     </ClerkProviderWrap>

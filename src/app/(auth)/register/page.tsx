@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { SocialAuthButtons } from "@/components/auth/social-auth-buttons";
-
+import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { trackOptionGroups } from "@/lib/tracks";
 
 export default function RegisterPage() {
@@ -63,16 +63,17 @@ export default function RegisterPage() {
       <div className="landing-noise pointer-events-none absolute inset-0" aria-hidden />
       <div className="landing-mesh pointer-events-none absolute inset-0" aria-hidden />
       <div className="pointer-events-none absolute inset-0 grid-overlay opacity-50" />
-      <Card className="animate-rise relative w-full max-w-lg border-teal-300/60 bg-[#070b12]/90 backdrop-blur-sm">
+      <Card className="animate-rise relative w-full max-w-lg border-teal-300/50 bg-slate-50/90 backdrop-blur-sm">
         <CardHeader>
-          <div className="mb-1 flex items-baseline gap-3">
-            <span className="font-serif-display text-2xl tracking-tight text-[var(--landing-ink)]">Crucible</span>
-            <span className="font-mono text-[10px] uppercase tracking-[0.28em] text-[var(--landing-teal)]">
-              Learn the craft
-            </span>
+          <div className="mb-1 flex items-center justify-between gap-3">
+            <div className="flex items-baseline gap-3">
+              <span className="font-serif-display text-2xl tracking-tight text-slate-900">Crucible</span>
+              <span className="font-mono text-[10px] uppercase tracking-[0.28em] text-teal-700">Learn the craft</span>
+            </div>
+            <ThemeToggle />
           </div>
           <CardTitle className="font-serif-display text-xl sm:text-2xl">Start learning free</CardTitle>
-          <CardDescription className="text-[var(--landing-mute)]">
+          <CardDescription>
             Practice timed engineering and security work, build a verified profile, and share evidence employers can
             trust. Hiring teams sign in from the employer path.
           </CardDescription>

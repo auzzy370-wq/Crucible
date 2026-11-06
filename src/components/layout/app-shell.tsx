@@ -28,6 +28,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { ThemeToggle } from "@/components/layout/theme-toggle";
 
 type NavItem = {
   href: string;
@@ -203,12 +204,16 @@ export function AppShell({
 
   const brand = (
     <div className="flex items-center gap-3">
-      <div className="pulse-live flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-teal-400/50 bg-teal-500/10 font-mono text-sm font-bold text-teal-700">
+      <div className="crucible-mark pulse-live flex h-11 w-11 shrink-0 items-center justify-center rounded-xl font-mono text-sm font-bold tracking-tight text-teal-700">
         CR
       </div>
       <div className="min-w-0">
-        <div className="truncate text-sm font-semibold tracking-[0.22em] text-slate-900">CRUCIBLE</div>
-        <div className="truncate text-[10px] font-medium tracking-[0.18em] text-teal-700">PROVE THE CRAFT</div>
+        <div className="truncate font-serif-display text-xl leading-none tracking-[-0.02em] text-slate-900">
+          Crucible
+        </div>
+        <div className="mt-0.5 truncate font-mono text-[10px] font-medium tracking-[0.2em] text-teal-700">
+          PROVE THE CRAFT
+        </div>
       </div>
     </div>
   );
@@ -270,25 +275,26 @@ export function AppShell({
 
   return (
     <div className="min-h-screen lg:grid lg:grid-cols-[272px_1fr]">
-      <header className="sticky top-0 z-40 flex items-center justify-between gap-3 border-b border-slate-200/80 bg-white/95 px-3 py-3 backdrop-blur sm:px-4 lg:hidden safe-top">
+      <header className="sticky top-0 z-40 flex items-center justify-between gap-3 border-b border-slate-200/80 bg-slate-50/95 px-3 py-3 backdrop-blur sm:px-4 lg:hidden safe-top">
         <Link href="/dashboard" className="min-w-0">
           {brand}
         </Link>
-        {inCodingSession ? (
-          <Button
-            type="button"
-            variant="secondary"
-            size="icon"
-            className="min-h-11 min-w-11"
-            aria-label={open ? "Close menu" : "Open menu"}
-            aria-expanded={open}
-            onClick={() => setOpen((v) => !v)}
-          >
-            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </Button>
-        ) : (
-          <div className="min-h-11 min-w-11" aria-hidden />
-        )}
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          {inCodingSession ? (
+            <Button
+              type="button"
+              variant="secondary"
+              size="icon"
+              className="min-h-11 min-w-11"
+              aria-label={open ? "Close menu" : "Open menu"}
+              aria-expanded={open}
+              onClick={() => setOpen((v) => !v)}
+            >
+              {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </Button>
+          ) : null}
+        </div>
       </header>
 
       <div
@@ -303,15 +309,18 @@ export function AppShell({
         />
         <aside
           className={cn(
-            "absolute inset-y-0 left-0 flex w-[min(100%,20rem)] max-w-full flex-col border-r border-slate-200 bg-white shadow-xl transition-transform duration-200 ease-out safe-top safe-bottom",
+            "absolute inset-y-0 left-0 flex w-[min(100%,20rem)] max-w-full flex-col border-r border-slate-200 bg-slate-50 shadow-xl transition-transform duration-200 ease-out safe-top safe-bottom",
             open ? "translate-x-0" : "-translate-x-full",
           )}
         >
           <div className="flex items-center justify-between gap-3 px-5 py-4">
             {brand}
-            <Button type="button" variant="ghost" size="icon" aria-label="Close menu" onClick={() => setOpen(false)}>
-              <X className="h-5 w-5" />
-            </Button>
+            <div className="flex items-center gap-1">
+              <ThemeToggle />
+              <Button type="button" variant="ghost" size="icon" aria-label="Close menu" onClick={() => setOpen(false)}>
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
           </div>
           <div className="px-5 pb-3">
             <Badge variant="cyan" className="mb-2">
@@ -326,8 +335,11 @@ export function AppShell({
         </aside>
       </div>
 
-      <aside className="hidden border-r border-slate-200/80 bg-white/85 backdrop-blur lg:flex lg:flex-col">
-        <div className="px-5 py-5">{brand}</div>
+      <aside className="hidden border-r border-slate-200/80 bg-slate-50/90 backdrop-blur lg:flex lg:flex-col">
+        <div className="flex items-start justify-between gap-3 px-5 py-5">
+          {brand}
+          <ThemeToggle className="shrink-0" />
+        </div>
         <div className="px-5 pb-4">
           <Badge variant="cyan" className="mb-2">
             {journeyCopy.badge}
@@ -354,7 +366,7 @@ export function AppShell({
 
       {!inCodingSession && (
         <nav
-          className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 backdrop-blur lg:hidden safe-bottom"
+          className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-slate-50/95 backdrop-blur lg:hidden safe-bottom"
           aria-label="Primary"
         >
           <div className="mx-auto grid max-w-lg grid-cols-5 gap-0.5 px-1 py-1.5">

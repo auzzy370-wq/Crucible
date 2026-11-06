@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Sans, IBM_Plex_Mono, Instrument_Serif } from "next/font/google";
-import { Toaster } from "sonner";
 import { Providers } from "@/components/layout/providers";
+import { ThemeToaster } from "@/components/layout/theme-toaster";
 import "./globals.css";
 
 const sans = IBM_Plex_Sans({
@@ -34,16 +34,19 @@ export const viewport = {
   initialScale: 1,
   maximumScale: 5,
   viewportFit: "cover" as const,
-  themeColor: "#eaf3fa",
+  themeColor: [
+    { media: "(prefers-color-scheme: dark)", color: "#070d14" },
+    { media: "(prefers-color-scheme: light)", color: "#eaf3fa" },
+  ],
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className="dark" suppressHydrationWarning>
       <body className={`${sans.variable} ${mono.variable} ${display.variable} antialiased`}>
         <Providers>
           {children}
-          <Toaster theme="light" richColors position="top-center" closeButton />
+          <ThemeToaster />
         </Providers>
       </body>
     </html>

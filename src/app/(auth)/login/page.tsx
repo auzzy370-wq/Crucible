@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { SocialAuthButtons } from "@/components/auth/social-auth-buttons";
+import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { cn } from "@/lib/utils";
 
 function LoginForm() {
@@ -88,30 +89,31 @@ function LoginForm() {
   }
 
   return (
-    <Card className="animate-rise relative w-full max-w-md border-teal-300/60 bg-[#070b12]/90 backdrop-blur-sm">
+    <Card className="animate-rise relative w-full max-w-md border-teal-300/50 bg-slate-50/90 backdrop-blur-sm">
       <CardHeader>
-        <div className="mb-1 flex items-baseline gap-3">
-          <span className="font-serif-display text-2xl tracking-tight text-[var(--landing-ink)]">Crucible</span>
-          <span className="font-mono text-[10px] uppercase tracking-[0.28em] text-[var(--landing-teal)]">
-            Learn · Hire
-          </span>
+        <div className="mb-1 flex items-center justify-between gap-3">
+          <div className="flex items-baseline gap-3">
+            <span className="font-serif-display text-2xl tracking-tight text-slate-900">Crucible</span>
+            <span className="font-mono text-[10px] uppercase tracking-[0.28em] text-teal-700">Learn · Hire</span>
+          </div>
+          <ThemeToggle />
         </div>
         <CardTitle className="font-serif-display text-xl sm:text-2xl">
           {mode === "hire" ? "Hire on evidence" : "Learn by proving"}
         </CardTitle>
-        <CardDescription className="text-[var(--landing-mute)]">
+        <CardDescription>
           {mode === "hire"
             ? "Assign timed work, review isolated workspaces, and decide with scorecards — never résumé claims alone."
             : "Practice with the same timed judges employers use. Build a verified profile as you learn."}
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="mb-4 grid grid-cols-2 gap-2 rounded-lg border border-slate-200 bg-white/80 p-1">
+        <div className="mb-4 grid grid-cols-2 gap-2 rounded-lg border border-slate-200 bg-slate-100/80 p-1">
           <button
             type="button"
             className={cn(
               "min-h-10 rounded-md text-sm transition",
-              mode === "learn" ? "bg-cyan-500/15 text-teal-900" : "text-slate-600 hover:text-slate-800",
+              mode === "learn" ? "bg-teal-500/15 text-teal-800" : "text-slate-600 hover:text-slate-800",
             )}
             onClick={() => setMode("learn")}
           >
@@ -121,7 +123,7 @@ function LoginForm() {
             type="button"
             className={cn(
               "min-h-10 rounded-md text-sm transition",
-              mode === "hire" ? "bg-amber-500/15 text-amber-100" : "text-slate-600 hover:text-slate-800",
+              mode === "hire" ? "bg-amber-500/15 text-amber-800" : "text-slate-600 hover:text-slate-800",
             )}
             onClick={() => setMode("hire")}
           >
@@ -137,7 +139,7 @@ function LoginForm() {
                 Create a free learner account →
               </Link>
             </div>
-            <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2.5 text-xs text-amber-100">
+            <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2.5 text-xs text-amber-800">
               Every signed-in learner can practice timed problems. Admins can auto-run assessments and post scores from
               Admin.
             </div>
@@ -151,12 +153,12 @@ function LoginForm() {
         )}
 
         {dbOk === false && (
-          <div className="mb-4 rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-100">
+          <div className="mb-4 rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-800">
             Database is not connected on this deploy yet. Publish with Postgres enabled, then register a new account.
           </div>
         )}
         {error && (
-          <div className="mb-4 rounded-lg border border-rose-500/40 bg-rose-500/10 p-3 text-sm text-rose-100">
+          <div className="mb-4 rounded-lg border border-rose-500/40 bg-rose-500/10 p-3 text-sm text-rose-700">
             {error}
           </div>
         )}

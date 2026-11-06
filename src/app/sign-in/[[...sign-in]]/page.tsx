@@ -3,7 +3,7 @@ import { Suspense } from "react";
 
 export default function SignInPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#070b12] px-4">
+    <div className="landing-root flex min-h-screen items-center justify-center px-4">
       <Suspense fallback={<p className="text-slate-600">Loading sign-in…</p>}>
         <SignIn routing="path" path="/sign-in" signUpUrl="/sign-up" fallbackRedirectUrl="/api/auth/clerk/handoff" />
       </Suspense>

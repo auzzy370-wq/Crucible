@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ThemeToggle } from "@/components/layout/theme-toggle";
 
 export function LandingPage(props: {
   verifiedSkills?: number;
@@ -26,7 +27,7 @@ export function LandingPage(props: {
             className="landing-anim-ambient absolute bottom-[-25%] right-[-15%] h-[60vh] w-[55vw] rounded-full bg-[radial-gradient(circle,rgba(52,211,153,0.1),transparent_70%)] blur-3xl"
             style={{ animationDelay: "-6s" }}
           />
-          <pre className="landing-anim-plane pointer-events-none absolute inset-0 overflow-hidden px-4 pt-[18vh] font-mono text-[11px] leading-[1.7] text-teal-800/[0.11] sm:px-10 sm:text-[12px] lg:px-16 lg:text-[13px]">
+          <pre className="landing-anim-plane pointer-events-none absolute inset-0 overflow-hidden px-4 pt-[18vh] font-mono text-[11px] leading-[1.7] text-teal-800/[0.14] sm:px-10 sm:text-[12px] lg:px-16 lg:text-[13px]">
             {`// timed evidence session · shared judge
 export async function listInvoices(orgId: string) {
   // enforce tenant boundary on every read
@@ -41,19 +42,30 @@ await deployCheck();
           <div className="landing-hero-fade absolute inset-0" />
         </div>
 
-        <header className="relative z-20 mx-auto flex w-full max-w-[1400px] items-center justify-end gap-4 px-4 py-4 safe-top sm:px-10 sm:py-6 lg:px-14">
-          <Link
-            href="/login"
-            className="inline-flex min-h-10 items-center text-sm text-[var(--landing-mute)] transition hover:text-[var(--landing-ink)]"
-          >
-            Sign in
-          </Link>
-          <Link
-            href="/register"
-            className="inline-flex min-h-10 items-center text-sm font-medium text-[var(--landing-teal)] transition hover:text-teal-900"
-          >
-            Start learning
-          </Link>
+        <header className="relative z-20 mx-auto flex w-full max-w-[1400px] items-center justify-between gap-4 px-4 py-4 safe-top sm:px-10 sm:py-6 lg:px-14">
+          <div className="flex items-center gap-3">
+            <div className="crucible-mark flex h-10 w-10 items-center justify-center rounded-xl font-mono text-xs font-bold text-teal-700">
+              CR
+            </div>
+            <span className="hidden font-mono text-[10px] tracking-[0.22em] text-teal-700 sm:inline">
+              PROVE THE CRAFT
+            </span>
+          </div>
+          <div className="flex items-center gap-3 sm:gap-4">
+            <ThemeToggle />
+            <Link
+              href="/login"
+              className="inline-flex min-h-10 items-center text-sm text-[var(--landing-mute)] transition hover:text-[var(--landing-ink)]"
+            >
+              Sign in
+            </Link>
+            <Link
+              href="/register"
+              className="inline-flex min-h-10 items-center text-sm font-medium text-[var(--landing-teal)] transition hover:text-teal-800"
+            >
+              Start learning
+            </Link>
+          </div>
         </header>
 
         <div className="relative z-20 mx-auto flex min-h-[calc(100svh-4.5rem)] w-full max-w-[1400px] flex-col justify-end px-4 pb-14 pt-6 sm:px-10 sm:pb-20 lg:px-14 lg:pb-24">
