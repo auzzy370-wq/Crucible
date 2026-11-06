@@ -114,7 +114,7 @@ export function InterviewClient(props: {
     <>
     {/* No transform here — fixed mobile CTA must escape containing blocks */}
     <div className="animate-rise min-w-0 space-y-8">
-      <header className="min-w-0 rounded-2xl border border-teal-300/50 bg-gradient-to-br from-teal-500/[0.12] via-white/90 to-emerald-50/80 p-4 sm:p-7">
+      <header className="min-w-0 rounded-2xl border border-teal-300/50 bg-[var(--surface-elevated)] p-4 sm:p-7">
         <div className="flex min-w-0 flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div className="min-w-0">
             <p className="font-mono text-xs tracking-[0.3em] text-teal-700">MOCK INTERVIEWS</p>

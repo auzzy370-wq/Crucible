@@ -90,7 +90,7 @@ export function ArcadeLobby(props: {
 
   return (
     <div className="animate-rise min-w-0 space-y-8">
-      <header className="relative min-w-0 overflow-hidden rounded-2xl border border-[var(--brand)]/30 bg-gradient-to-br from-[var(--brand-soft)] via-[var(--surface)] to-[var(--surface-elevated)] p-5 sm:p-7">
+      <header className="relative min-w-0 overflow-hidden rounded-2xl border border-[var(--brand)]/30 bg-[var(--surface-elevated)] p-5 sm:p-7">
         <ForgeSparks density={9} />
         <div className="relative flex min-w-0 flex-wrap items-start justify-between gap-4">
           <div className="min-w-0">

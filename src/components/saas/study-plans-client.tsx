@@ -171,7 +171,7 @@ export function StudyPlansClient(props: { plans: Plan[]; hud: Hud; premium: bool
           )}
         </div>
 
-        <section className="overflow-hidden rounded-2xl border border-teal-300/60 bg-gradient-to-br from-teal-500/[0.09] via-white/80 to-white p-5 sm:p-6">
+        <section className="overflow-hidden rounded-2xl border border-teal-300/60 bg-[var(--surface-elevated)] p-5 sm:p-6">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-teal-700/80">Campaign XP</p>

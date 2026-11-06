@@ -69,7 +69,7 @@ export function JobsClient(props: { companies: readonly JobCompany[] }) {
 
   return (
     <div className="animate-rise space-y-6">
-      <header className="rounded-2xl border border-[var(--brand)]/30 bg-gradient-to-br from-[var(--brand-soft)] via-white/80 to-orange-50/70 p-5 sm:p-7 dark:via-[var(--surface-elevated)]">
+      <header className="rounded-2xl border border-[var(--brand)]/30 bg-[var(--surface-elevated)] p-5 sm:p-7">
         <p className="font-mono text-xs tracking-[0.3em] text-[var(--brand)]">JOB BOARD</p>
         <h1 className="mt-2 font-serif-display text-2xl text-slate-900 sm:text-3xl">
           Tier-company roles. Official apply links.

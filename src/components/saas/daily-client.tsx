@@ -77,7 +77,7 @@ export function DailyClient(props: { daily: DailyPayload }) {
         </div>
       </header>
 
-      <Card className="border-teal-300/50 bg-gradient-to-br from-cyan-500/10 via-transparent to-transparent">
+      <Card className="border-teal-300/50 bg-[var(--surface-elevated)]">
         <CardHeader>
           <div className="flex flex-wrap gap-2">
             <Badge variant={c.difficulty <= 3 ? "emerald" : c.difficulty <= 6 ? "amber" : "rose"}>

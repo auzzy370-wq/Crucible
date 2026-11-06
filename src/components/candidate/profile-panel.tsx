@@ -161,7 +161,7 @@ export function CandidateProfilePanel({ dossier: initial }: { dossier: ProfileDo
 
   return (
     <div className="animate-rise space-y-8">
-      <header className="overflow-hidden rounded-2xl border border-teal-300/60 bg-gradient-to-br from-teal-500/[0.1] via-white/80 to-white p-5 sm:p-7">
+      <header className="overflow-hidden rounded-2xl border border-teal-300/60 bg-[var(--surface-elevated)] p-5 sm:p-7">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
           <div className="flex gap-4">
             <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-cyan-400/30 bg-teal-500/10 font-serif-display text-xl text-teal-900 sm:h-20 sm:w-20 sm:text-2xl">

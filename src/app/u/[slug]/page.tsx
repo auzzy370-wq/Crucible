@@ -69,7 +69,7 @@ export default async function PublicQualificationProfile({
       </header>
 
       <main className="relative z-10 mx-auto max-w-4xl space-y-8 px-6 pb-20">
-        <section className="animate-rise overflow-hidden rounded-2xl border border-teal-300/60 bg-gradient-to-br from-teal-500/[0.1] via-white/80 to-white p-6 sm:p-8">
+        <section className="animate-rise overflow-hidden rounded-2xl border border-teal-300/60 bg-[var(--surface-elevated)] p-6 sm:p-8">
           <p className="font-mono text-xs tracking-[0.3em] text-teal-700">VERIFIED PROFILE</p>
           <h1 className="mt-3 font-serif-display text-3xl tracking-tight text-slate-900 sm:text-4xl">
             {profile.user.name}

@@ -24,7 +24,7 @@ export function ArcadeClearFx({
 
   return (
     <div className="pointer-events-none absolute inset-0 z-20 overflow-hidden rounded-2xl">
-      <div className="absolute inset-0 bg-gradient-to-t from-orange-100/50 to-transparent" />
+      <div className="absolute inset-0 bg-[var(--brand-soft)]/40" />
       <ForgeSparks density={12} />
       <XpBurst amount={xp} active />
     </div>

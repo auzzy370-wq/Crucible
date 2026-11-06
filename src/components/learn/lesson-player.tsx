@@ -103,7 +103,7 @@ export function LessonPlayer(props: {
       </header>
 
       {celebration && (
-        <div className="learn-quest-card relative overflow-hidden rounded-2xl border border-amber-300 bg-gradient-to-br from-amber-50 via-white to-orange-50 p-5">
+        <div className="learn-quest-card relative overflow-hidden rounded-2xl border border-amber-300 bg-[var(--surface-elevated)] p-5">
           <ForgeSparks density={10} />
           <XpBurst amount={celebration.xp} active />
           <div className="relative">

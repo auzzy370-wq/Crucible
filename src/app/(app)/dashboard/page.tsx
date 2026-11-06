@@ -104,7 +104,7 @@ export default async function DashboardPage() {
           </Link>
         </header>
 
-        <section className="rounded-2xl border border-[var(--brand)]/30 bg-gradient-to-br from-[var(--brand-soft)] via-white to-orange-50/70 p-5">
+        <section className="rounded-2xl border border-[var(--brand)]/30 bg-[var(--surface-elevated)] p-5">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
               <div className="flex flex-wrap items-center gap-2">
