@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 export function CrucibleGlyph({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 40 40" fill="none" aria-hidden className={cn("h-full w-full", className)}>
-      <rect width="40" height="40" rx="10" fill="currentColor" />
+      <rect width="40" height="40" rx="6" fill="currentColor" />
       <path
         d="M27.5 12.8a9.6 9.6 0 1 0 0 14.4"
         stroke="var(--mark-cut, #07090d)"
@@ -29,21 +29,21 @@ type LockupProps = {
 const sizes = {
   sm: {
     mark: "h-8 w-8",
-    title: "text-base tracking-[-0.03em]",
+    title: "text-[1.05rem] tracking-[-0.03em]",
     tag: "text-[9px] tracking-[0.16em]",
-    gap: "gap-2.5",
+    gap: "gap-2",
   },
   md: {
     mark: "h-11 w-11",
-    title: "text-[1.5rem] tracking-[-0.035em]",
+    title: "text-[1.7rem] tracking-[-0.035em]",
     tag: "text-[10px] tracking-[0.18em]",
-    gap: "gap-3",
+    gap: "gap-2.5",
   },
   lg: {
     mark: "h-12 w-12",
-    title: "text-[1.75rem] tracking-[-0.04em]",
+    title: "text-[2rem] tracking-[-0.04em]",
     tag: "text-[11px] tracking-[0.2em]",
-    gap: "gap-3.5",
+    gap: "gap-3",
   },
 };
 
