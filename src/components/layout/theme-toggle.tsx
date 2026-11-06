@@ -17,19 +17,19 @@ export function ThemeToggle({ className }: { className?: string }) {
     <button
       type="button"
       aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
-      title={dark ? "Light mode" : "Dark mode"}
+      title={dark ? "Switch to light mode" : "Switch to dark mode"}
       onClick={() => setTheme(dark ? "light" : "dark")}
       className={cn(
-        "inline-flex min-h-9 min-w-9 items-center justify-center rounded-md border border-slate-200 bg-transparent text-slate-500 transition hover:border-slate-300 hover:text-slate-900",
+        "inline-flex min-h-9 min-w-9 items-center justify-center rounded-md border border-slate-300 bg-white/70 text-slate-700 shadow-sm transition hover:border-slate-400 hover:text-slate-900 dark:border-white/15 dark:bg-white/5 dark:text-white/80 dark:hover:border-white/30 dark:hover:text-white",
         className,
       )}
     >
       {!mounted ? (
         <span className="h-4 w-4" />
       ) : dark ? (
-        <Sun className="h-4 w-4" />
+        <Moon className="h-4 w-4" aria-hidden />
       ) : (
-        <Moon className="h-4 w-4" />
+        <Sun className="h-4 w-4" aria-hidden />
       )}
     </button>
   );

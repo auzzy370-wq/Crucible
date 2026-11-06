@@ -412,11 +412,25 @@ html:not(.dark) .landing-root {
 }
 
 .landing-hero-plane {
-  background: linear-gradient(168deg, #f7fbfd 0%, #eef5f9 50%, #e5eef4 100%);
+  background: #ffffff;
+  background-image: linear-gradient(180deg, #ffffff 0%, #f5fafc 58%, #eef5f9 100%);
 }
 
 .dark .landing-hero-plane {
-  background: linear-gradient(180deg, #0a0e14 0%, #07090d 100%);
+  background: #07090d;
+  background-image: linear-gradient(180deg, #0a0e14 0%, #07090d 100%);
+}
+
+.landing-hero-glow {
+  background:
+    radial-gradient(ellipse at 80% 0%, rgba(13, 148, 136, 0.1), transparent 48%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, transparent 55%);
+}
+
+.dark .landing-hero-glow {
+  background:
+    radial-gradient(ellipse at 80% 0%, rgba(13, 148, 136, 0.2), transparent 45%),
+    linear-gradient(180deg, #0b1118 0%, #07090d 60%, #05070a 100%);
 }
 
 .landing-hero-fade {

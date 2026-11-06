@@ -6,35 +6,35 @@ import { CrucibleLockup } from "@/components/brand/crucible-lockup";
 
 function WorkspacePreview() {
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl shadow-slate-900/10 dark:border-white/10 dark:bg-[#0d141c]/90 dark:shadow-black/50">
-      <div className="flex items-center gap-1.5 border-b border-slate-200 px-3 py-2 dark:border-white/10">
-        <span className="h-2 w-2 rounded-full bg-slate-300 dark:bg-white/25" />
-        <span className="h-2 w-2 rounded-full bg-slate-300 dark:bg-white/25" />
-        <span className="h-2 w-2 rounded-full bg-slate-300 dark:bg-white/25" />
-        <span className="ml-2 font-mono text-[10px] text-slate-400 dark:text-white/40">timed session</span>
+    <div className="overflow-hidden rounded-xl border border-[#d7e3ee] bg-[#ffffff] shadow-[0_18px_40px_rgba(15,28,46,0.08)] dark:border-white/10 dark:bg-[#0d141c]/90 dark:shadow-black/50">
+      <div className="flex items-center gap-1.5 border-b border-[#e2ebf2] px-3 py-2 dark:border-white/10">
+        <span className="h-2 w-2 rounded-full bg-[#cbd5e1] dark:bg-white/25" />
+        <span className="h-2 w-2 rounded-full bg-[#cbd5e1] dark:bg-white/25" />
+        <span className="h-2 w-2 rounded-full bg-[#cbd5e1] dark:bg-white/25" />
+        <span className="ml-2 font-mono text-[10px] text-[#94a3b8] dark:text-white/40">timed session</span>
       </div>
       <div className="grid grid-cols-[48px_1fr]">
-        <div className="space-y-2 border-r border-slate-200 px-2 py-3 dark:border-white/10">
+        <div className="space-y-2 border-r border-[#e2ebf2] px-2 py-3 dark:border-white/10">
           {[1, 2, 3, 4, 5].map((n) => (
             <div
               key={n}
-              className="h-1.5 rounded-full bg-slate-200 dark:bg-white/10"
+              className="h-1.5 rounded-full bg-[#e2e8f0] dark:bg-white/10"
               style={{ width: `${45 + (n % 3) * 16}%` }}
             />
           ))}
         </div>
         <div className="space-y-2 px-3 py-3">
           <div className="h-2 w-[70%] rounded-full bg-teal-500/40" />
-          <div className="h-2 w-[88%] rounded-full bg-slate-200 dark:bg-white/12" />
-          <div className="h-2 w-[55%] rounded-full bg-slate-200 dark:bg-white/12" />
-          <div className="h-2 w-[78%] rounded-full bg-slate-200 dark:bg-white/12" />
+          <div className="h-2 w-[88%] rounded-full bg-[#e2e8f0] dark:bg-white/12" />
+          <div className="h-2 w-[55%] rounded-full bg-[#e2e8f0] dark:bg-white/12" />
+          <div className="h-2 w-[78%] rounded-full bg-[#e2e8f0] dark:bg-white/12" />
           <div className="h-2 w-[62%] rounded-full bg-amber-400/35" />
-          <div className="h-2 w-[72%] rounded-full bg-slate-200 dark:bg-white/12" />
+          <div className="h-2 w-[72%] rounded-full bg-[#e2e8f0] dark:bg-white/12" />
         </div>
       </div>
-      <div className="flex items-center justify-between border-t border-slate-200 px-3 py-2 font-mono text-[10px] text-slate-400 dark:border-white/10 dark:text-white/40">
+      <div className="flex items-center justify-between border-t border-[#e2ebf2] px-3 py-2 font-mono text-[10px] text-[#94a3b8] dark:border-white/10 dark:text-white/40">
         <span>public 3/3</span>
-        <span className="text-teal-600 dark:text-teal-300/80">harness ready</span>
+        <span className="text-teal-700 dark:text-teal-300/80">harness ready</span>
       </div>
     </div>
   );
@@ -53,10 +53,10 @@ export function LandingPage(props: {
 
   return (
     <div className="landing-root relative min-h-screen overflow-x-clip">
-      <section className="relative isolate flex min-h-[100svh] flex-col bg-[#f4f8fb] dark:bg-[#07090d]">
+      <section className="landing-hero-plane relative isolate flex min-h-[100svh] flex-col">
         <div className="pointer-events-none absolute inset-0" aria-hidden>
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_0%,rgba(13,148,136,0.14),transparent_45%),linear-gradient(180deg,#f7fbfe_0%,#eef5f9_55%,#e7eef4_100%)] dark:bg-[radial-gradient(ellipse_at_80%_0%,rgba(13,148,136,0.2),transparent_45%),linear-gradient(180deg,#0b1118_0%,#07090d_60%,#05070a_100%)]" />
-          <div className="landing-noise absolute inset-0 opacity-30 dark:opacity-40 dark:mix-blend-soft-light" />
+          <div className="landing-hero-glow absolute inset-0" />
+          <div className="landing-noise absolute inset-0" />
           <div className="absolute bottom-[22%] right-10 top-28 hidden w-[min(400px,42vw)] sm:block lg:right-14">
             <WorkspacePreview />
           </div>
@@ -88,13 +88,13 @@ export function LandingPage(props: {
           </div>
 
           <div className="mt-auto max-w-xl sm:max-w-md lg:max-w-xl">
-            <p className="landing-anim-brand font-serif-display text-[clamp(3.25rem,14vw,8.5rem)] leading-[0.88] tracking-[-0.04em] text-slate-900">
+            <p className="landing-anim-brand font-serif-display text-[clamp(3.25rem,14vw,8.5rem)] leading-[0.88] tracking-[-0.04em] text-[#0f1c2e] dark:text-white">
               Crucible
             </p>
-            <h1 className="landing-anim-copy mt-4 text-[1.15rem] font-medium leading-snug text-slate-700 sm:mt-5 sm:text-[1.35rem]">
+            <h1 className="landing-anim-copy mt-4 text-[1.15rem] font-medium leading-snug text-[#334155] dark:text-white/90 sm:mt-5 sm:text-[1.35rem]">
               Learn the craft. Hire the proof.
             </h1>
-            <p className="landing-anim-copy mt-3 text-[15px] leading-relaxed text-slate-500">
+            <p className="landing-anim-copy mt-3 text-[15px] leading-relaxed text-[#5b7390] dark:text-white/55">
               Timed judges and real production work — one arena for engineers who practice and employers who hire.
             </p>
             <div className="landing-anim-cta mt-7 flex w-full flex-col gap-2.5 sm:mt-9 sm:flex-row sm:items-center sm:gap-3">
