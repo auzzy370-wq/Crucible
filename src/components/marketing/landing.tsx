@@ -2,7 +2,48 @@
 
 import Link from "next/link";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
-import { CrucibleGlyph, CrucibleLockup } from "@/components/brand/crucible-lockup";
+import { CrucibleLockup } from "@/components/brand/crucible-lockup";
+
+function WorkspacePreview({ className }: { className?: string }) {
+  return (
+    <div
+      className={
+        className ??
+        "overflow-hidden rounded-xl border border-white/10 bg-[#0d141c]/90 shadow-2xl shadow-black/50"
+      }
+    >
+      <div className="flex items-center gap-1.5 border-b border-white/10 px-3 py-2">
+        <span className="h-2 w-2 rounded-full bg-white/25" />
+        <span className="h-2 w-2 rounded-full bg-white/25" />
+        <span className="h-2 w-2 rounded-full bg-white/25" />
+        <span className="ml-2 font-mono text-[10px] text-white/40">timed session</span>
+      </div>
+      <div className="grid grid-cols-[48px_1fr]">
+        <div className="space-y-2 border-r border-white/10 px-2 py-3">
+          {[1, 2, 3, 4, 5].map((n) => (
+            <div
+              key={n}
+              className="h-1.5 rounded-full bg-white/10"
+              style={{ width: `${45 + (n % 3) * 16}%` }}
+            />
+          ))}
+        </div>
+        <div className="space-y-2 px-3 py-3">
+          <div className="h-2 w-[70%] rounded-full bg-teal-400/40" />
+          <div className="h-2 w-[88%] rounded-full bg-white/12" />
+          <div className="h-2 w-[55%] rounded-full bg-white/12" />
+          <div className="h-2 w-[78%] rounded-full bg-white/12" />
+          <div className="h-2 w-[62%] rounded-full bg-amber-300/30" />
+          <div className="h-2 w-[72%] rounded-full bg-white/12" />
+        </div>
+      </div>
+      <div className="flex items-center justify-between border-t border-white/10 px-3 py-2 font-mono text-[10px] text-white/40">
+        <span>public 3/3</span>
+        <span className="text-teal-300/80">harness ready</span>
+      </div>
+    </div>
+  );
+}
 
 export function LandingPage(props: {
   verifiedSkills?: number;
@@ -18,50 +59,20 @@ export function LandingPage(props: {
   return (
     <div className="landing-root relative min-h-screen overflow-x-clip">
       <section className="relative isolate flex min-h-[100svh] flex-col bg-[#07090d]">
-        {/* Full-bleed forge plane — fills the blank */}
         <div className="pointer-events-none absolute inset-0" aria-hidden>
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_70%_15%,rgba(13,148,136,0.22),transparent_50%),radial-gradient(ellipse_at_10%_90%,rgba(13,148,136,0.1),transparent_45%),linear-gradient(180deg,#0c1218_0%,#07090d_55%,#05070a_100%)]" />
-          <div className="landing-noise absolute inset-0 opacity-50 mix-blend-soft-light" />
-          <div className="absolute -right-8 top-24 h-[42vw] max-h-[420px] w-[42vw] max-w-[420px] text-teal-500/15 sm:right-[8%] sm:top-[18%]">
-            <CrucibleGlyph className="h-full w-full" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_0%,rgba(13,148,136,0.2),transparent_45%),linear-gradient(180deg,#0b1118_0%,#07090d_60%,#05070a_100%)]" />
+          <div className="landing-noise absolute inset-0 opacity-40 mix-blend-soft-light" />
+          {/* Desktop-only side preview — never overlaps mobile copy */}
+          <div className="absolute bottom-[22%] right-10 top-28 hidden w-[min(400px,42vw)] sm:block lg:right-14">
+            <WorkspacePreview />
           </div>
-          {/* Product atmosphere: editor chrome, not body copy */}
-          <div className="landing-anim-plane absolute inset-x-4 top-[4.75rem] overflow-hidden rounded-xl border border-white/10 bg-[#0d141c]/80 shadow-2xl shadow-black/40 sm:inset-x-auto sm:left-auto sm:right-10 sm:top-28 sm:w-[min(420px,46vw)] lg:right-14">
-            <div className="flex items-center gap-1.5 border-b border-white/10 px-3 py-2.5">
-              <span className="h-2 w-2 rounded-full bg-white/25" />
-              <span className="h-2 w-2 rounded-full bg-white/25" />
-              <span className="h-2 w-2 rounded-full bg-white/25" />
-              <span className="ml-2 font-mono text-[10px] tracking-wide text-white/35">workspace · timed session</span>
-            </div>
-            <div className="grid grid-cols-[56px_1fr] gap-0">
-              <div className="space-y-2 border-r border-white/10 px-2 py-3">
-                {[1, 2, 3, 4, 5, 6].map((n) => (
-                  <div key={n} className="h-1.5 rounded-full bg-white/10" style={{ width: `${40 + (n % 3) * 18}%` }} />
-                ))}
-              </div>
-              <div className="space-y-2.5 px-3 py-3">
-                <div className="h-2 w-2/3 rounded-full bg-teal-400/35" />
-                <div className="h-2 w-5/6 rounded-full bg-white/12" />
-                <div className="h-2 w-1/2 rounded-full bg-white/12" />
-                <div className="h-2 w-4/5 rounded-full bg-white/12" />
-                <div className="mt-3 h-2 w-3/5 rounded-full bg-amber-300/25" />
-                <div className="h-2 w-2/3 rounded-full bg-white/12" />
-                <div className="hidden h-2 w-1/2 rounded-full bg-white/12 sm:block" />
-              </div>
-            </div>
-            <div className="flex items-center justify-between border-t border-white/10 px-3 py-2 font-mono text-[10px] text-white/40">
-              <span>public 3/3</span>
-              <span className="text-teal-300/70">hidden harness ready</span>
-            </div>
-          </div>
-          <div className="absolute inset-x-0 bottom-0 h-[55%] bg-gradient-to-t from-[#07090d] via-[#07090d]/92 to-transparent sm:h-[48%]" />
         </div>
 
         <header className="relative z-20 mx-auto flex w-full max-w-[1200px] items-center justify-between gap-3 px-4 py-3 safe-top sm:px-8 sm:py-5 lg:px-10">
           <div className="[&_.font-serif-display]:text-white">
             <CrucibleLockup href="/" size="sm" wordmarkFrom="sm" />
           </div>
-          <div className="flex shrink-0 items-center gap-2">
+          <div className="relative z-20 flex shrink-0 items-center gap-2">
             <ThemeToggle className="border-white/15 text-white/70 hover:border-white/30 hover:text-white" />
             <Link
               href="/login"
@@ -79,29 +90,36 @@ export function LandingPage(props: {
           </div>
         </header>
 
-        <div className="relative z-20 mx-auto flex w-full max-w-[1200px] flex-1 flex-col justify-end px-4 pb-10 pt-[42vh] sm:px-8 sm:pb-20 sm:pt-10 lg:px-10">
-          <p className="landing-anim-brand font-serif-display text-[clamp(3.5rem,15vw,9.5rem)] leading-[0.86] tracking-[-0.04em] text-white">
-            Crucible
-          </p>
-          <h1 className="landing-anim-copy mt-4 max-w-md text-[1.1rem] font-medium leading-snug text-white/85 sm:mt-6 sm:text-[1.35rem]">
-            Learn the craft. Hire the proof.
-          </h1>
-          <p className="landing-anim-copy mt-3 max-w-md text-sm leading-relaxed text-white/55 sm:text-[15px]">
-            Timed judges and real production work — one arena for engineers who practice and employers who hire.
-          </p>
-          <div className="landing-anim-cta mt-8 flex w-full flex-col gap-2.5 sm:mt-10 sm:w-auto sm:flex-row sm:items-center sm:gap-3">
-            <Link
-              href="/register"
-              className="inline-flex min-h-12 w-full items-center justify-center rounded-md bg-[var(--brand)] px-6 text-sm font-semibold text-white transition hover:bg-[var(--brand-hover)] sm:w-auto"
-            >
-              Start learning free
-            </Link>
-            <Link
-              href="/login?intent=hire"
-              className="inline-flex min-h-12 w-full items-center justify-center rounded-md border border-white/20 bg-white/5 px-5 text-sm text-white transition hover:border-white/35 hover:bg-white/10 sm:w-auto"
-            >
-              Hire with Crucible
-            </Link>
+        <div className="relative z-10 mx-auto flex w-full max-w-[1200px] flex-1 flex-col px-4 pb-10 pt-3 sm:px-8 sm:pb-20 sm:pt-6 lg:px-10">
+          {/* Mobile visual sits in normal flow — no absolute overlap */}
+          <div className="mb-8 sm:hidden">
+            <WorkspacePreview />
+          </div>
+
+          <div className="mt-auto max-w-xl sm:max-w-md lg:max-w-xl">
+            <p className="landing-anim-brand font-serif-display text-[clamp(3.25rem,14vw,8.5rem)] leading-[0.88] tracking-[-0.04em] text-white">
+              Crucible
+            </p>
+            <h1 className="landing-anim-copy mt-4 text-[1.15rem] font-medium leading-snug text-white/90 sm:mt-5 sm:text-[1.35rem]">
+              Learn the craft. Hire the proof.
+            </h1>
+            <p className="landing-anim-copy mt-3 text-[15px] leading-relaxed text-white/55">
+              Timed judges and real production work — one arena for engineers who practice and employers who hire.
+            </p>
+            <div className="landing-anim-cta mt-7 flex w-full flex-col gap-2.5 sm:mt-9 sm:flex-row sm:items-center sm:gap-3">
+              <Link
+                href="/register"
+                className="inline-flex min-h-12 w-full items-center justify-center rounded-md bg-[var(--brand)] px-6 text-sm font-semibold text-white transition hover:bg-[var(--brand-hover)] sm:w-auto"
+              >
+                Start learning free
+              </Link>
+              <Link
+                href="/login?intent=hire"
+                className="inline-flex min-h-12 w-full items-center justify-center rounded-md border border-white/20 bg-white/5 px-5 text-sm text-white transition hover:border-white/35 hover:bg-white/10 sm:w-auto"
+              >
+                Hire with Crucible
+              </Link>
+            </div>
           </div>
         </div>
       </section>
