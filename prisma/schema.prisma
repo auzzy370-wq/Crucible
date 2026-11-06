@@ -149,6 +149,8 @@ model User {
   email         String    @unique
   /** Null for OAuth-only accounts (Google, GitHub, Apple, Facebook, Discord, X). */
   passwordHash  String?
+  /** Set when the inbox is proven (email link or verified OAuth). Required for password login. */
+  emailVerifiedAt DateTime?
   name          String
   role          Role      @default(CANDIDATE)
   plan          PlanTier  @default(FREE)
@@ -199,6 +201,20 @@ model Session {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@index([expiresAt])
+}
+
+/** Password signup held until the email link is opened — prevents inbox squatting. */
+model PendingRegistration {
+  id           String          @id @default(cuid())
+  email        String          @unique
+  name         String
+  passwordHash String
+  track        AssessmentTrack @default(SOFTWARE_ENGINEERING)
+  tokenHash    String          @unique
+  expiresAt    DateTime
+  createdAt    DateTime        @default(now())
+
   @@index([expiresAt])
 }
 

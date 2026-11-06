@@ -31,6 +31,10 @@ function LoginForm() {
   useEffect(() => {
     const oauthError = params.get("oauth_error");
     if (oauthError) setError(oauthError);
+    const verified = params.get("verified");
+    if (verified === "1") toast.success("Email verified — you are signed in");
+    if (verified === "invalid") setError("That verification link is invalid or expired.");
+    if (verified === "exists") toast.message("Account already exists — sign in");
   }, [params]);
 
   useEffect(() => {

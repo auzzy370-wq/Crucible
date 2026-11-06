@@ -24,6 +24,7 @@ export default function RegisterPage() {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [pendingEmail, setPendingEmail] = useState<string | null>(null);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -47,6 +48,11 @@ export default function RegisterPage() {
       });
       const json = await res.json();
       if (!json.ok) throw new Error(json.error?.message || "Registration failed");
+      if (json.data?.needsVerification) {
+        setPendingEmail(json.data.email || form.email);
+        toast.success("Check your email to verify your account");
+        return;
+      }
       toast.success("Account created — welcome to Crucible");
       router.push("/dashboard");
       router.refresh();
@@ -77,7 +83,39 @@ export default function RegisterPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <form className="space-y-4" onSubmit={onSubmit} suppressHydrationWarning>
+          {pendingEmail ? (
+            <div className="space-y-4 rounded-md border border-teal-500/30 bg-teal-500/10 px-4 py-5 text-sm text-slate-200">
+              <p className="font-medium text-teal-100">Verify your email to finish signup</p>
+              <p>
+                We sent a link to <span className="font-mono text-teal-50">{pendingEmail}</span>. Open it to
+                activate your account — nothing is live until that inbox is confirmed.
+              </p>
+              <p className="text-slate-400">
+                Didn&apos;t get it? Check spam, or{" "}
+                <button
+                  type="button"
+                  className="text-teal-300 underline"
+                  onClick={() => {
+                    setPendingEmail(null);
+                    setError(null);
+                  }}
+                >
+                  try again
+                </button>
+                .
+              </p>
+              <p className="text-center text-sm text-slate-500">
+                <Link className="text-teal-700 hover:underline" href="/login">
+                  Back to sign in
+                </Link>
+              </p>
+            </div>
+          ) : null}
+          <form
+            className={`space-y-4 ${pendingEmail ? "hidden" : ""}`}
+            onSubmit={onSubmit}
+            suppressHydrationWarning
+          >
             <div className="space-y-2">
               <Label htmlFor="name">Full name</Label>
               <Input

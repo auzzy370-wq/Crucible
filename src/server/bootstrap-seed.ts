@@ -32,8 +32,8 @@ export async function seedDatabase(opts?: { includeDemoAccounts?: boolean }) {
   const candidateHash = canCreateDemos
     ? await bcrypt.hash(demoCandidatePassword!, 8)
     : await bcrypt.hash(randomBytes(32).toString("hex"), 8);
-  const staffPasswordUpdate = canCreateDemos ? { passwordHash } : {};
-  const candidatePasswordUpdate = canCreateDemos ? { passwordHash: candidateHash, plan: "FREE" as const } : {};
+  const staffPasswordUpdate = canCreateDemos ? { passwordHash, emailVerifiedAt: new Date() } : { emailVerifiedAt: new Date() };
+  const candidatePasswordUpdate = canCreateDemos ? { passwordHash: candidateHash, plan: "FREE" as const, emailVerifiedAt: new Date() } : { emailVerifiedAt: new Date() };
 
   const adminEmail = canCreateDemos ? "admin@gauntlet.local" : "system@crucible.internal";
   const admin = await prisma.user.upsert({
@@ -44,6 +44,7 @@ export async function seedDatabase(opts?: { includeDemoAccounts?: boolean }) {
       name: canCreateDemos ? "Super Admin" : "System",
       role: "SUPER_ADMIN",
       passwordHash,
+      emailVerifiedAt: new Date(),
     },
   });
 
@@ -55,6 +56,7 @@ export async function seedDatabase(opts?: { includeDemoAccounts?: boolean }) {
       name: "Harper Manager",
       role: "HIRING_MANAGER",
       passwordHash,
+      emailVerifiedAt: new Date(),
     },
   });
 
@@ -66,6 +68,7 @@ export async function seedDatabase(opts?: { includeDemoAccounts?: boolean }) {
       name: "Riley Reviewer",
       role: "TECHNICAL_REVIEWER",
       passwordHash,
+      emailVerifiedAt: new Date(),
     },
   });
 
@@ -78,6 +81,7 @@ export async function seedDatabase(opts?: { includeDemoAccounts?: boolean }) {
       role: "CANDIDATE",
       plan: "FREE",
       passwordHash: candidateHash,
+      emailVerifiedAt: new Date(),
       githubLogin: "casey-candidate",
       candidateProfile: {
         create: {
@@ -117,6 +121,7 @@ export async function seedDatabase(opts?: { includeDemoAccounts?: boolean }) {
       plan: "PREMIUM",
       planExpiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
       passwordHash: candidateHash,
+      emailVerifiedAt: new Date(),
       candidateProfile: {
         create: {
           headline: "Premium Crucible member",
@@ -136,6 +141,7 @@ export async function seedDatabase(opts?: { includeDemoAccounts?: boolean }) {
       name: "Sam Security",
       role: "CANDIDATE",
       passwordHash: candidateHash,
+      emailVerifiedAt: new Date(),
       candidateProfile: {
         create: {
           headline: "Application security & detection engineering",
@@ -158,6 +164,7 @@ export async function seedDatabase(opts?: { includeDemoAccounts?: boolean }) {
       name: "Taylor Teammate",
       role: "TEAM_MEMBER",
       passwordHash: candidateHash,
+      emailVerifiedAt: new Date(),
       candidateProfile: { create: { headline: "Collaborative engineer", preferredTrack: "SOFTWARE_ENGINEERING" } },
     },
   });
