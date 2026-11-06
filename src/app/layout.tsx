@@ -43,7 +43,10 @@ export const viewport = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${sans.variable} ${mono.variable} ${display.variable} antialiased`}>
+      <body
+        className={`${sans.variable} ${mono.variable} ${display.variable} antialiased`}
+        suppressHydrationWarning
+      >
         <Providers>
           {children}
           <ThemeToaster />
