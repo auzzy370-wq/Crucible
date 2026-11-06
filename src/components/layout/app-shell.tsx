@@ -381,7 +381,7 @@ export function AppShell({
 
       {!inCodingSession && (
         <nav
-          className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-slate-50/95 backdrop-blur lg:hidden safe-bottom"
+          className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-[var(--surface)] lg:hidden safe-bottom"
           aria-label="Primary"
         >
           <div className="mx-auto grid max-w-lg grid-cols-5 gap-0.5 px-1 py-1.5">

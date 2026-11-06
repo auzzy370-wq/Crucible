@@ -198,18 +198,26 @@ export function InterviewClient(props: {
             <Input className="mt-2" value={role} onChange={(e) => setRole(e.target.value)} placeholder="Role" />
           </div>
 
-          <div className="flex flex-wrap gap-2">
-            <Button disabled={busy || !canStart} onClick={() => void start()}>
-              {busy ? "Provisioning…" : `Start ${company} · ${round.title}`}
-            </Button>
-            <Link href="/learn/interview">
-              <Button variant="secondary">Interview Craft lessons</Button>
-            </Link>
-            {!props.premium && !canStart && (
-              <Link href="/pricing">
-                <Button variant="outline">Go Premium</Button>
-              </Link>
-            )}
+          <div className="mobile-sticky-cta -mx-5 mt-2 space-y-2 border-t border-slate-200 bg-white/95 px-5 py-3 shadow-[0_-8px_24px_rgba(15,23,42,0.06)] backdrop-blur sm:-mx-6 sm:px-6 lg:mx-0 lg:mt-0 lg:space-y-0 lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none lg:backdrop-blur-none">
+            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+              <Button className="w-full sm:w-auto" disabled={busy || !canStart} onClick={() => void start()}>
+                {busy ? "Provisioning…" : `Start ${company} · ${round.title}`}
+              </Button>
+              <div className="flex flex-wrap gap-2">
+                <Link href="/learn/interview" className="min-w-0 flex-1 sm:flex-none">
+                  <Button variant="secondary" className="w-full sm:w-auto">
+                    Interview Craft lessons
+                  </Button>
+                </Link>
+                {!props.premium && !canStart && (
+                  <Link href="/pricing" className="min-w-0 flex-1 sm:flex-none">
+                    <Button variant="outline" className="w-full sm:w-auto">
+                      Go Premium
+                    </Button>
+                  </Link>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
