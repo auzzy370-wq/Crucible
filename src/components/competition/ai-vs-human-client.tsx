@@ -208,7 +208,7 @@ export function AiVsHumanClient() {
           className={`rounded-xl border px-4 py-3 text-sm ${
             providerStatus.anyFreeKey
               ? "border-emerald-500/30 bg-emerald-500/5 text-emerald-100"
-              : "border-amber-500/30 bg-amber-500/5 text-amber-100"
+              : "border-amber-500/30 bg-amber-500/5 text-amber-900 dark:text-amber-100"
           }`}
         >
           <div className="flex flex-wrap gap-2">

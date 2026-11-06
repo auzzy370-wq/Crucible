@@ -65,7 +65,7 @@ export function PricingClient(props: {
           simulations, autocomplete, debugger, and unlimited playgrounds.
         </p>
         {props.premium && (
-          <div className="mt-4 inline-flex items-center gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-sm text-amber-100">
+          <div className="mt-4 inline-flex items-center gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-sm text-amber-900 dark:text-amber-100">
             <Badge variant="amber">Premium</Badge>
             Active
             {props.planExpiresAt ? ` · renews/expires ${new Date(props.planExpiresAt).toLocaleDateString()}` : ""}

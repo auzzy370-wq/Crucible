@@ -57,7 +57,7 @@ export function SessionTimer(props: {
         expired
           ? "border-rose-500/40 bg-rose-500/10 text-rose-200"
           : urgent
-            ? "border-amber-500/40 bg-amber-500/10 text-amber-100"
+            ? "border-amber-500/40 bg-amber-500/10 text-amber-900 dark:text-amber-100"
             : warn
               ? "border-teal-300/60 bg-cyan-500/5 text-teal-900"
               : "border-slate-300/80 bg-white/85 text-slate-800",

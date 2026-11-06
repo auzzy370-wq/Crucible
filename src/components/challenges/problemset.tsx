@@ -511,7 +511,7 @@ export function Problemset(props: {
                 className={cn(
                   "min-h-10 rounded-md border px-3 text-xs",
                   bookmarksOnly
-                    ? "border-amber-500/40 bg-amber-500/10 text-amber-100"
+                    ? "border-amber-500/40 bg-amber-500/10 text-amber-900 dark:text-amber-100"
                     : "border-slate-300 text-slate-600",
                 )}
               >
@@ -606,7 +606,7 @@ export function Problemset(props: {
                   <div className="mt-3">
                     {locked ? (
                       <Link
-                        className="inline-flex min-h-11 w-full items-center justify-center rounded-md border border-amber-500/30 bg-amber-500/10 text-sm text-amber-100"
+                        className="inline-flex min-h-11 w-full items-center justify-center rounded-md border border-amber-500/30 bg-amber-500/10 text-sm text-amber-900 dark:text-amber-100"
                         href="/pricing"
                       >
                         Unlock Premium →

@@ -265,7 +265,9 @@ export default async function DashboardPage() {
           </Link>
           <Link href="/pricing" className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 hover:bg-amber-500/10">
             <div className="text-xs uppercase tracking-wider text-slate-500">Plan</div>
-            <div className="mt-1 font-mono text-2xl text-amber-100">{user?.plan === "PREMIUM" ? "Premium" : "Free"}</div>
+            <div className="mt-1 font-mono text-2xl font-semibold text-amber-800 dark:text-amber-200">
+              {user?.plan === "PREMIUM" ? "Premium" : "Free"}
+            </div>
           </Link>
         </section>
 

@@ -204,7 +204,7 @@ export function PracticeAssist(props: {
           className={cn(
             "rounded-md border px-2 py-1 text-xs",
             bookmarked
-              ? "border-amber-500/40 bg-amber-500/10 text-amber-100"
+              ? "border-amber-500/40 bg-amber-500/10 text-amber-900 dark:text-amber-100"
               : "border-slate-300 text-slate-600 hover:text-slate-800",
           )}
           title={bookmarked ? "Remove bookmark" : "Bookmark problem"}

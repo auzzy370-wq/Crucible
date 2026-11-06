@@ -108,7 +108,7 @@ export function RoadmapClient() {
               <div className="mt-2 flex flex-wrap gap-2">
                 {!data.weakTags.length && <span className="text-sm text-slate-500">No weak tags yet — keep solving.</span>}
                 {data.weakTags.map((t) => (
-                  <span key={t.tag} className="rounded border border-amber-500/30 px-2 py-1 font-mono text-xs text-amber-100">
+                  <span key={t.tag} className="rounded border border-amber-500/30 px-2 py-1 font-mono text-xs text-amber-900 dark:text-amber-100">
                     {t.tag} · {t.fails}F/{t.wins}W
                   </span>
                 ))}
