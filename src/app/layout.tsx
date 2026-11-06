@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Sans, IBM_Plex_Mono, Instrument_Serif } from "next/font/google";
+import { ExtensionHydrationGuard } from "@/components/layout/extension-hydration-guard";
 import { Providers } from "@/components/layout/providers";
 import { ThemeToaster } from "@/components/layout/theme-toaster";
 import "./globals.css";
@@ -47,6 +48,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         className={`${sans.variable} ${mono.variable} ${display.variable} antialiased`}
         suppressHydrationWarning
       >
+        <ExtensionHydrationGuard />
         <Providers>
           {children}
           <ThemeToaster />
