@@ -1,19 +1,20 @@
 # Public site URL
 
-Prefer the **Cursor Publish** app URL once confirmed (works for every registered learner).
+**Live demo tunnel (HTTPS):**
 
-Until then, the agent tunnel may be used for demos:
+**https://fought-honors-hostel-timing.trycloudflare.com**
 
-**https://recently-colours-cathedral-definition.trycloudflare.com**
+- Learn hub: `/learn`
+- Study campaigns: `/study-plans`
+- Mock interviews: `/interview`
+- Register any email (not `@gauntlet.local`) or use a seeded demo account when `DEMO_*` passwords are set locally
 
-- AI vs Human: `/ai-vs-human`
-- Register any email (not `@gauntlet.local`) or use demo `candidate@gauntlet.local` / `[set via DEMO_CANDIDATE_PASSWORD]`
-- Smoke test: **Two Sum** + **Groq GPT-OSS 20B** → Verified pass
+Quick tunnels are temporary. Prefer **Cursor Publish** for a stable multi-user URL once confirmed.
 
-Do **not** use expired `*.tmp.now` Vercel links — they lack the real AI judge.
+Do **not** use expired `*.tmp.now` Vercel links — they lack the real judge stack.
 
 ## Agent rules
 
-1. Prefer Cursor Publish for multi-user access.
-2. AI vs Human only lists judgable `lc-*` challenges; Two Sum is first.
-3. Empty DBs auto-seed on first login/register/bench request.
+1. Prefer Cursor Publish for durable access; use `*.trycloudflare.com` for demos.
+2. Keep `allowedDevOrigins` including `*.trycloudflare.com` so Next assets load through the tunnel.
+3. Set `APP_URL` / `NEXT_PUBLIC_APP_URL` to the active public HTTPS origin so cookies and redirects work.

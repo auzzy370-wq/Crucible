@@ -2,8 +2,8 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   serverExternalPackages: ["pdf-parse", "@prisma/client", "bcryptjs"],
-  // Dev overlay / HMR from 127.0.0.1 vs localhost
-  allowedDevOrigins: ["127.0.0.1", "localhost"],
+  // Dev overlay / HMR + Cloudflare quick tunnels (Edge HTTPS demos)
+  allowedDevOrigins: ["127.0.0.1", "localhost", "*.trycloudflare.com"],
   experimental: {
     serverActions: {
       bodySizeLimit: "6mb",
