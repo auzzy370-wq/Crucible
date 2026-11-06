@@ -4,6 +4,7 @@ import { AppError } from "@/lib/errors";
 import { jsonOk, withHandler } from "@/server/auth/api";
 import { requireUser } from "@/server/auth/session";
 import { AI_CRAFT_PLAN_SLUG, AI_LESSONS, getAiLesson, nextAiLesson } from "@/server/learning/ai-curriculum";
+import { LESSON_XP, touchLearnStreak } from "@/server/learning/gamification";
 
 export async function GET() {
   return withHandler(async () => {
@@ -66,6 +67,7 @@ export async function POST(req: Request) {
     if (!lesson) throw new AppError("Lesson not found", 404, "NOT_FOUND");
 
     const set = new Set(enrollment.completedSlugs);
+    const alreadyDone = set.has(body.lessonSlug);
     if (body.done) set.add(body.lessonSlug);
     else set.delete(body.lessonSlug);
 
@@ -73,10 +75,16 @@ export async function POST(req: Request) {
       where: { id: enrollment.id },
       data: { completedSlugs: [...set] },
     });
+    let xpEarned = 0;
+    if (body.done && !alreadyDone) {
+      xpEarned = LESSON_XP;
+      await touchLearnStreak(user.id);
+    }
     return jsonOk({
       enrolled: true,
       completedSlugs: updated.completedSlugs,
       nextLesson: nextAiLesson(updated.completedSlugs),
+      xpEarned,
     });
   });
 }

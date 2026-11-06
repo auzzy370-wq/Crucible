@@ -1,137 +1,202 @@
 import Link from "next/link";
 import { CANDIDATE_ROLES } from "@/lib/access";
 import { requirePageRoles } from "@/server/auth/page-guard";
-import { prisma } from "@/lib/db";
-import { AI_CRAFT_PLAN_SLUG, AI_LESSONS, nextAiLesson } from "@/server/learning/ai-curriculum";
-import {
-  INTERVIEW_CRAFT_PLAN_SLUG,
-  INTERVIEW_LESSONS,
-  nextInterviewLesson,
-} from "@/server/learning/interview-curriculum";
+import { buildLearnerGameState, LESSON_XP, DAILY_XP } from "@/server/learning/gamification";
 import { buildLearnerRoadmap } from "@/server/learning/roadmap";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export default async function LearnHubPage() {
   const user = await requirePageRoles(CANDIDATE_ROLES);
-  const [aiEnrollment, ivEnrollment, streak, roadmap] = await Promise.all([
-    prisma.studyPlanEnrollment.findUnique({
-      where: { userId_planSlug: { userId: user.id, planSlug: AI_CRAFT_PLAN_SLUG } },
-    }),
-    prisma.studyPlanEnrollment.findUnique({
-      where: { userId_planSlug: { userId: user.id, planSlug: INTERVIEW_CRAFT_PLAN_SLUG } },
-    }),
-    prisma.userStreak.findUnique({ where: { userId: user.id } }),
+  const [game, roadmap] = await Promise.all([
+    buildLearnerGameState(user.id),
     buildLearnerRoadmap(user.id).catch(() => null),
   ]);
-
-  const aiDone = new Set(aiEnrollment?.completedSlugs ?? []);
-  const ivDone = new Set(ivEnrollment?.completedSlugs ?? []);
-  const nextAi = nextAiLesson(aiDone);
-  const nextIv = nextInterviewLesson(ivDone);
-  const aiPercent = Math.round((aiDone.size / AI_LESSONS.length) * 100);
-  const ivPercent = Math.round((ivDone.size / INTERVIEW_LESSONS.length) * 100);
   const nextProblem = roadmap?.nextProblems?.[0] ?? null;
+  const primaryQuest = game.quests.find((q) => !q.done) ?? game.quests[0]!;
 
   return (
     <div className="animate-rise space-y-8">
-      <header>
-        <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">LEARN</p>
-        <h1 className="mt-2 font-serif-display text-2xl sm:text-3xl">Your learning hub</h1>
-        <p className="mt-2 max-w-2xl text-slate-400">
-          Study Interview Craft and AI Craft, clear daily problems, and follow an adaptive roadmap — then prove skills
-          with the same judges employers use.
-        </p>
-      </header>
-
-      <section className="grid gap-4 lg:grid-cols-2">
-        <div className="rounded-2xl border border-cyan-500/25 bg-cyan-500/5 p-5">
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="cyan">Interview Craft</Badge>
-            <Badge>{ivPercent}%</Badge>
-          </div>
-          <h2 className="mt-3 text-lg font-semibold text-slate-100">Prepare for the real loop</h2>
-          <p className="mt-2 text-sm text-slate-400">
-            {nextIv
-              ? `Next lesson: ${nextIv.title} (${nextIv.minutes} min)`
-              : ivDone.size
-                ? "Path complete — run a company pack or timed mock."
-                : "Coding framework, DSA patterns, system design, behavioral STAR."}
+      <header className="space-y-4">
+        <div>
+          <p className="font-mono text-xs tracking-[0.3em] text-cyan-300">LEARN · FORGE</p>
+          <h1 className="mt-2 font-serif-display text-2xl sm:text-3xl">Level up by proving craft</h1>
+          <p className="mt-2 max-w-2xl text-slate-400">
+            Clear lessons, keep a streak, and post timed evidence. XP and ranks come only from work you finish —
+            nothing is invented.
           </p>
-          <div className="mt-4 flex flex-wrap gap-2">
-            <Link href={nextIv ? `/learn/interview/${nextIv.slug}` : "/learn/interview"}>
-              <Button>{nextIv ? "Continue interview lesson" : "Open Interview Craft"}</Button>
-            </Link>
-            <Link href="/study-plans">
-              <Button variant="secondary">Company packs</Button>
-            </Link>
-          </div>
         </div>
 
-        <div className="rounded-2xl border border-violet-500/25 bg-violet-500/5 p-5">
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="violet">AI Craft</Badge>
-            <Badge>{aiPercent}%</Badge>
+        {/* HUD */}
+        <section className="overflow-hidden rounded-2xl border border-cyan-400/20 bg-gradient-to-br from-cyan-500/[0.07] via-slate-950/80 to-slate-950 p-5 sm:p-6">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-cyan-300/80">Rank</p>
+              <p className="mt-1 font-serif-display text-3xl text-slate-50 sm:text-4xl">{game.rank.title}</p>
+              <p className="mt-1 font-mono text-sm text-slate-400">
+                {game.xp.toLocaleString()} XP
+                {game.nextRank ? ` · ${game.xpToNext} to ${game.nextRank.title}` : " · max rank"}
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Badge variant="amber">
+                {game.streak.current} day streak
+                {game.streak.activeToday ? " · lit" : ""}
+              </Badge>
+              <Badge variant="cyan">
+                {game.questsDone}/{game.questsTotal} quests today
+              </Badge>
+              <Badge>
+                {game.unlockedCount}/{game.achievements.length} medals
+              </Badge>
+            </div>
           </div>
-          <h2 className="mt-3 text-lg font-semibold text-slate-100">Learn AI — prompting to production</h2>
-          <p className="mt-2 text-sm text-slate-400">
-            {nextAi
-              ? `Next lesson: ${nextAi.title} (${nextAi.minutes} min)`
-              : aiDone.size
-                ? "Path complete — keep practicing in the problem bank."
-                : "Start with what LLMs are, then ship integrations safely."}
-          </p>
-          <div className="mt-4 flex flex-wrap gap-2">
-            <Link href={nextAi ? `/learn/ai/${nextAi.slug}` : "/learn/ai"}>
-              <Button>{nextAi ? "Continue AI lesson" : "Open AI lessons"}</Button>
-            </Link>
-            <Link href="/challenges">
-              <Button variant="secondary">Practice in the bank</Button>
-            </Link>
+          <div className="mt-5">
+            <div className="mb-1.5 flex justify-between font-mono text-[10px] uppercase tracking-wider text-slate-500">
+              <span>Progress to next rank</span>
+              <span>{game.rankProgressPct}%</span>
+            </div>
+            <div className="h-2.5 overflow-hidden rounded-full bg-slate-900">
+              <div
+                className="learn-xp-bar h-full rounded-full bg-cyan-400 transition-[width] duration-700 ease-out"
+                style={{ width: `${game.rankProgressPct}%` }}
+              />
+            </div>
           </div>
+        </section>
+      </header>
+
+      {/* Daily quests */}
+      <section>
+        <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
+          <div>
+            <h2 className="font-serif-display text-xl text-slate-100">Today’s quests</h2>
+            <p className="mt-1 text-sm text-slate-500">Three objectives. Finish them to keep the forge hot.</p>
+          </div>
+          <Link href={primaryQuest.href}>
+            <Button size="sm">Start: {primaryQuest.title}</Button>
+          </Link>
+        </div>
+        <div className="grid gap-3 md:grid-cols-3">
+          {game.quests.map((q, i) => (
+            <Link
+              key={q.id}
+              href={q.href}
+              className={cn(
+                "learn-quest-card group rounded-xl border px-4 py-4 transition",
+                q.done
+                  ? "border-emerald-500/30 bg-emerald-500/5"
+                  : "border-slate-800 bg-slate-950/60 hover:border-cyan-500/35",
+              )}
+              style={{ animationDelay: `${i * 0.06}s` }}
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">
+                  Quest {i + 1}
+                </span>
+                <Badge variant={q.done ? "emerald" : "cyan"}>+{q.xp} XP</Badge>
+              </div>
+              <h3 className="mt-2 font-medium text-slate-100 group-hover:text-cyan-100">{q.title}</h3>
+              <p className="mt-1 text-sm text-slate-500">{q.detail}</p>
+              <p className="mt-3 font-mono text-[11px] text-cyan-300/80">
+                {q.done ? "Cleared" : "Open →"}
+              </p>
+            </Link>
+          ))}
         </div>
       </section>
 
+      {/* Craft paths */}
+      <section className="grid gap-4 lg:grid-cols-2">
+        <PathCard
+          label="Interview Craft"
+          percent={game.paths.interview.percent}
+          done={game.paths.interview.done}
+          total={game.paths.interview.total}
+          nextTitle={game.paths.interview.nextTitle}
+          href={game.paths.interview.nextHref}
+          browseHref="/learn/interview"
+          accent="cyan"
+        />
+        <PathCard
+          label="AI Craft"
+          percent={game.paths.ai.percent}
+          done={game.paths.ai.done}
+          total={game.paths.ai.total}
+          nextTitle={game.paths.ai.nextTitle}
+          href={game.paths.ai.nextHref}
+          browseHref="/learn/ai"
+          accent="teal"
+        />
+      </section>
+
+      {/* Recommended prove */}
       <section className="rounded-2xl border border-slate-800 bg-slate-950/60 p-5">
         <div className="flex flex-wrap items-center gap-2">
-          <Badge variant="cyan">Next up</Badge>
-          {streak && streak.currentStreak > 0 && (
-            <Badge variant="amber">{streak.currentStreak} day streak</Badge>
-          )}
+          <Badge variant="cyan">Prove quest</Badge>
+          <Badge variant="amber">+{DAILY_XP} XP</Badge>
         </div>
-        <h2 className="mt-3 text-lg font-semibold text-slate-100">
-          {nextProblem ? nextProblem.title : "Recommended practice"}
+        <h2 className="mt-3 font-serif-display text-xl text-slate-100">
+          {nextProblem ? nextProblem.title : "Today’s timed challenge"}
         </h2>
-        <p className="mt-2 text-sm text-slate-400">
+        <p className="mt-2 max-w-xl text-sm text-slate-400">
           {nextProblem
             ? `Adaptive pick · D${nextProblem.difficulty} · ${(nextProblem.tags ?? []).slice(0, 3).join(", ") || "coding"}`
-            : "Complete a daily or bank problem so the roadmap can personalize."}
+            : "Open the daily session — same public + hidden judges employers use."}
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
           {nextProblem ? (
             <Link href={`/challenges?q=${encodeURIComponent(nextProblem.slug)}`}>
-              <Button>Open in problem bank</Button>
+              <Button>Open recommended problem</Button>
             </Link>
           ) : (
             <Link href="/daily">
-              <Button>Do today&apos;s problem</Button>
+              <Button>Open today’s challenge</Button>
             </Link>
           )}
+          <Link href="/daily">
+            <Button variant="secondary">Daily forge</Button>
+          </Link>
           <Link href="/roadmap">
-            <Button variant="secondary">Full roadmap</Button>
+            <Button variant="ghost">Full roadmap</Button>
           </Link>
-          <Link href="/interview">
-            <Button variant="ghost">Timed company mock</Button>
-          </Link>
+        </div>
+      </section>
+
+      {/* Achievements */}
+      <section>
+        <h2 className="font-serif-display text-xl text-slate-100">Medals</h2>
+        <p className="mt-1 text-sm text-slate-500">Unlock by finishing real work — lessons, streaks, and evidence.</p>
+        <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          {game.achievements.map((a) => (
+            <div
+              key={a.id}
+              className={cn(
+                "rounded-xl border px-4 py-3",
+                a.unlocked
+                  ? "border-amber-500/25 bg-amber-500/[0.06]"
+                  : "border-slate-800/80 bg-slate-950/40 opacity-55",
+              )}
+            >
+              <div className="flex items-center justify-between gap-2">
+                <h3 className="text-sm font-medium text-slate-100">{a.title}</h3>
+                <span className="font-mono text-[10px] uppercase tracking-wider text-slate-500">
+                  {a.unlocked ? "Unlocked" : "Locked"}
+                </span>
+              </div>
+              <p className="mt-1 text-xs text-slate-500">{a.detail}</p>
+            </div>
+          ))}
         </div>
       </section>
 
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {[
-          { href: "/daily", title: "Daily", body: "One timed session today" },
-          { href: "/challenges", title: "Problem bank", body: "Browse & practice" },
+          { href: "/daily", title: "Daily forge", body: `+${DAILY_XP} XP · streak fuel` },
+          { href: "/challenges", title: "Problem bank", body: "Browse & clear judges" },
           { href: "/study-plans", title: "Study plans", body: "Company & role packs" },
-          { href: "/interview", title: "Company mocks", body: "Timed interview sims" },
+          { href: "/interview", title: "Mock interviews", body: "Timed company rounds" },
         ].map((c) => (
           <Link
             key={c.href}
@@ -144,24 +209,54 @@ export default async function LearnHubPage() {
         ))}
       </section>
 
-      <section>
-        <h2 className="text-sm font-semibold text-slate-300">Also useful</h2>
-        <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-sm">
-          {[
-            { href: "/roadmap", label: "Adaptive roadmap" },
-            { href: "/playgrounds", label: "Playgrounds" },
-            { href: "/weekly", label: "Broken prod" },
-            { href: "/contest", label: "Contest" },
-            { href: "/editorials", label: "Editorials" },
-            { href: "/research-frontier", label: "Research Frontier" },
-            { href: "/benchmarks", label: "Benchmarks" },
-          ].map((l) => (
-            <Link key={l.href} href={l.href} className="text-slate-500 hover:text-cyan-300 hover:underline">
-              {l.label}
-            </Link>
-          ))}
-        </div>
-      </section>
+      <p className="font-mono text-[11px] text-slate-600">
+        Lesson clears award +{LESSON_XP} XP each · ranks: Initiate → Operator → Specialist → Elite → Distinguished
+      </p>
+    </div>
+  );
+}
+
+function PathCard(props: {
+  label: string;
+  percent: number;
+  done: number;
+  total: number;
+  nextTitle: string | null;
+  href: string;
+  browseHref: string;
+  accent: "cyan" | "teal";
+}) {
+  const border =
+    props.accent === "cyan" ? "border-cyan-500/25 bg-cyan-500/5" : "border-emerald-500/20 bg-emerald-500/[0.04]";
+  const bar = props.accent === "cyan" ? "bg-cyan-400" : "bg-emerald-400/90";
+
+  return (
+    <div className={cn("rounded-2xl border p-5", border)}>
+      <div className="flex flex-wrap items-center gap-2">
+        <Badge variant={props.accent === "cyan" ? "cyan" : "emerald"}>{props.label}</Badge>
+        <Badge>
+          {props.done}/{props.total}
+        </Badge>
+        <Badge variant="amber">+{LESSON_XP} XP / lesson</Badge>
+      </div>
+      <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-900">
+        <div className={cn("h-full rounded-full transition-[width] duration-700", bar)} style={{ width: `${props.percent}%` }} />
+      </div>
+      <h2 className="mt-4 text-lg font-semibold text-slate-100">
+        {props.nextTitle ? `Next: ${props.nextTitle}` : "Path complete"}
+      </h2>
+      <p className="mt-1 text-sm text-slate-400">
+        {props.percent}% cleared
+        {props.nextTitle ? " — finish the next lesson to bank XP and keep your streak." : " — run mocks or the bank to keep ranking up."}
+      </p>
+      <div className="mt-4 flex flex-wrap gap-2">
+        <Link href={props.href}>
+          <Button>{props.nextTitle ? "Continue lesson" : "Review path"}</Button>
+        </Link>
+        <Link href={props.browseHref}>
+          <Button variant="secondary">All lessons</Button>
+        </Link>
+      </div>
     </div>
   );
 }

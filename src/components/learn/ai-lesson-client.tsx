@@ -36,7 +36,14 @@ export function AiLessonClient(props: {
       const json = await res.json();
       if (!json.ok) throw new Error(json.error?.message || "Failed");
       setDone(doneNext);
-      toast.success(doneNext ? "Lesson marked complete" : "Marked incomplete");
+      const xp = Number(json.data?.xpEarned ?? 0);
+      toast.success(
+        doneNext
+          ? xp > 0
+            ? `Lesson cleared · +${xp} XP · streak updated`
+            : "Lesson marked complete"
+          : "Marked incomplete",
+      );
       if (doneNext && props.nextSlug) router.push(`/learn/ai/${props.nextSlug}`);
       else router.refresh();
     } catch (e) {
@@ -80,7 +87,7 @@ export function AiLessonClient(props: {
       <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
         {!done ? (
           <Button disabled={busy} onClick={() => void mark(true)}>
-            Mark complete{props.nextSlug ? " & continue" : ""}
+            Clear lesson (+50 XP){props.nextSlug ? " & continue" : ""}
           </Button>
         ) : (
           <Button variant="secondary" disabled={busy} onClick={() => void mark(false)}>
