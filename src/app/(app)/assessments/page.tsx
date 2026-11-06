@@ -14,7 +14,7 @@ export default async function AssessmentsPage() {
 
   // Do not hydrate the full seeded library (5k+ assessments) into the page —
   // keep every challenge available via a lean picker, but only list active / owned assessments.
-  const [assessments, challenges, candidates, assignments] = await Promise.all([
+  const [assessments, challenges, challengeTotal, candidates, assignments] = await Promise.all([
     prisma.assessment.findMany({
       where: {
         OR: [
@@ -54,7 +54,9 @@ export default async function AssessmentsPage() {
         publicRequirements: true,
       },
       orderBy: [{ track: "asc" }, { difficulty: "asc" }, { title: "asc" }],
+      take: 80,
     }),
+    prisma.challenge.count({ where: { isPublished: true } }),
     prisma.user.findMany({
       where: { role: { in: ["CANDIDATE", "TEAM_MEMBER"] } },
       select: { id: true, name: true, email: true },
@@ -105,6 +107,7 @@ export default async function AssessmentsPage() {
         challenge: serializeChallenge(a.challenge),
       }))}
       challenges={challenges.map(serializeChallenge)}
+      challengeTotal={challengeTotal}
       candidates={candidates}
       assignments={assignments.map((a) => ({
         ...a,

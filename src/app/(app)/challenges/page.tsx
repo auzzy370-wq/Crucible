@@ -4,9 +4,9 @@ import { Problemset } from "@/components/challenges/problemset";
 import { isCodingProblem } from "@/server/challenges/coding-problems";
 import { editorialSlugByChallengeSlug, resolveEditorialSlug } from "@/server/saas/editorials";
 
-/** Cap SSR payload — Vercel serverless OOMs / 500s when shipping 10k+ challenge rows. */
-const CODING_LIMIT = 400;
-const PROJECT_LIMIT = 400;
+/** First paint only — full library is browsed via /api/challenges search + load more. */
+const CODING_LIMIT = 80;
+const PROJECT_LIMIT = 40;
 
 const listSelect = {
   id: true,
@@ -41,21 +41,28 @@ export default async function ChallengesPage({
   const user = await getSessionUser();
   const trackFilter = sp.track ? { track: sp.track as never } : {};
 
-  const [codingChallenges, projectChallenges, editorialMap] = await Promise.all([
-    prisma.challenge.findMany({
-      where: { isPublished: true, type: "CODING_PROBLEM", ...trackFilter },
-      select: listSelect,
-      orderBy: [{ frequency: "desc" }, { difficulty: "asc" }, { title: "asc" }],
-      take: CODING_LIMIT,
-    }),
-    prisma.challenge.findMany({
-      where: { isPublished: true, type: { not: "CODING_PROBLEM" }, ...trackFilter },
-      select: listSelect,
-      orderBy: [{ frequency: "desc" }, { difficulty: "asc" }, { title: "asc" }],
-      take: PROJECT_LIMIT,
-    }),
-    editorialSlugByChallengeSlug(),
-  ]);
+  const [codingTotal, projectTotal, codingChallenges, projectChallenges, editorialMap] =
+    await Promise.all([
+      prisma.challenge.count({
+        where: { isPublished: true, type: "CODING_PROBLEM", ...trackFilter },
+      }),
+      prisma.challenge.count({
+        where: { isPublished: true, type: { not: "CODING_PROBLEM" }, ...trackFilter },
+      }),
+      prisma.challenge.findMany({
+        where: { isPublished: true, type: "CODING_PROBLEM", ...trackFilter },
+        select: listSelect,
+        orderBy: [{ frequency: "desc" }, { difficulty: "asc" }, { title: "asc" }],
+        take: CODING_LIMIT,
+      }),
+      prisma.challenge.findMany({
+        where: { isPublished: true, type: { not: "CODING_PROBLEM" }, ...trackFilter },
+        select: listSelect,
+        orderBy: [{ frequency: "desc" }, { difficulty: "asc" }, { title: "asc" }],
+        take: PROJECT_LIMIT,
+      }),
+      editorialSlugByChallengeSlug(),
+    ]);
 
   const challenges = [...codingChallenges, ...projectChallenges];
 
@@ -111,6 +118,8 @@ export default async function ChallengesPage({
       projects={projects}
       initialMode={sp.view === "projects" ? "projects" : "problemset"}
       premium={isPremium(user)}
+      libraryTotals={{ coding: codingTotal, projects: projectTotal }}
+      trackFilter={sp.track ?? null}
     />
   );
 }

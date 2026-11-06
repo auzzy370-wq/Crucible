@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -61,11 +61,13 @@ export function AssessmentsClient(props: {
   role: string;
   assessments: Assessment[];
   challenges: Challenge[];
+  challengeTotal?: number;
   candidates: Candidate[];
   assignments: Assignment[];
 }) {
   const router = useRouter();
   const canManage = ["SUPER_ADMIN", "HIRING_MANAGER"].includes(props.role);
+  const libraryTotal = props.challengeTotal ?? props.challenges.length;
   const [title, setTitle] = useState("New Crucible assessment");
   const [description, setDescription] = useState(
     "Demonstrate end-to-end engineering ownership in a timed Crucible session.",
@@ -75,14 +77,55 @@ export function AssessmentsClient(props: {
   const [assignAssessmentId, setAssignAssessmentId] = useState(props.assessments[0]?.id ?? "");
   const [candidateId, setCandidateId] = useState(props.candidates[0]?.id ?? "");
   const [challengeQuery, setChallengeQuery] = useState("");
-  const filteredChallenges = challengeQuery.trim()
-    ? props.challenges
-        .filter((c) => {
-          const hay = `${c.title} ${c.slug} ${c.track} ${c.tags?.join(" ") ?? ""}`.toLowerCase();
-          return hay.includes(challengeQuery.trim().toLowerCase());
-        })
-        .slice(0, 80)
-    : props.challenges.slice(0, 80);
+  const [debouncedQ, setDebouncedQ] = useState("");
+  const [remoteChallenges, setRemoteChallenges] = useState<Challenge[] | null>(null);
+  const [remoteTotal, setRemoteTotal] = useState<number | null>(null);
+  const [searching, setSearching] = useState(false);
+
+  useEffect(() => {
+    const t = window.setTimeout(() => setDebouncedQ(challengeQuery.trim()), 280);
+    return () => window.clearTimeout(t);
+  }, [challengeQuery]);
+
+  useEffect(() => {
+    if (!debouncedQ) {
+      setRemoteChallenges(null);
+      setRemoteTotal(null);
+      return;
+    }
+    let cancelled = false;
+    void (async () => {
+      setSearching(true);
+      try {
+        const params = new URLSearchParams({ q: debouncedQ, take: "80", skip: "0" });
+        const res = await fetch(`/api/challenges?${params}`);
+        const json = (await res.json()) as {
+          ok?: boolean;
+          data?: { items: Challenge[]; total: number };
+        };
+        if (cancelled) return;
+        if (!res.ok || !json.data?.items) {
+          toast.error("Could not search challenge library");
+          return;
+        }
+        setRemoteChallenges(json.data.items);
+        setRemoteTotal(json.data.total);
+        if (json.data.items[0] && !json.data.items.some((c) => c.id === challengeId)) {
+          setChallengeId(json.data.items[0].id);
+        }
+      } catch {
+        if (!cancelled) toast.error("Could not search challenge library");
+      } finally {
+        if (!cancelled) setSearching(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only re-search on query
+  }, [debouncedQ]);
+
+  const filteredChallenges = remoteChallenges ?? props.challenges.slice(0, 80);
 
   async function createAssessment() {
     const res = await fetch("/api/assessments", {
@@ -138,7 +181,7 @@ export function AssessmentsClient(props: {
               <div className="space-y-2">
                 <Label>Challenge</Label>
                 <Input
-                  placeholder="Search 5,000+ challenges…"
+                  placeholder={`Search all ${libraryTotal.toLocaleString()} challenges…`}
                   value={challengeQuery}
                   onChange={(e) => setChallengeQuery(e.target.value)}
                 />
@@ -154,8 +197,11 @@ export function AssessmentsClient(props: {
                   ))}
                 </select>
                 <p className="font-mono text-[11px] text-slate-500">
-                  Showing {filteredChallenges.length}
-                  {challengeQuery.trim() ? " matches" : " (type to search the full library)"}
+                  {searching
+                    ? "Searching library…"
+                    : remoteTotal != null
+                      ? `Showing ${filteredChallenges.length} of ${remoteTotal.toLocaleString()} matches · ${libraryTotal.toLocaleString()} in library`
+                      : `Showing ${filteredChallenges.length} starters · type to search all ${libraryTotal.toLocaleString()}`}
                 </p>
               </div>
               <div className="space-y-2">

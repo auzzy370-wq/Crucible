@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -41,6 +41,15 @@ export type ProblemRow = {
 };
 
 const PAGE_SIZE = 40;
+const REMOTE_PAGE = 50;
+
+type ApiPage = {
+  items: ProblemRow[];
+  total: number;
+  skip: number;
+  take: number;
+  hasMore: boolean;
+};
 
 function label(difficulty: number): DifficultyBand {
   return difficultyBand(difficulty);
@@ -54,14 +63,32 @@ function diffClass(d: DifficultyBand) {
   return "text-fuchsia-300";
 }
 
+function toProblemRow(item: ProblemRow): ProblemRow {
+  return {
+    ...item,
+    companies: item.companies ?? [],
+    frequency: item.frequency ?? 0,
+    avgMinutes: item.avgMinutes ?? 60,
+    isPremium: Boolean(item.isPremium),
+    owaspMappings: item.owaspMappings ?? [],
+    mitreMappings: item.mitreMappings ?? [],
+    assessmentId: item.assessmentId ?? null,
+    workspaceId: item.workspaceId ?? null,
+    editorialSlug: item.editorialSlug ?? null,
+  };
+}
+
 export function Problemset(props: {
   problems: ProblemRow[];
   projects: ProblemRow[];
   initialMode?: "problemset" | "projects";
   premium?: boolean;
+  libraryTotals?: { coding: number; projects: number };
+  trackFilter?: string | null;
 }) {
   const [mode, setMode] = useState<"problemset" | "projects">(props.initialMode ?? "problemset");
   const [q, setQ] = useState("");
+  const [debouncedQ, setDebouncedQ] = useState("");
   const [diff, setDiff] = useState<"All" | DifficultyBand>("All");
   const [tag, setTag] = useState<string>("All");
   const [company, setCompany] = useState<string>("All");
@@ -74,9 +101,81 @@ export function Problemset(props: {
     Record<string, { acceptancePct: number; submissions: number }>
   >({});
   const [bookmarksOnly, setBookmarksOnly] = useState(false);
+  const [remoteItems, setRemoteItems] = useState<ProblemRow[] | null>(null);
+  const [remoteTotal, setRemoteTotal] = useState<number | null>(null);
+  const [remoteHasMore, setRemoteHasMore] = useState(false);
+  const [remoteLoading, setRemoteLoading] = useState(false);
   const router = useRouter();
 
-  const coding = props.problems;
+  const libraryTotal =
+    mode === "problemset"
+      ? (props.libraryTotals?.coding ?? props.problems.length)
+      : (props.libraryTotals?.projects ?? props.projects.length);
+
+  const seedCoding = props.problems;
+  const coding = remoteItems && mode === "problemset" ? remoteItems : seedCoding;
+  const projectsList = remoteItems && mode === "projects" ? remoteItems : props.projects;
+
+  useEffect(() => {
+    const t = window.setTimeout(() => setDebouncedQ(q.trim()), 280);
+    return () => window.clearTimeout(t);
+  }, [q]);
+
+  const fetchLibrary = useCallback(
+    async (opts: { skip: number; append: boolean; seed?: ProblemRow[] }) => {
+      setRemoteLoading(true);
+      try {
+        const params = new URLSearchParams();
+        params.set("skip", String(opts.skip));
+        params.set("take", String(REMOTE_PAGE));
+        params.set("type", mode === "problemset" ? "CODING_PROBLEM" : "PROJECT");
+        if (debouncedQ) params.set("q", debouncedQ);
+        if (company !== "All") params.set("company", company);
+        if (tag !== "All") params.set("tag", tag);
+        if (diff !== "All") params.set("difficulty", diff);
+        if (props.trackFilter) params.set("track", props.trackFilter);
+
+        const res = await fetch(`/api/challenges?${params}`);
+        const json = (await res.json()) as { ok?: boolean; data?: ApiPage };
+        if (!res.ok || !json.data?.items) {
+          throw new Error("Could not load challenge library");
+        }
+        const rows = json.data.items.map(toProblemRow);
+        setRemoteItems((prev) => {
+          if (opts.append) {
+            const base = prev ?? opts.seed ?? [];
+            const seen = new Set(base.map((r) => r.id));
+            return [...base, ...rows.filter((r) => !seen.has(r.id))];
+          }
+          return rows;
+        });
+        setRemoteTotal(json.data.total);
+        setRemoteHasMore(json.data.hasMore);
+      } catch (e) {
+        toast.error(e instanceof Error ? e.message : "Library load failed");
+      } finally {
+        setRemoteLoading(false);
+      }
+    },
+    [mode, debouncedQ, company, tag, diff, props.trackFilter],
+  );
+
+  const filtersActive = Boolean(debouncedQ) || company !== "All" || tag !== "All" || diff !== "All";
+
+  useEffect(() => {
+    if (!filtersActive) {
+      // Keep SSR seed until user searches/filters or explicitly loads more.
+      if (remoteItems !== null && !debouncedQ && company === "All" && tag === "All" && diff === "All") {
+        // User cleared filters after a remote session — reset to SSR seed.
+        setRemoteItems(null);
+        setRemoteTotal(null);
+        setRemoteHasMore(false);
+      }
+      return;
+    }
+    void fetchLibrary({ skip: 0, append: false });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch on filter identity only
+  }, [filtersActive, debouncedQ, company, tag, diff, mode, props.trackFilter]);
 
   useEffect(() => {
     let cancelled = false;
@@ -168,26 +267,35 @@ export function Problemset(props: {
   }
   const allTags = useMemo(() => {
     const s = new Set<string>();
-    for (const p of coding) for (const t of p.tags) if (t !== "coding") s.add(t);
+    for (const p of seedCoding) for (const t of p.tags) if (t !== "coding") s.add(t);
     return ["All", ...[...s].sort()];
-  }, [coding]);
+  }, [seedCoding]);
 
   const companies = useMemo(() => {
     const s = new Set<string>();
-    for (const p of coding) for (const c of p.companies ?? []) s.add(c);
+    for (const p of seedCoding) for (const c of p.companies ?? []) s.add(c);
     return ["All", ...[...s].sort()];
-  }, [coding]);
+  }, [seedCoding]);
 
   const filtered = useMemo(() => {
     const rows = coding.filter((p) => {
       const L = label(p.difficulty);
       if (bookmarksOnly && !bookmarkedIds.has(p.id)) return false;
-      if (diff !== "All" && L !== diff) return false;
-      if (tag !== "All" && !p.tags.includes(tag)) return false;
-      if (company !== "All" && !(p.companies ?? []).includes(company)) return false;
-      if (!q.trim()) return true;
-      const hay = `${p.title} ${p.summary} ${p.tags.join(" ")} ${(p.companies ?? []).join(" ")} ${p.slug}`.toLowerCase();
-      return hay.includes(q.trim().toLowerCase());
+      // Server already applied q/company/tag/diff when remoteItems is set
+      if (!remoteItems) {
+        if (diff !== "All" && L !== diff) return false;
+        if (tag !== "All" && !p.tags.includes(tag)) return false;
+        if (company !== "All" && !(p.companies ?? []).includes(company)) return false;
+        if (!q.trim()) return true;
+        const hay =
+          `${p.title} ${p.summary} ${p.tags.join(" ")} ${(p.companies ?? []).join(" ")} ${p.slug}`.toLowerCase();
+        return hay.includes(q.trim().toLowerCase());
+      }
+      if (q.trim() && q.trim().toLowerCase() !== debouncedQ.toLowerCase()) {
+        const hay = `${p.title} ${p.summary} ${p.slug}`.toLowerCase();
+        return hay.includes(q.trim().toLowerCase());
+      }
+      return true;
     });
     rows.sort((a, b) => {
       if (sort === "frequency") return (b.frequency ?? 0) - (a.frequency ?? 0);
@@ -195,25 +303,48 @@ export function Problemset(props: {
       return a.title.localeCompare(b.title);
     });
     return rows;
-  }, [coding, diff, tag, company, q, sort, bookmarksOnly, bookmarkedIds]);
+  }, [coding, remoteItems, diff, tag, company, q, debouncedQ, sort, bookmarksOnly, bookmarkedIds]);
 
   useEffect(() => {
     setVisibleCount(PAGE_SIZE);
-  }, [mode, diff, tag, company, sort, q]);
+  }, [mode, diff, tag, company, sort, q, remoteItems]);
 
   const visible = useMemo(() => filtered.slice(0, visibleCount), [filtered, visibleCount]);
-  const hasMore = visibleCount < filtered.length;
+  const matchTotal = remoteTotal ?? filtered.length;
+  const hasMoreLocal = visibleCount < filtered.length;
+  const hasMoreRemote =
+    remoteItems != null ? remoteHasMore : coding.length < libraryTotal || filtersActive;
+  const hasMore = hasMoreLocal || hasMoreRemote;
+
+  async function loadMore() {
+    if (hasMoreLocal) {
+      setVisibleCount((n) => n + PAGE_SIZE);
+      return;
+    }
+    if (remoteLoading) return;
+    if (remoteItems) {
+      await fetchLibrary({ skip: remoteItems.length, append: true });
+      setVisibleCount((n) => n + REMOTE_PAGE);
+      return;
+    }
+    const seed = mode === "problemset" ? seedCoding : props.projects;
+    await fetchLibrary({ skip: seed.length, append: true, seed });
+    setVisibleCount(seed.length + REMOTE_PAGE);
+  }
+
   const visibleProjects = useMemo(
-    () => props.projects.slice(0, visibleCount),
-    [props.projects, visibleCount],
+    () => projectsList.slice(0, visibleCount),
+    [projectsList, visibleCount],
   );
-  const hasMoreProjects = visibleCount < props.projects.length;
+  const hasMoreProjects =
+    visibleCount < projectsList.length ||
+    (remoteItems && mode === "projects" ? remoteHasMore : projectsList.length < libraryTotal);
 
   const counts = useMemo(() => {
     const c: Record<DifficultyBand, number> = { Easy: 0, Medium: 0, Hard: 0, Expert: 0, Impossible: 0 };
-    for (const p of coding) c[label(p.difficulty)] += 1;
+    for (const p of seedCoding) c[label(p.difficulty)] += 1;
     return c;
-  }, [coding]);
+  }, [seedCoding]);
 
   return (
     <div className="animate-rise space-y-6">
@@ -223,7 +354,9 @@ export function Problemset(props: {
           <h1 className="mt-2 font-serif-display text-2xl tracking-tight sm:text-3xl">Practice bank</h1>
           <p className="mt-2 max-w-2xl text-slate-600">
             Train on the same timed coding and production missions employers assign — TypeScript, JavaScript, Python,
-            Go, Rust, Java. Public checks first; hidden harnesses decide Accepted.
+            Go, Rust, Java. Search the full bank ({libraryTotal.toLocaleString()}{" "}
+            {mode === "problemset" ? "coding problems" : "missions"}); public checks first, hidden harnesses decide
+            Accepted.
           </p>
           <p className="mt-2 max-w-2xl text-xs text-slate-500" title={FREQUENCY_METHODOLOGY.detail}>
             Freq: {FREQUENCY_METHODOLOGY.label}. Acc: live when ≥3 hidden submits, otherwise{" "}
@@ -233,7 +366,12 @@ export function Problemset(props: {
         <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
           <button
             type="button"
-            onClick={() => setMode("problemset")}
+            onClick={() => {
+              setMode("problemset");
+              setRemoteItems(null);
+              setRemoteTotal(null);
+              setRemoteHasMore(false);
+            }}
             className={cn(
               "min-h-11 rounded-lg border px-3 py-2 text-sm",
               mode === "problemset"
@@ -241,11 +379,16 @@ export function Problemset(props: {
                 : "border-slate-300 text-slate-600 hover:bg-slate-100",
             )}
           >
-            Coding judges ({coding.length})
+            Coding judges ({(props.libraryTotals?.coding ?? seedCoding.length).toLocaleString()})
           </button>
           <button
             type="button"
-            onClick={() => setMode("projects")}
+            onClick={() => {
+              setMode("projects");
+              setRemoteItems(null);
+              setRemoteTotal(null);
+              setRemoteHasMore(false);
+            }}
             className={cn(
               "min-h-11 rounded-lg border px-3 py-2 text-sm",
               mode === "projects"
@@ -253,7 +396,7 @@ export function Problemset(props: {
                 : "border-slate-300 text-slate-600 hover:bg-slate-100",
             )}
           >
-            Missions ({props.projects.length})
+            Missions ({(props.libraryTotals?.projects ?? props.projects.length).toLocaleString()})
           </button>
           <Link
             href="/pricing"
@@ -268,7 +411,7 @@ export function Problemset(props: {
         <>
           <div className="flex flex-col gap-3">
             <Input
-              placeholder="Search title, company, tag…"
+              placeholder={`Search all ${(props.libraryTotals?.coding ?? seedCoding.length).toLocaleString()} problems…`}
               value={q}
               onChange={(e) => setQ(e.target.value)}
               className="w-full md:max-w-sm"
@@ -351,7 +494,10 @@ export function Problemset(props: {
           </div>
 
           <p className="font-mono text-[11px] text-slate-500">
-            Showing {Math.min(visible.length, filtered.length)} of {filtered.length} matching · library stays intact
+            Showing {visible.length.toLocaleString()} of {matchTotal.toLocaleString()} matching
+            {" · "}
+            {(props.libraryTotals?.coding ?? seedCoding.length).toLocaleString()} in full library
+            {remoteLoading ? " · loading…" : ""}
           </p>
 
           {/* Mobile card list */}
@@ -557,17 +703,21 @@ export function Problemset(props: {
           {hasMore && (
             <button
               type="button"
-              className="inline-flex min-h-11 w-full items-center justify-center rounded-md border border-slate-300 bg-white text-sm text-slate-800 hover:border-cyan-500/40 hover:text-teal-900"
-              onClick={() => setVisibleCount((n) => n + PAGE_SIZE)}
+              disabled={remoteLoading}
+              className="inline-flex min-h-11 w-full items-center justify-center rounded-md border border-slate-300 bg-white text-sm text-slate-800 hover:border-cyan-500/40 hover:text-teal-900 disabled:opacity-50"
+              onClick={() => void loadMore()}
             >
-              Load more ({filtered.length - visible.length} remaining)
+              {remoteLoading
+                ? "Loading…"
+                : `Load more (${Math.max(0, matchTotal - visible.length).toLocaleString()} remaining)`}
             </button>
           )}
         </>
       ) : (
         <div className="space-y-4">
           <p className="font-mono text-[11px] text-slate-500">
-            Showing {visibleProjects.length} of {props.projects.length} missions
+            Showing {visibleProjects.length.toLocaleString()} of {libraryTotal.toLocaleString()} missions
+            {remoteLoading ? " · loading…" : ""}
           </p>
           <div className="grid gap-4 lg:grid-cols-2">
             {visibleProjects.map((c) => (
@@ -610,10 +760,13 @@ export function Problemset(props: {
           {hasMoreProjects && (
             <button
               type="button"
-              className="inline-flex min-h-11 w-full items-center justify-center rounded-md border border-slate-300 bg-white text-sm text-slate-800 hover:border-cyan-500/40 hover:text-teal-900"
-              onClick={() => setVisibleCount((n) => n + PAGE_SIZE)}
+              disabled={remoteLoading}
+              className="inline-flex min-h-11 w-full items-center justify-center rounded-md border border-slate-300 bg-white text-sm text-slate-800 hover:border-cyan-500/40 hover:text-teal-900 disabled:opacity-50"
+              onClick={() => void loadMore()}
             >
-              Load more missions ({props.projects.length - visibleProjects.length} remaining)
+              {remoteLoading
+                ? "Loading…"
+                : `Load more missions (${Math.max(0, libraryTotal - visibleProjects.length).toLocaleString()} remaining)`}
             </button>
           )}
         </div>
