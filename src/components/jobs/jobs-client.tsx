@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { LocalTime } from "@/components/ui/local-time";
 import { cn } from "@/lib/utils";
 import type { JobCompany, JobPosting, JobSource } from "@/server/jobs/types";
 
@@ -80,7 +81,11 @@ export function JobsClient(props: { companies: readonly JobCompany[] }) {
         <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-slate-500">
           <Briefcase className="h-3.5 w-3.5" />
           <span>{jobs.length} roles shown</span>
-          {refreshedAt && <span>· refreshed {new Date(refreshedAt).toLocaleString()}</span>}
+          {refreshedAt && (
+            <span>
+              · refreshed <LocalTime value={refreshedAt} />
+            </span>
+          )}
         </div>
       </header>
 

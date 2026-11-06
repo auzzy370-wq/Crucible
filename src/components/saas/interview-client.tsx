@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { LocalTime } from "@/components/ui/local-time";
 import { cn } from "@/lib/utils";
 import {
   FREE_MOCK_LIMIT,
@@ -303,7 +304,7 @@ export function InterviewClient(props: {
               </div>
               <h3 className="mt-3 font-medium text-slate-900">{s.challenge.title}</h3>
               <p className="mt-1 text-sm text-slate-600">
-                {s.role} · {new Date(s.createdAt).toLocaleString()}
+                {s.role} · <LocalTime value={s.createdAt} />
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {s.workspaceId && s.status === "IN_PROGRESS" && (
