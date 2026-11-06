@@ -337,10 +337,7 @@ html.dark body {
 }
 
 .dark .landing-root {
-  background:
-    radial-gradient(ellipse 90% 70% at 70% 18%, rgba(45, 212, 191, 0.14), transparent 55%),
-    radial-gradient(ellipse 60% 50% at 8% 82%, rgba(52, 211, 153, 0.08), transparent 50%),
-    linear-gradient(165deg, #081018 0%, #0b1420 48%, #070d14 100%);
+  background: linear-gradient(180deg, #080d14 0%, #070b11 55%, #05080c 100%);
 }
 
 .landing-noise {
@@ -408,29 +405,24 @@ html.dark body {
 }
 
 .landing-hero-plane {
-  background:
-    radial-gradient(ellipse 90% 70% at 75% 15%, color-mix(in srgb, var(--brand) 18%, transparent), transparent 55%),
-    radial-gradient(ellipse 55% 45% at 8% 85%, color-mix(in srgb, var(--accent-2) 10%, transparent), transparent 50%),
-    linear-gradient(168deg, #f9fcff 0%, #eaf4fa 48%, #dceef5 100%);
+  background: linear-gradient(168deg, #f7fbfd 0%, #eef5f9 50%, #e5eef4 100%);
 }
 
 .dark .landing-hero-plane {
-  background:
-    radial-gradient(ellipse 90% 70% at 75% 15%, rgba(45, 212, 191, 0.16), transparent 55%),
-    radial-gradient(ellipse 55% 45% at 8% 85%, rgba(52, 211, 153, 0.08), transparent 50%),
-    linear-gradient(168deg, #0a121c 0%, #0d1824 48%, #081018 100%);
+  background: linear-gradient(180deg, #0a1018 0%, #080d14 100%);
 }
 
 .landing-hero-fade {
-  background:
-    linear-gradient(to top, rgba(243, 248, 252, 0.95) 0%, rgba(243, 248, 252, 0.55) 42%, rgba(243, 248, 252, 0.12) 100%),
-    linear-gradient(to right, rgba(243, 248, 252, 0.55) 0%, transparent 45%);
+  background: linear-gradient(
+    to top,
+    rgba(243, 248, 252, 0.92) 0%,
+    rgba(243, 248, 252, 0.45) 40%,
+    transparent 72%
+  );
 }
 
 .dark .landing-hero-fade {
-  background:
-    linear-gradient(to top, rgba(7, 13, 20, 0.96) 0%, rgba(7, 13, 20, 0.55) 42%, rgba(7, 13, 20, 0.12) 100%),
-    linear-gradient(to right, rgba(7, 13, 20, 0.55) 0%, transparent 45%);
+  background: linear-gradient(to top, rgba(7, 11, 17, 0.95) 0%, rgba(7, 11, 17, 0.4) 42%, transparent 75%);
 }
 
 .landing-anim-brand {
@@ -499,46 +491,4 @@ html.dark body {
   }
 }
 
-/* Brand mark — forge vessel */
-.crucible-mark {
-  background:
-    radial-gradient(circle at 50% 70%, color-mix(in srgb, var(--brand) 28%, transparent), transparent 55%),
-    linear-gradient(160deg, color-mix(in srgb, var(--brand) 18%, transparent), transparent 65%),
-    var(--surface-elevated);
-  box-shadow:
-    inset 0 0 0 1px color-mix(in srgb, var(--brand) 40%, transparent),
-    0 0 24px color-mix(in srgb, var(--brand) 12%, transparent);
-}
-
-.dark .crucible-mark {
-  background:
-    radial-gradient(circle at 50% 72%, rgba(45, 212, 191, 0.28), transparent 52%),
-    linear-gradient(160deg, rgba(45, 212, 191, 0.14), transparent 65%),
-    #101925;
-  box-shadow:
-    inset 0 0 0 1px rgba(45, 212, 191, 0.45),
-    0 0 28px rgba(45, 212, 191, 0.14);
-}
-
-/* Hero wordmark — unmistakable brand plane */
-.crucible-hero-word {
-  font-family: var(--font-serif);
-  font-weight: 400;
-  letter-spacing: -0.035em;
-  background: linear-gradient(
-    180deg,
-    var(--brand-ink) 0%,
-    var(--brand-ink) 55%,
-    color-mix(in srgb, var(--brand) 55%, var(--brand-ink)) 100%
-  );
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-.dark .crucible-hero-word {
-  background: linear-gradient(180deg, #f3fafc 0%, #e8eef5 42%, #5eead4 130%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
+/* Stamp mark inherits color; cut uses --mark-cut from the lockup */

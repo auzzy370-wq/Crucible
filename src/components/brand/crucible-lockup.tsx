@@ -1,29 +1,19 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
-/** Geometric crucible mark — vessel + molten core. */
+/**
+ * Stamp mark — a solid “C” cut from a rounded plate.
+ * Reads at 16px; no illustrative pot/vessel.
+ */
 export function CrucibleGlyph({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 40 40" fill="none" aria-hidden className={cn("h-full w-full", className)}>
+    <svg viewBox="0 0 32 32" fill="none" aria-hidden className={cn("h-full w-full", className)}>
+      <rect width="32" height="32" rx="8" fill="currentColor" />
       <path
-        d="M8 10h24l-2.5 4.5v11.5c0 4.2-3.6 7.5-9.5 7.5S10.5 29.7 10.5 25.5V14.5L8 10Z"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M14 10V7.5C14 6.1 15.1 5 16.5 5h7C24.9 5 26 6.1 26 7.5V10"
-        stroke="currentColor"
-        strokeWidth="2"
+        d="M22.2 10.4a7.6 7.6 0 1 0 0 11.2"
+        stroke="var(--mark-cut, #070d14)"
+        strokeWidth="3.2"
         strokeLinecap="round"
-      />
-      <circle cx="20" cy="22.5" r="4" fill="currentColor" fillOpacity="0.9" />
-      <path
-        d="M20 16.5v2.2M16.8 18.8l1.4 1.4M23.2 18.8l-1.4 1.4"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-        opacity="0.7"
       />
     </svg>
   );
@@ -39,49 +29,48 @@ type LockupProps = {
 
 const sizes = {
   sm: {
-    mark: "h-8 w-8 rounded-lg p-1.5",
-    title: "text-base tracking-[-0.02em]",
-    tag: "text-[9px] tracking-[0.18em]",
+    mark: "h-7 w-7",
+    title: "text-[15px] tracking-[-0.03em]",
+    tag: "text-[9px] tracking-[0.16em]",
+    gap: "gap-2.5",
   },
   md: {
-    mark: "h-10 w-10 rounded-xl p-2",
-    title: "text-xl tracking-[-0.02em]",
-    tag: "text-[10px] tracking-[0.2em]",
+    mark: "h-9 w-9",
+    title: "text-[1.35rem] tracking-[-0.03em]",
+    tag: "text-[10px] tracking-[0.18em]",
+    gap: "gap-3",
   },
   lg: {
-    mark: "h-12 w-12 rounded-xl p-2.5",
-    title: "text-2xl tracking-[-0.025em]",
-    tag: "text-[11px] tracking-[0.22em]",
+    mark: "h-11 w-11",
+    title: "text-[1.65rem] tracking-[-0.035em]",
+    tag: "text-[11px] tracking-[0.2em]",
+    gap: "gap-3.5",
   },
 };
 
 export function CrucibleLockup({
   href = "/dashboard",
   size = "md",
-  showTagline = true,
+  showTagline = false,
   className,
   markClassName,
 }: LockupProps) {
   const s = sizes[size];
   const inner = (
-    <div className={cn("flex items-center gap-3", className)}>
+    <div className={cn("flex items-center", s.gap, className)}>
       <div
         className={cn(
-          "crucible-mark flex shrink-0 items-center justify-center text-teal-500",
+          "flex shrink-0 items-center justify-center text-teal-500 [--mark-cut:#f3f8fc] dark:[--mark-cut:#070d14]",
           s.mark,
           markClassName,
         )}
       >
         <CrucibleGlyph />
       </div>
-      <div className="min-w-0">
-        <div className={cn("truncate font-serif-display leading-none text-slate-900", s.title)}>
-          Crucible
-        </div>
+      <div className="min-w-0 leading-none">
+        <div className={cn("truncate font-serif-display text-slate-900", s.title)}>Crucible</div>
         {showTagline && (
-          <div className={cn("mt-1 truncate font-mono font-medium text-teal-600", s.tag)}>
-            PROVE THE CRAFT
-          </div>
+          <div className={cn("mt-1.5 truncate font-mono text-slate-500", s.tag)}>PROVE THE CRAFT</div>
         )}
       </div>
     </div>

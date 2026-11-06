@@ -203,7 +203,7 @@ export function AppShell({
     router.refresh();
   }
 
-  const brand = <CrucibleLockup href="/dashboard" size="md" markClassName="pulse-live" />;
+  const brand = <CrucibleLockup href="/dashboard" size="md" />;
 
   const userBlock = (
     <div className="border-t border-slate-200/80 p-4">

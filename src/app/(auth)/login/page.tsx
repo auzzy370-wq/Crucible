@@ -90,29 +90,30 @@ function LoginForm() {
   }
 
   return (
-    <Card className="animate-rise relative w-full max-w-md border-teal-300/50 bg-slate-50/90 backdrop-blur-sm">
-      <CardHeader>
-        <div className="mb-3 flex items-start justify-between gap-3">
-          <CrucibleLockup href="/" size="md" showTagline />
+    <Card className="animate-rise relative w-full max-w-md border-slate-200 bg-slate-50 shadow-xl shadow-slate-950/20">
+      <CardHeader className="space-y-4">
+        <div className="flex items-start justify-between gap-3">
+          <CrucibleLockup href="/" size="md" />
           <ThemeToggle />
         </div>
-        <p className="mb-1 font-mono text-[10px] uppercase tracking-[0.28em] text-teal-600">Learn · Hire</p>
-        <CardTitle className="font-serif-display text-xl sm:text-2xl">
-          {mode === "hire" ? "Hire on evidence" : "Learn by proving"}
-        </CardTitle>
-        <CardDescription>
-          {mode === "hire"
-            ? "Assign timed work, review isolated workspaces, and decide with scorecards — never résumé claims alone."
-            : "Practice with the same timed judges employers use. Build a verified profile as you learn."}
-        </CardDescription>
+        <div>
+          <CardTitle className="font-serif-display text-2xl tracking-tight">
+            {mode === "hire" ? "Hire on evidence" : "Learn by proving"}
+          </CardTitle>
+          <CardDescription className="mt-2">
+            {mode === "hire"
+              ? "Assign timed work, review isolated workspaces, and decide with scorecards."
+              : "Practice with the same timed judges employers use. Build a verified profile as you learn."}
+          </CardDescription>
+        </div>
       </CardHeader>
       <CardContent>
-        <div className="mb-4 grid grid-cols-2 gap-2 rounded-lg border border-slate-200 bg-slate-100/80 p-1">
+        <div className="mb-5 grid grid-cols-2 gap-1 rounded-lg bg-slate-100 p-1">
           <button
             type="button"
             className={cn(
-              "min-h-10 rounded-md text-sm transition",
-              mode === "learn" ? "bg-teal-500/15 text-teal-800" : "text-slate-600 hover:text-slate-800",
+              "min-h-10 rounded-md text-sm font-medium transition",
+              mode === "learn" ? "bg-slate-50 text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-800",
             )}
             onClick={() => setMode("learn")}
           >
@@ -121,8 +122,8 @@ function LoginForm() {
           <button
             type="button"
             className={cn(
-              "min-h-10 rounded-md text-sm transition",
-              mode === "hire" ? "bg-amber-500/15 text-amber-800" : "text-slate-600 hover:text-slate-800",
+              "min-h-10 rounded-md text-sm font-medium transition",
+              mode === "hire" ? "bg-slate-50 text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-800",
             )}
             onClick={() => setMode("hire")}
           >
@@ -131,33 +132,29 @@ function LoginForm() {
         </div>
 
         {mode === "learn" && (
-          <div className="mb-4 space-y-2">
-            <div className="rounded-lg border border-cyan-500/20 bg-cyan-500/5 px-3 py-2.5 text-sm text-slate-700">
-              New here?{" "}
-              <Link className="font-medium text-teal-700 hover:underline" href="/register">
-                Create a free learner account →
-              </Link>
-            </div>
-            <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2.5 text-xs text-amber-800">
-              Every signed-in learner can practice timed problems. Admins can auto-run assessments and post scores from
-              Admin.
-            </div>
-          </div>
+          <p className="mb-5 text-sm text-slate-500">
+            New here?{" "}
+            <Link className="font-medium text-teal-600 hover:text-teal-500" href="/register">
+              Create a free learner account →
+            </Link>
+          </p>
         )}
         {mode === "hire" && (
-          <div className="mb-4 rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2.5 text-sm text-slate-700">
-            Hiring workspaces use invited staff accounts. Register a learner account first if you are exploring the
-            product.
-          </div>
+          <p className="mb-5 text-sm text-slate-500">
+            Hiring workspaces use invited staff accounts. Exploring?{" "}
+            <Link className="font-medium text-teal-600 hover:text-teal-500" href="/register">
+              Start as a learner →
+            </Link>
+          </p>
         )}
 
         {dbOk === false && (
-          <div className="mb-4 rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-800">
+          <div className="mb-4 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-800">
             Database is not connected on this deploy yet. Publish with Postgres enabled, then register a new account.
           </div>
         )}
         {error && (
-          <div className="mb-4 rounded-lg border border-rose-500/40 bg-rose-500/10 p-3 text-sm text-rose-700">
+          <div className="mb-4 rounded-lg border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-700">
             {error}
           </div>
         )}
@@ -183,18 +180,18 @@ function LoginForm() {
         <div className="mt-5">
           <SocialAuthButtons />
         </div>
-        <p className="mt-4 text-center text-sm text-slate-600">
+        <p className="mt-5 text-center text-sm text-slate-500">
           {mode === "hire" ? (
             <>
               Looking to practice instead?{" "}
-              <button type="button" className="text-teal-700 hover:underline" onClick={() => setMode("learn")}>
+              <button type="button" className="font-medium text-teal-600 hover:text-teal-500" onClick={() => setMode("learn")}>
                 Switch to learn
               </button>
             </>
           ) : (
             <>
               Hiring talent?{" "}
-              <button type="button" className="text-teal-700 hover:underline" onClick={() => setMode("hire")}>
+              <button type="button" className="font-medium text-teal-600 hover:text-teal-500" onClick={() => setMode("hire")}>
                 Switch to hire
               </button>
             </>
@@ -207,11 +204,9 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div className="landing-root relative flex min-h-screen items-center justify-center px-4 py-8 safe-top safe-bottom">
-      <div className="landing-noise pointer-events-none absolute inset-0" aria-hidden />
-      <div className="landing-mesh pointer-events-none absolute inset-0" aria-hidden />
-      <div className="pointer-events-none absolute inset-0 grid-overlay opacity-50" />
-      <Suspense fallback={<div className="text-slate-600">Loading…</div>}>
+    <div className="landing-root relative flex min-h-screen items-center justify-center px-4 py-10 safe-top safe-bottom">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(13,148,136,0.12),transparent_50%)]" />
+      <Suspense fallback={<div className="text-slate-500">Loading…</div>}>
         <LoginForm />
       </Suspense>
     </div>

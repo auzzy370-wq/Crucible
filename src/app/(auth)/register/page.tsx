@@ -60,22 +60,21 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="landing-root relative flex min-h-screen items-center justify-center px-4 py-8 safe-top safe-bottom">
-      <div className="landing-noise pointer-events-none absolute inset-0" aria-hidden />
-      <div className="landing-mesh pointer-events-none absolute inset-0" aria-hidden />
-      <div className="pointer-events-none absolute inset-0 grid-overlay opacity-50" />
-      <Card className="animate-rise relative w-full max-w-lg border-teal-300/50 bg-slate-50/90 backdrop-blur-sm">
-        <CardHeader>
-          <div className="mb-3 flex items-start justify-between gap-3">
-            <CrucibleLockup href="/" size="md" showTagline />
+    <div className="landing-root relative flex min-h-screen items-center justify-center px-4 py-10 safe-top safe-bottom">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(13,148,136,0.12),transparent_50%)]" />
+      <Card className="animate-rise relative w-full max-w-lg border-slate-200 bg-slate-50 shadow-xl shadow-slate-950/20">
+        <CardHeader className="space-y-4">
+          <div className="flex items-start justify-between gap-3">
+            <CrucibleLockup href="/" size="md" />
             <ThemeToggle />
           </div>
-          <p className="mb-1 font-mono text-[10px] uppercase tracking-[0.28em] text-teal-600">Learn the craft</p>
-          <CardTitle className="font-serif-display text-xl sm:text-2xl">Start learning free</CardTitle>
-          <CardDescription>
-            Practice timed engineering and security work, build a verified profile, and share evidence employers can
-            trust. Hiring teams sign in from the employer path.
-          </CardDescription>
+          <div>
+            <CardTitle className="font-serif-display text-2xl tracking-tight">Start learning free</CardTitle>
+            <CardDescription className="mt-2">
+              Practice timed engineering and security work, build a verified profile, and share evidence employers can
+              trust.
+            </CardDescription>
+          </div>
         </CardHeader>
         <CardContent>
           <form className="space-y-4" onSubmit={onSubmit}>
