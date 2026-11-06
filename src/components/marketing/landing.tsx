@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
-import { CrucibleLockup } from "@/components/brand/crucible-lockup";
+import { CrucibleLockup, CrucibleWordmark } from "@/components/brand/crucible-lockup";
 
 function WorkspacePreview() {
   return (
@@ -24,7 +24,7 @@ function WorkspacePreview() {
           ))}
         </div>
         <div className="space-y-2 px-3 py-3">
-          <div className="h-2 w-[70%] rounded-full bg-teal-500/40" />
+          <div className="h-2 w-[70%] rounded-full bg-[var(--brand-flame)]/45" />
           <div className="h-2 w-[88%] rounded-full bg-[#e2e8f0] dark:bg-white/12" />
           <div className="h-2 w-[55%] rounded-full bg-[#e2e8f0] dark:bg-white/12" />
           <div className="h-2 w-[78%] rounded-full bg-[#e2e8f0] dark:bg-white/12" />
@@ -34,7 +34,7 @@ function WorkspacePreview() {
       </div>
       <div className="flex items-center justify-between border-t border-[#e2ebf2] px-3 py-2 font-mono text-[10px] text-[#94a3b8] dark:border-white/10 dark:text-white/40">
         <span>public 3/3</span>
-        <span className="text-teal-700 dark:text-teal-300/80">harness ready</span>
+        <span className="text-[var(--brand)] dark:text-[var(--brand-flame)]">harness ready</span>
       </div>
     </div>
   );
@@ -88,8 +88,8 @@ export function LandingPage(props: {
           </div>
 
           <div className="max-w-xl sm:mt-auto sm:max-w-md lg:max-w-xl">
-            <p className="landing-anim-brand font-serif-display text-[clamp(2.75rem,12vw,8.5rem)] leading-[0.9] tracking-[-0.04em] text-[#0f1c2e] dark:text-white">
-              Crucible
+            <p className="landing-anim-brand leading-[0.9]">
+              <CrucibleWordmark className="text-[clamp(2.75rem,12vw,7.5rem)] font-semibold" />
             </p>
             <h1 className="landing-anim-copy mt-2.5 text-[1.05rem] font-medium leading-snug text-[#334155] dark:text-white/90 sm:mt-5 sm:text-[1.35rem]">
               Learn the craft. Hire the proof.
@@ -118,8 +118,8 @@ export function LandingPage(props: {
       <section id="paths" className="relative z-10 border-t border-slate-200 bg-[var(--background)]">
         <div className="mx-auto grid max-w-[1200px] gap-12 px-4 py-14 sm:px-8 lg:grid-cols-2 lg:gap-20 lg:px-10 lg:py-24">
           <div>
-            <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-teal-600">For learners</p>
-            <h2 className="mt-3 font-serif-display text-[1.75rem] leading-tight text-slate-900 sm:text-[2rem]">
+            <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--brand)]">For learners</p>
+            <h2 className="mt-3 text-[1.75rem] font-semibold leading-tight tracking-[-0.03em] text-slate-900 sm:text-[2rem]">
               A place to get better
             </h2>
             <p className="mt-4 max-w-md text-[15px] leading-relaxed text-slate-500">
@@ -128,14 +128,14 @@ export function LandingPage(props: {
             </p>
             <Link
               href="/register"
-              className="mt-8 inline-flex min-h-11 items-center text-sm font-medium text-teal-600 transition hover:text-teal-500"
+              className="mt-8 inline-flex min-h-11 items-center text-sm font-medium text-[var(--brand)] transition hover:text-[var(--brand-hover)]"
             >
               Create a learner account →
             </Link>
           </div>
           <div>
-            <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-amber-600">For employers</p>
-            <h2 className="mt-3 font-serif-display text-[1.75rem] leading-tight text-slate-900 sm:text-[2rem]">
+            <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--brand)]">For employers</p>
+            <h2 className="mt-3 text-[1.75rem] font-semibold leading-tight tracking-[-0.03em] text-slate-900 sm:text-[2rem]">
               A floor to test talent
             </h2>
             <p className="mt-4 max-w-md text-[15px] leading-relaxed text-slate-500">
@@ -156,7 +156,7 @@ export function LandingPage(props: {
         <div className="mx-auto flex max-w-[1200px] flex-col gap-6 px-4 py-12 sm:px-8 lg:flex-row lg:items-end lg:justify-between lg:px-10 lg:py-14">
           <div>
             <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-slate-500">Shared proof</p>
-            <p className="mt-3 max-w-xl font-serif-display text-xl leading-snug text-slate-900 sm:text-[1.75rem]">
+            <p className="mt-3 max-w-xl text-xl font-semibold leading-snug tracking-[-0.03em] text-slate-900 sm:text-[1.75rem]">
               {skills} verified skills · {timed}-minute sessions · human review
             </p>
             <p className="mt-2 font-mono text-[11px] text-slate-500">
@@ -165,7 +165,7 @@ export function LandingPage(props: {
           </div>
           <Link
             href={`/u/${sampleSlug}`}
-            className="text-sm font-medium text-teal-600 transition hover:text-teal-500"
+            className="text-sm font-medium text-[var(--brand)] transition hover:text-[var(--brand-hover)]"
           >
             Open a live qualification profile →
           </Link>
@@ -189,7 +189,7 @@ export function LandingPage(props: {
             },
           ].map((item) => (
             <div key={item.t}>
-              <h2 className="font-serif-display text-xl text-slate-900">{item.t}</h2>
+              <h2 className="text-xl font-semibold tracking-[-0.03em] text-slate-900">{item.t}</h2>
               <p className="mt-3 text-sm leading-relaxed text-slate-500">{item.d}</p>
             </div>
           ))}

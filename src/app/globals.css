@@ -10,24 +10,25 @@
 */
 
 :root {
-  --bg-0: #f3f8fc;
-  --bg-1: #eaf3fa;
+  --bg-0: #f7f4f1;
+  --bg-1: #f0ebe6;
   --bg-2: #ffffff;
-  --line: #c9d9e8;
-  --text: #0f1c2e;
-  --muted: #5b7390;
-  --accent: #0e8f9f;
-  --accent-2: #0f9f6e;
+  --line: #ddd4cb;
+  --text: #12141a;
+  --muted: #6b6570;
+  --accent: #ff5a1f;
+  --accent-2: #ff7a3d;
   --danger: #e11d48;
   --warning: #d97706;
-  --background: #f3f8fc;
-  --foreground: #0f1c2e;
+  --background: #f7f4f1;
+  --foreground: #12141a;
   --surface: #ffffff;
   --surface-elevated: #ffffff;
-  --brand: #0f766e;
-  --brand-hover: #0d9488;
-  --brand-soft: rgba(15, 118, 110, 0.12);
-  --brand-ink: #0f1c2e;
+  --brand: #ff5a1f;
+  --brand-hover: #ff7038;
+  --brand-soft: rgba(255, 90, 31, 0.12);
+  --brand-ink: #12141a;
+  --brand-flame: #ff5a1f;
 
   --font-display: var(--font-ibm-sans), "IBM Plex Sans", "Segoe UI", sans-serif;
   --font-serif: var(--font-instrument), "Times New Roman", serif;
@@ -45,17 +46,18 @@
   --slate-900: #0f172a;
   --slate-950: #020617;
 
-  --teal-50: #f0fdfa;
-  --teal-100: #ccfbf1;
-  --teal-200: #99f6e4;
-  --teal-300: #5eead4;
-  --teal-400: #2dd4bf;
-  --teal-500: #14b8a6;
-  --teal-600: #0d9488;
-  --teal-700: #0f766e;
-  --teal-800: #115e59;
-  --teal-900: #134e4a;
-  --teal-950: #042f2e;
+  /* Brand accent scale — teal utilities map to flame orange */
+  --teal-50: #fff4ef;
+  --teal-100: #ffe4d6;
+  --teal-200: #ffc4a8;
+  --teal-300: #ff9a66;
+  --teal-400: #ff7340;
+  --teal-500: #ff5a1f;
+  --teal-600: #e84a12;
+  --teal-700: #c43b0d;
+  --teal-800: #9a2f0f;
+  --teal-900: #7a2812;
+  --teal-950: #3f1208;
 
   --cyan-50: #ecfeff;
   --cyan-100: #cffafe;
@@ -89,16 +91,17 @@
   --line: #243246;
   --text: #e8eef5;
   --muted: #8b9cb3;
-  --accent: #2dd4bf;
-  --accent-2: #34d399;
+  --accent: #ff7340;
+  --accent-2: #ff9a66;
   --background: #07090d;
   --foreground: #e8eef5;
   --surface: #0c1016;
   --surface-elevated: #121820;
-  --brand: #0d9488;
-  --brand-hover: #14b8a6;
-  --brand-soft: rgba(13, 148, 136, 0.14);
-  --brand-ink: #f1f5f9;
+  --brand: #ff5a1f;
+  --brand-hover: #ff7340;
+  --brand-soft: rgba(255, 90, 31, 0.16);
+  --brand-ink: #f4f1ec;
+  --brand-flame: #ff5a1f;
 
   /* Semantic remap: low numbers = surfaces, high numbers = ink */
   --slate-50: #0c1016;
@@ -113,29 +116,29 @@
   --slate-900: #eef3f8;
   --slate-950: #f8fafc;
 
-  --teal-50: rgba(45, 212, 191, 0.08);
-  --teal-100: rgba(45, 212, 191, 0.14);
-  --teal-200: rgba(45, 212, 191, 0.28);
-  --teal-300: #5eead4;
-  --teal-400: #2dd4bf;
-  --teal-500: #2dd4bf;
-  --teal-600: #14b8a6;
-  --teal-700: #5eead4;
-  --teal-800: #99f6e4;
-  --teal-900: #ccfbf1;
-  --teal-950: #f0fdfa;
+  --teal-50: rgba(255, 90, 31, 0.08);
+  --teal-100: rgba(255, 90, 31, 0.14);
+  --teal-200: rgba(255, 90, 31, 0.28);
+  --teal-300: #ff9a66;
+  --teal-400: #ff7340;
+  --teal-500: #ff5a1f;
+  --teal-600: #ff7340;
+  --teal-700: #ff9a66;
+  --teal-800: #ffc4a8;
+  --teal-900: #ffe4d6;
+  --teal-950: #fff4ef;
 
-  --cyan-50: rgba(34, 211, 238, 0.08);
-  --cyan-100: rgba(34, 211, 238, 0.14);
-  --cyan-200: rgba(34, 211, 238, 0.28);
-  --cyan-300: #67e8f9;
-  --cyan-400: #22d3ee;
-  --cyan-500: #22d3ee;
-  --cyan-600: #06b6d4;
-  --cyan-700: #67e8f9;
-  --cyan-800: #a5f3fc;
-  --cyan-900: #cffafe;
-  --cyan-950: #ecfeff;
+  --cyan-50: rgba(255, 122, 61, 0.08);
+  --cyan-100: rgba(255, 122, 61, 0.14);
+  --cyan-200: rgba(255, 122, 61, 0.28);
+  --cyan-300: #ff9a66;
+  --cyan-400: #ff7340;
+  --cyan-500: #ff5a1f;
+  --cyan-600: #e84a12;
+  --cyan-700: #ff9a66;
+  --cyan-800: #ffc4a8;
+  --cyan-900: #ffe4d6;
+  --cyan-950: #fff4ef;
 
   --amber-50: rgba(251, 191, 36, 0.1);
   --amber-100: rgba(251, 191, 36, 0.16);
@@ -167,10 +170,10 @@ html.dark {
 body {
   color: var(--text);
   background:
-    radial-gradient(1100px 560px at 12% -8%, rgba(14, 143, 159, 0.14), transparent 55%),
-    radial-gradient(900px 480px at 92% 0%, rgba(15, 159, 110, 0.1), transparent 50%),
-    radial-gradient(700px 380px at 50% 100%, rgba(14, 143, 159, 0.06), transparent 45%),
-    linear-gradient(180deg, #f7fbfe 0%, var(--bg-0) 42%, #e8f2f8 100%);
+    radial-gradient(1100px 560px at 12% -8%, rgba(255, 90, 31, 0.1), transparent 55%),
+    radial-gradient(900px 480px at 92% 0%, rgba(255, 122, 61, 0.08), transparent 50%),
+    radial-gradient(700px 380px at 50% 100%, rgba(255, 90, 31, 0.05), transparent 45%),
+    linear-gradient(180deg, #fcfaf8 0%, var(--bg-0) 42%, #f0ebe6 100%);
   font-family: var(--font-display);
   overflow-x: clip;
   -webkit-tap-highlight-color: transparent;
@@ -180,7 +183,7 @@ body {
 .dark body,
 html.dark body {
   background:
-    radial-gradient(900px 480px at 12% -12%, rgba(13, 148, 136, 0.08), transparent 55%),
+    radial-gradient(900px 480px at 12% -12%, rgba(255, 90, 31, 0.1), transparent 55%),
     linear-gradient(180deg, #090c11 0%, var(--bg-0) 48%, #05070a 100%);
 }
 
@@ -332,9 +335,9 @@ html.dark body {
   --landing-line: color-mix(in srgb, var(--brand) 22%, transparent);
   --landing-teal: var(--brand);
   background:
-    radial-gradient(ellipse 90% 70% at 70% 18%, color-mix(in srgb, var(--brand) 16%, transparent), transparent 55%),
+    radial-gradient(ellipse 90% 70% at 70% 18%, color-mix(in srgb, var(--brand) 14%, transparent), transparent 55%),
     radial-gradient(ellipse 60% 50% at 8% 82%, color-mix(in srgb, var(--accent-2) 10%, transparent), transparent 50%),
-    linear-gradient(165deg, #f8fcff 0%, #eef6fb 48%, #e4f1f7 100%);
+    linear-gradient(165deg, #fcfaf8 0%, #f4efe9 48%, #ebe4dc 100%);
   color: var(--landing-ink);
 }
 
@@ -343,7 +346,7 @@ html.dark body {
 }
 
 html:not(.dark) .landing-root {
-  background: linear-gradient(180deg, #f8fcff 0%, #eef6fb 48%, #e6eef5 100%);
+  background: linear-gradient(180deg, #fcfaf8 0%, #f4efe9 48%, #ebe4dc 100%);
   color: var(--brand-ink);
 }
 
@@ -413,7 +416,7 @@ html:not(.dark) .landing-root {
 
 .landing-hero-plane {
   background: #ffffff;
-  background-image: linear-gradient(180deg, #ffffff 0%, #f5fafc 58%, #eef5f9 100%);
+  background-image: linear-gradient(180deg, #ffffff 0%, #faf7f4 58%, #f3eee8 100%);
 }
 
 .dark .landing-hero-plane {
@@ -423,13 +426,13 @@ html:not(.dark) .landing-root {
 
 .landing-hero-glow {
   background:
-    radial-gradient(ellipse at 80% 0%, rgba(13, 148, 136, 0.1), transparent 48%),
+    radial-gradient(ellipse at 80% 0%, rgba(255, 90, 31, 0.12), transparent 48%),
     linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, transparent 55%);
 }
 
 .dark .landing-hero-glow {
   background:
-    radial-gradient(ellipse at 80% 0%, rgba(13, 148, 136, 0.2), transparent 45%),
+    radial-gradient(ellipse at 80% 0%, rgba(255, 90, 31, 0.18), transparent 45%),
     linear-gradient(180deg, #0b1118 0%, #07090d 60%, #05070a 100%);
 }
 
