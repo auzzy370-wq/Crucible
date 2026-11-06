@@ -11,8 +11,9 @@ type ProviderRow = {
   startUrl: string;
 };
 
-const PRIMARY = ["google", "apple", "github"] as const;
-const SECONDARY = ["discord", "facebook", "x"] as const;
+/** Free to configure (Google Cloud / GitHub OAuth apps). Apple needs a paid Developer Program. */
+const PRIMARY = ["google", "github"] as const;
+const SECONDARY = ["apple", "discord", "facebook", "x"] as const;
 
 function ProviderIcon({ id }: { id: string }) {
   if (id === "google") {
@@ -146,11 +147,15 @@ export function SocialAuthButtons({ heading = "Or continue with" }: { heading?: 
 
           {!anyEnabled && (
             <p className="rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs leading-relaxed text-amber-900 dark:text-amber-100">
-              Social login uses your own Google / Apple / GitHub apps (no Clerk). Add{" "}
-              <span className="font-mono">GOOGLE_CLIENT_ID</span> +{" "}
-              <span className="font-mono">GOOGLE_CLIENT_SECRET</span> (and Apple / GitHub pairs) in app secrets,
-              then set the callback to{" "}
-              <span className="font-mono">/api/auth/oauth/&#123;provider&#125;/callback</span>.
+              Use email/password for now, or add free <span className="font-mono">GOOGLE_*</span> /{" "}
+              <span className="font-mono">GITHUB_*</span> secrets. Sign in with Apple is optional and needs a paid
+              Apple Developer Program account (~$99/yr) — skip it until you want it.
+            </p>
+          )}
+          {anyEnabled && !byId.apple?.enabled && (
+            <p className="text-[11px] leading-relaxed text-slate-500">
+              Apple Sign In is optional (paid Apple Developer Program). Google and GitHub cover social login without
+              that fee.
             </p>
           )}
         </>
