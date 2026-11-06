@@ -2,7 +2,7 @@
 
 **Live demo tunnel (HTTPS):**
 
-**https://fought-honors-hostel-timing.trycloudflare.com**
+**https://assets-send-qty-gives.trycloudflare.com**
 
 - Learn hub: `/learn`
 - Learn Arcade: `/learn/games`
