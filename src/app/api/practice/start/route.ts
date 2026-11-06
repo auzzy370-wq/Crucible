@@ -7,6 +7,7 @@ import { CODING_LANGUAGES, normalizeCodingLanguage } from "@/lib/coding-language
 import {
   createWorkspaceForAssignment,
   repairCodingHarness,
+  switchWorkspaceLanguage,
 } from "@/server/execution/workspace";
 
 const schema = z.object({
@@ -52,42 +53,73 @@ export async function POST(req: Request) {
       });
     }
 
-    // Prefer an existing workspace in the requested language; else create a new assignment
-    const existing = await prisma.assessmentAssignment.findFirst({
+    const minutes = challenge.avgMinutes || 45;
+    const dueAt = new Date(Date.now() + minutes * 60 * 1000);
+
+    // One assignment per (assessment, candidate) — reuse and switch language when needed.
+    const existing = await prisma.assessmentAssignment.findUnique({
       where: {
-        assessmentId: assessment.id,
-        candidateId: user.id,
-        workspace: { language },
+        assessmentId_candidateId: {
+          assessmentId: assessment.id,
+          candidateId: user.id,
+        },
       },
       include: { workspace: true },
-      orderBy: { createdAt: "desc" },
     });
-    if (existing?.workspace) {
-      const minutes = challenge.avgMinutes || 45;
-      const dueAt = new Date(Date.now() + minutes * 60 * 1000);
+
+    if (existing) {
       await prisma.assessmentAssignment.update({
         where: { id: existing.id },
         data: {
           status: ["COMPLETED", "FAILED", "EXPIRED"].includes(existing.status)
             ? "IN_PROGRESS"
-            : existing.status,
+            : existing.status === "ASSIGNED"
+              ? "IN_PROGRESS"
+              : existing.status,
           startedAt: existing.startedAt ?? new Date(),
           dueAt,
         },
       });
-      if (challenge.type === "CODING_PROBLEM") {
-        await repairCodingHarness({
+
+      if (existing.workspace) {
+        if (challenge.type === "CODING_PROBLEM") {
+          if (existing.workspace.language !== language) {
+            await switchWorkspaceLanguage({
+              workspaceId: existing.workspace.id,
+              challengeSlug: challenge.slug,
+              language,
+              track: challenge.track,
+            });
+          } else {
+            await repairCodingHarness({
+              workspaceId: existing.workspace.id,
+              challengeSlug: challenge.slug,
+              language,
+              track: challenge.track,
+            });
+          }
+        }
+        return jsonOk({
+          assignmentId: existing.id,
           workspaceId: existing.workspace.id,
-          challengeSlug: challenge.slug,
           language,
-          track: challenge.track,
         });
       }
-      return jsonOk({
+
+      const workspace = await createWorkspaceForAssignment({
         assignmentId: existing.id,
-        workspaceId: existing.workspace.id,
+        challengeSlug: challenge.slug,
         language,
+        track: challenge.track,
       });
+      return jsonOk(
+        {
+          assignmentId: existing.id,
+          workspaceId: workspace.id,
+          language,
+        },
+        { status: 201 },
+      );
     }
 
     const startedAt = new Date();
@@ -98,7 +130,7 @@ export async function POST(req: Request) {
         assignedById: user.id,
         status: "IN_PROGRESS",
         startedAt,
-        dueAt: new Date(startedAt.getTime() + (challenge.avgMinutes || 45) * 60 * 1000),
+        dueAt,
       },
     });
 

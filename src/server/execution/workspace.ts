@@ -151,6 +151,60 @@ export async function materializeWorkspaceToDisk(workspaceId: string) {
   return workspace.rootPath;
 }
 
+/**
+ * Retarget an existing 1:1 practice workspace to another language.
+ * Replaces starter/harness files so Solve · Java works after a TypeScript session.
+ */
+export async function switchWorkspaceLanguage(params: {
+  workspaceId: string;
+  challengeSlug: string;
+  language: string;
+  track: string;
+}) {
+  const workspace = await prisma.workspace.findUniqueOrThrow({
+    where: { id: params.workspaceId },
+    include: { files: true },
+  });
+  const files = starterFilesForChallenge(params.challengeSlug, params.language, params.track);
+  const nextPaths = new Set(files.map((f) => assertSafeRelativePath(f.path)));
+
+  for (const old of workspace.files) {
+    if (nextPaths.has(old.path)) continue;
+    const full = resolveInsideRoot(workspace.rootPath, assertSafeRelativePath(old.path));
+    await fs.rm(full, { force: true }).catch(() => undefined);
+    await prisma.workspaceFile.delete({ where: { id: old.id } }).catch(() => undefined);
+  }
+
+  for (const file of files) {
+    const safePath = assertSafeRelativePath(file.path);
+    const full = resolveInsideRoot(workspace.rootPath, safePath);
+    await fs.mkdir(path.dirname(full), { recursive: true });
+    await fs.writeFile(full, file.content, "utf8");
+    await prisma.workspaceFile.upsert({
+      where: { workspaceId_path: { workspaceId: workspace.id, path: safePath } },
+      create: {
+        workspaceId: workspace.id,
+        path: safePath,
+        content: file.content,
+        language: file.language,
+      },
+      update: { content: file.content, language: file.language },
+    });
+  }
+
+  await prisma.workspace.update({
+    where: { id: workspace.id },
+    data: {
+      language: params.language,
+      imageTag: imageTagForLanguage(params.language),
+      status: "ready",
+    },
+  });
+
+  await materializeWorkspaceToDisk(workspace.id);
+  return workspace.id;
+}
+
 /** Refresh harness/test runner files from current starters without wiping candidate solution code. */
 export async function repairCodingHarness(params: {
   workspaceId: string;
