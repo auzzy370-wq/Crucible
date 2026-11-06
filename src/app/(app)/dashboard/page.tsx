@@ -5,6 +5,7 @@ import { platformAnalytics } from "@/server/analytics/service";
 import { prisma } from "@/lib/db";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { formatScore } from "@/lib/utils";
 import { SessionTimer } from "@/components/assessment/session-timer";
 
@@ -21,7 +22,8 @@ export default async function DashboardPage() {
       nextInterviewLesson,
     } = await import("@/server/learning/interview-curriculum");
     const { buildLearnerRoadmap } = await import("@/server/learning/roadmap");
-    const [assignments, streak, enrollments, profile, daily, aiEnrollment, ivEnrollment, roadmap] =
+    const { buildLearnerGameState } = await import("@/server/learning/gamification");
+    const [assignments, streak, enrollments, profile, daily, aiEnrollment, ivEnrollment, roadmap, game] =
       await Promise.all([
         prisma.assessmentAssignment.findMany({
           where: { candidateId: user.id },
@@ -61,6 +63,7 @@ export default async function DashboardPage() {
           where: { userId_planSlug: { userId: user.id, planSlug: INTERVIEW_CRAFT_PLAN_SLUG } },
         }),
         buildLearnerRoadmap(user.id).catch(() => null),
+        buildLearnerGameState(user.id),
       ]);
     const aiNext = nextAiLesson(aiEnrollment?.completedSlugs ?? []);
     const aiPercent = Math.round(((aiEnrollment?.completedSlugs.length ?? 0) / AI_LESSONS.length) * 100);
@@ -87,12 +90,47 @@ export default async function DashboardPage() {
             {firstRunDone ? "Keep sharpening" : "Learn by proving"}
           </h1>
           <p className="mt-2 max-w-2xl text-slate-600">
-            Practice the same timed work employers use to test candidates — then publish verified proof.
+            Quests, craft paths, and timed evidence — XP only from work you finish.
           </p>
         </header>
 
+        <section className="rounded-2xl border border-teal-300/50 bg-gradient-to-br from-teal-500/[0.09] via-white to-emerald-50/70 p-5">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-teal-700">Forge rank</p>
+              <p className="mt-1 font-serif-display text-2xl text-slate-900 sm:text-3xl">{game.rank.title}</p>
+              <p className="mt-1 font-mono text-sm text-slate-600">
+                {game.xp.toLocaleString()} XP
+                {game.nextRank ? ` · ${game.xpToNext} to ${game.nextRank.title}` : " · max rank"}
+                {" · "}
+                {game.streak.current}d streak
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Badge variant="cyan">
+                {game.questsDone}/{game.questsTotal} daily quests
+              </Badge>
+              <Badge variant="amber">
+                {game.weeklyDone}/{game.weeklyTotal} weekly
+              </Badge>
+              <Link href="/learn">
+                <Button size="sm">{game.focus.cta}</Button>
+              </Link>
+            </div>
+          </div>
+          <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/80">
+            <div
+              className="h-full rounded-full bg-teal-500 transition-[width] duration-700"
+              style={{ width: `${game.rankProgressPct}%` }}
+            />
+          </div>
+          <p className="mt-3 text-sm text-slate-600">
+            Focus: <span className="text-slate-800">{game.focus.title}</span> — {game.focus.detail}
+          </p>
+        </section>
+
         <section className="grid gap-4 lg:grid-cols-3">
-          <div className="rounded-2xl border border-teal-300/50 bg-cyan-500/5 p-5">
+          <div className="rounded-2xl border border-teal-300/50 bg-teal-500/[0.06] p-5">
             <div className="text-xs font-medium uppercase tracking-wider text-teal-700/80">Interview Craft</div>
             <h2 className="mt-2 text-lg font-semibold text-slate-900">
               {ivNext ? ivNext.title : ivPercent ? "Interview path complete" : "Prepare for the loop"}
@@ -110,12 +148,12 @@ export default async function DashboardPage() {
                 {ivNext ? "Continue lesson →" : "Start Interview Craft →"}
               </Link>
               <Link href="/study-plans" className="text-slate-600 hover:underline">
-                Study plans →
+                Campaigns →
               </Link>
             </div>
           </div>
-          <div className="rounded-2xl border border-violet-500/25 bg-violet-500/5 p-5">
-            <div className="text-xs font-medium uppercase tracking-wider text-violet-200/80">AI Craft</div>
+          <div className="rounded-2xl border border-emerald-300/50 bg-emerald-500/[0.06] p-5">
+            <div className="text-xs font-medium uppercase tracking-wider text-emerald-800/80">AI Craft</div>
             <h2 className="mt-2 text-lg font-semibold text-slate-900">
               {aiNext ? aiNext.title : aiPercent ? "AI path complete" : "Learn AI — prompt to production"}
             </h2>
@@ -127,12 +165,12 @@ export default async function DashboardPage() {
             <div className="mt-3 flex flex-wrap gap-3 text-sm">
               <Link
                 href={aiNext ? `/learn/ai/${aiNext.slug}` : "/learn/ai"}
-                className="text-violet-200 hover:underline"
+                className="text-emerald-800 hover:underline"
               >
                 {aiNext ? "Continue lesson →" : "Start AI Craft →"}
               </Link>
               <Link href="/learn" className="text-slate-600 hover:underline">
-                Learning hub →
+                Learn hub →
               </Link>
             </div>
           </div>

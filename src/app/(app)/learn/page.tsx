@@ -1,7 +1,13 @@
 import Link from "next/link";
 import { CANDIDATE_ROLES } from "@/lib/access";
 import { requirePageRoles } from "@/server/auth/page-guard";
-import { buildLearnerGameState, LESSON_XP, DAILY_XP } from "@/server/learning/gamification";
+import {
+  buildLearnerGameState,
+  LESSON_XP,
+  DAILY_XP,
+  COMBO_XP,
+  CHAPTER_CLEAR_XP,
+} from "@/server/learning/gamification";
 import { buildLearnerRoadmap } from "@/server/learning/roadmap";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -23,13 +29,11 @@ export default async function LearnHubPage() {
           <p className="font-mono text-xs tracking-[0.3em] text-teal-700">LEARN · FORGE</p>
           <h1 className="mt-2 font-serif-display text-2xl sm:text-3xl">Level up by proving craft</h1>
           <p className="mt-2 max-w-2xl text-slate-600">
-            Clear lessons, keep a streak, and post timed evidence. XP and ranks come only from work you finish —
-            nothing is invented.
+            Clear lessons, keep a streak, finish campaigns, and post timed evidence. XP only comes from work you finish.
           </p>
         </div>
 
-        {/* HUD */}
-        <section className="overflow-hidden rounded-2xl border border-teal-300/60 bg-gradient-to-br from-teal-500/[0.09] via-white/80 to-white p-5 sm:p-6">
+        <section className="overflow-hidden rounded-2xl border border-teal-300/60 bg-gradient-to-br from-teal-500/[0.1] via-white/90 to-emerald-50/80 p-5 sm:p-6">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-teal-700/80">Rank</p>
@@ -45,13 +49,17 @@ export default async function LearnHubPage() {
                 {game.streak.activeToday ? " · lit" : ""}
               </Badge>
               <Badge variant="cyan">
-                {game.questsDone}/{game.questsTotal} quests today
+                {game.questsDone}/{game.questsTotal} today
+              </Badge>
+              <Badge variant="emerald">
+                {game.weeklyDone}/{game.weeklyTotal} weekly
               </Badge>
               <Badge>
                 {game.unlockedCount}/{game.achievements.length} medals
               </Badge>
             </div>
           </div>
+
           <div className="mt-5">
             <div className="mb-1.5 flex justify-between font-mono text-[10px] uppercase tracking-wider text-slate-500">
               <span>Progress to next rank</span>
@@ -64,15 +72,42 @@ export default async function LearnHubPage() {
               />
             </div>
           </div>
+
+          <div className="mt-5 grid gap-2 sm:grid-cols-5">
+            {(
+              [
+                ["Lessons", game.breakdown.lessons],
+                ["Daily", game.breakdown.daily],
+                ["Prove", game.breakdown.prove],
+                ["Campaigns", game.breakdown.campaigns],
+                ["Streak", game.breakdown.streak],
+              ] as const
+            ).map(([label, value]) => (
+              <div key={label} className="rounded-lg border border-teal-200/70 bg-white/80 px-3 py-2">
+                <p className="font-mono text-[10px] uppercase tracking-wider text-slate-500">{label}</p>
+                <p className="font-mono text-sm text-slate-900">{value.toLocaleString()} XP</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-5 rounded-xl border border-slate-200 bg-white/80 p-4">
+            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">Focus now</p>
+            <h2 className="mt-1 text-lg font-medium text-slate-900">{game.focus.title}</h2>
+            <p className="mt-1 text-sm text-slate-600">{game.focus.detail}</p>
+            <div className="mt-3">
+              <Link href={game.focus.href}>
+                <Button>{game.focus.cta}</Button>
+              </Link>
+            </div>
+          </div>
         </section>
       </header>
 
-      {/* Daily quests */}
       <section>
         <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
           <div>
             <h2 className="font-serif-display text-xl text-slate-900">Today’s quests</h2>
-            <p className="mt-1 text-sm text-slate-500">Three objectives. Finish them to keep the forge hot.</p>
+            <p className="mt-1 text-sm text-slate-500">Three daily objectives. Finish them to keep the forge hot.</p>
           </div>
           <Link href={primaryQuest.href}>
             <Button size="sm">Start: {primaryQuest.title}</Button>
@@ -86,28 +121,46 @@ export default async function LearnHubPage() {
               className={cn(
                 "learn-quest-card group rounded-xl border px-4 py-4 transition",
                 q.done
-                  ? "border-emerald-500/30 bg-emerald-500/5"
-                  : "border-slate-200 bg-white/75 hover:border-teal-400/50",
+                  ? "border-emerald-300 bg-emerald-50/70"
+                  : "border-slate-200 bg-white/80 hover:border-teal-400",
               )}
               style={{ animationDelay: `${i * 0.06}s` }}
             >
               <div className="flex items-center justify-between gap-2">
-                <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">
-                  Quest {i + 1}
-                </span>
+                <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">Quest {i + 1}</span>
                 <Badge variant={q.done ? "emerald" : "cyan"}>+{q.xp} XP</Badge>
               </div>
               <h3 className="mt-2 font-medium text-slate-900 group-hover:text-teal-900">{q.title}</h3>
               <p className="mt-1 text-sm text-slate-500">{q.detail}</p>
-              <p className="mt-3 font-mono text-[11px] text-teal-700/80">
-                {q.done ? "Cleared" : "Open →"}
-              </p>
+              <p className="mt-3 font-mono text-[11px] text-teal-700">{q.done ? "Cleared" : "Open →"}</p>
             </Link>
           ))}
         </div>
       </section>
 
-      {/* Craft paths */}
+      <section>
+        <h2 className="font-serif-display text-xl text-slate-900">This week</h2>
+        <p className="mt-1 text-sm text-slate-500">Weekly board — lessons, dailies, and campaigns.</p>
+        <div className="mt-3 grid gap-3 md:grid-cols-3">
+          {game.weeklyQuests.map((q) => (
+            <Link
+              key={q.id}
+              href={q.href}
+              className={cn(
+                "rounded-xl border px-4 py-4 transition",
+                q.done ? "border-amber-300 bg-amber-50/70" : "border-slate-200 bg-white/80 hover:border-teal-300",
+              )}
+            >
+              <div className="flex items-center justify-between gap-2">
+                <h3 className="font-medium text-slate-900">{q.title}</h3>
+                <Badge variant={q.done ? "emerald" : "amber"}>+{q.xp}</Badge>
+              </div>
+              <p className="mt-1 text-sm text-slate-500">{q.detail}</p>
+            </Link>
+          ))}
+        </div>
+      </section>
+
       <section className="grid gap-4 lg:grid-cols-2">
         <PathCard
           label="Interview Craft"
@@ -117,6 +170,7 @@ export default async function LearnHubPage() {
           nextTitle={game.paths.interview.nextTitle}
           href={game.paths.interview.nextHref}
           browseHref="/learn/interview"
+          chapters={game.paths.interview.chapters}
           accent="cyan"
         />
         <PathCard
@@ -127,12 +181,12 @@ export default async function LearnHubPage() {
           nextTitle={game.paths.ai.nextTitle}
           href={game.paths.ai.nextHref}
           browseHref="/learn/ai"
+          chapters={game.paths.ai.chapters}
           accent="teal"
         />
       </section>
 
-      {/* Recommended prove */}
-      <section className="rounded-2xl border border-slate-200 bg-white/75 p-5">
+      <section className="rounded-2xl border border-slate-200 bg-white/80 p-5">
         <div className="flex flex-wrap items-center gap-2">
           <Badge variant="cyan">Prove quest</Badge>
           <Badge variant="amber">+{DAILY_XP} XP</Badge>
@@ -158,25 +212,22 @@ export default async function LearnHubPage() {
           <Link href="/daily">
             <Button variant="secondary">Daily forge</Button>
           </Link>
-          <Link href="/roadmap">
-            <Button variant="ghost">Full roadmap</Button>
+          <Link href="/study-plans">
+            <Button variant="ghost">Study campaigns</Button>
           </Link>
         </div>
       </section>
 
-      {/* Achievements */}
       <section>
         <h2 className="font-serif-display text-xl text-slate-900">Medals</h2>
-        <p className="mt-1 text-sm text-slate-500">Unlock by finishing real work — lessons, streaks, and evidence.</p>
+        <p className="mt-1 text-sm text-slate-500">Unlock by finishing real work — lessons, streaks, campaigns, evidence.</p>
         <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {game.achievements.map((a) => (
             <div
               key={a.id}
               className={cn(
                 "rounded-xl border px-4 py-3",
-                a.unlocked
-                  ? "border-amber-500/25 bg-amber-500/[0.06]"
-                  : "border-slate-200/80 bg-white/60 opacity-55",
+                a.unlocked ? "border-amber-300 bg-amber-50/70" : "border-slate-200 bg-white/60 opacity-55",
               )}
             >
               <div className="flex items-center justify-between gap-2">
@@ -191,26 +242,9 @@ export default async function LearnHubPage() {
         </div>
       </section>
 
-      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {[
-          { href: "/daily", title: "Daily forge", body: `+${DAILY_XP} XP · streak fuel` },
-          { href: "/challenges", title: "Problem bank", body: "Browse & clear judges" },
-          { href: "/study-plans", title: "Study campaigns", body: "XP, chapters, pack clear bonuses" },
-          { href: "/interview", title: "Mock interviews", body: "Timed company rounds" },
-        ].map((c) => (
-          <Link
-            key={c.href}
-            href={c.href}
-            className="rounded-xl border border-slate-200 px-4 py-4 transition hover:border-teal-300/60"
-          >
-            <div className="font-medium text-slate-900">{c.title}</div>
-            <p className="mt-1 text-sm text-slate-500">{c.body}</p>
-          </Link>
-        ))}
-      </section>
-
-      <p className="font-mono text-[11px] text-slate-600">
-        Lesson clears award +{LESSON_XP} XP each · ranks: Initiate → Operator → Specialist → Elite → Distinguished
+      <p className="font-mono text-[11px] text-slate-500">
+        Lesson +{LESSON_XP} · same-day combo +{COMBO_XP} · chapter clear +{CHAPTER_CLEAR_XP} · ranks: Initiate →
+        Operator → Specialist → Elite → Distinguished
       </p>
     </div>
   );
@@ -224,11 +258,12 @@ function PathCard(props: {
   nextTitle: string | null;
   href: string;
   browseHref: string;
+  chapters: { id: string; title: string; done: number; total: number; cleared: boolean }[];
   accent: "cyan" | "teal";
 }) {
   const border =
-    props.accent === "cyan" ? "border-teal-300/50 bg-cyan-500/5" : "border-emerald-500/20 bg-emerald-500/[0.04]";
-  const bar = props.accent === "cyan" ? "bg-teal-500" : "bg-emerald-400/90";
+    props.accent === "cyan" ? "border-teal-300/50 bg-teal-500/[0.06]" : "border-emerald-300/50 bg-emerald-500/[0.06]";
+  const bar = props.accent === "cyan" ? "bg-teal-500" : "bg-emerald-500";
 
   return (
     <div className={cn("rounded-2xl border p-5", border)}>
@@ -239,22 +274,35 @@ function PathCard(props: {
         </Badge>
         <Badge variant="amber">+{LESSON_XP} XP / lesson</Badge>
       </div>
-      <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-100">
+      <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/80">
         <div className={cn("h-full rounded-full transition-[width] duration-700", bar)} style={{ width: `${props.percent}%` }} />
+      </div>
+      <div className="mt-3 flex flex-wrap gap-1.5">
+        {props.chapters.map((c) => (
+          <span
+            key={c.id}
+            className={cn(
+              "rounded border px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider",
+              c.cleared ? "border-emerald-400 text-emerald-800" : "border-slate-300 text-slate-500",
+            )}
+          >
+            {c.title} {c.done}/{c.total}
+          </span>
+        ))}
       </div>
       <h2 className="mt-4 text-lg font-semibold text-slate-900">
         {props.nextTitle ? `Next: ${props.nextTitle}` : "Path complete"}
       </h2>
       <p className="mt-1 text-sm text-slate-600">
         {props.percent}% cleared
-        {props.nextTitle ? " — finish the next lesson to bank XP and keep your streak." : " — run mocks or the bank to keep ranking up."}
+        {props.nextTitle ? " — finish the next lesson to bank XP and keep your streak." : " — run campaigns or the bank to keep ranking up."}
       </p>
       <div className="mt-4 flex flex-wrap gap-2">
         <Link href={props.href}>
           <Button>{props.nextTitle ? "Continue lesson" : "Review path"}</Button>
         </Link>
         <Link href={props.browseHref}>
-          <Button variant="secondary">All lessons</Button>
+          <Button variant="secondary">Path map</Button>
         </Link>
       </div>
     </div>

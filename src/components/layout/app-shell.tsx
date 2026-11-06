@@ -51,15 +51,15 @@ const NAV_GROUPS: NavGroup[] = [
     title: "For you",
     roles: ["CANDIDATE", "TEAM_MEMBER"],
     items: [
+      { href: "/learn", label: "Learn", icon: BookOpen, hint: "XP, quests, craft paths" },
+      { href: "/study-plans", label: "Campaigns", icon: Route, hint: "Chapter maps & pack XP" },
+      { href: "/daily", label: "Daily forge", icon: CalendarDays, hint: "Streak + timed XP" },
       { href: "/dashboard", label: "Home", icon: LayoutDashboard, hint: "What to do next" },
-      { href: "/learn", label: "Lessons", icon: BookOpen, hint: "Interview & AI guides" },
-      { href: "/study-plans", label: "Study plans", icon: Route, hint: "Follow a path" },
-      { href: "/daily", label: "Today’s challenge", icon: CalendarDays, hint: "One timed problem" },
       { href: "/challenges", label: "Problem bank", icon: Boxes, hint: "Browse all problems" },
-      { href: "/interview", label: "Mock interviews", icon: Timer, hint: "Company rounds + briefing" },
+      { href: "/interview", label: "Mocks", icon: Timer, hint: "Company rounds" },
       { href: "/tournaments", label: "Tournaments", icon: Trophy, hint: "Live contests" },
       { href: "/leaderboards", label: "Leaderboards", icon: BarChart3, hint: "Who’s ahead" },
-      { href: "/candidates", label: "My profile", icon: UserRound, hint: "Craft dossier & evidence" },
+      { href: "/candidates", label: "Profile", icon: UserRound, hint: "Rank & evidence" },
       { href: "/settings", label: "Settings", icon: Settings, hint: "Account & security" },
     ],
   },
@@ -249,18 +249,18 @@ export function AppShell({
           { href: "/candidates", label: "People", icon: Users },
         ] as const)
     : ([
-        { href: "/dashboard", label: "Home", icon: LayoutDashboard },
-        { href: "/learn", label: "Lessons", icon: BookOpen },
-        { href: "/challenges", label: "Practice", icon: Boxes },
-        { href: "/leaderboards", label: "Ranks", icon: BarChart3 },
+        { href: "/learn", label: "Learn", icon: BookOpen },
+        { href: "/daily", label: "Daily", icon: CalendarDays },
+        { href: "/study-plans", label: "Packs", icon: Route },
+        { href: "/challenges", label: "Bank", icon: Boxes },
       ] as const);
 
   const inCodingSession = /^\/workspace\/[^/]+/.test(pathname);
 
   const journeyCopy = isCandidate
     ? {
-        badge: "Simple path",
-        body: "Lessons → practice a problem → climb the board",
+        badge: "Learn loop",
+        body: "Quests → clear lessons → prove under the judge → rank up",
       }
     : {
         badge: "Hiring path",

@@ -4,7 +4,7 @@ import { AppError } from "@/lib/errors";
 import { jsonOk, withHandler } from "@/server/auth/api";
 import { requireUser } from "@/server/auth/session";
 import { AI_CRAFT_PLAN_SLUG, AI_LESSONS, getAiLesson, nextAiLesson } from "@/server/learning/ai-curriculum";
-import { LESSON_XP, touchLearnStreak } from "@/server/learning/gamification";
+import { awardLessonClear } from "@/server/learning/award-lesson";
 
 export async function GET() {
   return withHandler(async () => {
@@ -66,25 +66,32 @@ export async function POST(req: Request) {
     const lesson = getAiLesson(body.lessonSlug);
     if (!lesson) throw new AppError("Lesson not found", 404, "NOT_FOUND");
 
-    const set = new Set(enrollment.completedSlugs);
+    const before = [...enrollment.completedSlugs];
+    const set = new Set(before);
     const alreadyDone = set.has(body.lessonSlug);
     if (body.done) set.add(body.lessonSlug);
     else set.delete(body.lessonSlug);
+    const after = [...set];
 
     const updated = await prisma.studyPlanEnrollment.update({
       where: { id: enrollment.id },
-      data: { completedSlugs: [...set] },
+      data: { completedSlugs: after },
     });
-    let xpEarned = 0;
+    let award = { xpEarned: 0, lessonXp: 0, comboXp: 0, chapterXp: 0, chapterClearXp: 0 };
     if (body.done && !alreadyDone) {
-      xpEarned = LESSON_XP;
-      await touchLearnStreak(user.id);
+      award = await awardLessonClear({
+        userId: user.id,
+        track: "ai",
+        lessonSlug: body.lessonSlug,
+        completedBefore: before,
+        completedAfter: after,
+      });
     }
     return jsonOk({
       enrolled: true,
       completedSlugs: updated.completedSlugs,
       nextLesson: nextAiLesson(updated.completedSlugs),
-      xpEarned,
+      ...award,
     });
   });
 }

@@ -12,7 +12,7 @@ The seed loads the **full challenge library as published 60-minute assessments**
 
 | Path | Route | What you get |
 |------|-------|----------------|
-| **Learning hub** | `/learn` | Next lesson + adaptive practice |
+| **Learning hub** | `/learn` | Rank HUD, daily + weekly quests, XP breakdown, craft path chapters |
 | **Interview Craft** | `/learn/interview` | Loop mechanics, live-coding framework, DSA patterns, system design, behavioral STAR |
 | **AI Craft** | `/learn/ai` | Prompting, APIs, tools, RAG, agents, evals, safety |
 | **Study plans** | `/study-plans` | Gamified campaigns: chapter maps, node XP, pack clear bonus (+200), quests & medals |
