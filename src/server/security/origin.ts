@@ -18,7 +18,7 @@ export function assertSameOrigin(req: Request) {
     return;
   }
 
-  let allowed = new Set<string>();
+  const allowed = new Set<string>();
   if (app) allowed.add(app);
   for (const extra of (process.env.ALLOWED_ORIGINS || "").split(",")) {
     const t = extra.trim().replace(/\/$/, "");

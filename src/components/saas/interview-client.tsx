@@ -10,7 +10,6 @@ import { Input } from "@/components/ui/input";
 import { LocalTime } from "@/components/ui/local-time";
 import { cn } from "@/lib/utils";
 import {
-  FREE_MOCK_LIMIT,
   INTERVIEW_COMPANIES,
   INTERVIEW_ROLES,
   INTERVIEW_ROUNDS,
