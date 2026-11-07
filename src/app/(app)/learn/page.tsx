@@ -1,8 +1,10 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { CANDIDATE_ROLES } from "@/lib/access";
-import { requirePageRoles } from "@/server/auth/page-guard";
+import { requirePageRolesOrGuest } from "@/server/auth/page-guard";
 import {
   buildLearnerGameState,
+  guestLearnerGameState,
   LESSON_XP,
   DAILY_XP,
   COMBO_XP,
@@ -12,6 +14,7 @@ import {
 import { buildLearnerRoadmap } from "@/server/learning/roadmap";
 import { ForgeHero } from "@/components/learn/forge-hero";
 import { MedalShine, QuestClearedMark } from "@/components/learn/forge-fun";
+import { WelcomeSignIn } from "@/components/auth/welcome-sign-in";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -24,11 +27,9 @@ const JUMP = [
 ] as const;
 
 export default async function LearnHubPage() {
-  const user = await requirePageRoles(CANDIDATE_ROLES);
-  const [game, roadmap] = await Promise.all([
-    buildLearnerGameState(user.id),
-    buildLearnerRoadmap(user.id).catch(() => null),
-  ]);
+  const user = await requirePageRolesOrGuest("/learn", CANDIDATE_ROLES);
+  const game = user ? await buildLearnerGameState(user.id) : guestLearnerGameState();
+  const roadmap = user ? await buildLearnerRoadmap(user.id).catch(() => null) : null;
   const nextProblem = roadmap?.nextProblems?.[0] ?? null;
   const primaryQuest = game.quests.find((q) => !q.done) ?? game.quests[0]!;
   const unlockedMedals = game.achievements.filter((a) => a.unlocked);
@@ -36,13 +37,20 @@ export default async function LearnHubPage() {
 
   return (
     <div className="animate-rise space-y-8">
+      <Suspense fallback={null}>
+        <WelcomeSignIn />
+      </Suspense>
       <header className="space-y-4">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <p className="font-mono text-xs tracking-[0.3em] text-[var(--brand)]">LEARN · FORGE</p>
+            <p className="font-mono text-xs tracking-[0.3em] text-[var(--brand)]">
+              LEARN · FORGE{!user ? " · FREE" : ""}
+            </p>
             <h1 className="mt-2 text-2xl font-semibold tracking-[-0.03em] sm:text-3xl">Level up by proving craft</h1>
             <p className="mt-2 max-w-2xl text-slate-600">
-              Quests first, then paths and practice — XP only from work you finish.
+              {user
+                ? "Quests first, then paths and practice — XP only from work you finish."
+                : "Browse free. Close the sign-in popup anytime — arcade and craft paths stay open; sign in when you want XP saved."}
             </p>
           </div>
           <nav className="flex flex-wrap gap-1.5" aria-label="Learn sections">

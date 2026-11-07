@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CANDIDATE_ROLES } from "@/lib/access";
-import { requirePageRoles } from "@/server/auth/page-guard";
+import { requirePageRolesOrGuest } from "@/server/auth/page-guard";
 import { getArcadeGame } from "@/server/learning/arcade-games";
 import { Badge } from "@/components/ui/badge";
 import { FrameworkFlowGame } from "@/components/learn/games/framework-flow-game";
@@ -11,7 +11,7 @@ import { BinaryRangeGame } from "@/components/learn/games/binary-range-game";
 import { ProceduralArcadeGame } from "@/components/learn/games/procedural-arcade-game";
 
 export default async function ArcadeGamePage({ params }: { params: Promise<{ slug: string }> }) {
-  await requirePageRoles(CANDIDATE_ROLES);
+  await requirePageRolesOrGuest("/learn/games", CANDIDATE_ROLES);
   const { slug } = await params;
   const game = getArcadeGame(slug);
   if (!game) notFound();

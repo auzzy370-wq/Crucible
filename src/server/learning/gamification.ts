@@ -687,3 +687,156 @@ export async function buildLearnerGameState(userId: string): Promise<LearnerGame
     focus,
   };
 }
+
+/** Zeroed forge state for guests browsing the free Learn experience. */
+export function guestLearnerGameState(): LearnerGameState {
+  const emptyChapters = (ids: string[], titles: Record<string, string>): PathChapter[] =>
+    ids.map((id) => ({
+      id,
+      title: titles[id] ?? id,
+      done: 0,
+      total: 1,
+      percent: 0,
+      cleared: false,
+    }));
+  const ivChapters = emptyChapters(["foundations", "patterns", "rounds"], {
+    foundations: "Foundations",
+    patterns: "Patterns",
+    rounds: "Rounds",
+  });
+  const aiChapters = emptyChapters(["foundations", "builder", "production"], {
+    foundations: "Foundations",
+    builder: "Builder",
+    production: "Production",
+  });
+  const firstIv = INTERVIEW_LESSONS[0];
+  const firstAi = AI_LESSONS[0];
+  const quests: LearnerQuest[] = [
+    {
+      id: "forge",
+      title: "Keep the forge lit",
+      detail: "Sign in to save streak progress — you can still explore free",
+      href: firstIv ? `/learn/interview/${firstIv.slug}` : "/learn/games",
+      xp: 25,
+      done: false,
+    },
+    {
+      id: "lesson",
+      title: "Clear a lesson",
+      detail: firstIv ? `Try: ${firstIv.title}` : "Open Interview Craft",
+      href: firstIv ? `/learn/interview/${firstIv.slug}` : "/learn/interview",
+      xp: LESSON_XP,
+      done: false,
+    },
+    {
+      id: "prove",
+      title: "Prove it under the judge",
+      detail: "Sign in to run the daily forge for XP",
+      href: "/learn/games",
+      xp: DAILY_XP,
+      done: false,
+    },
+  ];
+  const weeklyQuests: LearnerQuest[] = [
+    {
+      id: "week-lessons",
+      title: "Study three days",
+      detail: "Create a free account to track weekly quests",
+      href: "/learn",
+      xp: WEEKLY_QUEST_BONUS_XP,
+      done: false,
+    },
+    {
+      id: "week-daily",
+      title: "Two daily forges",
+      detail: "Available after you sign in",
+      href: "/learn/games",
+      xp: WEEKLY_QUEST_BONUS_XP,
+      done: false,
+    },
+    {
+      id: "week-campaign",
+      title: "Advance a campaign",
+      detail: "Browse packs freely — progress saves when signed in",
+      href: "/learn/games",
+      xp: WEEKLY_QUEST_BONUS_XP,
+      done: false,
+    },
+  ];
+  const achievements: LearnerAchievement[] = [
+    {
+      id: "first-lesson",
+      title: "First clearance",
+      detail: "Complete any craft lesson",
+      unlocked: false,
+    },
+    {
+      id: "arcade-first",
+      title: "Arcade warm-up",
+      detail: "Clear any Learn Arcade game",
+      unlocked: false,
+    },
+  ];
+  const rank = LEARNER_RANKS[0]!;
+  const nextRank = LEARNER_RANKS[1] ?? null;
+  return {
+    xp: 0,
+    level: 1,
+    rank,
+    nextRank,
+    rankProgressPct: 0,
+    xpToNext: nextRank ? nextRank.minXp : null,
+    breakdown: {
+      lessons: 0,
+      daily: 0,
+      prove: 0,
+      campaigns: 0,
+      arcade: 0,
+      streak: 0,
+      weekly: 0,
+      perfectDay: 0,
+      total: 0,
+    },
+    streak: {
+      current: 0,
+      longest: 0,
+      activeToday: false,
+      heat: 0,
+      nextMilestone: STREAK_MILESTONES[0] ?? null,
+      milestones: STREAK_MILESTONES.map((days) => ({ days, reached: false })),
+    },
+    perfectDay: false,
+    paths: {
+      interview: {
+        done: 0,
+        total: INTERVIEW_LESSONS.length,
+        percent: 0,
+        nextHref: firstIv ? `/learn/interview/${firstIv.slug}` : "/learn/interview",
+        nextTitle: firstIv?.title ?? null,
+        chapters: ivChapters,
+      },
+      ai: {
+        done: 0,
+        total: AI_LESSONS.length,
+        percent: 0,
+        nextHref: firstAi ? `/learn/ai/${firstAi.slug}` : "/learn/ai",
+        nextTitle: firstAi?.title ?? null,
+        chapters: aiChapters,
+      },
+    },
+    quests,
+    questsDone: 0,
+    questsTotal: quests.length,
+    weeklyQuests,
+    weeklyDone: 0,
+    weeklyTotal: weeklyQuests.length,
+    achievements,
+    unlockedCount: 0,
+    focus: {
+      title: "Free forge — explore without an account",
+      detail: "Play arcade drills and skim craft paths. Sign in when you want XP saved.",
+      href: "/learn/games",
+      cta: "Open arcade",
+    },
+  };
+}

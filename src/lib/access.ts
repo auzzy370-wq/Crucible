@@ -81,3 +81,10 @@ export function canAccessPath(role: string, pathname: string): boolean {
 export function homeForRole(_role: string): string {
   return "/dashboard";
 }
+
+/** Paths guests can use for the free Learn experience without signing in. */
+export const GUEST_FREE_PREFIXES = ["/learn"] as const;
+
+export function isGuestFreePath(pathname: string): boolean {
+  return GUEST_FREE_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+}

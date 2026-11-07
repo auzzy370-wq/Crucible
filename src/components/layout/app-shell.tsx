@@ -31,6 +31,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { CrucibleLockup } from "@/components/brand/crucible-lockup";
+import { SignInModal } from "@/components/auth/sign-in-modal";
 
 type NavItem = {
   href: string;
@@ -127,10 +128,13 @@ const NAV_GROUPS: NavGroup[] = [
   },
 ];
 
-function visibleGroups(role: string) {
+function visibleGroups(role: string, guest = false) {
   return NAV_GROUPS.map((group) => {
     if (group.roles && !group.roles.includes(role)) return null;
-    const items = group.items.filter((item) => !item.roles || item.roles.includes(role));
+    let items = group.items.filter((item) => !item.roles || item.roles.includes(role));
+    if (guest) {
+      items = items.filter((item) => item.href === "/learn" || item.href.startsWith("/learn/"));
+    }
     if (!items.length) return null;
     return { ...group, items };
   }).filter(Boolean) as NavGroup[];
@@ -139,13 +143,15 @@ function visibleGroups(role: string) {
 function NavLinks({
   pathname,
   role,
+  guest = false,
   onNavigate,
 }: {
   pathname: string;
   role: string;
+  guest?: boolean;
   onNavigate?: () => void;
 }) {
-  const groups = useMemo(() => visibleGroups(role), [role]);
+  const groups = useMemo(() => visibleGroups(role, guest), [role, guest]);
 
   const allHrefs = useMemo(() => groups.flatMap((g) => g.items.map((i) => i.href)), [groups]);
 
@@ -207,14 +213,18 @@ export function AppShell({
   user,
   children,
 }: {
-  user: { name: string; email: string; role: string; plan?: string };
+  user: { name: string; email: string; role: string; plan?: string } | null;
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const isCandidate = user.role === "CANDIDATE" || user.role === "TEAM_MEMBER";
-  const isStaff = ["SUPER_ADMIN", "HIRING_MANAGER", "TECHNICAL_REVIEWER"].includes(user.role);
+  const [signInOpen, setSignInOpen] = useState(false);
+  const isGuest = !user;
+  const isCandidate = Boolean(user && (user.role === "CANDIDATE" || user.role === "TEAM_MEMBER"));
+  const isStaff = Boolean(
+    user && ["SUPER_ADMIN", "HIRING_MANAGER", "TECHNICAL_REVIEWER"].includes(user.role),
+  );
 
   useEffect(() => {
     setOpen(false);
@@ -235,20 +245,33 @@ export function AppShell({
     router.refresh();
   }
 
-  const brand = <CrucibleLockup href="/dashboard" size="md" />;
+  const brand = <CrucibleLockup href={isGuest ? "/learn" : "/dashboard"} size="md" />;
 
-  const userBlock = (
+  const userBlock = isGuest ? (
+    <div className="border-t border-slate-200/80 p-4">
+      <div className="mb-3 min-w-0">
+        <div className="truncate text-sm font-medium text-slate-900">Free guest</div>
+        <div className="truncate font-mono text-xs text-slate-500">Explore Learn · progress not saved</div>
+      </div>
+      <Button size="sm" className="w-full" onClick={() => setSignInOpen(true)}>
+        Sign in
+      </Button>
+      <Link href="/register" className="mt-2 block text-center text-xs text-teal-700 hover:underline">
+        Create free account →
+      </Link>
+    </div>
+  ) : (
     <div className="border-t border-slate-200/80 p-4">
       <div className="mb-3 min-w-0">
         <div className="flex items-center gap-2">
-          <div className="truncate text-sm font-medium text-slate-900">{user.name}</div>
-          {user.plan === "PREMIUM" && <Badge variant="amber">Premium</Badge>}
+          <div className="truncate text-sm font-medium text-slate-900">{user!.name}</div>
+          {user!.plan === "PREMIUM" && <Badge variant="amber">Premium</Badge>}
         </div>
         <div className="truncate font-mono text-xs text-slate-500">
-          {isCandidate ? "Learner" : isStaff ? "Hiring team" : user.role}
+          {isCandidate ? "Learner" : isStaff ? "Hiring team" : user!.role}
         </div>
       </div>
-      {user.plan !== "PREMIUM" && !isStaff && (
+      {user!.plan !== "PREMIUM" && !isStaff && (
         <Link href="/pricing" className="mb-2 block text-center text-xs text-amber-800 hover:underline">
           Upgrade to Premium →
         </Link>
@@ -259,38 +282,52 @@ export function AppShell({
     </div>
   );
 
-  const mobileTabs = isStaff
-    ? user.role === "TECHNICAL_REVIEWER"
-      ? ([
-          { href: "/dashboard", label: "Home", icon: LayoutDashboard },
-          { href: "/candidates", label: "People", icon: Users },
-          { href: "/reviews", label: "Review", icon: ScrollText },
-          { href: "/analytics", label: "Stats", icon: BarChart3 },
-        ] as const)
-      : ([
-          { href: "/dashboard", label: "Home", icon: LayoutDashboard },
-          { href: "/assessments", label: "Tests", icon: Crosshair },
-          { href: "/reviews", label: "Review", icon: ScrollText },
-          { href: "/candidates", label: "People", icon: Users },
-        ] as const)
-    : ([
+  const mobileTabs = isGuest
+    ? ([
         { href: "/learn", label: "Learn", icon: BookOpen },
-        { href: "/daily", label: "Daily", icon: CalendarDays },
-        { href: "/study-plans", label: "Packs", icon: Route },
-        { href: "/challenges", label: "Bank", icon: Boxes },
-      ] as const);
+        { href: "/learn/games", label: "Arcade", icon: Sparkles },
+        { href: "/learn/interview", label: "Interview", icon: Timer },
+        { href: "/learn/ai", label: "AI craft", icon: Route },
+      ] as const)
+    : isStaff
+      ? user!.role === "TECHNICAL_REVIEWER"
+        ? ([
+            { href: "/dashboard", label: "Home", icon: LayoutDashboard },
+            { href: "/candidates", label: "People", icon: Users },
+            { href: "/reviews", label: "Review", icon: ScrollText },
+            { href: "/analytics", label: "Stats", icon: BarChart3 },
+          ] as const)
+        : ([
+            { href: "/dashboard", label: "Home", icon: LayoutDashboard },
+            { href: "/assessments", label: "Tests", icon: Crosshair },
+            { href: "/reviews", label: "Review", icon: ScrollText },
+            { href: "/candidates", label: "People", icon: Users },
+          ] as const)
+      : ([
+          { href: "/learn", label: "Learn", icon: BookOpen },
+          { href: "/daily", label: "Daily", icon: CalendarDays },
+          { href: "/study-plans", label: "Packs", icon: Route },
+          { href: "/challenges", label: "Bank", icon: Boxes },
+        ] as const);
 
   const inCodingSession = /^\/workspace\/[^/]+/.test(pathname);
 
-  const journeyCopy = isCandidate
+  const journeyCopy = isGuest
     ? {
-        badge: "Learn loop",
-        body: "Quests → clear lessons → prove under the judge → rank up",
+        badge: "Free forge",
+        body: "Browse Learn & arcade without an account — sign in to save XP",
       }
-    : {
-        badge: "Hiring path",
-        body: "Create a test → assign → review → decide",
-      };
+    : isCandidate
+      ? {
+          badge: "Learn loop",
+          body: "Quests → clear lessons → prove under the judge → rank up",
+        }
+      : {
+          badge: "Hiring path",
+          body: "Create a test → assign → review → decide",
+        };
+
+  const navRole = isGuest ? "CANDIDATE" : user!.role;
 
   return (
     <div className="min-h-screen lg:grid lg:grid-cols-[272px_1fr]">
@@ -346,7 +383,7 @@ export function AppShell({
             <p className="text-xs leading-relaxed text-slate-600">{journeyCopy.body}</p>
           </div>
           <div className="flex-1 overflow-y-auto overscroll-contain">
-            <NavLinks pathname={pathname} role={user.role} onNavigate={() => setOpen(false)} />
+            <NavLinks pathname={pathname} role={navRole} guest={isGuest} onNavigate={() => setOpen(false)} />
           </div>
           {userBlock}
         </aside>
@@ -364,7 +401,7 @@ export function AppShell({
           <p className="text-xs leading-relaxed text-slate-600">{journeyCopy.body}</p>
         </div>
         <div className="flex-1 overflow-y-auto">
-          <NavLinks pathname={pathname} role={user.role} />
+          <NavLinks pathname={pathname} role={navRole} guest={isGuest} />
         </div>
         {userBlock}
       </aside>
@@ -415,6 +452,8 @@ export function AppShell({
           </div>
         </nav>
       )}
+
+      <SignInModal open={signInOpen} onOpenChange={setSignInOpen} freeHref="/learn" />
     </div>
   );
 }
