@@ -68,7 +68,7 @@ export default async function PublicQualificationProfile({
       <div className="pointer-events-none absolute inset-0 grid-overlay opacity-40" />
       <header className="relative z-10 mx-auto flex max-w-4xl items-center justify-between px-6 py-6">
         <Link href="/" className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-teal-400/50 bg-teal-500/10 font-mono text-xs font-bold text-teal-700">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-orange-400/50 bg-orange-500/10 font-mono text-xs font-bold text-orange-700">
             CR
           </div>
           <span className="text-sm font-semibold tracking-[0.2em]">CRUCIBLE</span>
@@ -77,16 +77,16 @@ export default async function PublicQualificationProfile({
       </header>
 
       <main className="relative z-10 mx-auto max-w-4xl space-y-8 px-6 pb-20">
-        <section className="animate-rise overflow-hidden rounded-2xl border border-teal-300/60 bg-[var(--surface-elevated)] p-6 sm:p-8">
-          <p className="font-mono text-xs tracking-[0.3em] text-teal-700">VERIFIED PROFILE</p>
+        <section className="animate-rise overflow-hidden rounded-2xl border border-orange-300/60 bg-[var(--surface-elevated)] p-6 sm:p-8">
+          <p className="font-mono text-xs tracking-[0.3em] text-orange-700">VERIFIED PROFILE</p>
           <h1 className="mt-3 font-serif-display text-3xl tracking-tight text-slate-900 sm:text-4xl">
             {profile.user.name}
           </h1>
           <p className="mt-2 text-lg text-slate-700">{profile.headline || "Crucible candidate"}</p>
           {profile.bio && <p className="mt-4 max-w-2xl text-slate-600">{profile.bio}</p>}
           <div className="mt-4 flex flex-wrap gap-2">
-            <Badge variant="amber">{game.rank.title}</Badge>
-            <Badge variant="cyan">{game.xp.toLocaleString()} XP</Badge>
+            <Badge variant="amber">Level {game.level}</Badge>
+            <Badge variant="brand">{game.xp.toLocaleString()} XP</Badge>
             <Badge variant={trackBadgeVariant(profile.preferredTrack)}>{trackLabel(profile.preferredTrack)}</Badge>
             {profile.yearsExperience != null && <Badge>{profile.yearsExperience}+ years</Badge>}
             {verified.length > 0 && <Badge variant="emerald">{verified.length} verified skills</Badge>}
@@ -101,7 +101,7 @@ export default async function PublicQualificationProfile({
                   href={l.href}
                   target="_blank"
                   rel="noopener noreferrer nofollow"
-                  className="text-sm text-teal-700 hover:underline"
+                  className="text-sm text-orange-700 hover:underline"
                 >
                   {l.label} →
                 </a>
@@ -124,11 +124,9 @@ export default async function PublicQualificationProfile({
               </p>
             </div>
             <div className="rounded-xl border border-slate-200/80 bg-white/70 px-3 py-3">
-              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">Medals</p>
-              <p className="mt-1 font-serif-display text-2xl text-slate-900">
-                {game.unlockedCount}/{game.achievements.length}
-              </p>
-              <p className="text-xs text-slate-500">Learn achievements</p>
+              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">Streak</p>
+              <p className="mt-1 font-serif-display text-2xl text-slate-900">{game.streak.current}d</p>
+              <p className="text-xs text-slate-500">Longest {game.streak.longest}d</p>
             </div>
           </div>
         </section>
@@ -141,7 +139,7 @@ export default async function PublicQualificationProfile({
             <p className="text-xs text-slate-500">Not the same as verified skills — listed by the candidate.</p>
             <div className="flex flex-wrap gap-1.5">
               {[...profile.languages, ...profile.frameworks, ...profile.cybersecurity].map((x) => (
-                <Badge key={x} variant="cyan">
+                <Badge key={x} variant="brand">
                   {x}
                 </Badge>
               ))}
@@ -196,7 +194,7 @@ export default async function PublicQualificationProfile({
                   )}
                 </div>
                 {a.scoreReport && (
-                  <Link href={`/scorecard/${a.id}`} className="text-sm text-teal-700 hover:underline">
+                  <Link href={`/scorecard/${a.id}`} className="text-sm text-orange-700 hover:underline">
                     Scorecard →
                   </Link>
                 )}

@@ -38,7 +38,7 @@ export function trackLabel(track: string): string {
 
 export function trackBadgeVariant(
   track: string,
-): "default" | "cyan" | "amber" | "rose" | "emerald" | "violet" {
+): "default" | "brand" | "amber" | "rose" | "emerald" | "violet" {
   switch (track) {
     case "CYBERSECURITY":
     case "CLOUD_INFRA_SECURITY":
@@ -57,7 +57,7 @@ export function trackBadgeVariant(
     case "PLATFORM_SRE":
       return "rose";
     default:
-      return "cyan";
+      return "brand";
   }
 }
 

@@ -312,7 +312,7 @@ export function AiVsHumanClient() {
             <span className="font-medium">
               {lastResult.correct ? "Verified pass" : lastResult.mocked ? "Experimental" : "Did not clear"}
             </span>
-            <Badge variant="cyan">
+            <Badge variant="brand">
               public {lastResult.passedPublic}/{lastResult.totalPublic}
             </Badge>
             <Badge>
@@ -331,7 +331,7 @@ export function AiVsHumanClient() {
       {humanCompare[0] && (
         <div className="rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-700">
           Human hidden-suite acceptance on this challenge:{" "}
-          <span className="font-mono text-teal-800">
+          <span className="font-mono text-orange-800">
             {humanCompare[0].humanAcceptancePct ?? "—"}%
           </span>{" "}
           ({humanCompare[0].submissions} jobs)

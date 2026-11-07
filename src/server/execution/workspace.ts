@@ -34,7 +34,7 @@ export async function createWorkspaceForAssignment(params: {
       language: params.language,
       imageTag: imageTagForLanguage(params.language),
       rootPath,
-      gitRemoteUrl: `local://gauntlet/${params.assignmentId}`,
+      gitRemoteUrl: `local://crucible/${params.assignmentId}`,
       status: "ready",
       files: {
         create: files.map((f) => ({
@@ -47,7 +47,7 @@ export async function createWorkspaceForAssignment(params: {
         create: {
           sha: "init",
           message: "chore: scaffold assessment workspace",
-          authorEmail: "platform@engineering-gauntlet.local",
+          authorEmail: "platform@crucible.local",
         },
       },
     },

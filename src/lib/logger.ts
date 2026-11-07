@@ -5,7 +5,7 @@ function emit(level: LogLevel, message: string, meta?: Record<string, unknown>) 
     ts: new Date().toISOString(),
     level,
     message,
-    service: "engineering-gauntlet",
+    service: "crucible",
     ...meta,
   };
   const line = JSON.stringify(entry);

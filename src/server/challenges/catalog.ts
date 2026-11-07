@@ -313,7 +313,7 @@ const PROJECT_CATALOG: ChallengeSeed[] = [
   },
   {
     slug: "codewatch-review",
-    title: "Cyber Challenge — Secure Code Review Gauntlet",
+    title: "Cyber Challenge — Secure Code Review Drill",
     summary: "Review PRs for security defects and propose precise, testable fixes.",
     description:
       "Review a series of pull requests containing subtle auth bugs, crypto misuse, race conditions in entitlement checks, and unsafe deserialization. Leave review comments, mark severity, and submit patch PRs with tests. Dominating volume without substance is not rewarded; precise, correct findings are.",
@@ -956,7 +956,7 @@ const PROJECT_CATALOG: ChallengeSeed[] = [
   },
   {
     slug: "graphql-gauntlet",
-    title: "Backend Challenge — GraphQL Gauntlet",
+    title: "Backend Challenge — GraphQL Hardening",
     summary: "Ship a GraphQL API with authZ, query cost limits, and N+1 defenses.",
     description:
       "Implement a GraphQL schema with nested types, DataLoader-style batching, field-level auth, depth/cost limits, and persisted queries. Hidden tests attempt expensive queries and authZ leaks via nested fields.",

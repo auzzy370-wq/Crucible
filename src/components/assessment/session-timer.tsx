@@ -59,7 +59,7 @@ export function SessionTimer(props: {
           : urgent
             ? "border-amber-500/40 bg-amber-500/10 text-amber-900 dark:text-amber-100"
             : warn
-              ? "border-teal-300/60 bg-cyan-500/5 text-teal-900"
+              ? "border-orange-300/60 bg-orange-500/5 text-orange-900"
               : "border-slate-300/80 bg-white/85 text-slate-800",
         props.className,
       )}

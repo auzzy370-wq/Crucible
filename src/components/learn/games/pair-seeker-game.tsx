@@ -61,7 +61,7 @@ export function PairSeekerGame() {
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, w, h);
 
-    ctx.fillStyle = "#0f766e";
+    ctx.fillStyle = "#c43b0d";
     ctx.font = "600 18px IBM Plex Sans, sans-serif";
     ctx.fillText(`Target: ${state.target}`, 24, 36);
     ctx.fillStyle = "#64748b";
@@ -72,11 +72,11 @@ export function PairSeekerGame() {
       ctx.beginPath();
       ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2);
       if (c.found) ctx.fillStyle = "#86efac";
-      else if (c.selected) ctx.fillStyle = "#5eead4";
+      else if (c.selected) ctx.fillStyle = "#ff9a66";
       else ctx.fillStyle = "#ffffff";
       ctx.fill();
       ctx.lineWidth = 2;
-      ctx.strokeStyle = c.found ? "#059669" : c.selected ? "#0f766e" : "#cbd5e1";
+      ctx.strokeStyle = c.found ? "#059669" : c.selected ? "#c43b0d" : "#cbd5e1";
       ctx.stroke();
       ctx.fillStyle = "#0f172a";
       ctx.font = "700 18px IBM Plex Mono, monospace";
@@ -169,11 +169,11 @@ export function PairSeekerGame() {
     <div className="relative space-y-4">
       <ArcadeClearFx xp={lastXp} trigger={clearTick} />
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <Badge variant="cyan">Two Sum trainer</Badge>
+        <Badge variant="brand">Two Sum trainer</Badge>
         <Badge variant="emerald">{wins} pairs</Badge>
       </div>
       {!started ? (
-        <div className="rounded-2xl border border-cyan-200 bg-cyan-50/70 p-6 text-center">
+        <div className="rounded-2xl border border-orange-200 bg-orange-50/70 p-6 text-center">
           <p className="font-serif-display text-xl text-slate-900">Find the complement</p>
           <p className="mt-2 text-sm text-slate-600">
             For each pick x, ask: is target−x already seen? That’s the hash-map interview answer.

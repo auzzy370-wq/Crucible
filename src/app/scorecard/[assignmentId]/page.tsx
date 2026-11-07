@@ -65,7 +65,7 @@ export default async function ScorecardPage({
       <div className="pointer-events-none absolute inset-0 grid-overlay opacity-40" />
       <header className="relative z-10 mx-auto flex max-w-4xl items-center justify-between px-6 py-6">
         <Link href="/" className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-teal-400/50 bg-teal-500/10 font-mono text-xs font-bold text-teal-700">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-orange-400/50 bg-orange-500/10 font-mono text-xs font-bold text-orange-700">
             CR
           </div>
           <span className="text-sm font-semibold tracking-[0.2em]">CRUCIBLE</span>
@@ -75,13 +75,13 @@ export default async function ScorecardPage({
 
       <main className="relative z-10 mx-auto max-w-4xl space-y-8 px-6 pb-20">
         <div className="animate-rise">
-          <p className="font-mono text-xs tracking-[0.3em] text-teal-700">EMPLOYER SCORECARD</p>
+          <p className="font-mono text-xs tracking-[0.3em] text-orange-700">EMPLOYER SCORECARD</p>
           <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
             {assignment.candidate.name}
           </h1>
           <p className="mt-2 text-lg text-slate-700">{assignment.assessment.title}</p>
           <div className="mt-4 flex flex-wrap gap-2">
-            <Badge variant={assignment.assessment.track === "CYBERSECURITY" ? "violet" : "cyan"}>
+            <Badge variant={assignment.assessment.track === "CYBERSECURITY" ? "violet" : "brand"}>
               {assignment.assessment.track}
             </Badge>
             <Badge variant="emerald">{formatScore(report.overall)}</Badge>
@@ -91,7 +91,7 @@ export default async function ScorecardPage({
             </Badge>
           </div>
           {profile?.publicSlug && profile.publicEnabled && (
-            <Link href={`/u/${profile.publicSlug}`} className="mt-4 inline-block text-sm text-teal-700 hover:underline">
+            <Link href={`/u/${profile.publicSlug}`} className="mt-4 inline-block text-sm text-orange-700 hover:underline">
               Public qualification profile →
             </Link>
           )}
@@ -110,8 +110,8 @@ export default async function ScorecardPage({
         </section>
 
         {diagnostics && (
-          <section className="animate-rise space-y-3 rounded-xl border border-cyan-500/20 bg-cyan-500/5 p-5">
-            <p className="font-mono text-xs tracking-[0.25em] text-teal-700">KNOWLEDGE PINPOINT</p>
+          <section className="animate-rise space-y-3 rounded-xl border border-orange-500/20 bg-orange-500/5 p-5">
+            <p className="font-mono text-xs tracking-[0.25em] text-orange-700">KNOWLEDGE PINPOINT</p>
             <p className="text-slate-800">{diagnostics.summary}</p>
             {diagnostics.band != null && (
               <p className="font-mono text-xs text-slate-500">
@@ -177,7 +177,7 @@ export default async function ScorecardPage({
 
         <p className="text-xs text-slate-500">
           Claimed résumé skills are excluded. Print this page or share with hiring staff who have access. Also available as{" "}
-          <a className="text-teal-700 hover:underline" href={`/api/scorecards/${assignmentId}?format=ats`}>
+          <a className="text-orange-700 hover:underline" href={`/api/scorecards/${assignmentId}?format=ats`}>
             ATS text
           </a>
           .

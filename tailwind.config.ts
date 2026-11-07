@@ -2,7 +2,7 @@ import type { Config } from "tailwindcss";
 
 /**
  * Slate / accent scales are CSS variables so light-oriented utilities
- * (text-slate-900, border-slate-200, bg-teal-50, …) remapping automatically in .dark.
+ * (text-slate-900, border-slate-200, bg-orange-50, …) remapping automatically in .dark.
  */
 export default {
   darkMode: ["class"],
@@ -35,32 +35,6 @@ export default {
           800: "var(--slate-800)",
           900: "var(--slate-900)",
           950: "var(--slate-950)",
-        },
-        teal: {
-          50: "var(--teal-50)",
-          100: "var(--teal-100)",
-          200: "var(--teal-200)",
-          300: "var(--teal-300)",
-          400: "var(--teal-400)",
-          500: "var(--teal-500)",
-          600: "var(--teal-600)",
-          700: "var(--teal-700)",
-          800: "var(--teal-800)",
-          900: "var(--teal-900)",
-          950: "var(--teal-950)",
-        },
-        cyan: {
-          50: "var(--cyan-50)",
-          100: "var(--cyan-100)",
-          200: "var(--cyan-200)",
-          300: "var(--cyan-300)",
-          400: "var(--cyan-400)",
-          500: "var(--cyan-500)",
-          600: "var(--cyan-600)",
-          700: "var(--cyan-700)",
-          800: "var(--cyan-800)",
-          900: "var(--cyan-900)",
-          950: "var(--cyan-950)",
         },
         amber: {
           50: "var(--amber-50)",

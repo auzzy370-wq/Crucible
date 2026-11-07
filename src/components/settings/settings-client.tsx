@@ -225,7 +225,7 @@ export function SettingsClient({ role }: { role: string }) {
   return (
     <div className="animate-rise space-y-6">
       <header>
-        <p className="font-mono text-xs tracking-[0.3em] text-teal-700">YOUR ACCOUNT</p>
+        <p className="font-mono text-xs tracking-[0.3em] text-orange-700">YOUR ACCOUNT</p>
         <h1 className="mt-2 text-2xl font-semibold sm:text-3xl">Settings</h1>
         <p className="mt-2 max-w-2xl text-slate-600">
           Manage profile preferences, privacy, password, and active sessions — one place for how Crucible works for you.
@@ -250,7 +250,7 @@ export function SettingsClient({ role }: { role: string }) {
         <Card>
           <CardContent className="pt-5">
             <div className="text-xs uppercase tracking-wider text-slate-500">Streak</div>
-            <div className="mt-1 font-mono text-xl text-teal-800">{data.stats.currentStreak} day</div>
+            <div className="mt-1 font-mono text-xl text-orange-800">{data.stats.currentStreak} day</div>
             <div className="text-xs text-slate-500">Best {data.stats.longestStreak}</div>
           </CardContent>
         </Card>
@@ -272,7 +272,7 @@ export function SettingsClient({ role }: { role: string }) {
             className={cn(
               "shrink-0 rounded-md border px-3 py-2 text-sm",
               tab === t.id
-                ? "border-teal-400/50 bg-teal-500/10 text-teal-900"
+                ? "border-orange-400/50 bg-orange-500/10 text-orange-900"
                 : "border-slate-200 text-slate-600 hover:bg-slate-100",
             )}
           >
@@ -303,7 +303,7 @@ export function SettingsClient({ role }: { role: string }) {
             </div>
             <div className="flex flex-wrap gap-2">
               <Badge>{data.account.role}</Badge>
-              <Badge variant="cyan">{data.account.plan}</Badge>
+              <Badge variant="brand">{data.account.plan}</Badge>
             </div>
             <Button disabled={busy} onClick={() => void saveAccount()}>
               Save account
@@ -437,7 +437,7 @@ export function SettingsClient({ role }: { role: string }) {
                 </Button>
                 <p className="text-sm text-slate-500">
                   Résumé uploads and skill evidence also live on{" "}
-                  <Link href="/candidates" className="text-teal-700 hover:underline">
+                  <Link href="/candidates" className="text-orange-700 hover:underline">
                     My profile →
                   </Link>
                 </p>
@@ -470,7 +470,7 @@ export function SettingsClient({ role }: { role: string }) {
                   />
                   <span>
                     Enable public profile at{" "}
-                    <span className="font-mono text-teal-800">/u/{publicSlug || "your-slug"}</span>
+                    <span className="font-mono text-orange-800">/u/{publicSlug || "your-slug"}</span>
                   </span>
                 </label>
                 <div className="space-y-2">
@@ -544,7 +544,7 @@ export function SettingsClient({ role }: { role: string }) {
                 <div className="min-w-0 text-sm">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="font-medium text-slate-900">{s.current ? "This device" : "Other session"}</span>
-                    {s.current && <Badge variant="cyan">current</Badge>}
+                    {s.current && <Badge variant="brand">current</Badge>}
                   </div>
                   <div className="mt-1 truncate font-mono text-[11px] text-slate-500">
                     {s.ip || "ip unknown"} · {s.userAgent || "unknown agent"}

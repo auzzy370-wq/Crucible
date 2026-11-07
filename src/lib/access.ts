@@ -78,8 +78,8 @@ export function canAccessPath(role: string, pathname: string): boolean {
   return hit.roles.includes(role);
 }
 
-export function homeForRole(_role: string): string {
-  return "/dashboard";
+export function homeForRole(role: string): string {
+  return (CANDIDATE_ROLES as readonly string[]).includes(role) ? "/learn" : "/dashboard";
 }
 
 /** Paths guests can use for the free Learn experience without signing in. */

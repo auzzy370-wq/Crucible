@@ -566,7 +566,7 @@ export function WorkspaceIde(props: {
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <Badge variant={props.track === "CYBERSECURITY" ? "violet" : "cyan"}>{props.track}</Badge>
+              <Badge variant={props.track === "CYBERSECURITY" ? "violet" : "brand"}>{props.track}</Badge>
               {props.difficulty != null && (
                 <span className={cn("rounded-md border px-2 py-0.5 text-xs font-semibold", diffClass(props.difficulty))}>
                   {difficultyLabel(props.difficulty)}
@@ -609,7 +609,7 @@ export function WorkspaceIde(props: {
         {(pairCode || joinCode !== undefined) && (
           <div className="flex flex-wrap items-end gap-2 rounded-xl border border-slate-200 bg-white/75 p-3 text-sm">
             {pairCode && (
-              <div className="font-mono text-teal-800">
+              <div className="font-mono text-orange-800">
                 Host code: <span className="text-lg tracking-widest">{pairCode}</span>
               </div>
             )}
@@ -681,7 +681,7 @@ export function WorkspaceIde(props: {
             type="button"
             className={cn(
               "flex-1 rounded-lg border px-3 py-2 text-sm",
-              panel === "problem" ? "border-teal-400/50 bg-teal-500/10 text-teal-900" : "border-slate-300 text-slate-600",
+              panel === "problem" ? "border-orange-400/50 bg-orange-500/10 text-orange-900" : "border-slate-300 text-slate-600",
             )}
             onClick={() => setPanel("problem")}
           >
@@ -691,7 +691,7 @@ export function WorkspaceIde(props: {
             type="button"
             className={cn(
               "flex-1 rounded-lg border px-3 py-2 text-sm",
-              panel === "code" ? "border-teal-400/50 bg-teal-500/10 text-teal-900" : "border-slate-300 text-slate-600",
+              panel === "code" ? "border-orange-400/50 bg-orange-500/10 text-orange-900" : "border-slate-300 text-slate-600",
             )}
             onClick={() => setPanel("code")}
           >
@@ -887,7 +887,7 @@ export function WorkspaceIde(props: {
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <Badge variant={props.track === "CYBERSECURITY" ? "violet" : "cyan"}>{props.track}</Badge>
+            <Badge variant={props.track === "CYBERSECURITY" ? "violet" : "brand"}>{props.track}</Badge>
             <Badge>{props.language}</Badge>
             {props.difficulty != null && (
               <span className={cn("rounded-md border px-2 py-0.5 text-xs font-semibold", diffClass(props.difficulty))}>
@@ -930,12 +930,12 @@ export function WorkspaceIde(props: {
       <div className="grid gap-2 sm:grid-cols-3">
         <div className="rounded-xl border border-slate-200 bg-white/75 px-3 py-2">
           <div className="text-[10px] uppercase tracking-wider text-slate-500">Deliverables</div>
-          <div className="mt-1 font-mono text-sm text-teal-800">
+          <div className="mt-1 font-mono text-sm text-orange-800">
             {deliverableDone}/{publicReqs.length || "—"} checked
           </div>
           <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-800">
             <div
-              className="h-full rounded-full bg-teal-500/80 transition-all"
+              className="h-full rounded-full bg-orange-500/80 transition-all"
               style={{
                 width: `${publicReqs.length ? Math.round((deliverableDone / publicReqs.length) * 100) : 0}%`,
               }}
@@ -975,7 +975,7 @@ export function WorkspaceIde(props: {
             type="button"
             className={cn(
               "flex-1 rounded-lg border px-3 py-2 text-sm",
-              projectPanel === id ? "border-teal-400/50 bg-teal-500/10 text-teal-900" : "border-slate-300 text-slate-600",
+              projectPanel === id ? "border-orange-400/50 bg-orange-500/10 text-orange-900" : "border-slate-300 text-slate-600",
             )}
             onClick={() => setProjectPanel(id)}
           >
@@ -1031,7 +1031,7 @@ export function WorkspaceIde(props: {
               <div className="text-xs uppercase tracking-wider text-slate-500">Public deliverables</div>
               <button
                 type="button"
-                className="text-[11px] text-teal-700 hover:underline"
+                className="text-[11px] text-orange-700 hover:underline"
                 onClick={() => {
                   setActivePath("CHECKLIST.md");
                   setProjectPanel("code");
@@ -1046,7 +1046,7 @@ export function WorkspaceIde(props: {
                   <label className="flex cursor-pointer items-start gap-2 text-sm text-slate-700">
                     <input
                       type="checkbox"
-                      className="mt-1 accent-cyan-400"
+                      className="mt-1 accent-orange-400"
                       checked={!!checkedDeliverables[r]}
                       onChange={(e) => setCheckedDeliverables((prev) => ({ ...prev, [r]: e.target.checked }))}
                     />
@@ -1077,7 +1077,7 @@ export function WorkspaceIde(props: {
               <ul className="space-y-2">
                 {Object.entries(rubric).map(([k, v]) => (
                   <li key={k} className="rounded-lg border border-slate-200 bg-black/20 px-3 py-2">
-                    <div className="text-xs font-semibold uppercase tracking-wide text-teal-800/90">{k}</div>
+                    <div className="text-xs font-semibold uppercase tracking-wide text-orange-800/90">{k}</div>
                     <div className="mt-0.5 text-sm text-slate-600">{v}</div>
                   </li>
                 ))}
@@ -1098,7 +1098,7 @@ export function WorkspaceIde(props: {
                       className={cn(
                         "rounded-md border px-2.5 py-1.5 text-xs",
                         current
-                          ? "border-teal-400/50 bg-teal-500/10 text-teal-900"
+                          ? "border-orange-400/50 bg-orange-500/10 text-orange-900"
                           : cleared
                             ? "border-emerald-500/20 bg-emerald-500/5 text-emerald-100/80"
                             : "border-slate-200 text-slate-500",
@@ -1169,7 +1169,7 @@ export function WorkspaceIde(props: {
                   <li key={f.id}>
                     <button
                       className={`w-full rounded px-2 py-1.5 text-left font-mono text-xs ${
-                        f.path === activePath ? "bg-teal-500/10 text-teal-800" : "text-slate-600 hover:bg-slate-100"
+                        f.path === activePath ? "bg-orange-500/10 text-orange-800" : "text-slate-600 hover:bg-slate-100"
                       }`}
                       onClick={() => setActivePath(f.path)}
                     >
@@ -1241,7 +1241,7 @@ export function WorkspaceIde(props: {
             <ul className="mt-3 max-h-40 space-y-2 overflow-auto text-xs text-slate-600">
               {props.commits.map((c) => (
                 <li key={c.sha} className="break-words font-mono">
-                  <span className="text-teal-700">{c.sha.slice(0, 8)}</span> {c.message}
+                  <span className="text-orange-700">{c.sha.slice(0, 8)}</span> {c.message}
                 </li>
               ))}
             </ul>
@@ -1301,9 +1301,9 @@ function PinpointPanel({ pinpoint, compact }: { pinpoint: Pinpoint | null; compa
     );
   }
   return (
-    <div className={cn("mt-3 space-y-2 rounded-lg border border-cyan-500/20 bg-cyan-500/5 p-3", compact && "mt-0")}>
+    <div className={cn("mt-3 space-y-2 rounded-lg border border-orange-500/20 bg-orange-500/5 p-3", compact && "mt-0")}>
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="text-xs uppercase tracking-wider text-teal-700/80">Knowledge pinpoint</div>
+        <div className="text-xs uppercase tracking-wider text-orange-700/80">Knowledge pinpoint</div>
         <span className="font-mono text-[11px] text-slate-600">
           {pinpoint.band} · D{pinpoint.difficulty}
         </span>

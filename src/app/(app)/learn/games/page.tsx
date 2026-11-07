@@ -1,7 +1,7 @@
 import { CANDIDATE_ROLES } from "@/lib/access";
 import { requirePageRolesOrGuest } from "@/server/auth/page-guard";
 import { prisma } from "@/lib/db";
-import { ARCADE_GAMES, ARCADE_PLAN_SLUG } from "@/server/learning/arcade-games";
+import { ARCADE_PLAN_SLUG } from "@/server/learning/arcade-games";
 import { ArcadeLobby } from "@/components/learn/games/arcade-lobby";
 
 export default async function LearnGamesPage() {
@@ -11,8 +11,6 @@ export default async function LearnGamesPage() {
         where: { userId_planSlug: { userId: user.id, planSlug: ARCADE_PLAN_SLUG } },
       })
     : null;
-  const done = new Set(enrollment?.completedSlugs ?? []);
-  const completedCount = ARCADE_GAMES.reduce((n, g) => n + (done.has(g.slug) ? 1 : 0), 0);
 
-  return <ArcadeLobby completedCount={completedCount} completedSlugs={enrollment?.completedSlugs ?? []} />;
+  return <ArcadeLobby completedSlugs={enrollment?.completedSlugs ?? []} />;
 }

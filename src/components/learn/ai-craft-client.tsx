@@ -8,7 +8,7 @@ export function AiCraftClient() {
       track="ai"
       eyebrow="AI CRAFT"
       title="Ship AI features with judgment"
-      blurb="Prompting, APIs, tools, RAG, agents, evals, and safety — clear chapters to bank XP, then prove production instincts in the bank."
+      blurb="Prompting, APIs, tools, RAG, agents, evals, and safety. Each lesson earns XP; then practice on real problems."
       progressApi="/api/learn/ai/progress"
       lessonHref={(slug) => `/learn/ai/${slug}`}
       levels={[
@@ -17,7 +17,7 @@ export function AiCraftClient() {
         { id: "production", label: "Production" },
       ]}
       secondaryCtas={[
-        { href: "/study-plans", label: "AI campaigns", variant: "secondary" },
+        { href: "/study-plans", label: "Study plans", variant: "secondary" },
         { href: "/learn", label: "Learn hub", variant: "ghost" },
       ]}
     />

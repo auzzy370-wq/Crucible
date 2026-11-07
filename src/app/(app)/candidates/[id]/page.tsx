@@ -29,7 +29,7 @@ export default async function CandidateDetailPage({ params }: { params: Promise<
   return (
     <div className="animate-rise space-y-6">
       <header>
-        <p className="font-mono text-xs tracking-[0.3em] text-teal-700">CANDIDATE DOSSIER</p>
+        <p className="font-mono text-xs tracking-[0.3em] text-orange-700">CANDIDATE DOSSIER</p>
         <h1 className="mt-2 text-2xl font-semibold sm:text-3xl">{candidate.name}</h1>
         <p className="text-slate-600">{candidate.email}</p>
       </header>
@@ -46,7 +46,7 @@ export default async function CandidateDetailPage({ params }: { params: Promise<
                   {skills
                     .filter((s) => s.source === source)
                     .map((s) => (
-                      <Badge key={s.id} variant={source === "CLAIMED" ? "amber" : source === "HUMAN_REVIEW" ? "violet" : "cyan"}>
+                      <Badge key={s.id} variant={source === "CLAIMED" ? "amber" : source === "HUMAN_REVIEW" ? "violet" : "brand"}>
                         {s.name}
                       </Badge>
                     ))}
@@ -64,7 +64,7 @@ export default async function CandidateDetailPage({ params }: { params: Promise<
               <div key={a.id} className="rounded-lg border border-slate-200 p-3">
                 <div className="font-medium">{a.assessment.title}</div>
                 <div className="mt-1 flex flex-wrap gap-2">
-                  <Badge variant={a.assessment.track === "CYBERSECURITY" ? "violet" : "cyan"}>{a.assessment.track}</Badge>
+                  <Badge variant={a.assessment.track === "CYBERSECURITY" ? "violet" : "brand"}>{a.assessment.track}</Badge>
                   <Badge>{a.status}</Badge>
                   {a.scoreReport && <Badge variant="emerald">{formatScore(a.scoreReport.overall)}</Badge>}
                 </div>

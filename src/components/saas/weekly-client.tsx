@@ -45,7 +45,7 @@ export function WeeklyClient() {
         <p className="mt-2 max-w-3xl text-slate-600">{data.synopsis}</p>
         <div className="mt-3 flex flex-wrap gap-2">
           <Badge variant="amber">{data.weekKey}</Badge>
-          <Badge variant="cyan">{data.challenge?.title}</Badge>
+          <Badge variant="brand">{data.challenge?.title}</Badge>
           {data.completed && <Badge variant="emerald">Attempted</Badge>}
         </div>
       </header>

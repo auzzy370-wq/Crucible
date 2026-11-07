@@ -3,10 +3,10 @@ import { cookies } from "next/headers";
 import { prisma } from "@/lib/db";
 import { AppError } from "@/lib/errors";
 import { jsonOk, withHandler } from "@/server/auth/api";
-import { requireUser } from "@/server/auth/session";
+import { SESSION_COOKIE, requireUser } from "@/server/auth/session";
 import { writeAudit } from "@/server/security/audit";
 
-const COOKIE = "gauntlet_session";
+const COOKIE = SESSION_COOKIE;
 
 export async function DELETE(req: Request) {
   return withHandler(async () => {

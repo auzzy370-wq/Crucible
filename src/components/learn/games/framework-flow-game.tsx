@@ -84,12 +84,12 @@ export function FrameworkFlowGame() {
     <div className="relative space-y-5">
       <ArcadeClearFx xp={lastXp} trigger={clearTick} />
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <Badge variant="cyan">Live coding order</Badge>
+        <Badge variant="brand">Live coding order</Badge>
         <Badge variant={seconds <= 10 ? "rose" : "amber"}>{seconds}s</Badge>
       </div>
 
       {!started ? (
-        <div className="rounded-2xl border border-teal-200 bg-teal-50/60 p-6 text-center">
+        <div className="rounded-2xl border border-orange-200 bg-orange-50/60 p-6 text-center">
           <p className="font-serif-display text-xl text-slate-900">Build the five beats</p>
           <p className="mt-2 text-sm text-slate-600">Tap steps in the order you’d use in a real interview loop.</p>
           <Button className="mt-4" onClick={start}>
@@ -123,7 +123,7 @@ export function FrameworkFlowGame() {
                 key={item.id}
                 type="button"
                 onClick={() => pick(item)}
-                className="rounded-xl border border-teal-300 bg-white px-4 py-3 text-left shadow-sm transition hover:border-teal-500"
+                className="rounded-xl border border-orange-300 bg-white px-4 py-3 text-left shadow-sm transition hover:border-orange-500"
               >
                 <div className="font-medium text-slate-900">{item.label}</div>
                 <div className="text-xs text-slate-500">{item.tip}</div>

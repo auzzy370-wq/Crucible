@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { LessonBody } from "@/components/learn/lesson-body";
-import { ForgeSparks, XpBurst } from "@/components/learn/forge-fun";
+import { XpBurst } from "@/components/learn/xp-burst";
 import { LESSON_XP } from "@/server/learning/gamification";
 
 export function LessonPlayer(props: {
@@ -31,11 +31,7 @@ export function LessonPlayer(props: {
   const router = useRouter();
   const [done, setDone] = useState(props.done);
   const [busy, setBusy] = useState(false);
-  const [celebration, setCelebration] = useState<{
-    xp: number;
-    combo: number;
-    chapter: number;
-  } | null>(null);
+  const [celebration, setCelebration] = useState<{ xp: number } | null>(null);
 
   async function mark(doneNext: boolean) {
     setBusy(true);
@@ -49,14 +45,9 @@ export function LessonPlayer(props: {
       if (!json.ok) throw new Error(json.error?.message || "Failed");
       setDone(doneNext);
       const xp = Number(json.data?.xpEarned ?? 0);
-      const combo = Number(json.data?.comboXp ?? 0);
-      const chapter = Number(json.data?.chapterXp ?? 0);
       if (doneNext && xp > 0) {
-        setCelebration({ xp, combo, chapter });
-        const bits = [`+${xp} XP`];
-        if (combo) bits.push(`combo +${combo}`);
-        if (chapter) bits.push(`chapter +${chapter}`);
-        toast.success(`Lesson cleared · ${bits.join(" · ")}`);
+        setCelebration({ xp });
+        toast.success(`Lesson complete · +${xp} XP`);
       } else {
         toast.message(doneNext ? "Lesson marked complete" : "Marked incomplete");
         if (!doneNext) setCelebration(null);
@@ -77,7 +68,7 @@ export function LessonPlayer(props: {
   return (
     <div className="animate-rise mx-auto max-w-3xl space-y-6">
       <div className="flex flex-wrap items-center gap-2 text-sm">
-        <Link href={props.pathHref} className="text-teal-700 hover:underline">
+        <Link href={props.pathHref} className="text-orange-700 hover:underline">
           ← {props.pathLabel}
         </Link>
         <span className="text-slate-500">/</span>
@@ -86,16 +77,16 @@ export function LessonPlayer(props: {
 
       <header>
         <div className="flex flex-wrap gap-2">
-          <Badge variant="cyan">{props.level}</Badge>
+          <Badge variant="brand">{props.level}</Badge>
           <Badge>{props.minutes} min</Badge>
           <Badge variant="amber">+{LESSON_XP} XP</Badge>
-          {done && <Badge variant="emerald">cleared</Badge>}
+          {done && <Badge variant="emerald">done</Badge>}
         </div>
         <h1 className="mt-3 font-serif-display text-2xl sm:text-3xl">{props.title}</h1>
         <p className="mt-2 text-slate-600">{props.summary}</p>
         <div className="mt-3 flex flex-wrap gap-1">
           {props.skills.map((s) => (
-            <Badge key={s} variant="cyan">
+            <Badge key={s} variant="brand">
               {s}
             </Badge>
           ))}
@@ -103,19 +94,13 @@ export function LessonPlayer(props: {
       </header>
 
       {celebration && (
-        <div className="learn-quest-card relative overflow-hidden rounded-2xl border border-amber-300 bg-[var(--surface-elevated)] p-5">
-          <ForgeSparks density={10} />
+        <div className="relative overflow-hidden rounded-2xl border border-amber-300 bg-[var(--surface-elevated)] p-5">
           <XpBurst amount={celebration.xp} active />
           <div className="relative">
-            <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-amber-800">Lesson cleared</p>
+            <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-amber-800">Lesson complete</p>
             <p className="mt-1 text-3xl font-semibold tracking-[-0.03em] text-slate-900">+{celebration.xp} XP</p>
-            <div className="mt-2 flex flex-wrap gap-2">
-              <Badge variant="cyan">lesson +{LESSON_XP}</Badge>
-              {celebration.combo > 0 && <Badge variant="amber">same-day combo +{celebration.combo}</Badge>}
-              {celebration.chapter > 0 && <Badge variant="emerald">chapter clear +{celebration.chapter}</Badge>}
-            </div>
             <p className="mt-2 text-sm text-slate-600">
-              {props.nextSlug ? "Loading next node…" : "Chapter or path may be complete — check the map."}
+              {props.nextSlug ? "Loading the next lesson…" : "That was the last lesson on this path."}
             </p>
           </div>
         </div>
@@ -128,7 +113,7 @@ export function LessonPlayer(props: {
       <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
         {!done ? (
           <Button disabled={busy} onClick={() => void mark(true)}>
-            Clear lesson (+{LESSON_XP} XP){props.nextSlug ? " & continue" : ""}
+            Mark complete (+{LESSON_XP} XP){props.nextSlug ? " & continue" : ""}
           </Button>
         ) : (
           <Button variant="secondary" disabled={busy} onClick={() => void mark(false)}>
@@ -147,18 +132,18 @@ export function LessonPlayer(props: {
 
       <nav className="flex justify-between gap-3 border-t border-slate-200 pt-4 text-sm">
         {props.prevSlug ? (
-          <Link href={props.lessonHref(props.prevSlug)} className="text-slate-600 hover:text-teal-800">
+          <Link href={props.lessonHref(props.prevSlug)} className="text-slate-600 hover:text-orange-800">
             ← Previous
           </Link>
         ) : (
           <span />
         )}
         {props.nextSlug ? (
-          <Link href={props.lessonHref(props.nextSlug)} className="text-teal-700 hover:underline">
+          <Link href={props.lessonHref(props.nextSlug)} className="text-orange-700 hover:underline">
             Next →
           </Link>
         ) : (
-          <Link href={props.pathHref} className="text-teal-700 hover:underline">
+          <Link href={props.pathHref} className="text-orange-700 hover:underline">
             Back to path →
           </Link>
         )}

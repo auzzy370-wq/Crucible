@@ -82,15 +82,9 @@ export async function POST(req: Request) {
       where: { id: enrollment.id },
       data: { completedSlugs: after },
     });
-    let award = { xpEarned: 0, lessonXp: 0, comboXp: 0, chapterXp: 0, chapterClearXp: 0 };
+    let award = { xpEarned: 0 };
     if (body.done && !alreadyDone) {
-      award = await awardLessonClear({
-        userId: user.id,
-        track: "interview",
-        lessonSlug: body.lessonSlug,
-        completedBefore: before,
-        completedAfter: after,
-      });
+      award = await awardLessonClear({ userId: user.id });
     }
     return jsonOk({
       enrolled: true,

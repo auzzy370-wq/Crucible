@@ -142,7 +142,7 @@ function LoginForm() {
         {mode === "learn" && (
           <p className="mb-5 text-sm text-slate-500">
             New here?{" "}
-            <Link className="font-medium text-teal-600 hover:text-teal-500" href="/register">
+            <Link className="font-medium text-orange-600 hover:text-orange-500" href="/register">
               Create a free learner account →
             </Link>
           </p>
@@ -150,7 +150,7 @@ function LoginForm() {
         {mode === "hire" && (
           <p className="mb-5 text-sm text-slate-500">
             Hiring workspaces use invited staff accounts. Exploring?{" "}
-            <Link className="font-medium text-teal-600 hover:text-teal-500" href="/register">
+            <Link className="font-medium text-orange-600 hover:text-orange-500" href="/register">
               Start as a learner →
             </Link>
           </p>
@@ -192,14 +192,14 @@ function LoginForm() {
           {mode === "hire" ? (
             <>
               Looking to practice instead?{" "}
-              <button type="button" className="font-medium text-teal-600 hover:text-teal-500" onClick={() => setMode("learn")}>
+              <button type="button" className="font-medium text-orange-600 hover:text-orange-500" onClick={() => setMode("learn")}>
                 Switch to learn
               </button>
             </>
           ) : (
             <>
               Hiring talent?{" "}
-              <button type="button" className="font-medium text-teal-600 hover:text-teal-500" onClick={() => setMode("hire")}>
+              <button type="button" className="font-medium text-orange-600 hover:text-orange-500" onClick={() => setMode("hire")}>
                 Switch to hire
               </button>
             </>

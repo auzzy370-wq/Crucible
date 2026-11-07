@@ -6,9 +6,9 @@
 
 - Learn hub: `/learn`
 - Learn Arcade: `/learn/games`
-- Study campaigns: `/study-plans`
+- Study plans: `/study-plans`
 - Mock interviews: `/interview`
-- Register any email (not `@gauntlet.local`) or use a seeded demo account when `DEMO_*` passwords are set locally
+- Register any email (not `@crucible.local`) or use a seeded demo account when `DEMO_*` passwords are set locally
 
 Quick tunnels are temporary. Prefer **Cursor Publish** for a stable multi-user URL once confirmed.
 

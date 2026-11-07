@@ -46,7 +46,7 @@ export function BenchmarksClient() {
   return (
     <div className="animate-rise space-y-6">
       <header>
-        <p className="font-mono text-xs tracking-[0.3em] text-teal-700">BENCHMARK REPORTS</p>
+        <p className="font-mono text-xs tracking-[0.3em] text-orange-700">BENCHMARK REPORTS</p>
         <h1 className="mt-2 font-serif-display text-2xl sm:text-3xl">Benchmark reports</h1>
         <p className="mt-2 max-w-2xl text-slate-600">
           Side-by-side human and model standings from recorded runs. Experimental (mocked) AI results are labeled
@@ -58,10 +58,10 @@ export function BenchmarksClient() {
         <Button variant="secondary" size="sm" onClick={() => void load()}>
           Refresh
         </Button>
-        <Link href="/challenges" className="text-teal-700 hover:underline">
+        <Link href="/challenges" className="text-orange-700 hover:underline">
           Practice problems →
         </Link>
-        <Link href="/leaderboards" className="text-teal-700 hover:underline">
+        <Link href="/leaderboards" className="text-orange-700 hover:underline">
           Full leaderboards →
         </Link>
       </div>
@@ -86,7 +86,7 @@ export function BenchmarksClient() {
                         </Badge>
                       )}
                     </span>
-                    <span className="shrink-0 font-mono text-teal-800">
+                    <span className="shrink-0 font-mono text-orange-800">
                       {r.accuracyPct != null ? `${r.accuracyPct}%` : r.contestScore}
                     </span>
                   </li>

@@ -64,20 +64,20 @@ export function DailyClient(props: { daily: DailyPayload }) {
     <div className="animate-rise space-y-6">
       <header className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="font-mono text-xs tracking-[0.3em] text-teal-700">STEP 1 · START</p>
+          <p className="font-mono text-xs tracking-[0.3em] text-orange-700">STEP 1 · START</p>
           <h1 className="mt-2 font-serif-display text-2xl sm:text-3xl">Daily evidence session</h1>
           <p className="mt-2 max-w-2xl text-slate-600">
             One problem a day. Start opens the IDE — Run public tests, then Submit for the hidden judge.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Badge variant="cyan">Streak {props.daily.streak.currentStreak}</Badge>
+          <Badge variant="brand">Streak {props.daily.streak.currentStreak}</Badge>
           <Badge variant="amber">Best {props.daily.streak.longestStreak}</Badge>
           <Badge>{props.daily.dateKey}</Badge>
         </div>
       </header>
 
-      <Card className="border-teal-300/50 bg-[var(--surface-elevated)]">
+      <Card className="border-orange-300/50 bg-[var(--surface-elevated)]">
         <CardHeader>
           <div className="flex flex-wrap gap-2">
             <Badge variant={c.difficulty <= 3 ? "emerald" : c.difficulty <= 6 ? "amber" : "rose"}>
@@ -85,7 +85,7 @@ export function DailyClient(props: { daily: DailyPayload }) {
             </Badge>
             {props.daily.completed && <Badge variant="emerald">Completed today</Badge>}
             {[...new Set(c.companies ?? [])].slice(0, 3).map((co) => (
-              <Badge key={`co-${co}`} variant="cyan">
+              <Badge key={`co-${co}`} variant="brand">
                 {co}
               </Badge>
             ))}
@@ -107,7 +107,7 @@ export function DailyClient(props: { daily: DailyPayload }) {
           <p className="text-sm text-slate-600">Suggested time · {c.avgMinutes ?? 30} minutes</p>
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
             <select
-              className="h-11 w-full rounded-md border border-teal-300/60 bg-white px-3 text-sm text-teal-900 sm:w-auto sm:min-w-[10rem]"
+              className="h-11 w-full rounded-md border border-orange-300/60 bg-white px-3 text-sm text-orange-900 sm:w-auto sm:min-w-[10rem]"
               value={lang}
               onChange={(e) => setLang(e.target.value as CodingLanguage)}
             >

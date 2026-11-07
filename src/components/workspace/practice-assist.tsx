@@ -190,7 +190,7 @@ export function PracticeAssist(props: {
               type="button"
               className={cn(
                 "rounded-md px-2.5 py-1 text-xs",
-                tab === id ? "bg-cyan-500/15 text-teal-900" : "text-slate-500 hover:text-slate-700",
+                tab === id ? "bg-orange-500/15 text-orange-900" : "text-slate-500 hover:text-slate-700",
               )}
               onClick={() => setTab(id)}
             >
@@ -308,7 +308,7 @@ export function PracticeAssist(props: {
                       {difficultyBand(r.difficulty)} · {r.tags.filter((t) => t !== "coding").slice(0, 3).join(", ")}
                     </div>
                   </div>
-                  <Link href={`/challenges?q=${encodeURIComponent(r.slug)}`} className="text-xs text-cyan-400 hover:underline">
+                  <Link href={`/challenges?q=${encodeURIComponent(r.slug)}`} className="text-xs text-orange-400 hover:underline">
                     Open
                   </Link>
                 </div>

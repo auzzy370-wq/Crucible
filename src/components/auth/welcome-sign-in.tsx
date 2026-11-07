@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { SignInModal, shouldAutoOpenSignInModal } from "@/components/auth/sign-in-modal";
 
-/** Opens the sign-in modal on first free-forge visit; dismissible to continue guest. */
+/** Opens the sign-in modal on a guest’s first Learn visit; dismissible to continue as guest. */
 export function WelcomeSignIn() {
   const params = useSearchParams();
   const [open, setOpen] = useState(false);

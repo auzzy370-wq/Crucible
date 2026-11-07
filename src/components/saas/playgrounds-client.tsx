@@ -89,7 +89,7 @@ export function PlaygroundsClient(props: {
     <div className="animate-rise space-y-6">
       <header className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="font-mono text-xs tracking-[0.3em] text-teal-700">PLAYGROUNDS</p>
+          <p className="font-mono text-xs tracking-[0.3em] text-orange-700">PLAYGROUNDS</p>
           <h1 className="mt-2 font-serif-display text-2xl sm:text-3xl">Playgrounds</h1>
           <p className="mt-2 max-w-2xl text-slate-600">
             Scratch pads beside evidence sessions. Free includes {FREE_PLAYGROUND_LIMIT}; Premium is unlimited with
@@ -99,7 +99,7 @@ export function PlaygroundsClient(props: {
         <div className="flex flex-wrap items-center gap-2">
           {props.premium ? <Badge variant="amber">Unlimited</Badge> : <Badge>{props.playgrounds.length}/{FREE_PLAYGROUND_LIMIT}</Badge>}
           {!props.premium && (
-            <Link href="/pricing" className="text-sm text-teal-700 hover:underline">
+            <Link href="/pricing" className="text-sm text-orange-700 hover:underline">
               Upgrade for unlimited →
             </Link>
           )}
@@ -128,7 +128,7 @@ export function PlaygroundsClient(props: {
                         <button
                           type="button"
                           className={`min-h-11 w-full rounded-md px-2 py-2 text-left text-sm ${
-                            active?.id === p.id ? "bg-teal-500/10 text-teal-900" : "text-slate-600 hover:bg-slate-100"
+                            active?.id === p.id ? "bg-orange-500/10 text-orange-900" : "text-slate-600 hover:bg-slate-100"
                           }`}
                           onClick={() => {
                             setActiveId(p.id);

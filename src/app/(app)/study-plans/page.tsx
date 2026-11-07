@@ -7,8 +7,7 @@ import { STUDY_PLANS } from "@/server/saas/study-plans";
 import { AI_LESSONS } from "@/server/learning/ai-curriculum";
 import { INTERVIEW_LESSONS } from "@/server/learning/interview-curriculum";
 import {
-  buildPlanChapters,
-  buildStudyCampaignHud,
+  buildStudyPlanSummary,
   itemXp,
   scorePlanProgress,
   type PlanGameView,
@@ -76,7 +75,6 @@ export default async function StudyPlansPage() {
             }));
 
     const scored = scorePlanProgress(plan, completed, difficultyBySlug);
-    const chapters = buildPlanChapters(plan, completed);
     const view: PlanGameView & { items: typeof items } = {
       ...plan,
       enrolled: Boolean(enr),
@@ -86,13 +84,10 @@ export default async function StudyPlansPage() {
         ? Math.round((completed.size / plan.challengeSlugs.length) * 100)
         : 0,
       items,
-      chapters,
       ...scored,
     };
     return view;
   });
 
-  const hud = buildStudyCampaignHud(plans);
-
-  return <StudyPlansClient plans={plans} hud={hud} premium={isPremium(user)} />;
+  return <StudyPlansClient plans={plans} summary={buildStudyPlanSummary(plans)} premium={isPremium(user)} />;
 }

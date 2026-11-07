@@ -2,7 +2,7 @@ import { prisma } from "@/lib/db";
 import { buildLearnerGameState } from "@/server/learning/gamification";
 import { STUDY_PLANS } from "@/server/saas/study-plans";
 import { ensureCandidateProfile, getCandidateDetail } from "@/server/candidates/service";
-import { itemXp, PLAN_CLEAR_BONUS_XP } from "@/server/learning/study-plan-game";
+import { itemXp } from "@/server/learning/study-plan-game";
 
 export type ProfileCompleteness = {
   score: number;
@@ -143,7 +143,6 @@ export async function buildProfileDossier(userId: string): Promise<ProfileDossie
       earnedXp += itemXp({ itemKind: plan.itemKind, difficulty: 4 });
     }
     const cleared = totalCount > 0 && completedCount >= totalCount;
-    if (cleared) earnedXp += PLAN_CLEAR_BONUS_XP;
     return {
       slug: plan.slug,
       title: plan.title,

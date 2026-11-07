@@ -90,13 +90,13 @@ export function CraftPathClient(props: {
 
   const accent =
     props.track === "interview"
-      ? "border-teal-300/50 bg-teal-500/[0.07]"
+      ? "border-orange-300/50 bg-orange-500/[0.07]"
       : "border-emerald-300/50 bg-emerald-500/[0.07]";
 
   return (
     <div className="animate-rise space-y-8">
       <header>
-        <p className="font-mono text-xs tracking-[0.3em] text-teal-700">{props.eyebrow}</p>
+        <p className="font-mono text-xs tracking-[0.3em] text-orange-700">{props.eyebrow}</p>
         <h1 className="mt-2 font-serif-display text-2xl sm:text-3xl">{props.title}</h1>
         <p className="mt-2 max-w-2xl text-slate-600">{props.blurb}</p>
       </header>
@@ -104,14 +104,14 @@ export function CraftPathClient(props: {
       <section className={cn("rounded-2xl border p-5", accent)}>
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <div className="text-xs uppercase tracking-wider text-teal-700/80">Path progress</div>
-            <div className="mt-1 font-mono text-2xl text-teal-900">{percent}% complete</div>
+            <div className="text-xs uppercase tracking-wider text-orange-700/80">Path progress</div>
+            <div className="mt-1 font-mono text-2xl text-orange-900">{percent}% complete</div>
             {next ? (
               <p className="mt-1 text-sm text-slate-600">
                 Next: <span className="text-slate-800">{next.title}</span> · {next.minutes} min · +{LESSON_XP} XP
               </p>
             ) : (
-              <p className="mt-1 text-sm text-emerald-800">Curriculum cleared — open campaigns or timed mocks.</p>
+              <p className="mt-1 text-sm text-emerald-800">Path complete — try a study plan or a timed mock.</p>
             )}
           </div>
           <div className="flex flex-wrap gap-2">
@@ -132,7 +132,7 @@ export function CraftPathClient(props: {
           </div>
         </div>
         <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/80">
-          <div className="h-full rounded-full bg-teal-500 transition-all" style={{ width: `${percent}%` }} />
+          <div className="h-full rounded-full bg-orange-500 transition-all" style={{ width: `${percent}%` }} />
         </div>
         <div className="mt-4 flex flex-wrap gap-2">
           {chapters.map((ch) => (
@@ -160,11 +160,11 @@ export function CraftPathClient(props: {
             <section key={ch.id} className="space-y-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <h2 className="font-serif-display text-lg text-slate-900">{ch.label}</h2>
-                <Badge variant={ch.cleared ? "emerald" : "cyan"}>
-                  {ch.cleared ? "Chapter cleared · +100 XP" : `${ch.percent}% · +${LESSON_XP} XP / lesson`}
+                <Badge variant={ch.cleared ? "emerald" : "brand"}>
+                  {ch.cleared ? "Done" : `${ch.percent}% · +${LESSON_XP} XP / lesson`}
                 </Badge>
               </div>
-              <ol className="relative space-y-2 border-l border-teal-200 pl-4">
+              <ol className="relative space-y-2 border-l border-orange-200 pl-4">
                 {ch.rows.map((l, idx) => {
                   const locked = Boolean(next) && !l.done && next?.slug !== l.slug && idx > 0 && !ch.rows[idx - 1]?.done;
                   return (
@@ -175,7 +175,7 @@ export function CraftPathClient(props: {
                           l.done
                             ? "border-emerald-500 bg-emerald-400"
                             : next?.slug === l.slug
-                              ? "border-teal-500 bg-teal-400"
+                              ? "border-orange-500 bg-orange-400"
                               : "border-slate-300 bg-white",
                         )}
                       />
@@ -186,8 +186,8 @@ export function CraftPathClient(props: {
                           l.done
                             ? "border-emerald-200 bg-emerald-50/50"
                             : next?.slug === l.slug
-                              ? "border-teal-400 bg-teal-50/80 shadow-sm"
-                              : "border-slate-200 bg-white/80 hover:border-teal-300",
+                              ? "border-orange-400 bg-orange-50/80 shadow-sm"
+                              : "border-slate-200 bg-white/80 hover:border-orange-300",
                           locked && "opacity-70",
                         )}
                       >
@@ -204,9 +204,9 @@ export function CraftPathClient(props: {
                         </div>
                         <div className="flex shrink-0 flex-wrap gap-1">
                           <Badge>{l.minutes} min</Badge>
-                          <Badge variant="cyan">+{LESSON_XP} XP</Badge>
+                          <Badge variant="brand">+{LESSON_XP} XP</Badge>
                           {l.skills.slice(0, 2).map((s) => (
-                            <Badge key={s} variant="cyan">
+                            <Badge key={s} variant="brand">
                               {s}
                             </Badge>
                           ))}

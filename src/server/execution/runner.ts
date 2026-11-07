@@ -504,7 +504,7 @@ async function recordDeploy(assignmentId: string, stdout: string, success: boole
     data: {
       assignmentId,
       success: ok,
-      url: ok ? `https://preview.gauntlet.local/${assignmentId}` : null,
+      url: ok ? `https://preview.crucible.local/${assignmentId}` : null,
       checks: { ...(typeof checks === "object" ? checks : {}), dockerfile: hasDocker },
       logs: stdout.slice(0, 50_000),
     },

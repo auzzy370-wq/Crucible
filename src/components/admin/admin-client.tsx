@@ -345,7 +345,7 @@ export function AdminClient() {
   return (
     <div className="animate-rise space-y-6">
       <header>
-        <p className="font-mono text-xs tracking-[0.3em] text-teal-700">SUPER ADMIN</p>
+        <p className="font-mono text-xs tracking-[0.3em] text-orange-700">SUPER ADMIN</p>
         <h1 className="mt-2 text-2xl font-semibold sm:text-3xl">Platform control plane</h1>
         <p className="mt-2 max-w-3xl text-slate-600">
           Users, assignments, challenge library, execution queue, AI providers, audit trail, and system posture —
@@ -362,7 +362,7 @@ export function AdminClient() {
             className={cn(
               "shrink-0 rounded-md border px-3 py-2 text-sm",
               tab === t.id
-                ? "border-teal-400/50 bg-teal-500/10 text-teal-900"
+                ? "border-orange-400/50 bg-orange-500/10 text-orange-900"
                 : "border-slate-200 text-slate-600 hover:bg-slate-100",
             )}
           >
@@ -439,7 +439,7 @@ export function AdminClient() {
                     </div>
                     <div className="flex shrink-0 gap-1">
                       <Badge>{u.role}</Badge>
-                      <Badge variant={u.plan === "PREMIUM" ? "amber" : "cyan"}>{u.plan}</Badge>
+                      <Badge variant={u.plan === "PREMIUM" ? "amber" : "brand"}>{u.plan}</Badge>
                     </div>
                   </div>
                 ))}
@@ -452,7 +452,7 @@ export function AdminClient() {
               <CardContent className="space-y-2">
                 {(overview.recentAudits ?? []).map((l: any) => (
                   <div key={l.id} className="rounded-lg border border-slate-200 px-3 py-2 text-sm">
-                    <div className="font-mono text-xs text-teal-800">{l.action}</div>
+                    <div className="font-mono text-xs text-orange-800">{l.action}</div>
                     <div className="text-slate-600">
                       {l.actor?.name ?? "system"} · {l.entityType}
                       {l.entityId ? ` · ${String(l.entityId).slice(0, 12)}` : ""}
@@ -467,13 +467,13 @@ export function AdminClient() {
           </section>
 
           <div className="flex flex-wrap gap-3 text-sm">
-            <Link href="/assessments" className="text-teal-700 hover:underline">
+            <Link href="/assessments" className="text-orange-700 hover:underline">
               Assessments →
             </Link>
-            <Link href="/reviews" className="text-teal-700 hover:underline">
+            <Link href="/reviews" className="text-orange-700 hover:underline">
               Review queue →
             </Link>
-            <Link href="/challenges" className="text-teal-700 hover:underline">
+            <Link href="/challenges" className="text-orange-700 hover:underline">
               Challenge bank →
             </Link>
           </div>
@@ -579,7 +579,7 @@ export function AdminClient() {
           {assignments && (
             <div className="flex flex-wrap gap-2">
               {Object.entries(assignments.byStatus ?? {}).map(([k, v]) => (
-                <Badge key={k} variant="cyan">
+                <Badge key={k} variant="brand">
                   {k} {String(v)}
                 </Badge>
               ))}
@@ -635,12 +635,12 @@ export function AdminClient() {
                           {row.workspace?.id && (
                             <Link
                               href={`/workspace/${row.workspace.id}`}
-                              className="text-xs text-teal-700 hover:underline"
+                              className="text-xs text-orange-700 hover:underline"
                             >
                               Workspace →
                             </Link>
                           )}
-                          <Link href={`/scorecards/${row.id}`} className="text-xs text-teal-700 hover:underline">
+                          <Link href={`/scorecards/${row.id}`} className="text-xs text-orange-700 hover:underline">
                             Scorecard →
                           </Link>
                         </div>
@@ -711,7 +711,7 @@ export function AdminClient() {
                 <Button variant="outline" disabled={busy} onClick={() => void scanIntegrityLibrary()}>
                   Scan integrity
                 </Button>
-                <Link href="/challenges" className="self-center text-sm text-teal-700 hover:underline">
+                <Link href="/challenges" className="self-center text-sm text-orange-700 hover:underline">
                   Open bank →
                 </Link>
               </div>
@@ -745,7 +745,7 @@ export function AdminClient() {
                             </Badge>
                           )}
                           {c.calibratedDifficulty != null && (
-                            <Badge variant="cyan">
+                            <Badge variant="brand">
                               labeled {c.difficulty} · cal {c.calibratedDifficulty}
                             </Badge>
                           )}
@@ -919,7 +919,7 @@ export function AdminClient() {
                       <div className="flex flex-wrap gap-2">
                         <Badge
                           variant={
-                            c.integrityStatus === "fail" ? "rose" : c.integrityStatus === "warn" ? "amber" : "cyan"
+                            c.integrityStatus === "fail" ? "rose" : c.integrityStatus === "warn" ? "amber" : "brand"
                           }
                         >
                           {c.integrityStatus}
@@ -937,7 +937,7 @@ export function AdminClient() {
                 </div>
               </div>
               {integrityDetail && (
-                <div className="rounded-xl border border-cyan-500/20 bg-cyan-500/5 p-4 text-sm">
+                <div className="rounded-xl border border-orange-500/20 bg-orange-500/5 p-4 text-sm">
                   <div className="font-medium">
                     {integrityDetail.slug} · {integrityDetail.status}
                   </div>
@@ -959,7 +959,7 @@ export function AdminClient() {
         <div className="space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex flex-wrap gap-2">
-              <Badge variant="cyan">queued {jobs.queued}</Badge>
+              <Badge variant="brand">queued {jobs.queued}</Badge>
               <Badge variant="amber">running {jobs.running}</Badge>
               <Badge>mode {jobs.executionMode}</Badge>
             </div>
@@ -988,7 +988,7 @@ export function AdminClient() {
                               ? "rose"
                               : j.status === "QUEUED"
                                 ? "amber"
-                                : "cyan"
+                                : "brand"
                         }
                       >
                         {j.status}
@@ -1028,7 +1028,7 @@ export function AdminClient() {
                     {p.model} · {p.baseUrl}
                   </div>
                   <div className="mt-1 flex flex-wrap gap-2">
-                    {p.isDefault && <Badge variant="cyan">default</Badge>}
+                    {p.isDefault && <Badge variant="brand">default</Badge>}
                     <Badge variant={p.enabled ? "emerald" : "amber"}>{p.enabled ? "enabled" : "disabled"}</Badge>
                     <Badge variant={p.apiKeyConfigured ? "emerald" : "amber"}>
                       {p.apiKeyConfigured ? `env ${p.apiKeyEnv}` : "mock fallback"}
@@ -1108,7 +1108,7 @@ export function AdminClient() {
               {audits.map((l) => (
                 <div key={l.id} className="rounded-lg border border-slate-200 px-3 py-2 text-sm">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-mono text-teal-800">{l.action}</span>
+                    <span className="font-mono text-orange-800">{l.action}</span>
                     <Badge>{l.entityType}</Badge>
                   </div>
                   <div className="mt-1 text-slate-600">
@@ -1164,7 +1164,7 @@ export function AdminClient() {
               </p>
               <p>
                 Avg overall score across reports:{" "}
-                <span className="font-mono text-teal-800">{formatScore(a?.averageScores?.overall ?? 0)}</span>
+                <span className="font-mono text-orange-800">{formatScore(a?.averageScores?.overall ?? 0)}</span>
               </p>
             </CardContent>
           </Card>
@@ -1173,19 +1173,19 @@ export function AdminClient() {
               <CardTitle>Quick ops links</CardTitle>
             </CardHeader>
             <CardContent className="flex flex-wrap gap-3 text-sm">
-              <Link href="/assessments" className="text-teal-700 hover:underline">
+              <Link href="/assessments" className="text-orange-700 hover:underline">
                 Assessments →
               </Link>
-              <Link href="/candidates" className="text-teal-700 hover:underline">
+              <Link href="/candidates" className="text-orange-700 hover:underline">
                 Candidates →
               </Link>
-              <Link href="/reviews" className="text-teal-700 hover:underline">
+              <Link href="/reviews" className="text-orange-700 hover:underline">
                 Reviews →
               </Link>
-              <Link href="/teams" className="text-teal-700 hover:underline">
+              <Link href="/teams" className="text-orange-700 hover:underline">
                 Teams →
               </Link>
-              <Link href="/architecture" className="text-teal-700 hover:underline">
+              <Link href="/architecture" className="text-orange-700 hover:underline">
                 Architecture →
               </Link>
             </CardContent>

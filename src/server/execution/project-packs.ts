@@ -690,7 +690,7 @@ function apiForgePack(): StarterFile[] {
       content: `import http from "http";
 import { URL } from "url";
 
-/** API design gauntlet — versioning, pagination, idempotency, errors. */
+/** API design pack — versioning, pagination, idempotency, errors. */
 const items = new Map<string, { id: string; name: string }>();
 
 export function createItem(name: string, idempotencyKey?: string) {

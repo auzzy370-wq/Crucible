@@ -12,11 +12,11 @@ The seed loads the **full challenge library as published 60-minute assessments**
 
 | Path | Route | What you get |
 |------|-------|----------------|
-| **Learning hub** | `/learn` | Rank HUD, daily + weekly quests, XP breakdown, craft path chapters |
-| **Learn Arcade** | `/learn/games` | 1,000 HTML5 drills — featured craft games plus seeded arenas (hashing, Big-O, stacks, bits, systems) |
+| **Learning hub** | `/learn` | Level, XP and streak; today’s two goals; craft paths; learner home after sign-in |
+| **Learn Arcade** | `/learn/games` | Four hand-built games: Framework Flow, Big-O Blitz, Pair Seeker, Binary Range |
 | **Interview Craft** | `/learn/interview` | Loop mechanics, live-coding framework, DSA patterns, system design, behavioral STAR |
 | **AI Craft** | `/learn/ai` | Prompting, APIs, tools, RAG, agents, evals, safety |
-| **Study plans** | `/study-plans` | Gamified campaigns: chapter maps, node XP, pack clear bonus (+200), quests & medals |
+| **Study plans** | `/study-plans` | Company and role problem lists; each solved problem earns XP |
 | **Company mocks** | `/interview` | Phone / coding / onsite rounds, briefings, 1 free mock then Premium |
 | **Jobs** | `/jobs` | Live eng openings from Google, Amazon, Meta, and the rest of the company list — Apply opens the official posting |
 | **Roadmap** | `/roadmap` | Skill tree + next problems |
@@ -126,12 +126,12 @@ Admins can **Auto-run all assessments** and **Post assignment scores** from the 
 
 ## SaaS prep features
 
-- **Public landing** — `/` converts logged-out visitors; signed-in users go to Operations
+- **Entry** — `/` sends guests to the free Learn page (with a dismissible sign-in popup); learners land on `/learn`, hiring staff on `/dashboard`
 - **Daily Challenge** — `/daily` with streak tracking
 - **Weekly broken production** — `/weekly` shared incident/SaaS failure for the week
 - **Contest Arena** — `/contest` optional heat + leaderboard
 - **Editorials** — `/editorials` free + Premium solutions after judge signal
-- **Study Plans** — `/study-plans` campaign HUD (XP, active quest, medals), company/role packs with chapter maps and clear bonuses
+- **Study Plans** — `/study-plans` company/role problem lists with progress and XP
 - **Lightning Judge / Debugger / AI autocomplete** — Premium priority queue, interactive debugger, Monaco AI completions
 - **Hidden harnesses** — coding Submit runs real hidden fixtures (TS/Python); Python & Go starters included
 - **Public qualification profiles** — `/u/casey-elite`, `/u/sam-appsec`, `/u/premium-prep`

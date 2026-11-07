@@ -180,7 +180,7 @@ export function AdminCompetitionPanel() {
           </div>
           <div className="h-2 overflow-hidden rounded-full bg-slate-100">
             <div
-              className="h-full rounded-full bg-cyan-500/80 transition-all duration-300"
+              className="h-full rounded-full bg-orange-500/80 transition-all duration-300"
               style={{ width: `${pct}%` }}
             />
           </div>
@@ -205,7 +205,7 @@ export function AdminCompetitionPanel() {
                 <tr
                   key={r.assignmentId}
                   className={`border-t border-slate-900 ${
-                    r.phase === "running" ? "bg-cyan-500/5 text-cyan-50" : "text-slate-700"
+                    r.phase === "running" ? "bg-orange-500/5 text-orange-50" : "text-slate-700"
                   }`}
                 >
                   <td className="px-2 py-1">
@@ -215,7 +215,7 @@ export function AdminCompetitionPanel() {
                   <td className="px-2 py-1">
                     <Badge
                       variant={
-                        r.phase === "done" ? "emerald" : r.phase === "error" ? "rose" : r.phase === "running" ? "cyan" : undefined
+                        r.phase === "done" ? "emerald" : r.phase === "error" ? "rose" : r.phase === "running" ? "brand" : undefined
                       }
                     >
                       {r.phase}
@@ -253,7 +253,7 @@ export function AdminCompetitionPanel() {
         ].map(([label, value]) => (
           <div key={String(label)} className="rounded-lg border border-slate-200 px-3 py-2">
             <div className="font-mono text-[10px] uppercase tracking-wider text-slate-500">{label}</div>
-            <div className="mt-1 font-mono text-xl text-teal-900">{value}</div>
+            <div className="mt-1 font-mono text-xl text-orange-900">{value}</div>
           </div>
         ))}
       </div>

@@ -4,7 +4,8 @@ import { Role, User } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { AppError } from "@/lib/errors";
 
-const COOKIE = "gauntlet_session";
+export const SESSION_COOKIE = "crucible_session";
+const COOKIE = SESSION_COOKIE;
 const TTL_MS = 1000 * 60 * 60 * 24 * 14;
 
 export type AuthUser = Pick<

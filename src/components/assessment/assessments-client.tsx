@@ -154,7 +154,7 @@ export function AssessmentsClient(props: {
   return (
     <div className="animate-rise space-y-6">
       <header>
-        <p className="font-mono text-xs tracking-[0.3em] text-teal-700">HIRING · STEP 1</p>
+        <p className="font-mono text-xs tracking-[0.3em] text-orange-700">HIRING · STEP 1</p>
         <h1 className="mt-2 text-2xl font-semibold sm:text-3xl">Create → assign → wait for evidence</h1>
         <p className="mt-2 max-w-3xl text-slate-600">
           Pick a challenge from the full library, set a timer, assign a candidate. They get an isolated IDE; you review
@@ -277,7 +277,7 @@ export function AssessmentsClient(props: {
               <Card key={a.id}>
                 <CardHeader>
                   <div className="flex flex-wrap gap-2">
-                    <Badge variant={a.track === "CYBERSECURITY" || a.track === "CLOUD_INFRA_SECURITY" ? "violet" : a.track === "SECURE_FULL_STACK" || a.track === "HEALTHCARE" ? "emerald" : "cyan"}>{a.track}</Badge>
+                    <Badge variant={a.track === "CYBERSECURITY" || a.track === "CLOUD_INFRA_SECURITY" ? "violet" : a.track === "SECURE_FULL_STACK" || a.track === "HEALTHCARE" ? "emerald" : "brand"}>{a.track}</Badge>
                     <Badge>{a.status}</Badge>
                     <Badge variant="emerald">{a.timedMinutes ?? 60}m</Badge>
                     {a.challenge.difficulty != null && <Badge variant="amber">D{a.challenge.difficulty}</Badge>}
@@ -291,7 +291,7 @@ export function AssessmentsClient(props: {
                     <ul className="space-y-1 text-xs text-slate-500">
                       {reqs.slice(0, 4).map((r) => (
                         <li key={r} className="flex gap-2">
-                          <span className="text-cyan-500">▸</span>
+                          <span className="text-orange-500">▸</span>
                           <span>{r}</span>
                         </li>
                       ))}
@@ -322,12 +322,12 @@ export function AssessmentsClient(props: {
                   <div className="text-slate-600">{a.assessment.title}</div>
                   <p className="text-xs text-slate-500">{ch.summary}</p>
                   <div className="flex flex-wrap items-center gap-2">
-                    <Badge variant={a.assessment.track === "CYBERSECURITY" ? "violet" : "cyan"}>
+                    <Badge variant={a.assessment.track === "CYBERSECURITY" ? "violet" : "brand"}>
                       {a.assessment.track}
                     </Badge>
                     <span className="font-mono text-xs text-slate-700">{a.status}</span>
                     <span className="font-mono text-xs text-emerald-300">L{a.currentLevel}</span>
-                    <span className="font-mono text-xs text-teal-700">
+                    <span className="font-mono text-xs text-orange-700">
                       {a.scoreReport ? formatScore(a.scoreReport.overall) : "—"}
                     </span>
                   </div>
@@ -335,7 +335,7 @@ export function AssessmentsClient(props: {
                     <div className="text-[11px] text-slate-500">{reqs.length} deliverables in mission brief</div>
                   )}
                   {a.workspace ? (
-                    <Link className="inline-block text-teal-700 hover:underline" href={`/workspace/${a.workspace.id}`}>
+                    <Link className="inline-block text-orange-700 hover:underline" href={`/workspace/${a.workspace.id}`}>
                       Open workspace →
                     </Link>
                   ) : null}
@@ -374,7 +374,7 @@ export function AssessmentsClient(props: {
                       {ch.difficulty != null ? ` · D${ch.difficulty}` : ""}
                     </td>
                     <td className="px-4 py-3">
-                      <Badge variant={a.assessment.track === "CYBERSECURITY" ? "violet" : "cyan"}>
+                      <Badge variant={a.assessment.track === "CYBERSECURITY" ? "violet" : "brand"}>
                         {a.assessment.track}
                       </Badge>
                     </td>
@@ -385,7 +385,7 @@ export function AssessmentsClient(props: {
                     </td>
                     <td className="px-4 py-3">
                       {a.workspace ? (
-                        <Link className="text-teal-700 hover:underline" href={`/workspace/${a.workspace.id}`}>
+                        <Link className="text-orange-700 hover:underline" href={`/workspace/${a.workspace.id}`}>
                           Open
                         </Link>
                       ) : (

@@ -33,7 +33,7 @@ export default async function CandidatesPage() {
   return (
     <div className="animate-rise space-y-6">
       <header>
-        <p className="font-mono text-xs tracking-[0.3em] text-teal-700">CANDIDATES</p>
+        <p className="font-mono text-xs tracking-[0.3em] text-orange-700">CANDIDATES</p>
         <h1 className="mt-2 font-serif-display text-2xl sm:text-3xl">Profiles & evidence lanes</h1>
         <p className="mt-2 max-w-2xl text-slate-600">
           Open a dossier to see verified skills, claimed résumé noise, and scored assessments.
@@ -49,7 +49,7 @@ export default async function CandidatesPage() {
           return (
             <article
               key={c.id}
-              className="rounded-2xl border border-slate-200 bg-white/75 p-5 transition hover:border-teal-300/60"
+              className="rounded-2xl border border-slate-200 bg-white/75 p-5 transition hover:border-orange-300/60"
             >
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div>
@@ -84,7 +84,7 @@ export default async function CandidatesPage() {
                   <div className="font-mono text-[10px] uppercase text-slate-500">Scored</div>
                 </div>
               </div>
-              <Link className="mt-4 inline-block text-sm text-teal-700 hover:underline" href={`/candidates/${c.id}`}>
+              <Link className="mt-4 inline-block text-sm text-orange-700 hover:underline" href={`/candidates/${c.id}`}>
                 Open dossier →
               </Link>
             </article>

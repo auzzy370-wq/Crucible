@@ -35,18 +35,18 @@ export default function TeamsPage() {
   return (
     <div className="animate-rise space-y-6">
       <header>
-        <p className="font-mono text-xs tracking-[0.3em] text-teal-700">TEAM COLLABORATION</p>
+        <p className="font-mono text-xs tracking-[0.3em] text-orange-700">TEAM COLLABORATION</p>
         <h1 className="mt-2 text-2xl font-semibold sm:text-3xl">Shared delivery assessments</h1>
         <p className="mt-2 max-w-3xl text-slate-600">
           Evaluate observable engineering collaboration — contracts, reviews, integration — not personality fit.
-          Cybersecurity purple-team exercises can also run as team gauntlets.
+          Cybersecurity purple-team exercises can also run as team challenges.
         </p>
       </header>
       {teams.map((team) => (
         <Card key={team.id}>
           <CardHeader>
             <div className="flex flex-wrap gap-2">
-              <Badge variant="cyan">{team.assessment.track}</Badge>
+              <Badge variant="brand">{team.assessment.track}</Badge>
               <Badge>{team.members.length} members</Badge>
             </div>
             <CardTitle>{team.name}</CardTitle>

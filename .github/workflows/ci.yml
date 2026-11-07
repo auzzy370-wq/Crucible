@@ -12,12 +12,12 @@ jobs:
       postgres:
         image: postgres:16-alpine
         env:
-          POSTGRES_USER: gauntlet
-          POSTGRES_PASSWORD: gauntlet
-          POSTGRES_DB: engineering_gauntlet
+          POSTGRES_USER: crucible
+          POSTGRES_PASSWORD: crucible
+          POSTGRES_DB: crucible
         ports: ["5432:5432"]
         options: >-
-          --health-cmd "pg_isready -U gauntlet -d engineering_gauntlet"
+          --health-cmd "pg_isready -U crucible -d crucible"
           --health-interval 5s
           --health-timeout 5s
           --health-retries 10
@@ -30,14 +30,14 @@ jobs:
           --health-timeout 3s
           --health-retries 10
     env:
-      DATABASE_URL: postgresql://gauntlet:gauntlet@localhost:5432/engineering_gauntlet?schema=public
+      DATABASE_URL: postgresql://crucible:crucible@localhost:5432/crucible?schema=public
       REDIS_URL: redis://localhost:6379
       SESSION_SECRET: ci-session-secret
       AI_FALLBACK_MOCK: "true"
       EXECUTION_MODE: docker
       APP_URL: http://localhost:3847
       NEXT_PUBLIC_APP_URL: http://localhost:3847
-      STORAGE_ROOT: /tmp/gauntlet-storage
+      STORAGE_ROOT: /tmp/crucible-storage
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -51,7 +51,7 @@ jobs:
       - run: npm run test:unit
       - run: npm run build
       - run: |
-          mkdir -p /tmp/gauntlet-storage
+          mkdir -p /tmp/crucible-storage
           npm run start &
           npx wait-on http://localhost:3847/login -t 60000
           npm run test:e2e

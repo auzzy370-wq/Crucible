@@ -377,8 +377,16 @@ export function Problemset(props: {
     <div className="animate-rise space-y-6">
       <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="font-mono text-xs tracking-[0.3em] text-teal-700">LEARNING LIBRARY</p>
-          <h1 className="mt-2 font-serif-display text-2xl tracking-tight sm:text-3xl">Practice bank</h1>
+          <p className="font-mono text-xs tracking-[0.3em] text-orange-700">PRACTICE</p>
+          <h1 className="mt-2 font-serif-display text-2xl tracking-tight sm:text-3xl">Problem bank</h1>
+          <div className="mt-2 flex flex-wrap gap-3 text-sm">
+            <Link href="/daily" className="text-orange-700 hover:underline">
+              Today’s problem →
+            </Link>
+            <Link href="/study-plans" className="text-orange-700 hover:underline">
+              Study plans →
+            </Link>
+          </div>
           <p className="mt-2 max-w-2xl text-slate-600">
             Train on the same timed coding and production missions employers assign — TypeScript, JavaScript, Python,
             Go, Rust, Java. Search the full bank ({libraryTotal.toLocaleString()}{" "}
@@ -402,7 +410,7 @@ export function Problemset(props: {
             className={cn(
               "min-h-11 rounded-lg border px-3 py-2 text-sm",
               mode === "problemset"
-                ? "border-teal-400/50 bg-teal-500/10 text-teal-900"
+                ? "border-orange-400/50 bg-orange-500/10 text-orange-900"
                 : "border-slate-300 text-slate-600 hover:bg-slate-100",
             )}
           >
@@ -419,7 +427,7 @@ export function Problemset(props: {
             className={cn(
               "min-h-11 rounded-lg border px-3 py-2 text-sm",
               mode === "projects"
-                ? "border-teal-400/50 bg-teal-500/10 text-teal-900"
+                ? "border-orange-400/50 bg-orange-500/10 text-orange-900"
                 : "border-slate-300 text-slate-600 hover:bg-slate-100",
             )}
           >
@@ -451,7 +459,7 @@ export function Problemset(props: {
                   onClick={() => setDiff(d)}
                   className={cn(
                     "shrink-0 rounded-md border px-2.5 py-2 text-xs font-medium",
-                    diff === d ? "border-teal-400 bg-teal-50 text-teal-900" : "border-slate-200 text-slate-500",
+                    diff === d ? "border-orange-400 bg-orange-50 text-orange-900" : "border-slate-200 text-slate-500",
                   )}
                 >
                   {d}
@@ -492,7 +500,7 @@ export function Problemset(props: {
                 <option value="title">Sort: title</option>
               </select>
               <select
-                className="h-11 w-full rounded-md border border-teal-300/60 bg-white px-3 text-sm text-teal-900"
+                className="h-11 w-full rounded-md border border-orange-300/60 bg-white px-3 text-sm text-orange-900"
                 value={lang}
                 onChange={(e) => setLang(e.target.value as CodingLanguage)}
                 title="Language for Solve"
@@ -597,7 +605,7 @@ export function Problemset(props: {
                     {p.editorialSlug && (
                       <Link
                         href={`/editorials?slug=${encodeURIComponent(p.editorialSlug)}`}
-                        className="text-cyan-400/80 hover:underline"
+                        className="text-orange-400/80 hover:underline"
                       >
                         Editorial
                       </Link>
@@ -616,7 +624,7 @@ export function Problemset(props: {
                         type="button"
                         disabled={starting === p.id}
                         onClick={() => void startProblem(p)}
-                        className="inline-flex min-h-11 w-full items-center justify-center rounded-md border border-cyan-400/30 bg-teal-500/10 text-sm text-teal-900 disabled:opacity-50"
+                        className="inline-flex min-h-11 w-full items-center justify-center rounded-md border border-orange-400/30 bg-orange-500/10 text-sm text-orange-900 disabled:opacity-50"
                       >
                         {starting === p.id ? "Opening…" : `Solve · ${CODING_LANGUAGE_LABELS[lang]}`}
                       </button>
@@ -678,7 +686,7 @@ export function Problemset(props: {
                           {p.editorialSlug && (
                             <Link
                               href={`/editorials?slug=${encodeURIComponent(p.editorialSlug)}`}
-                              className="font-mono text-[10px] text-cyan-400/80 hover:underline"
+                              className="font-mono text-[10px] text-orange-400/80 hover:underline"
                             >
                               Editorial
                             </Link>
@@ -723,7 +731,7 @@ export function Problemset(props: {
                             type="button"
                             disabled={starting === p.id}
                             onClick={() => void startProblem(p)}
-                            className="text-teal-700 hover:underline disabled:opacity-50"
+                            className="text-orange-700 hover:underline disabled:opacity-50"
                           >
                             {starting === p.id ? "Opening…" : `Solve (${CODING_LANGUAGE_LABELS[lang]}) →`}
                           </button>
@@ -747,7 +755,7 @@ export function Problemset(props: {
             <button
               type="button"
               disabled={remoteLoading}
-              className="inline-flex min-h-11 w-full items-center justify-center rounded-md border border-slate-300 bg-white text-sm text-slate-800 hover:border-cyan-500/40 hover:text-teal-900 disabled:opacity-50"
+              className="inline-flex min-h-11 w-full items-center justify-center rounded-md border border-slate-300 bg-white text-sm text-slate-800 hover:border-orange-500/40 hover:text-orange-900 disabled:opacity-50"
               onClick={() => void loadMore()}
             >
               {remoteLoading
@@ -788,7 +796,7 @@ export function Problemset(props: {
                 <div className="mt-4 flex items-center justify-between text-sm">
                   <span className="font-mono text-xs text-slate-500">60m session</span>
                   {c.workspaceId ? (
-                    <Link className="text-teal-700 hover:underline" href={`/workspace/${c.workspaceId}`}>
+                    <Link className="text-orange-700 hover:underline" href={`/workspace/${c.workspaceId}`}>
                       Open workspace →
                     </Link>
                   ) : (
@@ -804,7 +812,7 @@ export function Problemset(props: {
             <button
               type="button"
               disabled={remoteLoading}
-              className="inline-flex min-h-11 w-full items-center justify-center rounded-md border border-slate-300 bg-white text-sm text-slate-800 hover:border-cyan-500/40 hover:text-teal-900 disabled:opacity-50"
+              className="inline-flex min-h-11 w-full items-center justify-center rounded-md border border-slate-300 bg-white text-sm text-slate-800 hover:border-orange-500/40 hover:text-orange-900 disabled:opacity-50"
               onClick={() => void loadMore()}
             >
               {remoteLoading

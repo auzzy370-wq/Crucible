@@ -39,11 +39,11 @@ export function ContestClient() {
   return (
     <div className="animate-rise space-y-6">
       <header>
-        <p className="font-mono text-xs tracking-[0.3em] text-teal-700">PROVE THE CRAFT</p>
+        <p className="font-mono text-xs tracking-[0.3em] text-orange-700">PROVE THE CRAFT</p>
         <h1 className="mt-2 font-serif-display text-2xl sm:text-3xl">{contest.title}</h1>
         <p className="mt-2 max-w-3xl text-slate-600">{contest.description}</p>
         <div className="mt-3 flex flex-wrap gap-2">
-          <Badge variant="cyan">Ends {new Date(contest.endsAt).toLocaleString()}</Badge>
+          <Badge variant="brand">Ends {new Date(contest.endsAt).toLocaleString()}</Badge>
           <Badge>{contest.problems?.length ?? 0} problems</Badge>
         </div>
       </header>
@@ -59,7 +59,7 @@ export function ContestClient() {
             <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center">
               <Link
                 href="/challenges"
-                className="inline-flex min-h-11 items-center justify-center rounded-md border border-slate-300 px-3 text-sm text-teal-700 sm:min-h-0 sm:justify-start sm:border-0 sm:px-0"
+                className="inline-flex min-h-11 items-center justify-center rounded-md border border-slate-300 px-3 text-sm text-orange-700 sm:min-h-0 sm:justify-start sm:border-0 sm:px-0"
               >
                 Open evidence bank →
               </Link>
@@ -84,7 +84,7 @@ export function ContestClient() {
                 <div className="truncate text-sm font-medium text-slate-900">{e.user?.name}</div>
               </div>
               <div className="shrink-0 text-right font-mono text-sm">
-                <div className="text-teal-800">{e.score}</div>
+                <div className="text-orange-800">{e.score}</div>
                 <div className="text-[11px] text-slate-500">{e.solvedCount} solved</div>
               </div>
             </div>
@@ -110,7 +110,7 @@ export function ContestClient() {
                 <tr key={e.id} className="border-b border-slate-200/80">
                   <td className="px-4 py-3 font-mono text-slate-500">{i + 1}</td>
                   <td className="px-4 py-3">{e.user?.name}</td>
-                  <td className="px-4 py-3 font-mono text-teal-800">{e.score}</td>
+                  <td className="px-4 py-3 font-mono text-orange-800">{e.score}</td>
                   <td className="px-4 py-3 font-mono">{e.solvedCount}</td>
                 </tr>
               ))}

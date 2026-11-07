@@ -4,7 +4,7 @@ import { AppError } from "@/lib/errors";
 import { jsonOk, withHandler } from "@/server/auth/api";
 import { requireUser } from "@/server/auth/session";
 import { getStudyPlan } from "@/server/saas/study-plans";
-import { itemXp, PLAN_CLEAR_BONUS_XP } from "@/server/learning/study-plan-game";
+import { itemXp } from "@/server/learning/study-plan-game";
 import { touchLearnStreak } from "@/server/learning/gamification";
 
 const schema = z.object({
@@ -43,20 +43,12 @@ export async function POST(req: Request, ctx: { params: Promise<{ slug: string }
     }
 
     const nodeXp = itemXp({ itemKind: plan.itemKind, difficulty });
-    const wasComplete =
-      plan.challengeSlugs.length > 0 &&
-      plan.challengeSlugs.every((s) => existing.completedSlugs.includes(s));
     const nowComplete =
       plan.challengeSlugs.length > 0 && plan.challengeSlugs.every((s) => set.has(s));
 
     let xpEarned = 0;
-    let clearBonusXp = 0;
     if (body.done && !alreadyDone) {
       xpEarned = nodeXp;
-      if (nowComplete && !wasComplete) {
-        clearBonusXp = PLAN_CLEAR_BONUS_XP;
-        xpEarned += clearBonusXp;
-      }
       await touchLearnStreak(user.id);
     }
 
@@ -68,8 +60,7 @@ export async function POST(req: Request, ctx: { params: Promise<{ slug: string }
     return jsonOk({
       ...updated,
       xpEarned,
-      clearBonusXp,
-      campaignComplete: nowComplete,
+      complete: nowComplete,
       completedCount: set.size,
       totalCount: plan.challengeSlugs.length,
     });

@@ -43,7 +43,7 @@ export function ResearchFrontierClient() {
         <Button variant="secondary" size="sm" onClick={() => void load()}>
           Refresh catalog
         </Button>
-        <Link href="/leaderboards" className="inline-flex items-center text-sm text-teal-700 hover:underline">
+        <Link href="/leaderboards" className="inline-flex items-center text-sm text-orange-700 hover:underline">
           View rankings →
         </Link>
       </div>
@@ -62,11 +62,11 @@ export function ResearchFrontierClient() {
                 <div className="flex flex-wrap gap-1">
                   <Badge variant="amber">D{c.difficulty}</Badge>
                   {c.expectedComplexity && <Badge>{c.expectedComplexity}</Badge>}
-                  <Badge variant="cyan">{c.timeLimitMs}ms</Badge>
+                  <Badge variant="brand">{c.timeLimitMs}ms</Badge>
                 </div>
               </div>
               {c.functionSignature && (
-                <pre className="mt-3 overflow-x-auto rounded-lg border border-slate-200 bg-black/40 p-3 font-mono text-[11px] text-teal-900/90">
+                <pre className="mt-3 overflow-x-auto rounded-lg border border-slate-200 bg-black/40 p-3 font-mono text-[11px] text-orange-900/90">
                   {c.functionSignature}
                 </pre>
               )}
@@ -80,7 +80,7 @@ export function ResearchFrontierClient() {
               <div className="mt-4">
                 <Link
                   href={`/challenges?q=${encodeURIComponent(c.slug)}`}
-                  className="text-sm text-teal-700 hover:underline"
+                  className="text-sm text-orange-700 hover:underline"
                 >
                   Open in challenge bank →
                 </Link>

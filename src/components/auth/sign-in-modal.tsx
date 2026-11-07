@@ -109,7 +109,7 @@ export function SignInModal({
               Sign in to save progress
             </h2>
             <p className="mt-1.5 text-sm text-slate-500">
-              Or close this and keep exploring the free forge — arcade and craft paths stay open.
+              Or close this and keep exploring — lessons and the arcade are free.
             </p>
           </div>
           <Button type="button" variant="ghost" size="icon" aria-label="Close" onClick={continueFree}>
@@ -156,7 +156,7 @@ export function SignInModal({
           </Button>
           <p className="text-center text-sm text-slate-500">
             New here?{" "}
-            <Link className="text-teal-700 hover:underline" href="/register">
+            <Link className="text-orange-700 hover:underline" href="/register">
               Create a free learner account
             </Link>
           </p>

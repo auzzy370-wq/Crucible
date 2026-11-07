@@ -581,7 +581,7 @@ model Workspace {
   id             String   @id @default(cuid())
   assignmentId   String   @unique
   language       String   @default("typescript")
-  imageTag       String   @default("gauntlet/node:20")
+  imageTag       String   @default("crucible/node:20")
   rootPath       String
   gitRemoteUrl   String?
   lastCommitSha  String?

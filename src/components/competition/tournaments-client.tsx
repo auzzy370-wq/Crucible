@@ -43,7 +43,7 @@ export function TournamentsClient() {
   return (
     <div className="animate-rise space-y-6">
       <header>
-        <p className="font-mono text-xs tracking-[0.3em] text-teal-700">TOURNAMENT CENTER</p>
+        <p className="font-mono text-xs tracking-[0.3em] text-orange-700">TOURNAMENT CENTER</p>
         <h1 className="mt-2 font-serif-display text-2xl sm:text-3xl">Tournaments</h1>
         <p className="mt-2 max-w-2xl text-slate-600">
           Scheduled and live heats across human, AI, hybrid, and team modes. Standings update from verified
@@ -55,10 +55,10 @@ export function TournamentsClient() {
         <Button variant="secondary" size="sm" onClick={() => void load()}>
           Refresh
         </Button>
-        <Link href="/contest" className="inline-flex items-center text-sm text-teal-700 hover:underline">
+        <Link href="/contest" className="inline-flex items-center text-sm text-orange-700 hover:underline">
           Weekly heat →
         </Link>
-        <Link href="/leaderboards" className="inline-flex items-center text-sm text-teal-700 hover:underline">
+        <Link href="/leaderboards" className="inline-flex items-center text-sm text-orange-700 hover:underline">
           Leaderboards →
         </Link>
       </div>
@@ -75,7 +75,7 @@ export function TournamentsClient() {
                   <p className="mt-1 text-sm text-slate-600">{t.description}</p>
                 </div>
                 <div className="flex flex-wrap gap-1">
-                  <Badge variant={t.status === "LIVE" ? "emerald" : t.status === "SCHEDULED" ? "cyan" : "default"}>
+                  <Badge variant={t.status === "LIVE" ? "emerald" : t.status === "SCHEDULED" ? "brand" : "default"}>
                     {t.status}
                   </Badge>
                   <Badge>{t.mode}</Badge>
@@ -101,7 +101,7 @@ export function TournamentsClient() {
                       <span>
                         #{s.rank} {s.name}
                       </span>
-                      <span className="font-mono text-teal-800">{s.score}</span>
+                      <span className="font-mono text-orange-800">{s.score}</span>
                     </div>
                   ))}
                 </div>

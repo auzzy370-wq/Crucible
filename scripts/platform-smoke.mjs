@@ -68,13 +68,13 @@ async function main() {
 
   // Demo accounts
   const accounts = [
-    ["admin@gauntlet.local", process.env.DEMO_ADMIN_PASSWORD || ""],
-    ["hiring@gauntlet.local", process.env.DEMO_ADMIN_PASSWORD || ""],
-    ["reviewer@gauntlet.local", process.env.DEMO_ADMIN_PASSWORD || ""],
-    ["candidate@gauntlet.local", process.env.DEMO_CANDIDATE_PASSWORD || ""],
-    ["premium@gauntlet.local", process.env.DEMO_CANDIDATE_PASSWORD || ""],
-    ["cyber@gauntlet.local", process.env.DEMO_CANDIDATE_PASSWORD || ""],
-    ["teammate@gauntlet.local", process.env.DEMO_CANDIDATE_PASSWORD || ""],
+    ["admin@crucible.local", process.env.DEMO_ADMIN_PASSWORD || ""],
+    ["hiring@crucible.local", process.env.DEMO_ADMIN_PASSWORD || ""],
+    ["reviewer@crucible.local", process.env.DEMO_ADMIN_PASSWORD || ""],
+    ["candidate@crucible.local", process.env.DEMO_CANDIDATE_PASSWORD || ""],
+    ["premium@crucible.local", process.env.DEMO_CANDIDATE_PASSWORD || ""],
+    ["cyber@crucible.local", process.env.DEMO_CANDIDATE_PASSWORD || ""],
+    ["teammate@crucible.local", process.env.DEMO_CANDIDATE_PASSWORD || ""],
   ];
   const sessions = {};
   for (const [email, pw] of accounts) {
@@ -86,10 +86,10 @@ async function main() {
     }
   }
 
-  const free = sessions["candidate@gauntlet.local"];
-  const premium = sessions["premium@gauntlet.local"];
-  const hiring = sessions["hiring@gauntlet.local"];
-  const admin = sessions["admin@gauntlet.local"];
+  const free = sessions["candidate@crucible.local"];
+  const premium = sessions["premium@crucible.local"];
+  const hiring = sessions["hiring@crucible.local"];
+  const admin = sessions["admin@crucible.local"];
 
   // Authenticated app routes
   const routes = [
@@ -229,8 +229,8 @@ async function main() {
     // use a throwaway? free candidate already free — checkout mock upgrades them
     // Use teammate instead to not break free tests later — already ran free limits
   }
-  if (sessions["teammate@gauntlet.local"]) {
-    const tm = sessions["teammate@gauntlet.local"];
+  if (sessions["teammate@crucible.local"]) {
+    const tm = sessions["teammate@crucible.local"];
     const checkout = await api(tm.cookie, "/api/billing/checkout", {
       method: "POST",
       body: JSON.stringify({ interval: "monthly" }),

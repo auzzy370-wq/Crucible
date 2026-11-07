@@ -4,8 +4,8 @@
 
 /*
   Crucible brand tokens.
-  Slate/teal/cyan/amber scales invert semantically in .dark so existing
-  light-oriented utilities (text-slate-900, border-slate-200, bg-teal-50…)
+  Slate/orange/amber scales invert semantically in .dark so existing
+  light-oriented utilities (text-slate-900, border-slate-200, bg-orange-50…)
   stay readable without rewriting every page.
 */
 
@@ -29,7 +29,7 @@
   --brand-soft: rgba(255, 90, 31, 0.12);
   --brand-ink: #12141a;
   --brand-flame: #ff5a1f;
-  /* Inline/fenced code chips — never use remapped slate/teal scales here */
+  /* Inline/fenced code chips — never use remapped slate/orange scales here */
   --code-chip-bg: #ece8e4;
   --code-chip-fg: #1a1512;
   --code-chip-border: #d5cec6;
@@ -51,31 +51,6 @@
   --slate-800: #1e293b;
   --slate-900: #0f172a;
   --slate-950: #020617;
-
-  /* Brand accent scale — teal utilities map to flame orange */
-  --teal-50: #fff4ef;
-  --teal-100: #ffe4d6;
-  --teal-200: #ffc4a8;
-  --teal-300: #ff9a66;
-  --teal-400: #ff7340;
-  --teal-500: #ff5a1f;
-  --teal-600: #e84a12;
-  --teal-700: #c43b0d;
-  --teal-800: #9a2f0f;
-  --teal-900: #7a2812;
-  --teal-950: #3f1208;
-
-  --cyan-50: #ecfeff;
-  --cyan-100: #cffafe;
-  --cyan-200: #a5f3fc;
-  --cyan-300: #67e8f9;
-  --cyan-400: #22d3ee;
-  --cyan-500: #06b6d4;
-  --cyan-600: #0891b2;
-  --cyan-700: #0e7490;
-  --cyan-800: #155e75;
-  --cyan-900: #164e63;
-  --cyan-950: #083344;
 
   --amber-50: #fffbeb;
   --amber-100: #fef3c7;
@@ -101,17 +76,17 @@
   --emerald-900: #064e3b;
   --emerald-950: #022c22;
 
-  --orange-50: #fff7ed;
-  --orange-100: #ffedd5;
-  --orange-200: #fed7aa;
-  --orange-300: #fdba74;
-  --orange-400: #fb923c;
-  --orange-500: #f97316;
-  --orange-600: #ea580c;
-  --orange-700: #c2410c;
-  --orange-800: #9a3412;
-  --orange-900: #7c2d12;
-  --orange-950: #431407;
+  --orange-50: #fff4ef;
+  --orange-100: #ffe4d6;
+  --orange-200: #ffc4a8;
+  --orange-300: #ff9a66;
+  --orange-400: #ff7340;
+  --orange-500: #ff5a1f;
+  --orange-600: #e84a12;
+  --orange-700: #c43b0d;
+  --orange-800: #9a2f0f;
+  --orange-900: #7a2812;
+  --orange-950: #3f1208;
 
   --rose-50: #fff1f2;
   --rose-100: #ffe4e6;
@@ -175,29 +150,6 @@
   --slate-900: #eef3f8;
   --slate-950: #f8fafc;
 
-  --teal-50: rgba(255, 90, 31, 0.08);
-  --teal-100: rgba(255, 90, 31, 0.14);
-  --teal-200: rgba(255, 90, 31, 0.28);
-  --teal-300: #ff9a66;
-  --teal-400: #ff7340;
-  --teal-500: #ff5a1f;
-  --teal-600: #ff7340;
-  --teal-700: #ff9a66;
-  --teal-800: #ffc4a8;
-  --teal-900: #ffe4d6;
-  --teal-950: #fff4ef;
-
-  --cyan-50: rgba(255, 122, 61, 0.08);
-  --cyan-100: rgba(255, 122, 61, 0.14);
-  --cyan-200: rgba(255, 122, 61, 0.28);
-  --cyan-300: #ff9a66;
-  --cyan-400: #ff7340;
-  --cyan-500: #ff5a1f;
-  --cyan-600: #e84a12;
-  --cyan-700: #ff9a66;
-  --cyan-800: #ffc4a8;
-  --cyan-900: #ffe4d6;
-  --cyan-950: #fff4ef;
 
   --amber-50: rgba(251, 191, 36, 0.1);
   --amber-100: rgba(251, 191, 36, 0.16);
@@ -224,9 +176,9 @@
   --emerald-900: #ecfdf5;
   --emerald-950: #f0fdf8;
 
-  --orange-50: #1a1410;
-  --orange-100: #221810;
-  --orange-200: #3a2418;
+  --orange-50: rgba(255, 90, 31, 0.08);
+  --orange-100: rgba(255, 90, 31, 0.14);
+  --orange-200: rgba(255, 90, 31, 0.28);
   --orange-300: #ff9a66;
   --orange-400: #ff7340;
   --orange-500: #ff5a1f;
@@ -500,7 +452,7 @@ html.dark body {
   --landing-ink: var(--brand-ink);
   --landing-mute: var(--muted);
   --landing-line: color-mix(in srgb, var(--brand) 22%, transparent);
-  --landing-teal: var(--brand);
+  --landing-accent: var(--brand);
   background:
     radial-gradient(ellipse 90% 70% at 70% 18%, color-mix(in srgb, var(--brand) 14%, transparent), transparent 55%),
     radial-gradient(ellipse 60% 50% at 8% 82%, color-mix(in srgb, var(--accent-2) 10%, transparent), transparent 50%),
@@ -655,88 +607,7 @@ html:not(.dark) .landing-root {
   border-radius: 999px;
 }
 
-@keyframes learn-quest-in {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.learn-quest-card {
-  animation: learn-quest-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-.learn-quest-card:hover {
-  transform: translateY(-2px);
-}
-
-.learn-quest-card.is-cleared {
-  position: relative;
-}
-
-@keyframes learn-xp-shimmer {
-  0% {
-    background-position: 0% 50%;
-  }
-  100% {
-    background-position: 200% 50%;
-  }
-}
-
-.learn-xp-bar {
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--brand) 22%, transparent);
-  background-image: linear-gradient(
-    110deg,
-    var(--brand) 0%,
-    color-mix(in srgb, var(--brand) 70%, white) 45%,
-    var(--brand) 90%
-  );
-  background-size: 200% 100%;
-  animation: learn-xp-shimmer 2.8s linear infinite;
-}
-
-@keyframes forge-heat-pulse {
-  0%,
-  100% {
-    box-shadow: 0 0 0 0 color-mix(in srgb, var(--brand) 35%, transparent);
-    transform: scale(1);
-  }
-  50% {
-    box-shadow: 0 0 0 10px color-mix(in srgb, var(--brand) 0%, transparent);
-    transform: scale(1.03);
-  }
-}
-
-.forge-heat-pulse {
-  animation: forge-heat-pulse 2.4s ease-out infinite;
-}
-
-@keyframes forge-spark-rise {
-  0% {
-    opacity: 0;
-    transform: translateY(0) scale(0.6);
-  }
-  20% {
-    opacity: 0.9;
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(-72px) scale(1.1);
-  }
-}
-
-.forge-spark {
-  animation-name: forge-spark-rise;
-  animation-timing-function: ease-out;
-  animation-iteration-count: infinite;
-  opacity: 0;
-}
-
-@keyframes forge-xp-burst {
+@keyframes xp-burst {
   0% {
     opacity: 0;
     transform: translateY(8px) scale(0.9);
@@ -755,93 +626,12 @@ html:not(.dark) .landing-root {
   }
 }
 
-.forge-xp-burst {
-  animation: forge-xp-burst 1.35s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-@keyframes forge-quest-check {
-  0% {
-    opacity: 0;
-    transform: scale(0.4) rotate(-20deg);
-  }
-  55% {
-    opacity: 1;
-    transform: scale(1.15) rotate(4deg);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1) rotate(0deg);
-  }
-}
-
-.forge-quest-check {
-  animation: forge-quest-check 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-@keyframes forge-medal-shine {
-  0% {
-    transform: translateX(-120%) skewX(-18deg);
-  }
-  100% {
-    transform: translateX(220%) skewX(-18deg);
-  }
-}
-
-.forge-medal-shine::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  width: 40%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    color-mix(in srgb, white 55%, transparent),
-    transparent
-  );
-  animation: forge-medal-shine 2.8s ease-in-out infinite;
-}
-
-@keyframes forge-level-pop {
-  0% {
-    transform: scale(0.85);
-  }
-  60% {
-    transform: scale(1.08);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-.forge-level-badge {
-  animation: forge-level-pop 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-@keyframes forge-perfect-glow {
-  0%,
-  100% {
-    box-shadow: 0 0 0 0 color-mix(in srgb, #10b981 28%, transparent);
-  }
-  50% {
-    box-shadow: 0 0 0 8px color-mix(in srgb, #10b981 0%, transparent);
-  }
-}
-
-.forge-perfect-banner {
-  animation: forge-perfect-glow 2.2s ease-out infinite;
+.xp-burst {
+  animation: xp-burst 1.35s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .learn-quest-card,
-  .learn-quest-card:hover,
-  .learn-xp-bar,
-  .forge-heat-pulse,
-  .forge-spark,
-  .forge-xp-burst,
-  .forge-quest-check,
-  .forge-medal-shine::after,
-  .forge-level-badge,
-  .forge-perfect-banner {
+  .xp-burst {
     animation: none !important;
     transition: none !important;
     transform: none !important;

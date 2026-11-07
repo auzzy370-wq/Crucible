@@ -89,7 +89,7 @@ export function BigOBlitzGame() {
       <div className="flex flex-wrap items-center justify-between gap-2">
         <Badge variant="amber">Complexity match</Badge>
         <div className="flex gap-2">
-          <Badge variant="cyan">{score}/{ROUNDS.length}</Badge>
+          <Badge variant="brand">{score}/{ROUNDS.length}</Badge>
           <Badge variant={seconds <= 10 ? "rose" : "amber"}>{seconds}s</Badge>
         </div>
       </div>
@@ -103,7 +103,7 @@ export function BigOBlitzGame() {
           </Button>
         </div>
       ) : done ? (
-        <div className="rounded-2xl border border-teal-200 bg-teal-50 p-6">
+        <div className="rounded-2xl border border-orange-200 bg-orange-50 p-6">
           <p className="font-serif-display text-2xl text-slate-900">
             {score}/{ROUNDS.length} correct
           </p>
@@ -133,7 +133,7 @@ export function BigOBlitzGame() {
                 key={c}
                 type="button"
                 onClick={() => choose(c)}
-                className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 font-mono text-lg text-slate-900 transition hover:border-teal-400 hover:bg-teal-50"
+                className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 font-mono text-lg text-slate-900 transition hover:border-orange-400 hover:bg-orange-50"
               >
                 {c}
               </button>

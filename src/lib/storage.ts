@@ -6,7 +6,7 @@ import os from "os";
 export function getStorageRoot() {
   if (process.env.STORAGE_ROOT) return process.env.STORAGE_ROOT;
   if (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME) {
-    return path.join(os.tmpdir(), "gauntlet-storage");
+    return path.join(os.tmpdir(), "crucible-storage");
   }
   return path.join(process.cwd(), "storage");
 }

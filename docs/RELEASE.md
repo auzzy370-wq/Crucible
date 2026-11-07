@@ -26,12 +26,12 @@ npm start              # http://localhost:3847
 
 | Email | Password | Role |
 |-------|----------|------|
-| admin@gauntlet.local | [set via DEMO_ADMIN_PASSWORD] | Super Admin |
-| hiring@gauntlet.local | [set via DEMO_ADMIN_PASSWORD] | Hiring Manager |
-| reviewer@gauntlet.local | [set via DEMO_ADMIN_PASSWORD] | Technical Reviewer |
-| candidate@gauntlet.local | [set via DEMO_CANDIDATE_PASSWORD] | Candidate (SE + Secure Full-Stack library) |
-| cyber@gauntlet.local | [set via DEMO_CANDIDATE_PASSWORD] | Candidate (full Cyber library) |
-| teammate@gauntlet.local | [set via DEMO_CANDIDATE_PASSWORD] | Team member |
+| admin@crucible.local | [set via DEMO_ADMIN_PASSWORD] | Super Admin |
+| hiring@crucible.local | [set via DEMO_ADMIN_PASSWORD] | Hiring Manager |
+| reviewer@crucible.local | [set via DEMO_ADMIN_PASSWORD] | Technical Reviewer |
+| candidate@crucible.local | [set via DEMO_CANDIDATE_PASSWORD] | Candidate (SE + Secure Full-Stack library) |
+| cyber@crucible.local | [set via DEMO_CANDIDATE_PASSWORD] | Candidate (full Cyber library) |
+| teammate@crucible.local | [set via DEMO_CANDIDATE_PASSWORD] | Team member |
 
 ## Vercel
 

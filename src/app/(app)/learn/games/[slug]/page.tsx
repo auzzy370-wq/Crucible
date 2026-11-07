@@ -8,7 +8,6 @@ import { FrameworkFlowGame } from "@/components/learn/games/framework-flow-game"
 import { BigOBlitzGame } from "@/components/learn/games/big-o-blitz-game";
 import { PairSeekerGame } from "@/components/learn/games/pair-seeker-game";
 import { BinaryRangeGame } from "@/components/learn/games/binary-range-game";
-import { ProceduralArcadeGame } from "@/components/learn/games/procedural-arcade-game";
 
 export default async function ArcadeGamePage({ params }: { params: Promise<{ slug: string }> }) {
   await requirePageRolesOrGuest("/learn/games", CANDIDATE_ROLES);
@@ -16,16 +15,16 @@ export default async function ArcadeGamePage({ params }: { params: Promise<{ slu
   const game = getArcadeGame(slug);
   if (!game) notFound();
 
-  const featured =
+  const play =
     slug === "framework-flow" ? (
       <FrameworkFlowGame />
     ) : slug === "big-o-blitz" ? (
       <BigOBlitzGame />
     ) : slug === "pair-seeker" ? (
       <PairSeekerGame />
-    ) : slug === "binary-range" ? (
+    ) : (
       <BinaryRangeGame />
-    ) : null;
+    );
 
   return (
     <div className="animate-rise mx-auto max-w-3xl space-y-6">
@@ -39,17 +38,16 @@ export default async function ArcadeGamePage({ params }: { params: Promise<{ slu
 
       <header>
         <div className="flex flex-wrap gap-2">
-          <Badge variant="cyan">{game.skill}</Badge>
+          <Badge variant="brand">{game.skill}</Badge>
           <Badge>{game.minutes} min</Badge>
           <Badge variant="amber">D{game.difficulty}</Badge>
-          {game.featured && <Badge>Featured</Badge>}
         </div>
         <h1 className="mt-3 text-2xl font-semibold tracking-[-0.03em] sm:text-3xl">{game.title}</h1>
         <p className="mt-2 text-slate-600">{game.blurb}</p>
       </header>
 
       <section className="rounded-2xl border border-slate-200 bg-white/80 p-4 sm:p-6">
-        {featured ?? <ProceduralArcadeGame game={game} />}
+        {play}
       </section>
     </div>
   );

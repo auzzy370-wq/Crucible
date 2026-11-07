@@ -95,7 +95,7 @@ export function BinaryRangeGame() {
               />
             </div>
             <p className="mt-2 text-sm text-slate-600">
-              Hint midpoint: <span className="font-mono text-teal-800">{mid}</span> · {span} values left
+              Hint midpoint: <span className="font-mono text-orange-800">{mid}</span> · {span} values left
             </p>
           </div>
 

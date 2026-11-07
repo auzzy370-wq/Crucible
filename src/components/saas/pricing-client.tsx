@@ -56,7 +56,7 @@ export function PricingClient(props: {
   return (
     <div className="animate-rise space-y-8">
       <header className="mx-auto max-w-3xl text-center">
-        <p className="font-mono text-xs tracking-[0.3em] text-teal-700">PROVE THE CRAFT</p>
+        <p className="font-mono text-xs tracking-[0.3em] text-orange-700">PROVE THE CRAFT</p>
         <h1 className="mt-3 font-serif-display text-3xl tracking-tight sm:text-4xl">
           Evidence over puzzles
         </h1>
@@ -89,11 +89,11 @@ export function PricingClient(props: {
             </ul>
           </CardContent>
         </Card>
-        <Card className="border-teal-300/60 bg-cyan-500/5">
+        <Card className="border-orange-300/60 bg-orange-500/5">
           <CardHeader>
             <div className="flex items-center gap-2">
               <CardTitle>Premium</CardTitle>
-              <Badge variant="cyan">Most popular</Badge>
+              <Badge variant="brand">Most popular</Badge>
             </div>
             <CardDescription>Full craft loop — company tags, Lightning Judge, verified depth</CardDescription>
           </CardHeader>

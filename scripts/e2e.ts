@@ -46,10 +46,10 @@ async function login(email: string, password: string) {
 async function main() {
   console.log("E2E against", BASE);
 
-  const admin = await login("admin@gauntlet.local", process.env.DEMO_ADMIN_PASSWORD || "");
+  const admin = await login("admin@crucible.local", process.env.DEMO_ADMIN_PASSWORD || "");
   console.log("✓ admin login");
 
-  const hiring = await login("hiring@gauntlet.local", process.env.DEMO_ADMIN_PASSWORD || "");
+  const hiring = await login("hiring@crucible.local", process.env.DEMO_ADMIN_PASSWORD || "");
   console.log("✓ hiring manager login");
 
   const { json: assessments } = await api(hiring.jar, "/api/assessments");
@@ -59,7 +59,7 @@ async function main() {
 
   const { json: candidates } = await api(hiring.jar, "/api/candidates");
   if (!candidates.ok) throw new Error("candidates forbidden/failed");
-  const candidate = candidates.data.find((c: any) => c.email === "cyber@gauntlet.local") || candidates.data[0];
+  const candidate = candidates.data.find((c: any) => c.email === "cyber@crucible.local") || candidates.data[0];
 
   const { json: assignment } = await api(hiring.jar, "/api/assignments", {
     method: "POST",
@@ -68,7 +68,7 @@ async function main() {
   if (!assignment.ok) throw new Error(`assign failed: ${JSON.stringify(assignment)}`);
   console.log("✓ assignment + workspace", assignment.data.id);
 
-  const cand = await login("cyber@gauntlet.local", process.env.DEMO_CANDIDATE_PASSWORD || "");
+  const cand = await login("cyber@crucible.local", process.env.DEMO_CANDIDATE_PASSWORD || "");
   const workspaceId = assignment.data.workspace.id;
 
   await api(cand.jar, `/api/assignments/${assignment.data.id}`, {
@@ -137,7 +137,7 @@ async function main() {
   });
   console.log("✓ incident recovery");
 
-  const reviewer = await login("reviewer@gauntlet.local", process.env.DEMO_ADMIN_PASSWORD || "");
+  const reviewer = await login("reviewer@crucible.local", process.env.DEMO_ADMIN_PASSWORD || "");
   const { json: review } = await api(reviewer.jar, "/api/reviews", {
     method: "POST",
     body: JSON.stringify({

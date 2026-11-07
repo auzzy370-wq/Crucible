@@ -44,7 +44,7 @@ function BarRow({ label, value, max, mono }: { label: string; value: number; max
         <span className="font-mono text-slate-900">{value}</span>
       </div>
       <div className="h-2 overflow-hidden rounded-full bg-slate-100">
-        <div className="h-full rounded-full bg-teal-500/70 transition-all" style={{ width: `${pct}%` }} />
+        <div className="h-full rounded-full bg-orange-500/70 transition-all" style={{ width: `${pct}%` }} />
       </div>
     </div>
   );
@@ -60,7 +60,7 @@ function SparkBars({ points }: { points: { date: string; value: number }[] }) {
       {points.map((p) => (
         <div key={p.date} className="group relative flex-1" title={`${p.date}: ${p.value}`}>
           <div
-            className="w-full rounded-t-sm bg-teal-500/60 transition group-hover:bg-cyan-300"
+            className="w-full rounded-t-sm bg-orange-500/60 transition group-hover:bg-orange-300"
             style={{ height: `${Math.max(4, Math.round((p.value / max) * 100))}%` }}
           />
         </div>
@@ -178,7 +178,7 @@ export function AnalyticsPanel({ data, compact }: { data: AnalyticsData; compact
               ))}
             </div>
             <div className="flex flex-wrap gap-2">
-              <Badge variant="cyan">Elite {data.tiers?.elite ?? 0}</Badge>
+              <Badge variant="brand">Elite {data.tiers?.elite ?? 0}</Badge>
               <Badge variant="violet">Exceptional {data.tiers?.exceptional ?? 0}</Badge>
               <Badge variant="amber">Distinguished {data.tiers?.distinguished ?? 0}</Badge>
             </div>
@@ -187,7 +187,7 @@ export function AnalyticsPanel({ data, compact }: { data: AnalyticsData; compact
                 Cyber · {data.cybersecurity?.reports ?? 0} reports · {data.cybersecurity?.elite ?? 0} elite · avg
                 security {formatScore(data.cybersecurity?.avgSecurity ?? 0)}
               </div>
-              <div className="rounded-lg border border-cyan-500/20 bg-cyan-500/5 p-3">
+              <div className="rounded-lg border border-orange-500/20 bg-orange-500/5 p-3">
                 Software eng · {data.softwareEngineering?.reports ?? 0} reports ·{" "}
                 {data.softwareEngineering?.elite ?? 0} elite
               </div>
@@ -215,7 +215,7 @@ export function AnalyticsPanel({ data, compact }: { data: AnalyticsData; compact
                       {a.slug} · {a.type} · {a.track}
                     </div>
                   </div>
-                  <span className="font-mono text-teal-800">{a.count}</span>
+                  <span className="font-mono text-orange-800">{a.count}</span>
                 </div>
               ))}
               {!(data.topAssessments ?? []).length && <p className="text-sm text-slate-500">No volume yet.</p>}

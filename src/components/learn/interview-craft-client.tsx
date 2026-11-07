@@ -8,7 +8,7 @@ export function InterviewCraftClient() {
       track="interview"
       eyebrow="INTERVIEW CRAFT"
       title="Prepare for the real loop"
-      blurb="Live coding framework, DSA patterns, system design, behavioral STAR — clear chapters for XP, then prove it under the same judges employers use."
+      blurb="Live coding framework, DSA patterns, system design, behavioral STAR. Each lesson earns XP; then practice under the same judges employers use."
       progressApi="/api/learn/interview/progress"
       lessonHref={(slug) => `/learn/interview/${slug}`}
       levels={[

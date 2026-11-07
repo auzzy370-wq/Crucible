@@ -149,7 +149,7 @@ export function CandidateProfilePanel({ dossier: initial }: { dossier: ProfileDo
       key: "portfolio" as const,
       title: "Portfolio backed",
       detail: "Tied to a project link",
-      variant: "cyan" as const,
+      variant: "brand" as const,
     },
     {
       key: "claimed" as const,
@@ -161,10 +161,10 @@ export function CandidateProfilePanel({ dossier: initial }: { dossier: ProfileDo
 
   return (
     <div className="animate-rise space-y-8">
-      <header className="overflow-hidden rounded-2xl border border-teal-300/60 bg-[var(--surface-elevated)] p-5 sm:p-7">
+      <header className="overflow-hidden rounded-2xl border border-orange-300/60 bg-[var(--surface-elevated)] p-5 sm:p-7">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
           <div className="flex gap-4">
-            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-cyan-400/30 bg-teal-500/10 font-serif-display text-xl text-teal-900 sm:h-20 sm:w-20 sm:text-2xl">
+            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-orange-400/30 bg-orange-500/10 font-serif-display text-xl text-orange-900 sm:h-20 sm:w-20 sm:text-2xl">
               {dossier.user.avatarUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={dossier.user.avatarUrl} alt="" className="h-full w-full rounded-2xl object-cover" />
@@ -173,25 +173,22 @@ export function CandidateProfilePanel({ dossier: initial }: { dossier: ProfileDo
               )}
             </div>
             <div>
-              <p className="font-mono text-xs tracking-[0.3em] text-teal-700">CRAFT DOSSIER</p>
+              <p className="font-mono text-xs tracking-[0.3em] text-orange-700">CRAFT DOSSIER</p>
               <h1 className="mt-1 font-serif-display text-2xl text-slate-900 sm:text-3xl">{dossier.user.name}</h1>
               <p className="mt-1 max-w-xl text-slate-600">
                 {headline.trim() || p.headline || "Add a headline so employers know what you ship."}
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
                 <Badge variant="amber">
-                  Lv {dossier.game.level} · {dossier.game.rank.title}
+                  Level {dossier.game.level}
                 </Badge>
-                <Badge variant="cyan">{dossier.game.xp.toLocaleString()} XP</Badge>
+                <Badge variant="brand">{dossier.game.xp.toLocaleString()} XP</Badge>
                 <Badge variant={trackBadgeVariant(preferredTrack)}>{trackLabel(preferredTrack)}</Badge>
                 {dossier.game.streak.current > 0 && (
                   <Badge variant="emerald">
                     {dossier.game.streak.current}-day streak
-                    {dossier.game.streak.activeToday ? "" : " · cool"}
-                    {dossier.game.streak.heat >= 30 ? ` · heat ${dossier.game.streak.heat}%` : ""}
                   </Badge>
                 )}
-                {dossier.game.perfectDay && <Badge variant="emerald">Perfect day</Badge>}
                 {publicEnabled && publicSlug && <Badge>Public · /u/{publicSlug}</Badge>}
               </div>
             </div>
@@ -222,10 +219,10 @@ export function CandidateProfilePanel({ dossier: initial }: { dossier: ProfileDo
 
         <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {[
-            { label: "Rank progress", value: `${dossier.game.rankProgressPct}%`, sub: dossier.game.nextRank ? `${dossier.game.xpToNext} XP to ${dossier.game.nextRank.title}` : "Top rank" },
+            { label: "Level progress", value: `${dossier.game.levelProgressPct}%`, sub: dossier.game.xpToNext === null ? "Max level" : `${dossier.game.xpToNext} XP to level ${dossier.game.level + 1}` },
             { label: "Verified skills", value: String(dossier.stats.verifiedSkills), sub: `${dossier.stats.humanReviewed} human · ${dossier.stats.claimedSkills} claimed` },
             { label: "Assessments scored", value: String(dossier.stats.assessmentsScored), sub: dossier.stats.bestScore ? `Best ${formatScore(dossier.stats.bestScore)}` : "No scores yet" },
-            { label: "Campaigns", value: `${dossier.stats.studyCleared}/${dossier.stats.studyEnrolled}`, sub: `${dossier.stats.campaignXp} campaign XP` },
+            { label: "Study plans", value: `${dossier.stats.studyCleared}/${dossier.stats.studyEnrolled}`, sub: `${dossier.stats.campaignXp} XP from plans` },
           ].map((s) => (
             <div key={s.label} className="rounded-xl border border-slate-200/80 bg-white/70 px-3 py-3">
               <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">{s.label}</p>
@@ -240,18 +237,18 @@ export function CandidateProfilePanel({ dossier: initial }: { dossier: ProfileDo
             <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-slate-500">
               Profile completeness · {dossier.completeness.filled}/{dossier.completeness.total}
             </p>
-            <span className="font-mono text-xs text-teal-700/80">{dossier.completeness.score}%</span>
+            <span className="font-mono text-xs text-orange-700/80">{dossier.completeness.score}%</span>
           </div>
           <div className="h-2.5 overflow-hidden rounded-full bg-slate-100">
             <div
-              className="h-full rounded-full bg-teal-500 transition-[width] duration-700"
+              className="h-full rounded-full bg-orange-500 transition-[width] duration-700"
               style={{ width: `${dossier.completeness.score}%` }}
             />
           </div>
           {nextMissing && (
             <button
               type="button"
-              className="mt-2 text-left text-sm text-teal-700 hover:underline"
+              className="mt-2 text-left text-sm text-orange-700 hover:underline"
               onClick={() => {
                 setTab("edit");
                 requestAnimationFrame(() =>
@@ -282,7 +279,7 @@ export function CandidateProfilePanel({ dossier: initial }: { dossier: ProfileDo
             className={cn(
               "rounded-md border px-3 py-1.5 text-xs transition",
               tab === id
-                ? "border-teal-400/50 bg-teal-500/10 text-teal-900"
+                ? "border-orange-400/50 bg-orange-500/10 text-orange-900"
                 : "border-slate-200 text-slate-600 hover:text-slate-800",
             )}
           >
@@ -297,14 +294,14 @@ export function CandidateProfilePanel({ dossier: initial }: { dossier: ProfileDo
             <div className="rounded-2xl border border-slate-200 bg-white/70 p-5">
               <div className="flex items-center justify-between gap-2">
                 <h2 className="font-serif-display text-xl text-slate-900">Craft paths</h2>
-                <Link href="/learn" className="text-xs text-teal-700 hover:underline">
+                <Link href="/learn" className="text-xs text-orange-700 hover:underline">
                   Open Learn →
                 </Link>
               </div>
               <div className="mt-4 space-y-4">
                 {(
                   [
-                    ["Interview Craft", dossier.game.paths.interview, "cyan"],
+                    ["Interview Craft", dossier.game.paths.interview, "brand"],
                     ["AI Craft", dossier.game.paths.ai, "emerald"],
                   ] as const
                 ).map(([title, path, accent]) => (
@@ -319,45 +316,26 @@ export function CandidateProfilePanel({ dossier: initial }: { dossier: ProfileDo
                       <div
                         className={cn(
                           "h-full rounded-full",
-                          accent === "cyan" ? "bg-teal-500" : "bg-emerald-400",
+                          accent === "brand" ? "bg-orange-500" : "bg-emerald-400",
                         )}
                         style={{ width: `${path.percent}%` }}
                       />
                     </div>
                     {path.nextTitle && (
-                      <Link href={path.nextHref} className="mt-1.5 inline-block text-xs text-slate-600 hover:text-teal-700">
+                      <Link href={path.nextHref} className="mt-1.5 inline-block text-xs text-slate-600 hover:text-orange-700">
                         Next: {path.nextTitle} →
                       </Link>
                     )}
                   </div>
                 ))}
               </div>
-              <div className="mt-5 border-t border-slate-200 pt-4">
-                <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">Medals</p>
-                <p className="mt-1 text-sm text-slate-700">
-                  {dossier.game.unlockedCount}/{dossier.game.achievements.length} unlocked
-                </p>
-                <div className="mt-2 flex flex-wrap gap-1.5">
-                  {dossier.game.achievements
-                    .filter((a) => a.unlocked)
-                    .slice(0, 6)
-                    .map((a) => (
-                      <Badge key={a.id} variant="amber">
-                        {a.title}
-                      </Badge>
-                    ))}
-                  {!dossier.game.unlockedCount && (
-                    <span className="text-xs text-slate-500">Clear a lesson to unlock your first medal</span>
-                  )}
-                </div>
-              </div>
             </div>
 
             <div className="rounded-2xl border border-slate-200 bg-white/70 p-5">
               <div className="flex items-center justify-between gap-2">
-                <h2 className="font-serif-display text-xl text-slate-900">Study campaigns</h2>
-                <Link href="/study-plans" className="text-xs text-teal-700 hover:underline">
-                  Browse packs →
+                <h2 className="font-serif-display text-xl text-slate-900">Study plans</h2>
+                <Link href="/study-plans" className="text-xs text-orange-700 hover:underline">
+                  Browse plans →
                 </Link>
               </div>
               <ul className="mt-4 space-y-2">
@@ -371,15 +349,15 @@ export function CandidateProfilePanel({ dossier: initial }: { dossier: ProfileDo
                         <div>
                           <div className="font-medium text-slate-900">{c.title}</div>
                           <div className="font-mono text-[11px] text-slate-500">
-                            {c.completedCount}/{c.totalCount} nodes · {c.earnedXp} XP
+                            {c.completedCount}/{c.totalCount} problems · {c.earnedXp} XP
                             {c.company ? ` · ${c.company}` : ""}
                           </div>
                         </div>
-                        {c.cleared ? <Badge variant="emerald">Cleared</Badge> : <Badge>{c.percent}%</Badge>}
+                        {c.cleared ? <Badge variant="emerald">Done</Badge> : <Badge>{c.percent}%</Badge>}
                       </div>
                       <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-100">
                         <div
-                          className={cn("h-full rounded-full", c.cleared ? "bg-emerald-400" : "bg-teal-500")}
+                          className={cn("h-full rounded-full", c.cleared ? "bg-emerald-400" : "bg-orange-500")}
                           style={{ width: `${c.percent}%` }}
                         />
                       </div>
@@ -387,8 +365,8 @@ export function CandidateProfilePanel({ dossier: initial }: { dossier: ProfileDo
                   ))
                 ) : (
                   <li className="rounded-xl border border-dashed border-slate-200 px-3 py-6 text-center text-sm text-slate-500">
-                    No campaigns enlisted yet.{" "}
-                    <Link href="/study-plans" className="text-teal-700 hover:underline">
+                    No study plans yet.{" "}
+                    <Link href="/study-plans" className="text-orange-700 hover:underline">
                       Start one
                     </Link>
                   </li>
@@ -400,7 +378,7 @@ export function CandidateProfilePanel({ dossier: initial }: { dossier: ProfileDo
           <section className="rounded-2xl border border-slate-200 bg-white/70 p-5">
             <div className="flex items-center justify-between gap-2">
               <h2 className="font-serif-display text-xl text-slate-900">Recent assessments</h2>
-              <Link href="/challenges" className="text-xs text-teal-700 hover:underline">
+              <Link href="/challenges" className="text-xs text-orange-700 hover:underline">
                 Problem bank →
               </Link>
             </div>
@@ -422,7 +400,7 @@ export function CandidateProfilePanel({ dossier: initial }: { dossier: ProfileDo
                       {a.overall != null && <Badge variant="emerald">{formatScore(a.overall)}</Badge>}
                       {a.tier && <Badge variant="amber">{a.tier}</Badge>}
                       {a.overall != null && (
-                        <Link href={`/scorecard/${a.id}`} className="text-xs text-teal-700 hover:underline">
+                        <Link href={`/scorecard/${a.id}`} className="text-xs text-orange-700 hover:underline">
                           Scorecard
                         </Link>
                       )}
@@ -441,7 +419,7 @@ export function CandidateProfilePanel({ dossier: initial }: { dossier: ProfileDo
                 key={b.key}
                 type="button"
                 onClick={() => setTab("evidence")}
-                className="rounded-2xl border border-slate-200 bg-white/70 p-4 text-left transition hover:border-teal-300/60"
+                className="rounded-2xl border border-slate-200 bg-white/70 p-4 text-left transition hover:border-orange-300/60"
               >
                 <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">{b.title}</p>
                 <p className="mt-1 font-serif-display text-2xl text-slate-900">
@@ -503,7 +481,7 @@ export function CandidateProfilePanel({ dossier: initial }: { dossier: ProfileDo
                   <div className="mt-2 flex flex-wrap gap-1.5">
                     {items?.length ? (
                       items.map((x) => (
-                        <Badge key={x} variant="cyan">
+                        <Badge key={x} variant="brand">
                           {x}
                         </Badge>
                       ))
@@ -641,7 +619,7 @@ export function CandidateProfilePanel({ dossier: initial }: { dossier: ProfileDo
             </div>
           </section>
 
-          <section id="edit-public" className="rounded-2xl border border-teal-300/50 bg-teal-500/[0.04] p-5">
+          <section id="edit-public" className="rounded-2xl border border-orange-300/50 bg-orange-500/[0.04] p-5">
             <h2 className="font-serif-display text-xl text-slate-900">Public qualification page</h2>
             <p className="mt-1 text-sm text-slate-600">
               Share a /u/… link with employers. Only assessment-verified and human-reviewed skills appear publicly.
@@ -669,7 +647,7 @@ export function CandidateProfilePanel({ dossier: initial }: { dossier: ProfileDo
                 Publish at /u/{publicSlug || "…"}
               </label>
               {publicEnabled && publicSlug && (
-                <Link href={`/u/${publicSlug}`} className="inline-block text-sm text-teal-700 hover:underline" target="_blank">
+                <Link href={`/u/${publicSlug}`} className="inline-block text-sm text-orange-700 hover:underline" target="_blank">
                   Preview public page →
                 </Link>
               )}

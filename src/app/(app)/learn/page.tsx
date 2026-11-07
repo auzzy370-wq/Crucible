@@ -1,357 +1,213 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { CANDIDATE_ROLES } from "@/lib/access";
+import { prisma } from "@/lib/db";
 import { requirePageRolesOrGuest } from "@/server/auth/page-guard";
-import {
-  buildLearnerGameState,
-  guestLearnerGameState,
-  LESSON_XP,
-  DAILY_XP,
-  COMBO_XP,
-  CHAPTER_CLEAR_XP,
-  PERFECT_DAY_XP,
-} from "@/server/learning/gamification";
-import { buildLearnerRoadmap } from "@/server/learning/roadmap";
-import { ForgeHero } from "@/components/learn/forge-hero";
-import { MedalShine, QuestClearedMark } from "@/components/learn/forge-fun";
+import { buildLearnerGameState, guestLearnerGameState, LESSON_XP } from "@/server/learning/gamification";
+import { ARCADE_GAMES } from "@/server/learning/arcade-games";
+import { ProgressHero } from "@/components/learn/progress-hero";
 import { WelcomeSignIn } from "@/components/auth/welcome-sign-in";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-const JUMP = [
-  { href: "#quests", label: "Quests" },
-  { href: "#paths", label: "Paths" },
-  { href: "#practice", label: "Practice" },
-  { href: "#medals", label: "Medals" },
-] as const;
-
 export default async function LearnHubPage() {
   const user = await requirePageRolesOrGuest("/learn", CANDIDATE_ROLES);
-  const game = user ? await buildLearnerGameState(user.id) : guestLearnerGameState();
-  const roadmap = user ? await buildLearnerRoadmap(user.id).catch(() => null) : null;
-  const nextProblem = roadmap?.nextProblems?.[0] ?? null;
-  const primaryQuest = game.quests.find((q) => !q.done) ?? game.quests[0]!;
-  const unlockedMedals = game.achievements.filter((a) => a.unlocked);
-  const lockedMedals = game.achievements.filter((a) => !a.unlocked);
+  const [game, assigned] = user
+    ? await Promise.all([
+        buildLearnerGameState(user.id),
+        prisma.assessmentAssignment.findMany({
+          where: { candidateId: user.id, status: { notIn: ["COMPLETED", "FAILED", "EXPIRED"] } },
+          select: {
+            id: true,
+            status: true,
+            assessment: { select: { title: true } },
+            workspace: { select: { id: true } },
+          },
+          orderBy: { createdAt: "desc" },
+          take: 4,
+        }),
+      ])
+    : [guestLearnerGameState(), []];
 
   return (
     <div className="animate-rise space-y-8">
-      <Suspense fallback={null}>
-        <WelcomeSignIn />
-      </Suspense>
+      {!user && (
+        <Suspense fallback={null}>
+          <WelcomeSignIn />
+        </Suspense>
+      )}
       <header className="space-y-4">
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <p className="font-mono text-xs tracking-[0.3em] text-[var(--brand)]">
-              LEARN · FORGE{!user ? " · FREE" : ""}
-            </p>
-            <h1 className="mt-2 text-2xl font-semibold tracking-[-0.03em] sm:text-3xl">Level up by proving craft</h1>
-            <p className="mt-2 max-w-2xl text-slate-600">
-              {user
-                ? "Quests first, then paths and practice — XP only from work you finish."
-                : "Browse free. Close the sign-in popup anytime — arcade and craft paths stay open; sign in when you want XP saved."}
-            </p>
-          </div>
-          <nav className="flex flex-wrap gap-1.5" aria-label="Learn sections">
-            {JUMP.map((j) => (
-              <a
-                key={j.href}
-                href={j.href}
-                className="rounded-md border border-slate-200 bg-white/80 px-2.5 py-1.5 font-mono text-[11px] uppercase tracking-wider text-slate-600 transition hover:border-[var(--brand)]/40 hover:text-[var(--brand)]"
-              >
-                {j.label}
-              </a>
-            ))}
-          </nav>
+        <div>
+          <p className="font-mono text-xs tracking-[0.3em] text-[var(--brand)]">LEARN{!user ? " · FREE" : ""}</p>
+          <h1 className="mt-2 text-2xl font-semibold tracking-[-0.03em] sm:text-3xl">Get interview-ready</h1>
+          <p className="mt-2 max-w-2xl text-slate-600">
+            {user
+              ? "Short lessons, then real problems judged on hidden tests. You earn XP for work you finish."
+              : "Everything here is free to try. Sign in when you want your XP and streak saved."}
+          </p>
         </div>
-        <ForgeHero game={game} />
+        <ProgressHero game={game} />
       </header>
 
-      <section id="quests" className="scroll-mt-20 space-y-6">
-        <div>
-          <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
-            <div>
-              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">1 · Board</p>
-              <h2 className="mt-1 text-xl font-semibold tracking-[-0.02em] text-slate-900">Today’s quests</h2>
-              <p className="mt-1 text-sm text-slate-500">
-                {game.questsDone}/{game.questsTotal} cleared
-                {game.perfectDay ? " · perfect day banked" : ` · +${PERFECT_DAY_XP} XP if you clear all three`}
-              </p>
-            </div>
-            <Link href={primaryQuest.href}>
-              <Button size="sm">{game.perfectDay ? "Browse forge" : `Start: ${primaryQuest.title}`}</Button>
-            </Link>
-          </div>
-          <div className="grid gap-3 md:grid-cols-3">
-            {game.quests.map((q, i) => (
+      {assigned.length > 0 && (
+        <section className="space-y-3">
+          <h2 className="text-xl font-semibold tracking-[-0.02em] text-slate-900">Assigned to you</h2>
+          <div className="grid gap-3 md:grid-cols-2">
+            {assigned.map((a) => (
               <Link
-                key={q.id}
-                href={q.href}
-                className={cn(
-                  "learn-quest-card group rounded-xl border px-4 py-4 transition",
-                  q.done
-                    ? "is-cleared border-emerald-300 bg-emerald-50/70"
-                    : "border-slate-200 bg-white/80 hover:border-[var(--brand)]/50",
-                )}
-                style={{ animationDelay: `${i * 0.06}s` }}
+                key={a.id}
+                href={a.workspace ? `/workspace/${a.workspace.id}` : "/challenges"}
+                className="flex items-center justify-between gap-3 rounded-xl border border-[var(--brand)]/40 bg-white/80 px-4 py-4 transition hover:border-[var(--brand)]"
               >
-                <div className="flex items-center justify-between gap-2">
-                  <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">Quest {i + 1}</span>
-                  <div className="flex items-center gap-2">
-                    <QuestClearedMark show={q.done} />
-                    <Badge variant={q.done ? "emerald" : "cyan"}>+{q.xp} XP</Badge>
-                  </div>
+                <div className="min-w-0">
+                  <h3 className="truncate font-medium text-slate-900">{a.assessment.title}</h3>
+                  <p className="mt-1 font-mono text-xs text-slate-500">{a.status.replaceAll("_", " ").toLowerCase()}</p>
                 </div>
-                <h3 className="mt-2 font-medium text-slate-900 group-hover:text-[var(--brand)]">{q.title}</h3>
-                <p className="mt-1 text-sm text-slate-500">{q.detail}</p>
-                <p className="mt-3 font-mono text-[11px] text-[var(--brand)]">{q.done ? "Cleared" : "Open →"}</p>
+                <span className="shrink-0 text-sm text-[var(--brand)]">Open →</span>
               </Link>
             ))}
           </div>
-        </div>
+        </section>
+      )}
 
-        <div>
-          <div className="mb-3">
-            <h3 className="text-lg font-semibold tracking-[-0.02em] text-slate-900">This week</h3>
+      <section className="space-y-3">
+        <div className="flex flex-wrap items-end justify-between gap-2">
+          <div>
+            <h2 className="text-xl font-semibold tracking-[-0.02em] text-slate-900">Today</h2>
             <p className="mt-1 text-sm text-slate-500">
-              {game.weeklyDone}/{game.weeklyTotal} done
-              {game.weeklyDone >= game.weeklyTotal
-                ? " · board clear bonus banked"
-                : " · clear all three for a board bonus"}
+              {game.todayDone}/{game.today.length} done
             </p>
           </div>
-          <div className="grid gap-3 md:grid-cols-3">
-            {game.weeklyQuests.map((q) => (
-              <Link
-                key={q.id}
-                href={q.href}
-                className={cn(
-                  "learn-quest-card rounded-xl border px-4 py-4 transition",
-                  q.done
-                    ? "is-cleared border-amber-300 bg-amber-50/70"
-                    : "border-slate-200 bg-white/80 hover:border-[var(--brand)]/40",
-                )}
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <h3 className="font-medium text-slate-900">{q.title}</h3>
-                  <div className="flex items-center gap-2">
-                    <QuestClearedMark show={q.done} />
-                    <Badge variant={q.done ? "emerald" : "amber"}>+{q.xp}</Badge>
-                  </div>
-                </div>
-                <p className="mt-1 text-sm text-slate-500">{q.detail}</p>
-              </Link>
-            ))}
-          </div>
+        </div>
+        <div className="grid gap-3 md:grid-cols-2">
+          {game.today.map((t) => (
+            <Link
+              key={t.id}
+              href={t.href}
+              className={cn(
+                "group rounded-xl border px-4 py-4 transition",
+                t.done
+                  ? "border-emerald-300 bg-emerald-50/70"
+                  : "border-slate-200 bg-white/80 hover:border-[var(--brand)]/50",
+              )}
+            >
+              <div className="flex items-center justify-between gap-2">
+                <h3 className="font-medium text-slate-900 group-hover:text-[var(--brand)]">{t.title}</h3>
+                {t.done ? (
+                  <Badge variant="emerald">Done</Badge>
+                ) : t.xp > 0 ? (
+                  <Badge variant="brand">+{t.xp} XP</Badge>
+                ) : null}
+              </div>
+              <p className="mt-1 text-sm text-slate-500">{t.detail}</p>
+            </Link>
+          ))}
         </div>
       </section>
 
-      <section id="paths" className="scroll-mt-20 space-y-3">
-        <div>
-          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">2 · Craft paths</p>
-          <h2 className="mt-1 text-xl font-semibold tracking-[-0.02em] text-slate-900">Continue a curriculum</h2>
-        </div>
+      <section className="space-y-3">
+        <h2 className="text-xl font-semibold tracking-[-0.02em] text-slate-900">Paths</h2>
         <div className="grid gap-4 lg:grid-cols-2">
           <PathCard
             label="Interview Craft"
-            percent={game.paths.interview.percent}
-            done={game.paths.interview.done}
-            total={game.paths.interview.total}
-            nextTitle={game.paths.interview.nextTitle}
-            href={game.paths.interview.nextHref}
+            blurb="How coding interviews actually run, and the patterns that come up most."
+            path={game.paths.interview}
             browseHref="/learn/interview"
-            chapters={game.paths.interview.chapters}
-            accent="cyan"
           />
           <PathCard
             label="AI Craft"
-            percent={game.paths.ai.percent}
-            done={game.paths.ai.done}
-            total={game.paths.ai.total}
-            nextTitle={game.paths.ai.nextTitle}
-            href={game.paths.ai.nextHref}
+            blurb="Building with LLMs: prompting, evals, retrieval and shipping to production."
+            path={game.paths.ai}
             browseHref="/learn/ai"
-            chapters={game.paths.ai.chapters}
-            accent="teal"
           />
         </div>
       </section>
 
-      <section id="practice" className="scroll-mt-20 space-y-3">
-        <div>
-          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">3 · Practice lanes</p>
-          <h2 className="mt-1 text-xl font-semibold tracking-[-0.02em] text-slate-900">Prove it or play a drill</h2>
-        </div>
-        <div className="grid gap-4 lg:grid-cols-2">
-          <div className="rounded-2xl border border-slate-200 bg-white/80 p-5">
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="cyan">Timed evidence</Badge>
-              <Badge variant="amber">+{DAILY_XP} XP</Badge>
-            </div>
-            <h3 className="mt-3 text-lg font-semibold text-slate-900">
-              {nextProblem ? nextProblem.title : "Today’s timed challenge"}
-            </h3>
-            <p className="mt-2 text-sm text-slate-600">
-              {nextProblem
-                ? `Adaptive pick · D${nextProblem.difficulty} · ${(nextProblem.tags ?? []).slice(0, 3).join(", ") || "coding"}`
-                : "Same public + hidden judges employers use."}
-            </p>
-            <div className="mt-4 flex flex-wrap gap-2">
-              {nextProblem ? (
-                <Link href={`/challenges?q=${encodeURIComponent(nextProblem.slug)}`}>
-                  <Button>Open problem</Button>
-                </Link>
-              ) : (
-                <Link href="/daily">
-                  <Button>Open daily</Button>
-                </Link>
-              )}
-              <Link href="/daily">
-                <Button variant="secondary">Daily forge</Button>
-              </Link>
-              <Link href="/study-plans">
-                <Button variant="ghost">Campaigns</Button>
-              </Link>
-            </div>
-          </div>
-
-          <div className="rounded-2xl border border-amber-200 bg-amber-50/60 p-5">
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="amber">HTML5</Badge>
-              <Badge>1,000 drills</Badge>
-            </div>
-            <h3 className="mt-3 text-lg font-semibold text-slate-900">Learn Arcade</h3>
-            <p className="mt-2 text-sm text-slate-600">
-              Featured craft games plus seeded arenas for hashing, Big-O, stacks, bits, and systems timing.
-            </p>
-            <div className="mt-4">
-              <Link href="/learn/games">
-                <Button>Open arcade</Button>
-              </Link>
-            </div>
-          </div>
+      <section className="space-y-3">
+        <h2 className="text-xl font-semibold tracking-[-0.02em] text-slate-900">Practice</h2>
+        <div className="grid gap-4 md:grid-cols-3">
+          <PracticeCard
+            title="Problem bank"
+            body="Coding, security and system problems, judged on public and hidden tests."
+            href="/challenges"
+            cta="Browse problems"
+          />
+          <PracticeCard
+            title="Mock interviews"
+            body="Timed rounds modeled on real company loops."
+            href="/interview"
+            cta="Start a mock"
+          />
+          <PracticeCard
+            title="Arcade"
+            body={`${ARCADE_GAMES.length} two-minute games for hashing, Big-O and binary search.`}
+            href="/learn/games"
+            cta="Play"
+          />
         </div>
       </section>
-
-      <section id="medals" className="scroll-mt-20 space-y-3">
-        <div className="flex flex-wrap items-end justify-between gap-2">
-          <div>
-            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">4 · Collection</p>
-            <h2 className="mt-1 text-xl font-semibold tracking-[-0.02em] text-slate-900">Medals</h2>
-            <p className="mt-1 text-sm text-slate-500">
-              {game.unlockedCount}/{game.achievements.length} earned
-            </p>
-          </div>
-          <div className="h-2 w-40 overflow-hidden rounded-full bg-slate-100">
-            <div
-              className="h-full rounded-full bg-[var(--brand)] transition-[width] duration-700"
-              style={{
-                width: `${Math.round((game.unlockedCount / Math.max(1, game.achievements.length)) * 100)}%`,
-              }}
-            />
-          </div>
-        </div>
-
-        {unlockedMedals.length > 0 && (
-          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-            {unlockedMedals.map((a) => (
-              <div
-                key={a.id}
-                className="relative overflow-hidden rounded-xl border border-amber-300 bg-amber-50/70 px-4 py-3"
-              >
-                <MedalShine active />
-                <div className="relative flex items-center justify-between gap-2">
-                  <h3 className="text-sm font-medium text-slate-900">{a.title}</h3>
-                  <span className="font-mono text-[10px] uppercase tracking-wider text-amber-800">Unlocked</span>
-                </div>
-                <p className="relative mt-1 text-xs text-slate-500">{a.detail}</p>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {lockedMedals.length > 0 && (
-          <details className="rounded-xl border border-slate-200 bg-white/60 px-4 py-3">
-            <summary className="cursor-pointer font-mono text-[11px] uppercase tracking-wider text-slate-600">
-              {lockedMedals.length} locked medals
-            </summary>
-            <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-              {lockedMedals.map((a) => (
-                <div key={a.id} className="rounded-xl border border-slate-200 bg-white/80 px-4 py-3 opacity-70">
-                  <div className="flex items-center justify-between gap-2">
-                    <h3 className="text-sm font-medium text-slate-900">{a.title}</h3>
-                    <span className="font-mono text-[10px] uppercase tracking-wider text-slate-500">Locked</span>
-                  </div>
-                  <p className="mt-1 text-xs text-slate-500">{a.detail}</p>
-                </div>
-              ))}
-            </div>
-          </details>
-        )}
-      </section>
-
-      <p className="font-mono text-[11px] text-slate-500">
-        Lesson +{LESSON_XP} · same-day combo +{COMBO_XP} · chapter clear +{CHAPTER_CLEAR_XP} · perfect day +
-        {PERFECT_DAY_XP}
-      </p>
     </div>
   );
 }
 
 function PathCard(props: {
   label: string;
-  percent: number;
-  done: number;
-  total: number;
-  nextTitle: string | null;
-  href: string;
+  blurb: string;
   browseHref: string;
-  chapters: { id: string; title: string; done: number; total: number; cleared: boolean }[];
-  accent: "cyan" | "teal";
+  path: {
+    percent: number;
+    done: number;
+    total: number;
+    nextTitle: string | null;
+    nextHref: string;
+  };
 }) {
-  const border =
-    props.accent === "cyan" ? "border-teal-300/50 bg-teal-500/[0.06]" : "border-emerald-300/50 bg-emerald-500/[0.06]";
-  const bar = props.accent === "cyan" ? "bg-teal-500" : "bg-emerald-500";
-
+  const { path } = props;
   return (
-    <div className={cn("rounded-2xl border p-5", border)}>
-      <div className="flex flex-wrap items-center gap-2">
-        <Badge variant={props.accent === "cyan" ? "cyan" : "emerald"}>{props.label}</Badge>
-        <Badge>
-          {props.done}/{props.total}
-        </Badge>
-        <Badge variant="amber">+{LESSON_XP} XP / lesson</Badge>
+    <div className="rounded-2xl border border-slate-200 bg-white/80 p-5">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h3 className="text-lg font-semibold text-slate-900">{props.label}</h3>
+        <span className="font-mono text-xs text-slate-500">
+          {path.done}/{path.total} lessons · +{LESSON_XP} XP each
+        </span>
       </div>
-      <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/80">
-        <div className={cn("h-full rounded-full transition-[width] duration-700", bar)} style={{ width: `${props.percent}%` }} />
+      <p className="mt-1 text-sm text-slate-600">{props.blurb}</p>
+      <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-100">
+        <div
+          className="h-full rounded-full bg-[var(--brand)] transition-[width] duration-700"
+          style={{ width: `${path.percent}%` }}
+        />
       </div>
-      <div className="mt-3 flex flex-wrap gap-1.5">
-        {props.chapters.map((c) => (
-          <span
-            key={c.id}
-            className={cn(
-              "rounded border px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider",
-              c.cleared ? "border-emerald-400 text-emerald-800" : "border-slate-300 text-slate-500",
-            )}
-          >
-            {c.title} {c.done}/{c.total}
-          </span>
-        ))}
-      </div>
-      <h3 className="mt-4 text-lg font-semibold text-slate-900">
-        {props.nextTitle ? `Next: ${props.nextTitle}` : "Path complete"}
-      </h3>
-      <p className="mt-1 text-sm text-slate-600">
-        {props.percent}% cleared
-        {props.nextTitle ? " — finish the next lesson to bank XP." : " — run campaigns or the bank next."}
+      <p className="mt-3 text-sm text-slate-700">
+        {path.nextTitle ? (
+          <>
+            Next: <span className="font-medium">{path.nextTitle}</span>
+          </>
+        ) : (
+          "Path complete."
+        )}
       </p>
       <div className="mt-4 flex flex-wrap gap-2">
-        <Link href={props.href}>
-          <Button>{props.nextTitle ? "Continue lesson" : "Review path"}</Button>
+        <Link href={path.nextHref}>
+          <Button>{path.nextTitle ? "Continue" : "Review"}</Button>
         </Link>
         <Link href={props.browseHref}>
-          <Button variant="secondary">Path map</Button>
+          <Button variant="secondary">All lessons</Button>
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+function PracticeCard(props: { title: string; body: string; href: string; cta: string }) {
+  return (
+    <div className="flex flex-col rounded-2xl border border-slate-200 bg-white/80 p-5">
+      <h3 className="font-semibold text-slate-900">{props.title}</h3>
+      <p className="mt-1 flex-1 text-sm text-slate-600">{props.body}</p>
+      <div className="mt-4">
+        <Link href={props.href}>
+          <Button variant="secondary">{props.cta}</Button>
         </Link>
       </div>
     </div>

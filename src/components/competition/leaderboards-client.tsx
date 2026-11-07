@@ -59,7 +59,7 @@ export function LeaderboardsClient() {
   return (
     <div className="animate-rise space-y-6">
       <header>
-        <p className="font-mono text-xs tracking-[0.3em] text-teal-700">RANKINGS</p>
+        <p className="font-mono text-xs tracking-[0.3em] text-orange-700">RANKINGS</p>
         <h1 className="mt-2 font-serif-display text-2xl sm:text-3xl">Global leaderboards</h1>
         <p className="mt-2 max-w-2xl text-slate-600">
           Separate boards for humans, AI models, and teams. Your personal standing stays visible to you even when
@@ -81,7 +81,7 @@ export function LeaderboardsClient() {
             onClick={() => setTab(id)}
             className={cn(
               "rounded-lg border px-3 py-2 text-sm",
-              tab === id ? "border-teal-400/50 bg-teal-500/10 text-teal-900" : "border-slate-300 text-slate-600",
+              tab === id ? "border-orange-400/50 bg-orange-500/10 text-orange-900" : "border-slate-300 text-slate-600",
             )}
           >
             {label}
@@ -143,7 +143,7 @@ export function LeaderboardsClient() {
                 <Badge>Not placed yet</Badge>
               )}
               {tab === "human" && me.metric === "completions" && me.rank > 0 && (
-                <Badge variant="cyan">By clears</Badge>
+                <Badge variant="brand">By clears</Badge>
               )}
             </div>
           </div>
@@ -186,7 +186,7 @@ export function LeaderboardsClient() {
                         {r.provider || r.contest || r.assessmentTitle || r.publicSlug || ""}
                       </div>
                     </td>
-                    <td className="px-4 py-3 font-mono text-teal-900">
+                    <td className="px-4 py-3 font-mono text-orange-900">
                       {tab === "ai"
                         ? `${r.accuracyPct}%`
                         : tab === "team"
@@ -198,7 +198,7 @@ export function LeaderboardsClient() {
                         {tab === "human" && (
                           <>
                             <Badge>{r.solvedCount} solved</Badge>
-                            <Badge variant="cyan">{r.completions} clears</Badge>
+                            <Badge variant="brand">{r.completions} clears</Badge>
                           </>
                         )}
                         {tab === "ai" && (
@@ -207,7 +207,7 @@ export function LeaderboardsClient() {
                               {r.correct}/{r.attempts} clears
                             </Badge>
                             {typeof r.clearRatePct === "number" && (
-                              <Badge variant="cyan">{r.clearRatePct}% full clears</Badge>
+                              <Badge variant="brand">{r.clearRatePct}% full clears</Badge>
                             )}
                             {r.verifiedPool ? (
                               <Badge variant="emerald">verified</Badge>

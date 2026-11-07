@@ -26,7 +26,7 @@ export function LessonBody({ md }: { md: string }) {
           return (
             <pre
               key={i}
-              className="overflow-x-auto rounded-lg border border-slate-200 bg-black/50 p-3 font-mono text-[11px] text-teal-900/90"
+              className="overflow-x-auto rounded-lg border border-slate-200 bg-black/50 p-3 font-mono text-[11px] text-orange-900/90"
             >
               {code}
             </pre>

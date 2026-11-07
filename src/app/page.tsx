@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { getSessionUser } from "@/server/auth/session";
 
-/** Signed-in users go home; everyone else lands in the free Learn forge. */
+/** Signed-in users go home; everyone else lands on the free Learn page. */
 export default async function Home() {
   try {
     const user = await getSessionUser();

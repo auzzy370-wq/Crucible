@@ -30,7 +30,7 @@ export async function POST(req: Request) {
     const email = body.email.toLowerCase().trim();
 
     // Keep seeded demo identities reserved so real signups don't collide with demos
-    if (email.endsWith("@gauntlet.local") || email.endsWith("@crucible.internal")) {
+    if (email.endsWith("@crucible.local") || email.endsWith("@crucible.internal") || email.endsWith("@gauntlet.local")) {
       throw new AppError(
         "That email domain is reserved for demo accounts. Use your real email to register.",
         400,

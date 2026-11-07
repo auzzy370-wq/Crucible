@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ForgeSparks, XpBurst } from "@/components/learn/forge-fun";
+import { XpBurst } from "@/components/learn/xp-burst";
 
 /** Brief overlay when an arcade drill banks XP. */
 export function ArcadeClearFx({
@@ -25,7 +25,6 @@ export function ArcadeClearFx({
   return (
     <div className="pointer-events-none absolute inset-0 z-20 overflow-hidden rounded-2xl">
       <div className="absolute inset-0 bg-[var(--brand-soft)]/40" />
-      <ForgeSparks density={12} />
       <XpBurst amount={xp} active />
     </div>
   );

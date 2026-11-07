@@ -38,7 +38,7 @@ export function EditorialsClient() {
   return (
     <div className="animate-rise space-y-6">
       <header>
-        <p className="font-mono text-xs tracking-[0.3em] text-teal-700">PROVE THE CRAFT</p>
+        <p className="font-mono text-xs tracking-[0.3em] text-orange-700">PROVE THE CRAFT</p>
         <h1 className="mt-2 font-serif-display text-2xl sm:text-3xl">Editorials</h1>
         <p className="mt-2 max-w-3xl text-slate-600">
           Study after the judge — public Accepted and hidden harness green first. Free foundations; Premium unlocks
@@ -76,7 +76,7 @@ export function EditorialsClient() {
                 {active.approach} · {active.complexity}
               </p>
               <p className="text-amber-800">Premium required to read the full solution.</p>
-              <Link href="/pricing" className="text-sm text-teal-700 hover:underline">
+              <Link href="/pricing" className="text-sm text-orange-700 hover:underline">
                 Upgrade →
               </Link>
             </div>

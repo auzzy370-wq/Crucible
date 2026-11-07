@@ -184,7 +184,7 @@ export function JobsClient(props: { companies: readonly JobCompany[] }) {
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0 space-y-2">
                   <div className="flex flex-wrap gap-2">
-                    <Badge variant="cyan">{job.company}</Badge>
+                    <Badge variant="brand">{job.company}</Badge>
                     <Badge>{SOURCE_LABEL[job.source]}</Badge>
                     {job.team ? <Badge variant="amber">{job.team}</Badge> : null}
                   </div>

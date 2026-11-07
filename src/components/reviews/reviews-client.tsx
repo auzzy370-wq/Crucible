@@ -44,7 +44,7 @@ export function ReviewsClient() {
   return (
     <div className="animate-rise space-y-6">
       <header>
-        <p className="font-mono text-xs tracking-[0.3em] text-teal-700">HUMAN TECHNICAL REVIEW</p>
+        <p className="font-mono text-xs tracking-[0.3em] text-orange-700">HUMAN TECHNICAL REVIEW</p>
         <h1 className="mt-2 text-2xl font-semibold sm:text-3xl">AI assists — humans decide</h1>
         <p className="mt-2 max-w-3xl text-slate-600">
           Inspect evidence-based AI reports, override with documented reasoning, and verify cybersecurity or
@@ -66,7 +66,7 @@ export function ReviewsClient() {
             <Card key={item.id}>
               <CardHeader>
                 <div className="flex flex-wrap gap-2">
-                  <Badge variant={item.assessment.track === "CYBERSECURITY" ? "violet" : "cyan"}>
+                  <Badge variant={item.assessment.track === "CYBERSECURITY" ? "violet" : "brand"}>
                     {item.assessment.track}
                   </Badge>
                   <Badge>{item.status}</Badge>
@@ -94,7 +94,7 @@ export function ReviewsClient() {
                     Override AI
                   </Button>
                   <a
-                    className="inline-flex min-h-10 items-center rounded-md border border-teal-300/60 px-3 text-xs text-teal-800 hover:bg-teal-500/10 sm:min-h-8"
+                    className="inline-flex min-h-10 items-center rounded-md border border-orange-300/60 px-3 text-xs text-orange-800 hover:bg-orange-500/10 sm:min-h-8"
                     href={`/scorecard/${item.id}`}
                     target="_blank"
                     rel="noreferrer"

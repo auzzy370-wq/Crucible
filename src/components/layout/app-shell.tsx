@@ -17,9 +17,6 @@ import {
   X,
   Sparkles,
   Timer,
-  CalendarDays,
-  Route,
-  Trophy,
   BookOpen,
   UserRound,
   BarChart3,
@@ -48,46 +45,17 @@ type NavGroup = {
   items: NavItem[];
 };
 
-/** Short groups, plain labels — no jargon destinations. */
 const NAV_GROUPS: NavGroup[] = [
   {
-    id: "learner-home",
-    title: "Start",
+    id: "learner",
+    title: "",
     roles: ["CANDIDATE", "TEAM_MEMBER"],
     items: [
-      { href: "/dashboard", label: "Home", icon: LayoutDashboard, hint: "What to do next" },
-      { href: "/learn", label: "Learn", icon: BookOpen, hint: "Quests, paths, medals" },
-    ],
-  },
-  {
-    id: "learner-train",
-    title: "Train",
-    roles: ["CANDIDATE", "TEAM_MEMBER"],
-    items: [
-      { href: "/learn/games", label: "Arcade", icon: Sparkles, hint: "1,000 HTML5 drills" },
-      { href: "/daily", label: "Daily forge", icon: CalendarDays, hint: "Streak + timed XP" },
-      { href: "/study-plans", label: "Campaigns", icon: Route, hint: "Chapter maps & pack XP" },
-      { href: "/challenges", label: "Problem bank", icon: Boxes, hint: "Browse all problems" },
-      { href: "/interview", label: "Mocks", icon: Timer, hint: "Company rounds" },
-      { href: "/jobs", label: "Jobs", icon: Briefcase, hint: "Tier-company openings" },
-    ],
-  },
-  {
-    id: "learner-compete",
-    title: "Compete",
-    roles: ["CANDIDATE", "TEAM_MEMBER"],
-    items: [
-      { href: "/tournaments", label: "Tournaments", icon: Trophy, hint: "Live contests" },
-      { href: "/leaderboards", label: "Leaderboards", icon: BarChart3, hint: "Who’s ahead" },
-    ],
-  },
-  {
-    id: "learner-you",
-    title: "You",
-    roles: ["CANDIDATE", "TEAM_MEMBER"],
-    items: [
-      { href: "/candidates", label: "Profile", icon: UserRound, hint: "Rank & evidence" },
-      { href: "/settings", label: "Settings", icon: Settings, hint: "Account & security" },
+      { href: "/learn", label: "Learn", icon: BookOpen, hint: "Lessons, today’s goals, arcade" },
+      { href: "/challenges", label: "Practice", icon: Boxes, hint: "Problems & study plans" },
+      { href: "/interview", label: "Mocks", icon: Timer, hint: "Timed company rounds" },
+      { href: "/jobs", label: "Jobs", icon: Briefcase, hint: "Open roles" },
+      { href: "/candidates", label: "Profile", icon: UserRound, hint: "Your progress & public page" },
     ],
   },
   {
@@ -128,30 +96,31 @@ const NAV_GROUPS: NavGroup[] = [
   },
 ];
 
-function visibleGroups(role: string, guest = false) {
+function visibleGroups(role: string) {
   return NAV_GROUPS.map((group) => {
     if (group.roles && !group.roles.includes(role)) return null;
-    let items = group.items.filter((item) => !item.roles || item.roles.includes(role));
-    if (guest) {
-      items = items.filter((item) => item.href === "/learn" || item.href.startsWith("/learn/"));
-    }
+    const items = group.items.filter((item) => !item.roles || item.roles.includes(role));
     if (!items.length) return null;
     return { ...group, items };
   }).filter(Boolean) as NavGroup[];
 }
+
+const isGuestOpen = (href: string) => href === "/learn" || href.startsWith("/learn/");
 
 function NavLinks({
   pathname,
   role,
   guest = false,
   onNavigate,
+  onRequireSignIn,
 }: {
   pathname: string;
   role: string;
   guest?: boolean;
   onNavigate?: () => void;
+  onRequireSignIn?: () => void;
 }) {
-  const groups = useMemo(() => visibleGroups(role, guest), [role, guest]);
+  const groups = useMemo(() => visibleGroups(role), [role]);
 
   const allHrefs = useMemo(() => groups.flatMap((g) => g.items.map((i) => i.href)), [groups]);
 
@@ -159,9 +128,11 @@ function NavLinks({
     <nav className="space-y-5 px-3 pb-6">
       {groups.map((group) => (
         <div key={group.id}>
-          <div className="mb-1.5 px-3 font-mono text-[10px] uppercase tracking-[0.22em] text-slate-600">
-            {group.title}
-          </div>
+          {group.title && (
+            <div className="mb-1.5 px-3 font-mono text-[10px] uppercase tracking-[0.22em] text-slate-600">
+              {group.title}
+            </div>
+          )}
           <div className="space-y-0.5">
             {group.items.map((item) => {
               const Icon = item.icon;
@@ -175,14 +146,21 @@ function NavLinks({
                   href.startsWith(`${item.href}/`),
               );
               const active = exact || (prefix && !longerMatch);
+              const gated = guest && !isGuestOpen(item.href);
               return (
                 <Link
                   key={`${group.id}-${item.href}-${item.label}`}
                   href={item.href}
-                  onClick={onNavigate}
+                  onClick={(e) => {
+                    if (gated) {
+                      e.preventDefault();
+                      onRequireSignIn?.();
+                    }
+                    onNavigate?.();
+                  }}
                   className={cn(
                     "flex min-h-11 items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors",
-                    active ? "bg-teal-500/10 text-teal-800" : "text-slate-600 hover:bg-slate-100 hover:text-slate-900",
+                    active ? "bg-orange-500/10 text-orange-800" : "text-slate-600 hover:bg-slate-100 hover:text-slate-900",
                   )}
                 >
                   <Icon className="h-4 w-4 shrink-0" />
@@ -192,7 +170,7 @@ function NavLinks({
                       <span
                         className={cn(
                           "block text-[11px] leading-tight",
-                          active ? "text-teal-800/60" : "text-slate-600",
+                          active ? "text-orange-800/60" : "text-slate-600",
                         )}
                       >
                         {item.hint}
@@ -245,18 +223,18 @@ export function AppShell({
     router.refresh();
   }
 
-  const brand = <CrucibleLockup href={isGuest ? "/learn" : "/dashboard"} size="md" />;
+  const brand = <CrucibleLockup href={isGuest || isCandidate ? "/learn" : "/dashboard"} size="md" />;
 
   const userBlock = isGuest ? (
     <div className="border-t border-slate-200/80 p-4">
       <div className="mb-3 min-w-0">
         <div className="truncate text-sm font-medium text-slate-900">Free guest</div>
-        <div className="truncate font-mono text-xs text-slate-500">Explore Learn · progress not saved</div>
+        <div className="truncate font-mono text-xs text-slate-500">Progress isn’t saved yet</div>
       </div>
       <Button size="sm" className="w-full" onClick={() => setSignInOpen(true)}>
         Sign in
       </Button>
-      <Link href="/register" className="mt-2 block text-center text-xs text-teal-700 hover:underline">
+      <Link href="/register" className="mt-2 block text-center text-xs text-orange-700 hover:underline">
         Create free account →
       </Link>
     </div>
@@ -271,10 +249,17 @@ export function AppShell({
           {isCandidate ? "Learner" : isStaff ? "Hiring team" : user!.role}
         </div>
       </div>
-      {user!.plan !== "PREMIUM" && !isStaff && (
-        <Link href="/pricing" className="mb-2 block text-center text-xs text-amber-800 hover:underline">
-          Upgrade to Premium →
-        </Link>
+      {!isStaff && (
+        <div className="mb-2 flex items-center justify-between text-xs">
+          <Link href="/settings" className="inline-flex items-center gap-1 text-slate-600 hover:text-slate-900">
+            <Settings className="h-3.5 w-3.5" /> Settings
+          </Link>
+          {user!.plan !== "PREMIUM" && (
+            <Link href="/pricing" className="text-amber-800 hover:underline">
+              Upgrade →
+            </Link>
+          )}
+        </div>
       )}
       <Button variant="secondary" size="sm" className="w-full" onClick={logout}>
         <LogOut className="h-4 w-4" /> Sign out
@@ -282,50 +267,28 @@ export function AppShell({
     </div>
   );
 
-  const mobileTabs = isGuest
-    ? ([
-        { href: "/learn", label: "Learn", icon: BookOpen },
-        { href: "/learn/games", label: "Arcade", icon: Sparkles },
-        { href: "/learn/interview", label: "Interview", icon: Timer },
-        { href: "/learn/ai", label: "AI craft", icon: Route },
-      ] as const)
-    : isStaff
-      ? user!.role === "TECHNICAL_REVIEWER"
-        ? ([
-            { href: "/dashboard", label: "Home", icon: LayoutDashboard },
-            { href: "/candidates", label: "People", icon: Users },
-            { href: "/reviews", label: "Review", icon: ScrollText },
-            { href: "/analytics", label: "Stats", icon: BarChart3 },
-          ] as const)
-        : ([
-            { href: "/dashboard", label: "Home", icon: LayoutDashboard },
-            { href: "/assessments", label: "Tests", icon: Crosshair },
-            { href: "/reviews", label: "Review", icon: ScrollText },
-            { href: "/candidates", label: "People", icon: Users },
-          ] as const)
+  const mobileTabs = isStaff
+    ? user!.role === "TECHNICAL_REVIEWER"
+      ? ([
+          { href: "/dashboard", label: "Home", icon: LayoutDashboard },
+          { href: "/candidates", label: "People", icon: Users },
+          { href: "/reviews", label: "Review", icon: ScrollText },
+          { href: "/analytics", label: "Stats", icon: BarChart3 },
+        ] as const)
       : ([
-          { href: "/learn", label: "Learn", icon: BookOpen },
-          { href: "/daily", label: "Daily", icon: CalendarDays },
-          { href: "/study-plans", label: "Packs", icon: Route },
-          { href: "/challenges", label: "Bank", icon: Boxes },
-        ] as const);
+          { href: "/dashboard", label: "Home", icon: LayoutDashboard },
+          { href: "/assessments", label: "Tests", icon: Crosshair },
+          { href: "/reviews", label: "Review", icon: ScrollText },
+          { href: "/candidates", label: "People", icon: Users },
+        ] as const)
+    : ([
+        { href: "/learn", label: "Learn", icon: BookOpen },
+        { href: "/challenges", label: "Practice", icon: Boxes },
+        { href: "/interview", label: "Mocks", icon: Timer },
+        { href: "/jobs", label: "Jobs", icon: Briefcase },
+      ] as const);
 
   const inCodingSession = /^\/workspace\/[^/]+/.test(pathname);
-
-  const journeyCopy = isGuest
-    ? {
-        badge: "Free forge",
-        body: "Browse Learn & arcade without an account — sign in to save XP",
-      }
-    : isCandidate
-      ? {
-          badge: "Learn loop",
-          body: "Quests → clear lessons → prove under the judge → rank up",
-        }
-      : {
-          badge: "Hiring path",
-          body: "Create a test → assign → review → decide",
-        };
 
   const navRole = isGuest ? "CANDIDATE" : user!.role;
 
@@ -376,14 +339,14 @@ export function AppShell({
               </Button>
             </div>
           </div>
-          <div className="px-5 pb-3">
-            <Badge variant="cyan" className="mb-2">
-              {journeyCopy.badge}
-            </Badge>
-            <p className="text-xs leading-relaxed text-slate-600">{journeyCopy.body}</p>
-          </div>
           <div className="flex-1 overflow-y-auto overscroll-contain">
-            <NavLinks pathname={pathname} role={navRole} guest={isGuest} onNavigate={() => setOpen(false)} />
+            <NavLinks
+              pathname={pathname}
+              role={navRole}
+              guest={isGuest}
+              onNavigate={() => setOpen(false)}
+              onRequireSignIn={() => setSignInOpen(true)}
+            />
           </div>
           {userBlock}
         </aside>
@@ -394,14 +357,8 @@ export function AppShell({
           {brand}
           <ThemeToggle className="shrink-0" />
         </div>
-        <div className="px-5 pb-4">
-          <Badge variant="cyan" className="mb-2">
-            {journeyCopy.badge}
-          </Badge>
-          <p className="text-xs leading-relaxed text-slate-600">{journeyCopy.body}</p>
-        </div>
         <div className="flex-1 overflow-y-auto">
-          <NavLinks pathname={pathname} role={navRole} guest={isGuest} />
+          <NavLinks pathname={pathname} role={navRole} guest={isGuest} onRequireSignIn={() => setSignInOpen(true)} />
         </div>
         {userBlock}
       </aside>
@@ -431,9 +388,15 @@ export function AppShell({
                 <Link
                   key={tab.href}
                   href={tab.href}
+                  onClick={(e) => {
+                    if (isGuest && !isGuestOpen(tab.href)) {
+                      e.preventDefault();
+                      setSignInOpen(true);
+                    }
+                  }}
                   className={cn(
                     "flex h-full flex-col items-center justify-center gap-0.5 rounded-lg px-1 text-[10px] font-medium",
-                    active ? "bg-teal-500/10 text-teal-800" : "text-slate-500 hover:text-slate-800",
+                    active ? "bg-orange-500/10 text-orange-800" : "text-slate-500 hover:text-slate-800",
                   )}
                 >
                   <Icon className="h-4 w-4" />

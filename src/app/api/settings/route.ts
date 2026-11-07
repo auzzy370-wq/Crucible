@@ -5,13 +5,13 @@ import { prisma } from "@/lib/db";
 import { AppError } from "@/lib/errors";
 import { optionalSafeHttpUrl } from "@/lib/safe-url";
 import { jsonOk, withHandler } from "@/server/auth/api";
-import { requireUser } from "@/server/auth/session";
+import { SESSION_COOKIE, requireUser } from "@/server/auth/session";
 import { ensureCandidateProfile } from "@/server/candidates/service";
 import { hashPassword, verifyPassword } from "@/server/auth/password";
 import { writeAudit } from "@/server/security/audit";
 import { assertSameOrigin } from "@/server/security/origin";
 
-const COOKIE = "gauntlet_session";
+const COOKIE = SESSION_COOKIE;
 
 export async function GET() {
   return withHandler(async () => {

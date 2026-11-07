@@ -54,8 +54,8 @@ curl -X POST https://YOUR_APP.vercel.app/api/setup \
 
 Then open `/login` and use:
 
-- `admin@gauntlet.local` / `[set via DEMO_ADMIN_PASSWORD]`
-- `cyber@gauntlet.local` / `[set via DEMO_CANDIDATE_PASSWORD]`
+- `admin@crucible.local` / `[set via DEMO_ADMIN_PASSWORD]`
+- `cyber@crucible.local` / `[set via DEMO_CANDIDATE_PASSWORD]`
 
 ## 4. Health check
 

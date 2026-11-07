@@ -64,10 +64,10 @@ export async function POST(req: Request) {
 
     let xpEarned = 0;
     if (firstClear) {
-      xpEarned = arcadeClearXp(game, Boolean(body.perfect));
+      xpEarned = arcadeClearXp(Boolean(body.perfect));
       await touchLearnStreak(user.id);
     } else if (body.perfect) {
-      xpEarned = arcadeReplayPerfectXp(game);
+      xpEarned = arcadeReplayPerfectXp();
       await touchLearnStreak(user.id);
     } else {
       await touchLearnStreak(user.id);

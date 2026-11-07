@@ -92,7 +92,7 @@ export default async function AnalyticsPage() {
     <div className="animate-rise space-y-6">
       <header className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="font-mono text-xs tracking-[0.3em] text-teal-700">HIRING ANALYTICS</p>
+          <p className="font-mono text-xs tracking-[0.3em] text-orange-700">HIRING ANALYTICS</p>
           <h1 className="mt-2 text-2xl font-semibold sm:text-3xl">Evidence operations</h1>
           <p className="mt-2 max-w-3xl text-slate-600">
             Pipeline health, qualification rates, and track performance — visible to hiring roles only.
@@ -101,7 +101,7 @@ export default async function AnalyticsPage() {
         <div className="flex flex-wrap gap-2">
           <Badge>{user.role}</Badge>
           {user.role === "SUPER_ADMIN" && (
-            <Link href="/admin" className="text-sm text-teal-700 hover:underline">
+            <Link href="/admin" className="text-sm text-orange-700 hover:underline">
               Full control plane →
             </Link>
           )}

@@ -114,10 +114,10 @@ export function InterviewClient(props: {
     <>
     {/* No transform here — fixed mobile CTA must escape containing blocks */}
     <div className="animate-rise min-w-0 space-y-8">
-      <header className="min-w-0 rounded-2xl border border-teal-300/50 bg-[var(--surface-elevated)] p-4 sm:p-7">
+      <header className="min-w-0 rounded-2xl border border-orange-300/50 bg-[var(--surface-elevated)] p-4 sm:p-7">
         <div className="flex min-w-0 flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div className="min-w-0">
-            <p className="font-mono text-xs tracking-[0.3em] text-teal-700">MOCK INTERVIEWS</p>
+            <p className="font-mono text-xs tracking-[0.3em] text-orange-700">MOCK INTERVIEWS</p>
             <h1 className="mt-2 font-serif-display text-2xl text-slate-900 sm:text-3xl">
               Company rounds. Real clock. Same judge.
             </h1>
@@ -135,7 +135,7 @@ export function InterviewClient(props: {
               ) : (
                 <>
                   Free mock used.{" "}
-                  <Link href="/pricing" className="font-medium text-teal-800 underline">
+                  <Link href="/pricing" className="font-medium text-orange-800 underline">
                     Unlock unlimited
                   </Link>
                 </>
@@ -150,7 +150,7 @@ export function InterviewClient(props: {
             { label: "In progress", value: String(inProgress) },
             { label: "Companies tried", value: String(companiesTried) },
           ].map((s) => (
-            <div key={s.label} className="min-w-0 rounded-xl border border-teal-200/70 bg-white/80 px-3 py-3">
+            <div key={s.label} className="min-w-0 rounded-xl border border-orange-200/70 bg-white/80 px-3 py-3">
               <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">{s.label}</p>
               <p className="mt-1 font-serif-display text-2xl text-slate-900">{s.value}</p>
             </div>
@@ -176,8 +176,8 @@ export function InterviewClient(props: {
                   className={cn(
                     "box-border w-full min-w-0 max-w-full rounded-xl border px-3 py-3 text-left transition",
                     roundId === r.id
-                      ? "border-teal-400 bg-teal-50 shadow-sm"
-                      : "border-slate-200 bg-white hover:border-teal-300",
+                      ? "border-orange-400 bg-orange-50 shadow-sm"
+                      : "border-slate-200 bg-white hover:border-orange-300",
                   )}
                 >
                   <div className="flex min-w-0 items-start justify-between gap-2">
@@ -187,7 +187,7 @@ export function InterviewClient(props: {
                     </Badge>
                   </div>
                   <p className="mt-1 break-words text-xs text-slate-600">{r.blurb}</p>
-                  <p className="mt-2 font-mono text-[10px] text-teal-700">+{r.xp} XP on clear</p>
+                  <p className="mt-2 font-mono text-[10px] text-orange-700">+{r.xp} XP on clear</p>
                 </button>
               ))}
             </div>
@@ -204,7 +204,7 @@ export function InterviewClient(props: {
                   className={cn(
                     "max-w-full rounded-md border px-3 py-2 text-xs transition",
                     company === c
-                      ? "border-teal-400 bg-teal-50 text-teal-900"
+                      ? "border-orange-400 bg-orange-50 text-orange-900"
                       : "border-slate-200 text-slate-600 hover:bg-slate-50",
                   )}
                 >
@@ -231,7 +231,7 @@ export function InterviewClient(props: {
                   className={cn(
                     "max-w-full shrink rounded-md border px-2.5 py-1.5 text-left text-xs transition",
                     role === r
-                      ? "border-teal-400 bg-teal-50 text-teal-900"
+                      ? "border-orange-400 bg-orange-50 text-orange-900"
                       : "border-slate-200 text-slate-600 hover:bg-slate-50",
                   )}
                 >
@@ -253,8 +253,8 @@ export function InterviewClient(props: {
         </div>
 
         <aside className="min-w-0 space-y-4">
-          <div className="rounded-2xl border border-teal-200 bg-teal-50/70 p-5">
-            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-teal-700">{briefing.title}</p>
+          <div className="rounded-2xl border border-orange-200 bg-orange-50/70 p-5">
+            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-orange-700">{briefing.title}</p>
             <h3 className="mt-2 font-serif-display text-lg text-slate-900">
               {company} · {round.title}
             </h3>
@@ -275,11 +275,11 @@ export function InterviewClient(props: {
               <li>Talk through constraints before the first keystroke.</li>
               <li>Public tests first — hidden harness after green.</li>
               <li>
-                Prep with{" "}
-                <Link href="/study-plans" className="text-teal-700 hover:underline">
-                  study campaigns
+                Prep with a{" "}
+                <Link href="/study-plans" className="text-orange-700 hover:underline">
+                  study plan
                 </Link>{" "}
-                if the company has a pack.
+                if the company has one.
               </li>
             </ul>
           </div>
@@ -295,7 +295,7 @@ export function InterviewClient(props: {
           {props.sims.map((s) => (
             <article key={s.id} className="rounded-2xl border border-slate-200 bg-white/80 p-4">
               <div className="flex flex-wrap gap-2">
-                <Badge variant="cyan">{s.company}</Badge>
+                <Badge variant="brand">{s.company}</Badge>
                 <Badge variant={s.status === "IN_PROGRESS" ? "amber" : s.status === "COMPLETED" ? "emerald" : "default"}>
                   {s.status.replaceAll("_", " ")}
                 </Badge>

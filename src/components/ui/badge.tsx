@@ -5,11 +5,11 @@ export function Badge({
   variant = "default",
   ...props
 }: React.HTMLAttributes<HTMLDivElement> & {
-  variant?: "default" | "cyan" | "amber" | "rose" | "emerald" | "violet";
+  variant?: "default" | "brand" | "amber" | "rose" | "emerald" | "violet";
 }) {
   const styles = {
     default: "border-slate-300 bg-slate-100 text-slate-700",
-    cyan: "border-teal-300 bg-teal-50 text-teal-800",
+    brand: "border-orange-300 bg-orange-50 text-orange-800",
     amber: "border-amber-300 bg-amber-50 text-amber-800",
     rose: "border-rose-300 bg-rose-50 text-rose-800",
     emerald: "border-emerald-300 bg-emerald-50 text-emerald-800",

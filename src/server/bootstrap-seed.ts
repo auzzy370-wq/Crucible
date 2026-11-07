@@ -35,7 +35,7 @@ export async function seedDatabase(opts?: { includeDemoAccounts?: boolean }) {
   const staffPasswordUpdate = canCreateDemos ? { passwordHash, emailVerifiedAt: new Date() } : { emailVerifiedAt: new Date() };
   const candidatePasswordUpdate = canCreateDemos ? { passwordHash: candidateHash, plan: "FREE" as const, emailVerifiedAt: new Date() } : { emailVerifiedAt: new Date() };
 
-  const adminEmail = canCreateDemos ? "admin@gauntlet.local" : "system@crucible.internal";
+  const adminEmail = canCreateDemos ? "admin@crucible.local" : "system@crucible.internal";
   const admin = await prisma.user.upsert({
     where: { email: adminEmail },
     update: staffPasswordUpdate,
@@ -49,10 +49,10 @@ export async function seedDatabase(opts?: { includeDemoAccounts?: boolean }) {
   });
 
   const hiring = await prisma.user.upsert({
-    where: { email: "hiring@gauntlet.local" },
+    where: { email: "hiring@crucible.local" },
     update: staffPasswordUpdate,
     create: {
-      email: "hiring@gauntlet.local",
+      email: "hiring@crucible.local",
       name: "Harper Manager",
       role: "HIRING_MANAGER",
       passwordHash,
@@ -61,10 +61,10 @@ export async function seedDatabase(opts?: { includeDemoAccounts?: boolean }) {
   });
 
   const reviewer = await prisma.user.upsert({
-    where: { email: "reviewer@gauntlet.local" },
+    where: { email: "reviewer@crucible.local" },
     update: staffPasswordUpdate,
     create: {
-      email: "reviewer@gauntlet.local",
+      email: "reviewer@crucible.local",
       name: "Riley Reviewer",
       role: "TECHNICAL_REVIEWER",
       passwordHash,
@@ -73,10 +73,10 @@ export async function seedDatabase(opts?: { includeDemoAccounts?: boolean }) {
   });
 
   const candidate = await prisma.user.upsert({
-    where: { email: "candidate@gauntlet.local" },
+    where: { email: "candidate@crucible.local" },
     update: candidatePasswordUpdate,
     create: {
-      email: "candidate@gauntlet.local",
+      email: "candidate@crucible.local",
       name: "Casey Candidate",
       role: "CANDIDATE",
       plan: "FREE",
@@ -106,7 +106,7 @@ export async function seedDatabase(opts?: { includeDemoAccounts?: boolean }) {
   });
 
   const premiumCandidate = await prisma.user.upsert({
-    where: { email: "premium@gauntlet.local" },
+    where: { email: "premium@crucible.local" },
     update: canCreateDemos
       ? {
           passwordHash: candidateHash,
@@ -115,7 +115,7 @@ export async function seedDatabase(opts?: { includeDemoAccounts?: boolean }) {
         }
       : {},
     create: {
-      email: "premium@gauntlet.local",
+      email: "premium@crucible.local",
       name: "Parker Premium",
       role: "CANDIDATE",
       plan: "PREMIUM",
@@ -134,10 +134,10 @@ export async function seedDatabase(opts?: { includeDemoAccounts?: boolean }) {
   });
 
   const cyberCandidate = await prisma.user.upsert({
-    where: { email: "cyber@gauntlet.local" },
+    where: { email: "cyber@crucible.local" },
     update: canCreateDemos ? { passwordHash: candidateHash } : {},
     create: {
-      email: "cyber@gauntlet.local",
+      email: "cyber@crucible.local",
       name: "Sam Security",
       role: "CANDIDATE",
       passwordHash: candidateHash,
@@ -157,10 +157,10 @@ export async function seedDatabase(opts?: { includeDemoAccounts?: boolean }) {
   });
 
   const teammate = await prisma.user.upsert({
-    where: { email: "teammate@gauntlet.local" },
+    where: { email: "teammate@crucible.local" },
     update: canCreateDemos ? { passwordHash: candidateHash } : {},
     create: {
-      email: "teammate@gauntlet.local",
+      email: "teammate@crucible.local",
       name: "Taylor Teammate",
       role: "TEAM_MEMBER",
       passwordHash: candidateHash,
@@ -576,7 +576,7 @@ export async function seedDatabase(opts?: { includeDemoAccounts?: boolean }) {
     track: "SECURE_FULL_STACK",
   });
 
-  // Featured assessment IDs for challenges that already have named gauntlets
+  // Featured assessment IDs for challenges that already have named assessments
   const featuredBySlug: Record<string, string> = {
     "saas-nexus": assessmentSaas.id,
     "appsec-fortress": assessmentCyber.id,
@@ -797,7 +797,7 @@ export async function seedDatabase(opts?: { includeDemoAccounts?: boolean }) {
     }
   }
 
-  // Team already formed for collaborative gauntlet
+  // Team already formed for collaborative challenge
   const existingTeam = await prisma.engineeringTeam.findFirst({
     where: { name: "Forge Squad Alpha", assessmentId: assessmentTeam.id },
   });

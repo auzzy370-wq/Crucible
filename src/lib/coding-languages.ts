@@ -50,14 +50,14 @@ export function imageTagForCodingLanguage(language: string): string {
   const lang = normalizeCodingLanguage(language);
   switch (lang) {
     case "python":
-      return "gauntlet/python:3.12";
+      return "crucible/python:3.12";
     case "go":
-      return "gauntlet/go:1.22";
+      return "crucible/go:1.22";
     case "rust":
-      return "gauntlet/rust:1.78";
+      return "crucible/rust:1.78";
     case "java":
-      return "gauntlet/java:21";
+      return "crucible/java:21";
     default:
-      return "gauntlet/node:20";
+      return "crucible/node:20";
   }
 }

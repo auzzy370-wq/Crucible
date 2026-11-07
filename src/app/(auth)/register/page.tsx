@@ -84,17 +84,17 @@ export default function RegisterPage() {
         </CardHeader>
         <CardContent>
           {pendingEmail ? (
-            <div className="space-y-4 rounded-md border border-teal-500/30 bg-teal-500/10 px-4 py-5 text-sm text-slate-200">
-              <p className="font-medium text-teal-100">Verify your email to finish signup</p>
+            <div className="space-y-4 rounded-md border border-orange-500/30 bg-orange-500/10 px-4 py-5 text-sm text-slate-200">
+              <p className="font-medium text-orange-100">Verify your email to finish signup</p>
               <p>
-                We sent a link to <span className="font-mono text-teal-50">{pendingEmail}</span>. Open it to
+                We sent a link to <span className="font-mono text-orange-50">{pendingEmail}</span>. Open it to
                 activate your account — nothing is live until that inbox is confirmed.
               </p>
               <p className="text-slate-400">
                 Didn&apos;t get it? Check spam, or{" "}
                 <button
                   type="button"
-                  className="text-teal-300 underline"
+                  className="text-orange-300 underline"
                   onClick={() => {
                     setPendingEmail(null);
                     setError(null);
@@ -105,7 +105,7 @@ export default function RegisterPage() {
                 .
               </p>
               <p className="text-center text-sm text-slate-500">
-                <Link className="text-teal-700 hover:underline" href="/login">
+                <Link className="text-orange-700 hover:underline" href="/login">
                   Back to sign in
                 </Link>
               </p>
@@ -197,7 +197,7 @@ export default function RegisterPage() {
           </div>
           <p className="mt-4 text-center text-sm text-slate-600">
             Already learning?{" "}
-            <Link className="text-teal-700 hover:underline" href="/login">
+            <Link className="text-orange-700 hover:underline" href="/login">
               Sign in
             </Link>
             {" · "}

@@ -48,7 +48,7 @@ export function RoadmapClient() {
   return (
     <div className="animate-rise space-y-8">
       <header>
-        <p className="font-mono text-xs tracking-[0.3em] text-teal-700">ADAPTIVE PATH</p>
+        <p className="font-mono text-xs tracking-[0.3em] text-orange-700">ADAPTIVE PATH</p>
         <h1 className="mt-2 font-serif-display text-2xl sm:text-3xl">Personal roadmap</h1>
         <p className="mt-2 max-w-2xl text-slate-600">
           Crucible tracks what you clear, where you stall, and which skills transfer — then raises difficulty as you
@@ -65,7 +65,7 @@ export function RoadmapClient() {
         ].map(([k, v]) => (
           <div key={k} className="rounded-xl border border-slate-200 bg-white/75 px-4 py-3">
             <div className="text-[10px] uppercase tracking-wider text-slate-500">{k}</div>
-            <div className="mt-1 font-mono text-lg text-teal-900">{v}</div>
+            <div className="mt-1 font-mono text-lg text-orange-900">{v}</div>
           </div>
         ))}
       </section>
@@ -79,13 +79,13 @@ export function RoadmapClient() {
               <li key={n.id} className="rounded-lg border border-slate-200 px-3 py-2">
                 <div className="flex items-center justify-between gap-2">
                   {n.href ? (
-                    <Link href={n.href} className="text-slate-800 hover:text-teal-800">
+                    <Link href={n.href} className="text-slate-800 hover:text-orange-800">
                       {n.label}
                     </Link>
                   ) : (
                     <span className="text-slate-800">{n.label}</span>
                   )}
-                  <Badge variant="cyan">
+                  <Badge variant="brand">
                     {n.total != null ? `${n.mastery}/${n.total}` : `×${n.mastery}`}
                   </Badge>
                 </div>
@@ -134,7 +134,7 @@ export function RoadmapClient() {
           {!data.nextProblems.length && (
             <li className="py-4 text-sm text-slate-500">
               No fresh matches — explore the{" "}
-              <Link href="/challenges" className="text-cyan-400 hover:underline">
+              <Link href="/challenges" className="text-orange-400 hover:underline">
                 practice bank
               </Link>
               .
@@ -150,7 +150,7 @@ export function RoadmapClient() {
               </div>
               <Link
                 href={`/challenges?q=${encodeURIComponent(p.slug)}`}
-                className="text-sm text-teal-700 hover:underline"
+                className="text-sm text-orange-700 hover:underline"
               >
                 Open →
               </Link>

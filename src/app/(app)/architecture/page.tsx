@@ -53,7 +53,7 @@ export default function ArchitecturePage() {
   return (
     <div className="animate-rise space-y-6">
       <header>
-        <p className="font-mono text-xs tracking-[0.3em] text-teal-700">ARCHITECTURE ASSESSMENT</p>
+        <p className="font-mono text-xs tracking-[0.3em] text-orange-700">ARCHITECTURE ASSESSMENT</p>
         <h1 className="mt-2 text-2xl font-semibold sm:text-3xl">Design before you build</h1>
         <p className="mt-2 max-w-3xl text-slate-600">
           Practicality, trade-offs, reliability, security, and cost awareness. Unnecessary complexity is penalized.
