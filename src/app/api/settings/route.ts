@@ -3,11 +3,13 @@ import { cookies } from "next/headers";
 import { AssessmentTrack } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { AppError } from "@/lib/errors";
+import { optionalSafeHttpUrl } from "@/lib/safe-url";
 import { jsonOk, withHandler } from "@/server/auth/api";
 import { requireUser } from "@/server/auth/session";
 import { ensureCandidateProfile } from "@/server/candidates/service";
 import { hashPassword, verifyPassword } from "@/server/auth/password";
 import { writeAudit } from "@/server/security/audit";
+import { assertSameOrigin } from "@/server/security/origin";
 
 const COOKIE = "gauntlet_session";
 
@@ -100,9 +102,9 @@ const patchSchema = z.object({
   accommodations: z.string().max(2000).optional(),
   headline: z.string().max(160).optional().or(z.literal("")),
   bio: z.string().max(4000).optional().or(z.literal("")),
-  portfolioUrl: z.string().url().optional().or(z.literal("")),
-  githubUrl: z.string().url().optional().or(z.literal("")),
-  linkedInUrl: z.string().url().optional().or(z.literal("")),
+  portfolioUrl: optionalSafeHttpUrl,
+  githubUrl: optionalSafeHttpUrl,
+  linkedInUrl: optionalSafeHttpUrl,
   yearsExperience: z.number().int().min(0).max(60).nullable().optional(),
   publicEnabled: z.boolean().optional(),
   publicSlug: z
@@ -120,6 +122,7 @@ const patchSchema = z.object({
 
 export async function PATCH(req: Request) {
   return withHandler(async () => {
+    assertSameOrigin(req);
     const user = await requireUser();
     const body = patchSchema.parse(await req.json());
 

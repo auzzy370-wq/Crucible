@@ -75,7 +75,7 @@ services:
       - "3847:3847"
     volumes:
       - ./storage:/app/storage
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      # Never mount docker.sock into the web process — RCE would own the host.
     depends_on:
       postgres:
         condition: service_healthy
@@ -94,9 +94,10 @@ services:
       REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
       EXECUTION_MODE: docker
       STORAGE_ROOT: /app/storage
+      # Talk to Docker through a constrained proxy — not a raw host socket mount.
+      DOCKER_HOST: tcp://docker-proxy:2375
     volumes:
       - ./storage:/app/storage
-      - /var/run/docker.sock:/var/run/docker.sock:ro
     depends_on:
       postgres:
         condition: service_healthy
@@ -104,8 +105,32 @@ services:
         condition: service_healthy
       web:
         condition: service_started
-    # SECURITY NOTE: mounting the Docker socket is for local orchestration only.
-    # Production must use a dedicated executor (e.g. Firecracker/gVisor) with no host socket access.
+      docker-proxy:
+        condition: service_started
+
+  # Least-privilege Docker API for the worker only (no privileged / swarm / secrets APIs).
+  docker-proxy:
+    image: tecnativa/docker-socket-proxy:0.3.0
+    environment:
+      CONTAINERS: 1
+      IMAGES: 1
+      NETWORKS: 1
+      VOLUMES: 0
+      EXEC: 0
+      BUILD: 0
+      COMMIT: 0
+      SWARM: 0
+      SERVICES: 0
+      TASKS: 0
+      SECRETS: 0
+      CONFIGS: 0
+      POST: 1
+      ALLOW_RESTARTS: 0
+      AUTH: 0
+      INFO: 1
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    # Not published to the host network.
 
 volumes:
   pgdata:

@@ -1,6 +1,6 @@
 /**
- * Transactional mail. Prefer Resend when RESEND_API_KEY is set; otherwise log
- * the message server-side only (never return the body/link to the browser).
+ * Transactional mail. Prefer Resend when RESEND_API_KEY is set.
+ * Never log message bodies or verification tokens.
  */
 
 export type MailMessage = {
@@ -16,6 +16,14 @@ export function mailConfigured(): boolean {
 
 function fromAddress() {
   return process.env.AUTH_FROM_EMAIL?.trim() || "Crucible <onboarding@resend.dev>";
+}
+
+function maskEmail(email: string) {
+  const [user, domain] = email.split("@");
+  if (!domain) return "(redacted)";
+  const u = user || "";
+  const shown = u.length <= 2 ? "*" : `${u[0]}***${u[u.length - 1]}`;
+  return `${shown}@${domain}`;
 }
 
 export async function sendMail(message: MailMessage): Promise<{ mode: "resend" | "log" }> {
@@ -42,9 +50,9 @@ export async function sendMail(message: MailMessage): Promise<{ mode: "resend" |
     return { mode: "resend" };
   }
 
-  // Local / unpublished fallback: server logs only. Attackers never see the link.
+  // Dev fallback: acknowledge delivery without leaking tokens into logs.
   console.info(
-    `[crucible-mail:log] to=${message.to} subject=${JSON.stringify(message.subject)}\n${message.text}`,
+    `[crucible-mail:log] queued subject=${JSON.stringify(message.subject)} to=${maskEmail(message.to)} (body redacted; set RESEND_API_KEY for delivery)`,
   );
   return { mode: "log" };
 }

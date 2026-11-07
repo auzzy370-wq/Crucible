@@ -1,8 +1,10 @@
 import { z } from "zod";
 import { AssessmentTrack } from "@prisma/client";
+import { optionalSafeHttpUrl } from "@/lib/safe-url";
 import { jsonOk, withHandler } from "@/server/auth/api";
 import { requireUser } from "@/server/auth/session";
 import { ensureCandidateProfile, getCandidateDetail, updateCandidateProfile } from "@/server/candidates/service";
+import { assertSameOrigin } from "@/server/security/origin";
 
 export async function GET() {
   return withHandler(async () => {
@@ -15,9 +17,9 @@ export async function GET() {
 const schema = z.object({
   headline: z.string().optional(),
   bio: z.string().optional(),
-  portfolioUrl: z.string().url().optional().or(z.literal("")),
-  githubUrl: z.string().url().optional().or(z.literal("")),
-  linkedInUrl: z.string().url().optional().or(z.literal("")),
+  portfolioUrl: optionalSafeHttpUrl,
+  githubUrl: optionalSafeHttpUrl,
+  linkedInUrl: optionalSafeHttpUrl,
   yearsExperience: z.number().int().min(0).max(60).optional(),
   languages: z.array(z.string()).optional(),
   frameworks: z.array(z.string()).optional(),
@@ -39,6 +41,7 @@ const schema = z.object({
 
 export async function PUT(req: Request) {
   return withHandler(async () => {
+    assertSameOrigin(req);
     const user = await requireUser();
     const body = schema.parse(await req.json());
     const updated = await updateCandidateProfile(user.id, {

@@ -1058,7 +1058,25 @@ export function AdminClient() {
               </div>
               <div className="space-y-2">
                 <Label>API key env var name</Label>
-                <Input value={form.apiKeyEnv} onChange={(e) => setForm({ ...form, apiKeyEnv: e.target.value })} />
+                <select
+                  className="flex h-11 w-full rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-900"
+                  value={form.apiKeyEnv}
+                  onChange={(e) => setForm({ ...form, apiKeyEnv: e.target.value })}
+                >
+                  {[
+                    "OPENAI_API_KEY",
+                    "GROQ_API_KEY",
+                    "OPENROUTER_API_KEY",
+                    "ANTHROPIC_API_KEY",
+                    "AZURE_OPENAI_API_KEY",
+                    "TOGETHER_API_KEY",
+                    "FIREWORKS_API_KEY",
+                  ].map((name) => (
+                    <option key={name} value={name}>
+                      {name}
+                    </option>
+                  ))}
+                </select>
               </div>
               <Button disabled={busy} onClick={() => void addProvider()}>
                 Save provider

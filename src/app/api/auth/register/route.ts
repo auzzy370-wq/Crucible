@@ -3,6 +3,8 @@ import { AssessmentTrack } from "@prisma/client";
 import { AppError } from "@/lib/errors";
 import { jsonOk, withHandler } from "@/server/auth/api";
 import { startPasswordRegistration } from "@/server/auth/email-verification";
+import { clientIp } from "@/server/security/client-ip";
+import { assertSameOrigin } from "@/server/security/origin";
 import { rateLimit } from "@/server/security/rate-limit";
 
 const schema = z.object({
@@ -20,8 +22,10 @@ const schema = z.object({
 
 export async function POST(req: Request) {
   return withHandler(async () => {
-    const ip = req.headers.get("x-forwarded-for") ?? "local";
+    assertSameOrigin(req);
+    const ip = clientIp(req);
     await rateLimit(`register:${ip}`, 10);
+    await rateLimit(`register-global`, 60, 60_000);
     const body = schema.parse(await req.json());
     const email = body.email.toLowerCase().trim();
 

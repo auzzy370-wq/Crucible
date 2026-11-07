@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 import { prisma } from "@/lib/db";
 import { logger } from "@/lib/logger";
+import { isAllowedAiApiKeyEnv, isAllowedAiBaseUrl } from "@/server/ai/provider-policy";
 
 export type LlmMessage = { role: "system" | "user" | "assistant"; content: string };
 
@@ -42,13 +43,24 @@ export async function getActiveProvider(): Promise<LlmProviderConfig> {
     where: { enabled: true },
     orderBy: [{ isDefault: "desc" }, { createdAt: "asc" }],
   });
-  if (configured) {
+  if (
+    configured &&
+    isAllowedAiApiKeyEnv(configured.apiKeyEnv) &&
+    isAllowedAiBaseUrl(configured.baseUrl)
+  ) {
     return {
       name: configured.name,
       baseUrl: configured.baseUrl,
       model: configured.model,
       apiKeyEnv: configured.apiKeyEnv,
     };
+  }
+  if (configured) {
+    logger.warn("Ignoring AI provider config that fails allowlist checks", {
+      name: configured.name,
+      baseUrl: configured.baseUrl,
+      apiKeyEnv: configured.apiKeyEnv,
+    });
   }
 
   return {
@@ -74,15 +86,26 @@ export async function completeJson<T>(params: {
     apiKeyEnv: params.providerOverride?.apiKeyEnv ?? active.apiKeyEnv,
   };
 
-  const apiKey =
-    (provider.apiKeyEnv && process.env[provider.apiKeyEnv]?.trim()) ||
-    process.env.GROQ_API_KEY?.trim() ||
-    process.env.OPENROUTER_API_KEY?.trim() ||
-    process.env.OPENAI_API_KEY?.trim() ||
-    "";
+  // Never send arbitrary env values (DATABASE_URL, SESSION_SECRET, …) to a model host.
+  const keyEnv = isAllowedAiApiKeyEnv(provider.apiKeyEnv) ? provider.apiKeyEnv : null;
+  let apiKey = (keyEnv && process.env[keyEnv]?.trim()) || "";
+  let baseUrl = isAllowedAiBaseUrl(provider.baseUrl) ? provider.baseUrl : "";
+  let modelId = provider.model;
+  let providerName = provider.name;
+
+  if (!apiKey || !baseUrl) {
+    const fallbackPreset = FREE_PROVIDER_PRESETS.find((p) => envHasKey(p.apiKeyEnv));
+    if (fallbackPreset) {
+      apiKey = process.env[fallbackPreset.apiKeyEnv]!.trim();
+      baseUrl = fallbackPreset.baseUrl;
+      modelId = fallbackPreset.model;
+      providerName = `${provider.name}→${fallbackPreset.name}`;
+    }
+  }
+
   const allowMock = process.env.AI_FALLBACK_MOCK !== "false";
 
-  if (!apiKey) {
+  if (!apiKey || !baseUrl) {
     if (!allowMock) throw new Error("No AI API key configured (set GROQ_API_KEY or OPENROUTER_API_KEY)");
     logger.warn("AI provider missing API key; using deterministic mock", { provider: provider.name });
     return {
@@ -91,19 +114,6 @@ export async function completeJson<T>(params: {
       model: provider.model,
       mocked: true,
     };
-  }
-
-  // If override asked for a key we don't have, fall through to any available free key + its preset
-  let baseUrl = provider.baseUrl;
-  let modelId = provider.model;
-  let providerName = provider.name;
-  if (provider.apiKeyEnv && !process.env[provider.apiKeyEnv]?.trim()) {
-    const fallbackPreset = FREE_PROVIDER_PRESETS.find((p) => envHasKey(p.apiKeyEnv));
-    if (fallbackPreset) {
-      baseUrl = fallbackPreset.baseUrl;
-      modelId = fallbackPreset.model;
-      providerName = `${provider.name}→${fallbackPreset.name}`;
-    }
   }
 
   const client = new OpenAI({

@@ -49,8 +49,9 @@ async function finishOAuth(
       appleUserName,
       appleIdToken: params.idToken,
     });
+    const { clientIp } = await import("@/server/security/client-ip");
     await loginWithOAuthProfile(profile, {
-      ip: req.headers.get("x-forwarded-for") ?? undefined,
+      ip: clientIp(req),
       userAgent: req.headers.get("user-agent") ?? undefined,
     });
     return redirectTo(req, "/dashboard");

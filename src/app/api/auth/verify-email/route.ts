@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { AppError } from "@/lib/errors";
 import { withHandler } from "@/server/auth/api";
 import { completeEmailVerification } from "@/server/auth/email-verification";
+import { clientIp } from "@/server/security/client-ip";
 import { rateLimit } from "@/server/security/rate-limit";
 
 export const runtime = "nodejs";
@@ -16,8 +17,9 @@ function redirectTo(path: string, req: Request) {
 /** GET — open from the verification email; creates the user and session. */
 export async function GET(req: Request) {
   return withHandler(async () => {
-    const ip = req.headers.get("x-forwarded-for") ?? "local";
+    const ip = clientIp(req);
     await rateLimit(`verify-email:${ip}`, 30);
+    await rateLimit(`verify-email-global`, 120, 60_000);
     const token = new URL(req.url).searchParams.get("token")?.trim();
     if (!token) {
       throw new AppError("Missing verification token", 400, "VERIFY_MISSING");

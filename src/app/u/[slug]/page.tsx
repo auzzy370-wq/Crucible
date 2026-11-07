@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
+import { safeHref } from "@/lib/safe-url";
 import { Badge } from "@/components/ui/badge";
 import { formatScore } from "@/lib/utils";
 import { trackBadgeVariant, trackLabel } from "@/lib/tracks";
@@ -49,11 +50,18 @@ export default async function PublicQualificationProfile({
   const best = scored.reduce((m, a) => Math.max(m, a.scoreReport?.overall ?? 0), 0);
   const game = await buildLearnerGameState(profile.user.id);
 
-  const links = [
-    profile.portfolioUrl ? { href: profile.portfolioUrl, label: "Portfolio" } : null,
-    profile.githubUrl ? { href: profile.githubUrl, label: "GitHub" } : null,
-    profile.linkedInUrl ? { href: profile.linkedInUrl, label: "LinkedIn" } : null,
-  ].filter(Boolean) as { href: string; label: string }[];
+  const links = (
+    [
+      { raw: profile.portfolioUrl, label: "Portfolio" },
+      { raw: profile.githubUrl, label: "GitHub" },
+      { raw: profile.linkedInUrl, label: "LinkedIn" },
+    ] as const
+  )
+    .map((l) => {
+      const href = safeHref(l.raw);
+      return href ? { href, label: l.label } : null;
+    })
+    .filter(Boolean) as { href: string; label: string }[];
 
   return (
     <div className="min-h-screen">
@@ -92,7 +100,7 @@ export default async function PublicQualificationProfile({
                   key={l.href}
                   href={l.href}
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer nofollow"
                   className="text-sm text-teal-700 hover:underline"
                 >
                   {l.label} →

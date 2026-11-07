@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
 
-/** Cost 8 keeps serverless login under Vercel timeouts (bcryptjs is pure JS). */
-const ROUNDS = 8;
+/** bcrypt cost — 10 balances security vs serverless latency (bcryptjs is pure JS). */
+const ROUNDS = Number(process.env.BCRYPT_ROUNDS || 10);
 
 export async function hashPassword(password: string) {
   return bcrypt.hash(password, ROUNDS);

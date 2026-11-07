@@ -1,6 +1,7 @@
 import { createHmac, createHash, randomBytes, timingSafeEqual } from "crypto";
 import { cookies } from "next/headers";
 import { nanoid } from "nanoid";
+import { AppError } from "@/lib/errors";
 import type { OAuthProvider } from "./types";
 
 const STATE_COOKIE = "crucible_oauth_state";
@@ -8,7 +9,15 @@ const PKCE_COOKIE = "crucible_oauth_pkce";
 const TTL_MS = 1000 * 60 * 10;
 
 function secret() {
-  return process.env.SESSION_SECRET || process.env.SETUP_SECRET || "crucible-dev-oauth";
+  const value = process.env.SESSION_SECRET?.trim() || process.env.SETUP_SECRET?.trim();
+  if (!value || value.length < 16) {
+    throw new AppError(
+      "SESSION_SECRET (or SETUP_SECRET) must be set to a strong value before OAuth can run",
+      500,
+      "AUTH_SECRET_MISSING",
+    );
+  }
+  return value;
 }
 
 function sign(payload: string) {
@@ -20,6 +29,17 @@ function cookieSecure() {
   if (process.env.COOKIE_SECURE === "false") return false;
   const appUrl = process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "";
   return appUrl.startsWith("https://") || process.env.VERCEL === "1";
+}
+
+function safeEqual(a: string, b: string) {
+  try {
+    const ba = Buffer.from(a);
+    const bb = Buffer.from(b);
+    if (ba.length !== bb.length) return false;
+    return timingSafeEqual(ba, bb);
+  } catch {
+    return false;
+  }
 }
 
 export function createPkcePair() {
@@ -56,8 +76,13 @@ export async function consumeOAuthState(expectedProvider: OAuthProvider, present
   const pkce = jar.get(PKCE_COOKIE)?.value ?? null;
   jar.delete(STATE_COOKIE);
   jar.delete(PKCE_COOKIE);
-  const value = presented || cookieVal;
-  if (!value) return { ok: false as const, pkce: null };
+
+  // Binding: callback state MUST match the httpOnly cookie issued to this browser.
+  if (!presented || !cookieVal || !safeEqual(presented, cookieVal)) {
+    return { ok: false as const, pkce: null };
+  }
+
+  const value = presented;
   const parts = value.split(".");
   if (parts.length !== 4) return { ok: false as const, pkce: null };
   const [provider, , expStr, sig] = parts;
@@ -66,12 +91,6 @@ export async function consumeOAuthState(expectedProvider: OAuthProvider, present
   const exp = Number(expStr);
   if (!Number.isFinite(exp) || exp < Date.now()) return { ok: false as const, pkce: null };
   const expected = sign(body);
-  try {
-    const a = Buffer.from(sig);
-    const b = Buffer.from(expected);
-    if (a.length !== b.length || !timingSafeEqual(a, b)) return { ok: false as const, pkce: null };
-  } catch {
-    return { ok: false as const, pkce: null };
-  }
+  if (!safeEqual(sig, expected)) return { ok: false as const, pkce: null };
   return { ok: true as const, pkce };
 }
